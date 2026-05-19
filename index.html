@@ -62,4 +62,368 @@
     .nav-menu {
       flex: 1;
       overflow-y: auto;
-     
+      overflow-x: hidden;
+    }
+
+    .nav-item {
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .nav-item:hover {
+      background: var(--sidebar-hover);
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      font-size: 15px;
+    }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .nav-text {
+      flex: 1;
+      white-space: nowrap;
+    }
+
+    .nav-arrow {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.3s;
+      position: relative;
+    }
+
+    .nav-arrow::before,
+    .nav-arrow::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      width: 8px;
+      height: 1.5px;
+      background: #999;
+      border-radius: 1px;
+    }
+
+    .nav-arrow::before {
+      left: 1px;
+      transform: rotate(45deg);
+    }
+
+    .nav-arrow::after {
+      right: 1px;
+      transform: rotate(-45deg);
+    }
+
+    .nav-link:hover .nav-arrow::before,
+    .nav-link:hover .nav-arrow::after {
+      background: var(--primary-color);
+    }
+
+    .sidebar.collapsed .nav-text,
+    .sidebar.collapsed .nav-arrow {
+      display: none;
+    }
+
+    .sidebar.collapsed .nav-link {
+      justify-content: center;
+      padding: 15px 10px;
+    }
+
+    /* 子菜单 */
+    .submenu {
+      background: #ebeef2;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .submenu.open {
+      max-height: 500px;
+    }
+
+    .submenu-item {
+      padding: 12px 15px 12px 51px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .submenu-item:hover {
+      background: var(--sidebar-hover);
+    }
+
+    .sidebar.collapsed .submenu {
+      display: none;
+    }
+
+    /* 底部收起按钮 */
+    .toggle-btn {
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      border-top: 1px solid #ddd;
+      background: #e8ecf0;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .toggle-btn:hover {
+      background: var(--primary-color);
+      color: #fff;
+    }
+
+    .toggle-icon svg {
+      display: block;
+    }
+
+    .sidebar.collapsed .toggle-icon {
+      transform: scaleX(-1);
+    }
+
+    /* 主内容区 */
+    .main-content {
+      flex: 1;
+      margin-left: 220px;
+      padding: 20px;
+      background: #f5f5f5;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .sidebar.collapsed ~ .main-content {
+      margin-left: 50px;
+    }
+
+    .content-header {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .content-header h1 {
+      color: #333;
+      font-size: 24px;
+    }
+
+    .welcome-card {
+      background: linear-gradient(135deg, var(--primary-color), #a52840);
+      color: #fff;
+      padding: 40px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .welcome-card h2 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .welcome-card p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    /* 按钮样式 - 使用主题色 */
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #6d1526;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary-color);
+      color: #fff;
+    }
+
+    /* 图标样式 */
+    .icon-workbench::before { content: "📊"; }
+    .icon-afterSales::before { content: "🔧"; }
+    .icon-parts::before { content: "🧰"; }
+    .icon-settings::before { content: "⚙️"; }
+  </style>
+</head>
+<body>
+  <!-- 侧边导航栏 -->
+  <nav class="sidebar" id="sidebar">
+    <div class="system-title">奕境售后管理系统</div>
+    
+    <div class="nav-menu">
+      <!-- 工作台 -->
+      <div class="nav-item">
+        <div class="nav-link">
+          <span class="nav-icon icon-workbench"></span>
+          <span class="nav-text">工作台</span>
+          <span class="nav-arrow"></span>
+        </div>
+        <div class="submenu">
+          <div class="submenu-item" onclick="showContent('dashboard')">工作台首页</div>
+          <div class="submenu-item" onclick="showContent('statistics')">统计报表</div>
+        </div>
+      </div>
+      
+      <!-- 售后管理 -->
+      <div class="nav-item">
+        <div class="nav-link">
+          <span class="nav-icon icon-afterSales"></span>
+          <span class="nav-text">售后管理</span>
+          <span class="nav-arrow"></span>
+        </div>
+        <div class="submenu">
+          <div class="submenu-item" onclick="showContent('repair')">维修管理</div>
+          <div class="submenu-item" onclick="showContent('order')">工单管理</div>
+          <div class="submenu-item" onclick="showContent('customer')">客户管理</div>
+        </div>
+      </div>
+      
+      <!-- 配件管理 -->
+      <div class="nav-item">
+        <div class="nav-link">
+          <span class="nav-icon icon-parts"></span>
+          <span class="nav-text">配件管理</span>
+          <span class="nav-arrow"></span>
+        </div>
+        <div class="submenu">
+          <div class="submenu-item" onclick="showContent('inventory')">库存管理</div>
+          <div class="submenu-item" onclick="showContent('purchase')">采购管理</div>
+        </div>
+      </div>
+      
+      <!-- 系统设置 -->
+      <div class="nav-item">
+        <div class="nav-link">
+          <span class="nav-icon icon-settings"></span>
+          <span class="nav-text">系统设置</span>
+          <span class="nav-arrow"></span>
+        </div>
+        <div class="submenu">
+          <div class="submenu-item" onclick="showContent('user')">用户管理</div>
+          <div class="submenu-item" onclick="showContent('role')">角色权限</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部收起/展开按钮 -->
+    <div class="toggle-btn" onclick="toggleSidebar()">
+      <div class="toggle-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 第一条横线（长） -->
+          <line x1="1" y1="4" x2="16" y2="4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- 第二条横线（中间，短）+ > 箭头 -->
+          <line x1="1" y1="11" x2="10" y2="11" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="13" y1="8" x2="17" y2="11" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="13" y1="14" x2="17" y2="11" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- 第三条横线（长） -->
+          <line x1="1" y1="18" x2="16" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <main class="main-content">
+    <div class="content-header">
+      <h1 id="pageTitle">工作台</h1>
+    </div>
+    <div class="welcome-card">
+      <h2>欢迎使用奕境售后管理系统</h2>
+      <p>请从左侧菜单选择功能模块</p>
+    </div>
+    <div style="margin-top: 30px;">
+      <button class="btn" onclick="alert('这是主题色按钮样式')">主要按钮</button>
+      <button class="btn btn-outline" style="margin-left: 10px;">次要按钮</button>
+    </div>
+  </main>
+
+  <script>
+    // 侧边栏展开/收起
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('collapsed');
+      
+      // 关闭所有子菜单
+      document.querySelectorAll('.submenu').forEach(sub => {
+        sub.classList.remove('open');
+      });
+      
+      // 旋转箭头
+      document.querySelectorAll('.nav-arrow').forEach(arrow => {
+        arrow.style.transform = sidebar.classList.contains('collapsed') 
+          ? 'rotate(-90deg)' : 'rotate(0deg)';
+      });
+    }
+
+    // 点击菜单项时切换子菜单
+    document.querySelectorAll('.nav-item > .nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.classList.contains('collapsed')) {
+          return; // 收起状态不展开子菜单
+        }
+        
+        const submenu = this.nextElementSibling;
+        if (submenu && submenu.classList.contains('submenu')) {
+          e.stopPropagation();
+          submenu.classList.toggle('open');
+          
+          // 旋转箭头
+          const arrow = this.querySelector('.nav-arrow');
+          if (arrow) {
+            arrow.style.transform = submenu.classList.contains('open') 
+              ? 'rotate(180deg)' : 'rotate(0deg)';
+          }
+        }
+      });
+    });
+
+    // 显示内容
+    function showContent(module) {
+      const titles = {
+        'dashboard': '工作台首页',
+        'statistics': '统计报表',
+        'repair': '维修管理',
+        'order': '工单管理',
+        'customer': '客户管理',
+        'inventory': '库存管理',
+        'purchase': '采购管理',
+        'user': '用户管理',
+        'role': '角色权限'
+      };
+      
+      document.getElementById('pageTitle').textContent = titles[module] || '工作台';
+    }
+  </script>
+</body>
+</html>
