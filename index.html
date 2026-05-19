@@ -2,209 +2,64 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>奕境售后管理系统</title>
   <style>
-/* 最终清爽蓝色主题 */
-body{ margin:0; padding:0; font-family:"Microsoft YaHei"; background:#f6f8fc; }
-.main{ display:flex; min-height:100vh; }
-.left-menu{ width:220px; background:#1F458E; color:white; }
-.left-menu ul,.left-menu li{ list-style:none; margin:0; padding:0; }
-
-.first-menu{
-  display:block; padding:12px 18px;
-  background:#183774; color:white;
-  text-decoration:none; cursor:pointer;
-  border-bottom:1px solid rgba(255,255,255,0.05);
-}
-.second-menu{ display:none; }
-.second-menu a{
-  display:block; padding:10px 25px;
-  background:#2954A6; color:white;
-  text-decoration:none;
-}
-.third-menu{ display:none; }
-.third-menu a{
-  display:block; padding:10px 35px;
-  background:#3667C8; color:white;
-  text-decoration:none;
-}
-
-.content{ flex:1; padding:20px; }
-.page{ display:none; }
-.page.show{ display:block; }
-
-.third-menu {
-  padding-left: 0;
-  list-style: none;
-}
-.third-menu a {
-  display: block;
-  padding: 8px 42px;
-  background: #4a78c2;
-  color: #fff;
-  text-decoration: none;
-  font-size: 12px;
-}
-
-/* 菜单箭头：修复展开变成▼ */
-.first-menu:after {
-  content: ' ▶';
-  font-size: 12px;
-  opacity: 0.8;
-}
-.first-menu.open:after {
-  content: ' ▼' !important;
-}
-
-.second-menu li a:after {
-  content: ' ▶';
-  font-size: 12px;
-  opacity: 0.8;
-}
-.second-menu li a.open:after {
-  content: ' ▼' !important;
-}
-
-/* 左右区域独立滚动 */
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
-.main {
-  display: flex;
-  height: 100vh;
-}
-.left-menu {
-  height: 100%;
-  overflow-y: auto;
-}
-.content {
-  height: 100vh;
-  overflow-y: auto;
-  flex: 1;
-}
-    .left-menu {
-  transition: all 0.3s;
-}
-.left-menu.hide {
-  width: 0 !important;
-}
-  </style>
-</head>
-<body>
-  <div style="background:#1F458E; color:white; padding:14px 20px; font-size:16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
-    <div>奕境售后管理系统</div>
-    <div id="toggleMenu" style="cursor:pointer; font-size:20px;">☰</div>
-  </div>
-  <div class="main">
-    <div class="left-menu">
-      <ul>
-        <li>
-          <a class="first-menu">工作台</a>
-        </li>
-        <li>
-          <a class="first-menu">服务管理</a>
-        </li>
-        <li>
-          <a class="first-menu">备件管理</a>
-          <ul class="second-menu">
-            <li>
-              <a>备件基础数据</a>
-              <ul class="third-menu">
-                <li><a href="#" onclick="showPage('page1')">备件目录</a></li>
-                <li><a href="#" onclick="showPage('page2')">集单时间</a></li>
-                <li><a href="#" onclick="showPage('page3')">外采供应商</a></li>
-              </ul>
-            </li>
-            <li>
-              <a>备件采购管理</a>
-              <ul class="third-menu">
-                <li><a href="#" onclick="showPage('page4')">备件采购</a></li>
-                <li><a href="#" onclick="showPage('page5')">备件外采</a></li>
-                <li><a href="#" onclick="showPage('page6')">厂端缺件</a></li>
-                <li><a href="#" onclick="showPage('page7')">备件索赔</a></li>
-              </ul>
-            </li>
-            <li><a href="#" onclick="showPage('page8')">备件销售管理</a></li>
-            <li><a href="#" onclick="showPage('page9')">备件出入库管理</a></li>
-            <li><a href="#" onclick="showPage('page10')">备件库存管理</a></li>
-            <li><a href="#" onclick="showPage('page11')">备件报表查询</a></li>
-          </ul>
-        </li>
-        <li>
-          <a class="first-menu">系统设置</a>
-        </li>
-      </ul>
-      <!-- 左侧菜单底部：收起展开按钮 -->
-<div id="toggleBtn"
-     style="text-align:center;
-            padding:12px;
-            color:white;
-            background:#183774;
-            cursor:pointer;
-            border-top:1px solid rgba(255,255,255,0.1);
-            position:fixed;
-            bottom:0;
-            width:220px;
-            box-sizing:border-box;">
-  &lt; 收起
-</div>
-</div>
-    </div>
-    <div class="content">
-      <div id="page1" class="page show">备件目录页面内容</div>
-      <div id="page2" class="page">集单时间页面内容</div>
-      <div id="page3" class="page">外采供应商页面内容</div>
-      <div id="page4" class="page">备件采购页面内容</div>
-      <div id="page5" class="page">备件外采页面内容</div>
-      <div id="page6" class="page">厂端缺件页面内容</div>
-      <div id="page7" class="page">备件索赔页面内容</div>
-      <div id="page8" class="page">备件销售管理页面内容</div>
-      <div id="page9" class="page">备件出入库管理页面内容</div>
-      <div id="page10" class="page">备件库存管理页面内容</div>
-      <div id="page11" class="page">备件报表查询页面内容</div>
-    </div>
-  </div>
-
-  <script>
-    function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('show'));
-      document.getElementById(pageId).classList.add('show');
+    :root {
+      --primary-color: #861B2F;
+      --sidebar-bg: #F5F7FA;
+      --sidebar-text: #333;
+      --sidebar-hover: rgba(134, 27, 47, 0.1);
     }
 
-    // 一级菜单展开/收起
-    document.querySelectorAll('.first-menu').forEach(el => {
-      el.onclick = function() {
-        let sub = this.nextElementSibling;
-        if (sub) {
-          sub.style.display = sub.style.display === 'block' ? 'none' : 'block';
-          this.classList.toggle('open');
-        }
-      }
-    });
-
-    // 二级菜单展开/收起
-    document.querySelectorAll('.second-menu > li > a').forEach(el => {
-      el.onclick = function(e) {
-        e.stopPropagation();
-        let sub = this.nextElementSibling;
-        if (sub) {
-          sub.style.display = sub.style.display === 'block' ? 'none' : 'block';
-          this.classList.toggle('open');
-        }
-      }
-    });
-
-    // 左侧菜单显示/隐藏
-    document.getElementById('toggleMenu').onclick = function() {
-      document.querySelector('.left-menu').classList.toggle('hide');
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    // 左侧菜单收起展开（修复版）
-document.getElementById('toggleBtn').onclick = function () {
-  let menu = document.querySelector('.left-menu');
-  menu.classList.toggle('hide');
-  this.textContent = menu.classList.contains('hide') ? '> 展开' : '< 收起';
-};
-  </script>
-</body>
-</html>
+
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 侧边导航栏 */
+    .sidebar {
+      width: 220px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.3s ease;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.collapsed {
+      width: 50px;
+    }
+
+    /* 系统标题 */
+    .system-title {
+      padding: 20px 15px;
+      font-size: 16px;
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .sidebar.collapsed .system-title {
+      font-size: 0;
+      padding: 20px 0;
+    }
+
+    /* 导航菜单 */
+    .nav-menu {
+      flex: 1;
+      overflow-y: auto;
+     
