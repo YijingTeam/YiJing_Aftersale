@@ -181,7 +181,7 @@
       transition: max-height 0.3s ease;
     }
     .submenu-nested.open {
-      max-height: 200px;
+      max-height: 250px;
     }
     .submenu-item-nested {
       padding: 10px 15px 10px 68px;
@@ -865,6 +865,22 @@
     #page-internal-usage-detail .lt-table th.col-location, #page-internal-usage-detail .lt-table td.col-location { min-width: 80px; }
     #page-internal-usage-detail .lt-table th.col-remark, #page-internal-usage-detail .lt-table td.col-remark { min-width: 120px; }
 
+    /* 盘盈盘亏明细冻结列 */
+    #page-inventory-check-detail .lt-table th.col-seq, #page-inventory-check-detail .lt-table td.col-seq { left: 0; width: 40px; min-width: 40px; max-width: 40px; overflow: hidden; }
+    #page-inventory-check-detail .lt-table th.col-check-no, #page-inventory-check-detail .lt-table td.col-check-no { left: 40px; width: 160px; min-width: 160px; max-width: 160px; overflow: hidden; }
+    /* 盘盈盘亏明细非冻结列 */
+    #page-inventory-check-detail .lt-table th.col-store-name, #page-inventory-check-detail .lt-table td.col-store-name { min-width: 160px; }
+    #page-inventory-check-detail .lt-table th.col-store-code, #page-inventory-check-detail .lt-table td.col-store-code { min-width: 80px; }
+    #page-inventory-check-detail .lt-table th.col-code, #page-inventory-check-detail .lt-table td.col-code { min-width: 80px; }
+    #page-inventory-check-detail .lt-table th.col-name, #page-inventory-check-detail .lt-table td.col-name { min-width: 120px; }
+    #page-inventory-check-detail .lt-table th.col-diff-qty, #page-inventory-check-detail .lt-table td.col-diff-qty { min-width: 80px; }
+    #page-inventory-check-detail .lt-table th.col-price, #page-inventory-check-detail .lt-table td.col-price { min-width: 90px; }
+    #page-inventory-check-detail .lt-table th.col-amount, #page-inventory-check-detail .lt-table td.col-amount { min-width: 90px; }
+    #page-inventory-check-detail .lt-table th.col-io-time, #page-inventory-check-detail .lt-table td.col-io-time { min-width: 140px; }
+    #page-inventory-check-detail .lt-table th.col-warehouse, #page-inventory-check-detail .lt-table td.col-warehouse { min-width: 90px; }
+    #page-inventory-check-detail .lt-table th.col-position, #page-inventory-check-detail .lt-table td.col-position { min-width: 80px; }
+    #page-inventory-check-detail .lt-table th.col-remark, #page-inventory-check-detail .lt-table td.col-remark { min-width: 120px; }
+
     /* ===== 页面说明组件 ===== */
     .page-desc-trigger {
       position: fixed;
@@ -1003,6 +1019,7 @@
             <div class="submenu-item submenu-item-nested" onclick="showContent('parts-sales-detail')" data-module="parts-sales-detail">配件销售明细</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('purchase-return-detail')" data-module="purchase-return-detail">采购退货明细</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('internal-usage-detail')" data-module="internal-usage-detail">内部领用明细</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('inventory-check-detail')" data-module="inventory-check-detail">盘盈盘亏明细</div>
           </div>
         </div>
       </div>
@@ -2351,6 +2368,34 @@
         </div>
       </div>
     </div><!-- /#page-internal-usage-detail -->
+    <!-- 盘盈盘亏明细 -->
+    <div id="page-inventory-check-detail" class="page-content">
+      <div class="lt-wrap">
+        <div class="lt-filter"><div class="lt-filter-grid" id="icd-filterGrid">
+            <div class="lt-filter-item"><label>配件编码</label><div class="lt-input-wrap search"><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="icd-flt-part-code" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
+            <div class="lt-filter-item"><label>配件名称</label><div class="lt-input-wrap search"><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="icd-flt-part-name" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
+            <div class="lt-filter-item"><label>盈亏状态</label><div class="lt-input-wrap"><select id="icd-flt-status" onchange="icdApplyFilter()"><option value="">全部</option><option>盘盈</option><option>盘亏</option></select></div></div>
+            <div class="lt-filter-item"><label>出入库日期</label><div class="lt-date-range"><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期 — 结束日期" onclick="toggleDateRangePicker(this)" data-callback="icdApplyFilter"><div class="lt-date-range-drop"><input type="date" id="icd-flt-date-start" value="" onchange="updateDateRangeDisplay(this)"><span>—</span><input type="date" id="icd-flt-date-end" value="" onchange="updateDateRangeDisplay(this)"></div></div></div>
+            <div class="lt-filter-item"><label>盘点单号</label><div class="lt-input-wrap search"><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="icd-flt-check-no" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
+            <div class="lt-filter-item"><label>出入库单号</label><div class="lt-input-wrap search"><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="icd-flt-io-no" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
+            <div class="lt-filter-item"><label>大区</label><div class="lt-input-wrap combobox"><input type="text" id="icd-flt-region" placeholder="请选择" oninput="icdFilterCombobox(this)" onfocus="icdShowCombobox(this)"><span class="cb-arrow" onclick="icdToggleCombobox(this)">▼</span><ul class="lt-datalist" id="icd-region-list"><li onclick="icdSelectCombobox(this)">华北区</li><li onclick="icdSelectCombobox(this)">华东区</li><li onclick="icdSelectCombobox(this)">华南区</li><li onclick="icdSelectCombobox(this)">西南区</li><li onclick="icdSelectCombobox(this)">西北区</li></ul></div></div>
+            <div class="lt-filter-item"><label>小区</label><div class="lt-input-wrap combobox"><input type="text" id="icd-flt-district" placeholder="请选择" oninput="icdFilterCombobox(this)" onfocus="icdShowCombobox(this)"><span class="cb-arrow" onclick="icdToggleCombobox(this)">▼</span><ul class="lt-datalist" id="icd-district-list"><li onclick="icdSelectCombobox(this)">北京区</li><li onclick="icdSelectCombobox(this)">上海区</li><li onclick="icdSelectCombobox(this)">广州区</li><li onclick="icdSelectCombobox(this)">成都区</li></ul></div></div>
+            <div class="lt-filter-item"><label>门店</label><div class="lt-input-wrap search"><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="icd-flt-store" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
+            <div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="icdApplyFilter()">查询</button><button class="lt-btn lt-btn-default" onclick="icdResetFilter()">重置</button><a href="javascript:void(0)" class="lt-filter-toggle" onclick="icdToggleFilter()">﹀ 展开</a></div>
+          </div></div>
+        <div class="lt-list-area">
+          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-default" onclick="icdExportData()">导出</button></div><div class="lt-toolbar-right"></div></div>
+          <div class="lt-table-wrap"><table class="lt-table">
+              <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-check-no">盘点单号</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-code">配件编码</th><th class="col-name">配件名称</th><th class="col-diff-qty">盈亏数量</th><th class="col-price">单价</th><th class="col-amount">金额</th><th class="col-io-time">出入库时间</th><th class="col-warehouse">仓库</th><th class="col-position">仓位</th><th class="col-remark">备注</th></tr></thead>
+              <tbody id="icd-tbody"></tbody></table></div>
+          <div class="lt-pager"><div class="lt-pager-left"><span class="pager-total" id="icd-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button id="icd-pg-prev" onclick="icdChangePage(-1)">上一页</button><span id="icd-pg-pages" class="pg-pages"></span><button id="icd-pg-next" onclick="icdChangePage(1)">下一页</button>
+              <div class="pager-goto">前往 <input id="icd-pg-goto" onkeydown="if(event.key==='Enter')icdGotoPage(this.value)"> 页</div>
+              <select class="pager-size" id="icd-pg-size" onchange="icdChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>
+            </div></div></div></div>
+    </div><!-- /#page-inventory-check-detail -->
+
+    
   </main>
 
   <!-- 页面说明：右下角悬浮按钮 -->
@@ -2520,6 +2565,9 @@
         // 如果是内部领用明细，初始化
         if (module === 'internal-usage-detail') {
           initInt();
+        }
+        if (module === 'inventory-check-detail') {
+          initIcd();
         }
       }
     }
@@ -4463,6 +4511,136 @@
       document.getElementById('page-desc-drawer').classList.remove('open');
       document.getElementById('page-desc-trigger').classList.remove('open');
     }
-  </script>
+  
+    // ===== 盘盈盘亏明细 JS =====
+    var icdStores = [{code:'BJ001',name:'北京朝阳店'},{code:'SH001',name:'上海浦东店'},{code:'GZ001',name:'广州天河店'},{code:'WH001',name:'武汉洪山店'},{code:'SZ001',name:'深圳南山店'},{code:'HZ001',name:'杭州西湖店'}];
+    var icdAllData = [];
+    for (var ii = 0; ii < 20; ii++) {
+      var idx = ii % 10;
+      var st = icdStores[ii % 6];
+      var statuses = ['盘盈','盘亏'];
+      var status = statuses[ii % 2];
+      var qty = status === '盘盈' ? (1 + ii % 8) : -(1 + ii % 5);
+      var prices = [35,45,150,50,68,85,120,450,280,120];
+      var price = prices[idx];
+      var day = 20 + (ii % 6);
+      var ioTime = '2025-05-' + (day < 10 ? '0' + day : day) + ' ' + (8 + ii % 10) + ':00:00';
+      var warehouses = ['中心仓','上海仓','广州仓','武汉仓','深圳仓','杭州仓'];
+      var positions = ['A-01-01','A-01-02','B-02-01','B-02-02','C-03-01'];
+      icdAllData.push({id:ii+1,checkNo:'PD20250'+(1001+ii),storeName:st.name,storeCode:st.code,code:'P'+(101+idx).toString().substr(1),name:['机油滤清器','空气滤清器','刹车片','火花塞','雨刮器','机油','变速箱油','轮胎','减震器','空调滤清器'][idx],diffQty:qty,price:price,amount:Math.abs(qty)*price,ioTime:ioTime,warehouse:warehouses[ii%6],position:positions[ii%5],remark:'',status:status,ioNo:'IO20250'+(1001+ii),region:['华北区','华东区','华南区','华中区','华南区','华东区'][ii%6],district:['北京区','上海区','广州区','武汉区','深圳区','杭州区'][ii%6]});
+    }
+    var icdFilteredData = [];
+    var icdCurrentPage = 1;
+    var icdPageSize = 20;
+    var icdFilterExpanded = false;
+    var icdInitialized = false;
+
+    function initIcd() {
+      if (!icdInitialized) {
+        icdInitialized = true;
+        var now = new Date();
+        var startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        if (startDate.getMonth() !== ((now.getMonth() - 1 + 12) % 12)) { startDate = new Date(now.getFullYear(), now.getMonth(), 0); }
+        var ds = startDate.toISOString().split('T')[0];
+        var de = now.toISOString().split('T')[0];
+        var startEl = document.getElementById('icd-flt-date-start');
+        var endEl = document.getElementById('icd-flt-date-end');
+        if (startEl) startEl.value = ds;
+        if (endEl) endEl.value = de;
+        var textEl = document.querySelector('#page-inventory-check-detail .lt-date-range-text');
+        if (textEl) textEl.value = ds + ' — ' + de;
+      }
+      icdFilteredData = icdAllData.slice();
+      icdRenderTable();
+      var grid = document.getElementById('icd-filterGrid');
+      var items = grid ? grid.querySelectorAll('.lt-filter-item') : [];
+      for (var j = 7; j < items.length; j++) { if (items[j]) items[j].style.display = 'none'; }
+    }
+
+    function icdRenderTable() {
+      var start = (icdCurrentPage - 1) * icdPageSize;
+      var pageData = icdFilteredData.slice(start, start + icdPageSize);
+      var tbody = document.getElementById('icd-tbody');
+      var rows = [];
+      for (var k = 0; k < pageData.length; k++) {
+        var r = pageData[k];
+        var rIdx = start + k + 1;
+        rows.push('<tr><td class="sticky col-seq">' + rIdx + '</td><td class="sticky col-check-no">' + r.checkNo + '</td><td class="col-store-name">' + r.storeName + '</td><td class="col-store-code">' + r.storeCode + '</td><td class="col-code">' + r.code + '</td><td class="col-name">' + r.name + '</td><td class="col-diff-qty">' + r.diffQty + '</td><td class="col-price">' + r.price + '</td><td class="col-amount">' + r.amount + '</td><td class="col-io-time">' + r.ioTime + '</td><td class="col-warehouse">' + r.warehouse + '</td><td class="col-position">' + r.position + '</td><td class="col-remark">' + r.remark + '</td></tr>');
+      }
+      tbody.innerHTML = rows.join('');
+      document.getElementById('icd-pg-total').textContent = '共 ' + icdFilteredData.length + ' 条';
+      icdRenderPages();
+    }
+
+    function icdRenderPages() {
+      var totalPages = Math.ceil(icdFilteredData.length / icdPageSize) || 1;
+      var pages = document.getElementById('icd-pg-pages');
+      var html = '';
+      for (var i = 1; i <= totalPages; i++) {
+        html += i === icdCurrentPage ? '<button class="active" onclick="icdGoPage(' + i + ')">' + i + '</button>' : '<button onclick="icdGoPage(' + i + ')">' + i + '</button>';
+      }
+      pages.innerHTML = html;
+      document.getElementById('icd-pg-prev').disabled = icdCurrentPage === 1;
+      document.getElementById('icd-pg-next').disabled = icdCurrentPage >= totalPages;
+    }
+
+    function icdGoPage(p) { icdCurrentPage = p; icdRenderTable(); }
+    function icdChangePage(delta) { icdGoPage(Math.max(1, Math.min(icdCurrentPage + delta, Math.ceil(icdFilteredData.length / icdPageSize) || 1))); }
+    function icdChangePageSize(size) { icdPageSize = parseInt(size); icdCurrentPage = 1; icdRenderTable(); }
+    function icdGotoPage(v) { var p = parseInt(v); if (p) icdGoPage(p); }
+
+    function icdApplyFilter() {
+      icdFilteredData = icdAllData.filter(function(r) {
+        var partCode = document.getElementById('icd-flt-part-code').value.trim().toLowerCase();
+        var partName = document.getElementById('icd-flt-part-name').value.trim().toLowerCase();
+        var status = document.getElementById('icd-flt-status').value;
+        var checkNo = document.getElementById('icd-flt-check-no').value.trim().toLowerCase();
+        var ioNo = document.getElementById('icd-flt-io-no').value.trim().toLowerCase();
+        var ds = document.getElementById('icd-flt-date-start').value;
+        var de = document.getElementById('icd-flt-date-end').value;
+        var region = document.getElementById('icd-flt-region').value.trim();
+        var district = document.getElementById('icd-flt-district').value.trim();
+        var store = document.getElementById('icd-flt-store').value.trim().toLowerCase();
+        if (partCode && r.code.toLowerCase().indexOf(partCode) < 0) return false;
+        if (partName && r.name.toLowerCase().indexOf(partName) < 0) return false;
+        if (status && r.status !== status) return false;
+        if (checkNo && r.checkNo.toLowerCase().indexOf(checkNo) < 0) return false;
+        if (ioNo && r.ioNo.toLowerCase().indexOf(ioNo) < 0) return false;
+        if (ds && r.ioTime < ds) return false;
+        if (de && r.ioTime > de + ' 23:59:59') return false;
+        if (region && r.region !== region) return false;
+        if (district && r.district !== district) return false;
+        if (store && r.storeName.toLowerCase().indexOf(store) < 0 && r.storeCode.toLowerCase().indexOf(store) < 0) return false;
+        return true;
+      });
+      icdCurrentPage = 1;
+      icdRenderTable();
+    }
+
+    function icdResetFilter() {
+      document.getElementById('icd-flt-part-code').value = '';
+      document.getElementById('icd-flt-part-name').value = '';
+      document.getElementById('icd-flt-status').value = '';
+      document.getElementById('icd-flt-check-no').value = '';
+      document.getElementById('icd-flt-io-no').value = '';
+      document.getElementById('icd-flt-region').value = '';
+      document.getElementById('icd-flt-district').value = '';
+      document.getElementById('icd-flt-store').value = '';
+      icdFilteredData = icdAllData.slice();
+      icdCurrentPage = 1;
+      icdRenderTable();
+    }
+
+    function icdExportData() { alert('导出'); }
+
+    function icdFilterCombobox(input) { var wrap = input.closest('.lt-input-wrap.combobox'); if (!wrap) return; var list = wrap.querySelector('.lt-datalist'); if (!list) return; var val = input.value.toLowerCase(); var its = list.querySelectorAll('li'); for (var m = 0; m < its.length; m++) { its[m].classList.toggle('hidden', !its[m].textContent.toLowerCase().includes(val)); } }
+    function icdShowCombobox(input) { var wrap = input.closest('.lt-input-wrap.combobox'); if (!wrap) return; var list = wrap.querySelector('.lt-datalist'); if (list) list.classList.add('show'); }
+    function icdToggleCombobox(arrow) { var wrap = arrow.closest('.lt-input-wrap.combobox'); if (!wrap) return; var list = wrap.querySelector('.lt-datalist'); if (!list) return; list.classList.toggle('show'); if (list.classList.contains('show')) { var inp = wrap.querySelector('input'); if (inp) inp.focus(); } }
+    function icdSelectCombobox(li) { var wrap = li.closest('.lt-input-wrap.combobox'); if (!wrap) return; var inp = wrap.querySelector('input'); var list = wrap.querySelector('.lt-datalist'); if (inp) inp.value = li.textContent; if (list) list.classList.remove('show'); icdApplyFilter(); }
+    document.addEventListener('click', function(e) { if (!e.target.closest('.lt-input-wrap.combobox')) { var shows = document.querySelectorAll('#page-inventory-check-detail .lt-datalist.show'); for (var n = 0; n < shows.length; n++) { shows[n].classList.remove('show'); } } });
+
+    function icdToggleFilter() { icdFilterExpanded = !icdFilterExpanded; var grid = document.getElementById('icd-filterGrid'); if (!grid) return; var items = grid.querySelectorAll('.lt-filter-item'); for (var i = 7; i < items.length; i++) { if (items[i]) items[i].style.display = icdFilterExpanded ? '' : 'none'; } var toggleEl = grid.querySelector('.lt-filter-toggle'); if (toggleEl) toggleEl.innerHTML = icdFilterExpanded ? '︿ 收起' : '﹀ 展开'; }
+
+</script>
 </body>
 </html>
