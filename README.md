@@ -1,2 +1,2 @@
-# YiJing_Afersale
-奕境售后+备件
+# YiJing_Aftersale
+奕境售后+配件
