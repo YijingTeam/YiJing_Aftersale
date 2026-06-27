@@ -1110,9 +1110,9 @@
     .ts-panel-actions { display:flex; gap:8px; flex-wrap:wrap; }
     .ts-panel-close { background:none; border:none; font-size:20px; cursor:pointer; color:#999; padding:4px 8px; line-height:1; }
     .ts-panel-close:hover { color:#333; }
-    .ts-panel-body { flex:1; overflow-y:auto; padding:20px; }
+    .ts-panel-body { flex:1; overflow-y:auto; padding:20px; scrollbar-gutter: stable; }
     /* 申请信息固定区（不随面板体滚动），按钮也在此区右上角 */
-    .ts-panel-fixed { flex-shrink:0; padding:0 20px 16px; background:#fff; border-bottom:1px solid #f0d0d5; }
+    .ts-panel-fixed { flex-shrink:0; padding:0 20px 16px; background:#fff; border-bottom:1px solid #f0d0d5; scrollbar-gutter: stable; overflow-y:auto; }
     .ts-panel-fixed-actions { display:flex; justify-content:flex-end; align-items:center; padding:12px 0 10px; border-bottom:1px dashed #eee; margin-bottom:12px; }
     .ts-panel-fixed-actions:empty { display:none; }
     .ts-panel-fixed .ts-form-grid { gap:10px 20px; }
@@ -1210,8 +1210,8 @@
     .qr-panel-actions { display:flex; gap:8px; flex-wrap:wrap; }
     .qr-panel-close { background:none; border:none; font-size:20px; cursor:pointer; color:#999; padding:4px 8px; line-height:1; }
     .qr-panel-close:hover { color:#333; }
-    .qr-panel-body { flex:1; overflow-y:auto; padding:20px; }
-    .qr-panel-fixed { flex-shrink:0; padding:0 20px 16px; background:#fff; border-bottom:1px solid #f0d0d5; }
+    .qr-panel-body { flex:1; overflow-y:auto; padding:20px; scrollbar-gutter: stable; }
+    .qr-panel-fixed { flex-shrink:0; padding:0 20px 16px; background:#fff; border-bottom:1px solid #f0d0d5; scrollbar-gutter: stable; overflow-y:auto; }
     .qr-panel-fixed-actions { display:flex; justify-content:flex-end; align-items:center; padding:12px 0 10px; border-bottom:1px dashed #eee; margin-bottom:12px; }
     .qr-panel-fixed-actions:empty { display:none; }
     .qr-panel-fixed .qr-form-grid { gap:10px 20px; }
@@ -1260,8 +1260,8 @@
     .qrt-panel-actions { display:flex; gap:8px; flex-wrap:wrap; }
     .qrt-panel-close { background:none; border:none; font-size:20px; cursor:pointer; color:#999; padding:4px 8px; line-height:1; }
     .qrt-panel-close:hover { color:#333; }
-    .qrt-panel-body { flex:1; overflow-y:auto; padding:20px; }
-    .qrt-panel-fixed { flex-shrink:0; padding:0 20px 16px; background:#fff; border-bottom:1px solid #f0d0d5; }
+    .qrt-panel-body { flex:1; overflow-y:auto; padding:20px; scrollbar-gutter: stable; }
+    .qrt-panel-fixed { flex-shrink:0; padding:0 20px 16px; background:#fff; border-bottom:1px solid #f0d0d5; scrollbar-gutter: stable; overflow-y:auto; }
     .qrt-panel-fixed-actions { display:flex; justify-content:flex-end; align-items:center; padding:12px 0 10px; border-bottom:1px dashed #eee; margin-bottom:12px; }
     .qrt-panel-fixed-actions:empty { display:none; }
     .qrt-panel-fixed .qr-form-grid { gap:10px 20px; }
@@ -1416,16 +1416,7 @@
 
     .qr-panel-close:hover { color:#333; }
 
-    .qr-panel-body { flex:1; overflow-y:auto; padding:20px; }
-
-    /* 申请信息固定区（不随面板体滚动），按钮也在此区右上角 */
-    .qr-panel-fixed { flex-shrink:0; padding:0 20px 16px; background:#fff; border-bottom:1px solid #f0d0d5; }
-
-    .qr-panel-fixed-actions { display:flex; justify-content:flex-end; align-items:center; padding:12px 0 10px; border-bottom:1px dashed #eee; margin-bottom:12px; }
-
-    .qr-panel-fixed-actions:empty { display:none; }
-
-    .qr-panel-fixed .qr-form-grid { gap:10px 20px; }
+    /* 申请信息固定区（不随面板体滚动），按钮也在此区右上角（重复定义已删除，见上方第1214行） */
 
     .qr-section { margin-bottom:20px; }
 
