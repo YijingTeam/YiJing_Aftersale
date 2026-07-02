@@ -50,6 +50,16 @@
           <span class="nav-text">配件管理</span>
           <span class="nav-arrow"></span>
         </div>
+        <div class="submenu">
+          <div class="submenu-item">基础数据</div>
+          <div class="submenu submenu-nested">
+            <div class="submenu-item submenu-item-nested" onclick="showContent('parts-master')" data-module="parts-master">配件主数据</div>
+          </div>
+          <div class="submenu-item">配件订单管理</div>
+          <div class="submenu submenu-nested">
+            <div class="submenu-item submenu-item-nested" onclick="showContent('supplier-manage')" data-module="supplier-manage">外采供应商管理</div>
+          </div>
+        </div>
       </div>
       
       <!-- 报表管理 -->
@@ -1568,7 +1578,7 @@
             <!-- 3. 故障系统（模糊搜索下拉） -->
             <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障系统</span><input type="text" id="qrt-form-fault-system" placeholder="请选择或输入" onfocus="qrtShowCombobox(this,'qrt-fs-list')" oninput="qrtFilterCombobox(this)"><span class="cb-arrow" onclick="qrtToggleComboboxArrow('qrt-fs-list')">▼</span><ul class="lt-datalist" id="qrt-fs-list"><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">请选择</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">发动机系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">变速箱系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">制动系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">转向系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">电气系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">空调系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">底盘系统</li></ul></div>
             <!-- 4. 主故障件编码、主故障件名称、重要程度 -->
-            <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="qrtOpenPartCodeLookup()"><span class="lt-filter-prefix"><span class="req">*</span> 主故障件编码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qrt-form-fault-part-code" placeholder="请输入或点击搜索" style="cursor:pointer" onclick="event.stopPropagation();qrtOpenPartCodeLookup()"></div>
+            <div class="lt-input-wrap search required" style="flex:1;min-width:0;cursor:pointer" onclick="qrtOpenPartCodeLookup()"><span class="lt-filter-prefix">主故障件编码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qrt-form-fault-part-code" placeholder="请输入或点击搜索" style="cursor:pointer" onclick="event.stopPropagation();qrtOpenPartCodeLookup()"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">主故障件名称</span><input type="text" id="qrt-form-fault-part-name" placeholder="自动带出，可修改"></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">重要程度</span><select id="qrt-form-importance"><option value="">请选择</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">有无显示故障码</span><select id="qrt-form-has-fault-code" onchange="qrtToggleFaultCode()"><option value="">请选择</option><option>是</option><option>否</option></select></div>
@@ -1632,8 +1642,403 @@
       <div style="display:flex;gap:8px" id="qrt-panel-bottom-actions"></div>
     </div>
   </div>
+      </div><!-- /.lt-wrap -->
+    </div><!-- /#page-quality-report-template -->
 
-    
+    <!-- ========== 配件主数据（配件目录） ========== -->
+    <div id="page-parts-master" class="page-content">
+      <div class="lt-wrap">
+        <!-- 筛选区 -->
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="pm-filterGrid">
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">配件来源</span>
+                <select id="pm-flt-source" onchange="pmApplyFilter()">
+                  <option value="">请选择</option>
+                  <option>奕境</option>
+                  <option>门店</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件编码</span>
+                <input type="text" id="pm-flt-code" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件名称</span>
+                <input type="text" id="pm-flt-name" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">采购开关</span>
+                <select id="pm-flt-purchase-switch">
+                  <option value="开" selected>开</option>
+                  <option value="关">关</option>
+                  <option value="">全部</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">配件类别</span>
+                <select id="pm-flt-category">
+                  <option value="">请选择</option>
+                  <option>事故件</option>
+                  <option>常规件</option>
+                  <option>辅料</option>
+                  <option>X</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">配件销售属性</span>
+                <select id="pm-flt-attribute">
+                  <option value="">请选择(下拉带模糊搜索)</option>
+                  <option>关键配件</option>
+                  <option>自制件</option>
+                  <option>沿用件</option>
+                  <option>保养件</option>
+                  <option>车身件</option>
+                  <option>发动机件</option>
+                  <option>变速箱件</option>
+                  <option>电器</option>
+                  <option>空调及安全设备</option>
+                  <option>化学类原辅材料</option>
+                  <option>精品</option>
+                  <option>随车工具</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">配件状态</span>
+                <select id="pm-flt-status">
+                  <option value="可用" selected>可用</option>
+                  <option value="不可用">不可用</option>
+                  <option value="">全部</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">油品</span>
+                <select id="pm-flt-oil">
+                  <option value="">请选择</option>
+                  <option value="是">是</option>
+                  <option value="否">否</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">适用车系</span>
+                <input type="text" id="pm-flt-series" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">适用车型</span>
+                <input type="text" id="pm-flt-model" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">可下紧急</span>
+                <select id="pm-flt-urgent">
+                  <option value="">请选择</option>
+                  <option value="是">是</option>
+                  <option value="否">否</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">直发件</span>
+                <select id="pm-flt-direct">
+                  <option value="">请选择</option>
+                  <option value="是">是</option>
+                  <option value="否">否</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">直营外采件</span>
+                <select id="pm-flt-direct-purchase">
+                  <option value="">请选择</option>
+                  <option value="是">是</option>
+                  <option value="否">否</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn lt-btn-primary" onclick="pmApplyFilter()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="pmResetFilter()">重置</button>
+              <a href="javascript:void(0)" class="lt-filter-toggle" onclick="pmToggleFilter()">收起</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 操作按钮行 -->
+        <div class="lt-list-area">
+          <div class="lt-toolbar">
+            <div class="lt-toolbar-left">
+              <button class="lt-btn lt-btn-primary" onclick="pmOpenAddModal()">新增</button>
+              <button class="lt-btn lt-btn-default">导入</button>
+              <button class="lt-btn lt-btn-default">导入销售价</button>
+              <button class="lt-btn lt-btn-default">导入出库SNP</button>
+              <button class="lt-btn lt-btn-default">导入是否油品</button>
+              <button class="lt-btn lt-btn-default" onclick="showContent('parts-price-history')">价格调整历史</button>
+            </div>
+            <div class="lt-toolbar-right"></div>
+          </div>
+
+          <!-- 数据表格 -->
+          <div class="lt-table-wrap">
+            <table class="lt-table" id="pm-table">
+              <thead>
+                <tr>
+                  <th class="sticky col-seq">序号</th>
+                  <th style="min-width:120px">配件编码</th>
+                  <th style="min-width:140px">配件名称</th>
+                  <th>配件状态</th>
+                  <th>配件类别</th>
+                  <th>配件销售属性</th>
+                  <th>是否油品</th>
+                  <th>直营外采件</th>
+                  <th style="min-width:100px">适用车系</th>
+                  <th style="min-width:140px">适用车型</th>
+                  <th>参考销售价(含税)</th>
+                  <th>销售价(含税)</th>
+                  <th>正常采购价(含税)</th>
+                  <th>紧急采购价(含税)</th>
+                  <th>采购开关</th>
+                  <th>计量单位</th>
+                  <th>配件来源</th>
+                  <th>采购SNP</th>
+                  <th>出库SNP</th>
+                  <th>最小采购量</th>
+                  <th>最大订单量/次</th>
+                  <th>替换件编码</th>
+                  <th style="min-width:150px">最近更新时间</th>
+                  <th style="min-width:150px">首次录入时间</th>
+                  <th class="sticky col-actions">操作</th>
+                </tr>
+              </thead>
+              <tbody id="pm-tbody"></tbody>
+            </table>
+          </div>
+
+          <!-- 分页 -->
+          <div class="lt-pager">
+            <div class="lt-pager-left"><span class="pager-total" id="pm-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right">
+              <button id="pm-pg-prev" onclick="pmChangePage(-1)">上一页</button>
+              <span id="pm-pg-pages" class="pg-pages"></span>
+              <button id="pm-pg-next" onclick="pmChangePage(1)">下一页</button>
+              <div class="pager-goto">前往 <input id="pm-pg-goto" onkeydown="if(event.key==='Enter')pmGotoPage(this.value)"> 页</div>
+              <select class="pager-size" id="pm-pg-size" onchange="pmChangePageSize(this.value)">
+                <option value="10">10条/页</option>
+                <option value="20" selected>20条/页</option>
+                <option value="50">50条/页</option>
+                <option value="100">100条/页</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-parts-master -->
+
+    <!-- ========== 价格调整历史 ========== -->
+    <div id="page-parts-price-history" class="page-content">
+      <div class="lt-wrap">
+        <div class="pm-page-header">
+          <button class="lt-btn lt-btn-link" onclick="showContent('parts-master')">&lt; 返回配件目录</button>
+          <h3 class="pm-page-title">价格调整历史</h3>
+        </div>
+        <!-- 筛选区 -->
+        <div class="lt-filter">
+          <div class="lt-filter-grid">
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">配件来源</span>
+                <select id="ph-flt-source">
+                  <option value="">请选择</option>
+                  <option>奕境</option>
+                  <option>门店</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件编码</span>
+                <input type="text" id="ph-flt-code" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件名称</span>
+                <input type="text" id="ph-flt-name" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">价格类型</span>
+                <select id="ph-flt-price-type">
+                  <option value="">请选择</option>
+                  <option>正常采购价</option>
+                  <option>紧急采购价</option>
+                  <option>参考销售价</option>
+                  <option>销售价</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">配件类别</span>
+                <select id="ph-flt-category">
+                  <option value="">请选择</option>
+                  <option>事故件</option>
+                  <option>常规件</option>
+                  <option>辅料</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">更新日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)">
+                <div class="lt-date-range-drop">
+                  <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ph-flt-date-start" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                  <span>-</span>
+                  <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ph-flt-date-end" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                </div>
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn lt-btn-primary" onclick="phRenderTable()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="phResetFilter()">重置</button>
+              <a href="javascript:void(0)" class="lt-filter-toggle">收起</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表区 -->
+        <div class="lt-list-area">
+          <div class="lt-toolbar">
+            <div class="lt-toolbar-left">
+              <button class="lt-btn lt-btn-default">导出</button>
+            </div>
+          </div>
+          <div class="lt-table-wrap">
+            <table class="lt-table">
+              <thead>
+                <tr>
+                  <th class="sticky col-seq">序号</th>
+                  <th style="min-width:120px">配件编码</th>
+                  <th style="min-width:140px">配件名称</th>
+                  <th>配件类别</th>
+                  <th>价格类型</th>
+                  <th>调整前价格</th>
+                  <th>调整后价格</th>
+                  <th>更新人</th>
+                  <th style="min-width:150px">更新时间</th>
+                </tr>
+              </thead>
+              <tbody id="ph-tbody"></tbody>
+            </table>
+          </div>
+          <!-- 分页 -->
+          <div class="lt-pager">
+            <div class="lt-pager-left"><span class="pager-total" id="ph-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right">
+              <button onclick="phChangePage(-1)">上一页</button>
+              <span id="ph-pg-pages" class="pg-pages"></span>
+              <button onclick="phChangePage(1)">下一页</button>
+              <div class="pager-goto">前往 <input id="ph-pg-goto" onkeydown="if(event.key==='Enter')phGotoPage(this.value)"> 页</div>
+              <select class="pager-size" onchange="phChangePageSize(this.value)">
+                <option value="10">10条/页</option>
+                <option value="20" selected>20条/页</option>
+                <option value="50">50条/页</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-parts-price-history -->
+
+    <!-- ========== 外采供应商管理 ========== -->
+    <div id="page-supplier-manage" class="page-content">
+      <div class="lt-wrap">
+        <!-- Tab 栏 -->
+        <div class="pm-tab-bar">
+          <span class="pm-tab">配件外采</span>
+          <span class="pm-tab active">外采供应商管理</span>
+        </div>
+        <!-- 筛选区 -->
+        <div class="lt-filter">
+          <div class="lt-filter-grid">
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">供应商编码</span>
+                <input type="text" id="sp-flt-code" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">供应商简称</span>
+                <input type="text" id="sp-flt-name" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">供货说明</span>
+                <input type="text" id="sp-flt-desc" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn lt-btn-primary" onclick="spApplyFilter()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="spResetFilter()">重置</button>
+              <a href="javascript:void(0)" class="lt-filter-toggle">收起</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表区 -->
+        <div class="lt-list-area">
+          <div class="lt-toolbar">
+            <div class="lt-toolbar-left">
+              <button class="lt-btn lt-btn-primary" onclick="spOpenAddPanel()">新增</button>
+              <button class="lt-btn lt-btn-default">导出</button>
+            </div>
+          </div>
+          <div class="lt-table-wrap">
+            <table class="lt-table" id="sp-table">
+              <thead>
+                <tr>
+                  <th class="sticky col-seq">序号</th>
+                  <th style="min-width:100px">供应商编码</th>
+                  <th style="min-width:100px">供应商简称</th>
+                  <th style="min-width:160px">供应商全称</th>
+                  <th style="min-width:180px">统一社会信用代码</th>
+                  <th style="min-width:100px">门店名称</th>
+                  <th>门店编码</th>
+                  <th>供应商联系人</th>
+                  <th>供应商电话</th>
+                  <th>财务联系人</th>
+                  <th>财务电话</th>
+                  <th>财务邮箱</th>
+                  <th style="min-width:160px">供应商地址</th>
+                  <th>供货说明</th>
+                  <th class="sticky col-actions">操作</th>
+                </tr>
+              </thead>
+              <tbody id="sp-tbody"></tbody>
+            </table>
+          </div>
+          <!-- 分页 -->
+          <div class="lt-pager">
+            <div class="lt-pager-left"><span class="pager-total" id="sp-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right">
+              <button>上一页</button>
+              <span id="sp-pg-pages" class="pg-pages"></span>
+              <button>下一页</button>
+              <div class="pager-goto">前往 <input> 页</div>
+              <select class="pager-size">
+                <option value="20" selected>20条/页</option>
+                <option value="50">50条/页</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-supplier-manage -->
+
+
   </main>
 
   <!-- 侧滑面板（技术支持共用） -->
@@ -1673,7 +2078,7 @@
             <div class="ts-form-item-inline plain ts-form-search"><span class="ts-form-label-inline">PDI单</span><input type="text" id="ts-form-pdi-order" placeholder="请输入"><svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <!-- Row2 -->
             <div class="ts-form-item-inline plain ts-form-search"><span class="ts-form-label-inline">告警单</span><input type="text" id="ts-form-warning-order" placeholder="请输入"><svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
-            <div class="ts-form-item-inline plain ts-form-search"><span class="ts-form-label-inline"><span class="req">*</span> VIN</span><input type="text" id="ts-form-vin" placeholder="请输入VIN查询车辆"><svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="ts-form-item-inline plain ts-form-search required"><span class="ts-form-label-inline">VIN</span><input type="text" id="ts-form-vin" placeholder="请输入VIN查询车辆"><svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">车系</span><input type="text" id="ts-form-car-series" readonly placeholder="自动带入"></div>
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">车型</span><input type="text" id="ts-form-car-model" readonly placeholder="自动带入"></div>
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">车身颜色</span><input type="text" id="ts-form-body-color" readonly placeholder="自动带入"></div>
@@ -1693,9 +2098,9 @@
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">联系电话</span><input type="text" id="ts-form-customer-phone" readonly placeholder="自动带入"></div>
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">生产日期</span><input type="text" id="ts-form-prod-date" readonly placeholder="自动带入"></div>
             <!-- Row6 -->
-            <div class="ts-form-item-inline plain"><span class="ts-form-label-inline"><span class="req">*</span> 交付日期</span><input type="text" id="ts-form-delivery-date" readonly placeholder="自动带入"></div>
-            <div class="ts-form-item-inline plain"><span class="ts-form-label-inline"><span class="req">*</span> 故障日期</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-form-fault-date" onchange="this.classList.remove('date-shim')"></div>
-            <div class="ts-form-item-inline plain"><span class="ts-form-label-inline"><span class="req">*</span> 故障里程(km)</span><input type="number" id="ts-form-fault-mileage" placeholder="请输入"></div>
+            <div class="ts-form-item-inline plain required"><span class="ts-form-label-inline">交付日期</span><input type="text" id="ts-form-delivery-date" readonly placeholder="自动带入"></div>
+            <div class="ts-form-item-inline plain required"><span class="ts-form-label-inline">故障日期</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-form-fault-date" onchange="this.classList.remove('date-shim')"></div>
+            <div class="ts-form-item-inline plain required"><span class="ts-form-label-inline">故障里程(km)</span><input type="number" id="ts-form-fault-mileage" placeholder="请输入"></div>
             <div></div>
           </div>
         </div>
@@ -1843,7 +2248,7 @@
             <div class="qr-form-item-inline plain qr-form-search"><span class="qr-form-label-inline">PDI单</span><input type="text" id="qr-form-pdi-order" placeholder="请输入"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <!-- Row2 -->
             <div class="qr-form-item-inline plain qr-form-search"><span class="qr-form-label-inline">告警单</span><input type="text" id="qr-form-warning-order" placeholder="请输入"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
-            <div class="qr-form-item-inline plain qr-form-search"><span class="qr-form-label-inline"><span class="req">*</span> VIN</span><input type="text" id="qr-form-vin" placeholder="请输入VIN查询车辆"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="qr-form-item-inline plain qr-form-search required"><span class="qr-form-label-inline">VIN</span><input type="text" id="qr-form-vin" placeholder="请输入VIN查询车辆"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">车系</span><input type="text" id="qr-form-car-series" readonly placeholder="自动带入"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">车型</span><input type="text" id="qr-form-car-model" readonly placeholder="自动带入"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">车身颜色</span><input type="text" id="qr-form-body-color" readonly placeholder="自动带入"></div>
@@ -1863,9 +2268,9 @@
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">联系电话</span><input type="text" id="qr-form-customer-phone" readonly placeholder="自动带入"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">生产日期</span><input type="text" id="qr-form-prod-date" readonly placeholder="自动带入"></div>
             <!-- Row6 -->
-            <div class="qr-form-item-inline plain"><span class="qr-form-label-inline"><span class="req">*</span> 交付日期</span><input type="text" id="qr-form-delivery-date" readonly placeholder="自动带入"></div>
-            <div class="qr-form-item-inline plain"><span class="qr-form-label-inline"><span class="req">*</span> 故障日期</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-form-fault-date" onchange="this.classList.remove('date-shim')"></div>
-            <div class="qr-form-item-inline plain"><span class="qr-form-label-inline"><span class="req">*</span> 故障里程(km)</span><input type="number" id="qr-form-fault-mileage" placeholder="请输入"></div>
+            <div class="qr-form-item-inline plain required"><span class="qr-form-label-inline">交付日期</span><input type="text" id="qr-form-delivery-date" readonly placeholder="自动带入"></div>
+            <div class="qr-form-item-inline plain required"><span class="qr-form-label-inline">故障日期</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-form-fault-date" onchange="this.classList.remove('date-shim')"></div>
+            <div class="qr-form-item-inline plain required"><span class="qr-form-label-inline">故障里程(km)</span><input type="number" id="qr-form-fault-mileage" placeholder="请输入"></div>
             <div></div>
           </div>
         </div>
@@ -1884,7 +2289,7 @@
             <!-- 4. 故障系统（模糊搜索下拉） -->
             <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障系统</span><input type="text" id="qr-form-fault-system" placeholder="请选择或输入" onfocus="qrShowCombobox(this,'qr-fs-list')" oninput="qrFilterCombobox(this)"><span class="cb-arrow" onclick="qrToggleComboboxArrow('qr-fs-list')">▼</span><ul class="lt-datalist" id="qr-fs-list"><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">请选择</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">发动机系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">变速箱系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">制动系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">转向系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">电气系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">空调系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">底盘系统</li></ul></div>
             <!-- 5. 主故障件编码、主故障件名称、重要程度 -->
-            <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="qrOpenPartCodeLookup()"><span class="lt-filter-prefix"><span class="req">*</span> 主故障件编码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qr-form-fault-part-code" placeholder="请输入或点击搜索" style="cursor:pointer" onclick="event.stopPropagation();qrOpenPartCodeLookup()"></div>
+            <div class="lt-input-wrap search required" style="flex:1;min-width:0;cursor:pointer" onclick="qrOpenPartCodeLookup()"><span class="lt-filter-prefix">主故障件编码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qr-form-fault-part-code" placeholder="请输入或点击搜索" style="cursor:pointer" onclick="event.stopPropagation();qrOpenPartCodeLookup()"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">主故障件名称</span><input type="text" id="qr-form-fault-part-reason" placeholder="自动带出，可修改"></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">重要程度</span><select id="qr-form-importance"><option value="">请选择</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">有无显示故障码</span><select id="qr-form-has-fault-code" onchange="qrToggleFaultCode()"><option value="">请选择</option><option>是</option><option>否</option></select></div>
@@ -2018,8 +2423,9 @@
       <span>页面说明</span>
       <button class="page-desc-drawer-close" onclick="closePageDesc()">&times;</button>
     </div>
-    <div class="page-desc-drawer-body">
-      <div class="page-desc-empty">
+    <div class="page-desc-drawer-body" id="page-desc-drawer-body">
+      <!-- 默认内容（非配件主数据页面时显示） -->
+      <div class="page-desc-empty" id="page-desc-default">
         <svg class="page-desc-working" viewBox="0 0 48 48">
           <rect x="10" y="18" width="28" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
           <rect x="15" y="26" width="18" height="3" rx="1" fill="currentColor" opacity="0.3">
@@ -2034,9 +2440,48 @@
           </g>
           <line x1="6" y1="36" x2="42" y2="36" stroke="currentColor" stroke-width="1.5"/>
         </svg>
-        <p class="page-desc-empty-title">主人可能正在忙</p>
-        <p class="page-desc-empty-desc">如有疑问，请联系：李荣云<br>飞书 lirongyun@szlanyou.com</p>
+        <p class="page-desc-empty-title">暂无页面说明</p>
       </div>
+      <!-- 配件主数据页面说明（动态显示） -->
+      <div id="page-desc-parts-master" style="display:none;padding:16px;font-size:13px;line-height:2.0">
+        <h4 style="color:#185FA5;border-left:3px solid #185FA5;padding-left:8px;margin:0 0 12px 0">配件主数据变更说明（0725）</h4>
+        <p style="margin:4px 0">1，增加：配件销售属性，原"配件属性"字段隐藏</p>
+        <p style="margin:4px 0">2，增加："是否油品"的导入和维护</p>
+        <p style="margin:4px 0">3，增加：配件类别，PCC-&gt;SAP-&gt;DMS。原"配件类别"改为"物料组"，仍然接收SAP"物料组"C10字段</p>
+        <p style="margin:4px 0">4，配件来源"奕境"的件中：配件类别=X（待刘旋与PCC确认）为直营店外采件<br>&nbsp;&nbsp;&nbsp;&nbsp;技术方案：DMS增加一个参数"直营外采件"。"直营外采件(是)"：配件来源"奕境"的件中，配件类别=X</p>
+        <p style="margin:4px 0">5，直营店外采件，非直营店不可见</p>
+        <h4 style="color:#185FA5;border-left:3px solid #185FA5;padding-left:8px;margin:20px 0 12px 0">改动点(页面部分)</h4>
+        <p style="margin:4px 0"><b>1，查询项、列表项：</b></p>
+        <p style="margin:2px 0 2px 16px">原"配件类别(物料组)"位置显示现在新的"配件类别"</p>
+        <p style="margin:2px 0 2px 16px">原页面显示"配件属性"位置替换为"配件销售属性"</p>
+        <p style="margin:2px 0 2px 16px">增加查询项：直营外采件（请选择/是/否），列表增加显示列"直营外采件"</p>
+        <p style="margin:4px 0"><b>2，详情：</b></p>
+        <p style="margin:2px 0 2px 16px">原"配件属性"不展示，替换为展示"配件销售属性"</p>
+        <p style="margin:2px 0 2px 16px">原"配件类别(物料组)"，显示为"物料组"</p>
+        <p style="margin:2px 0 2px 16px">增加显示"配件类别"</p>
+        <p style="margin:2px 0 2px 16px">增加显示"直营外采件"</p>
+        <h4 style="color:#185FA5;border-left:3px solid #185FA5;padding-left:8px;margin:20px 0 12px 0">配件主数据可见性</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px">
+          <thead><tr style="background:#f5f5f5"><th style="border:1px solid #e8e8e8;padding:6px">配件主数据</th><th style="border:1px solid #e8e8e8;padding:6px">配件来源</th><th style="border:1px solid #e8e8e8;padding:6px">总部</th><th style="border:1px solid #e8e8e8;padding:6px">直营店</th><th style="border:1px solid #e8e8e8;padding:6px">非直营店</th></tr></thead>
+          <tbody>
+            <tr><td style="border:1px solid #e8e8e8;padding:6px">主机厂件<br><span style="color:#888;font-size:11px">配件来源：奕境，直营外采件(否)</span></td><td style="border:1px solid #e8e8e8;padding:6px">PCC-&gt;SAP-&gt;DMS</td><td style="border:1px solid #e8e8e8;padding:6px;color:green;text-align:center">&#10004;</td><td style="border:1px solid #e8e8e8;padding:6px;color:green;text-align:center">&#10004;</td><td style="border:1px solid #e8e8e8;padding:6px;color:green;text-align:center">&#10004;</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:6px">主机厂件<br><span style="color:#888;font-size:11px">配件来源：奕境，直营外采件(是)</span></td><td style="border:1px solid #e8e8e8;padding:6px">PCC-&gt;SAP-&gt;DMS</td><td style="border:1px solid #e8e8e8;padding:6px;color:green;text-align:center">&#10004;</td><td style="border:1px solid #e8e8e8;padding:6px;color:green;text-align:center">&#10004;</td><td style="border:1px solid #e8e8e8;padding:6px;color:red;text-align:center">&#10008;</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:6px">外采件<br><span style="color:#888;font-size:11px">配件来源：门店</span></td><td style="border:1px solid #e8e8e8;padding:6px">DMS，非直营新增/导入</td><td style="border:1px solid #e8e8e8;padding:6px;color:green;text-align:center">&#10004;</td><td style="border:1px solid #e8e8e8;padding:6px;color:red;text-align:center">&#10008;</td><td style="border:1px solid #e8e8e8;padding:6px;color:green;text-align:center">&#10004;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- 外采供应商管理页面说明（动态显示） -->
+      <div id="page-desc-supplier-manage" style="display:none;padding:16px;font-size:13px;line-height:2.0">
+        <h4 style="color:#185FA5;border-left:3px solid #185FA5;padding-left:8px;margin:0 0 12px 0">外采供应商管理变更说明（0725）</h4>
+        <p style="margin:4px 0"><b>改动点：</b></p>
+        <p style="margin:2px 0 2px 16px">1，增加字段：统一社会信用代码，必填项，18位</p>
+        <p style="margin:2px 0 2px 16px">2，增加一个默认的外采供应商：联友科技武汉分公司，用于直营店外采</p>
+      </div>
+    </div>
+    <!-- 底部固定联系信息 -->
+    <div class="page-desc-drawer-footer">
+      <p style="margin:0;font-size:12px;color:#666">如有疑问，请联系：李荣云</p>
+      <p style="margin:2px 0 0 0;font-size:12px;color:#666">飞书 lirongyun@szlanyou.com</p>
     </div>
   </div>
 
@@ -2118,16 +2563,16 @@
       <span class="audit-modal-close" onclick="qrCloseAuditModal()">×</span>
     </div>
     <div class="audit-modal-body">
-      <div class="audit-modal-field audit-modal-field-inline">
-        <span class="audit-modal-label"><span class="req">*</span> 审核结果</span>
+      <div class="audit-modal-field audit-modal-field-inline required">
+        <span class="audit-modal-label">审核结果</span>
         <div class="audit-modal-radio-group">
           <label class="audit-radio"><input type="radio" name="audit-result" value="通过" checked onchange="qrOnAuditResultChange()"> 通过</label>
           <label class="audit-radio"><input type="radio" name="audit-result" value="退回" onchange="qrOnAuditResultChange()"> 退回</label>
           <label class="audit-radio"><input type="radio" name="audit-result" value="驳回" onchange="qrOnAuditResultChange()"> 驳回</label>
         </div>
       </div>
-      <div class="audit-modal-field">
-        <span class="audit-modal-label"><span class="req" id="audit-opinion-req" style="display:none">*</span> 审核意见</span>
+      <div class="audit-modal-field" id="audit-opinion-field">
+        <span class="audit-modal-label">审核意见</span>
         <textarea id="audit-opinion" placeholder="请输入审核意见" style="min-height:80px;width:100%;box-sizing:border-box"></textarea>
       </div>
     </div>
@@ -2136,6 +2581,394 @@
       <button class="lt-btn lt-btn-primary" onclick="qrConfirmAudit()">提交</button>
     </div>
   </div>
+
+  <!-- ========== 外采供应商 侧拉面板 ========== -->
+  <div class="pm-panel-overlay" id="sp-panel-overlay" onclick="spClosePanel()"></div>
+  <div class="pm-panel sp-panel" id="sp-panel">
+    <div class="pm-panel-header">
+      <div style="display:flex;align-items:center">
+        <span class="pm-panel-title" id="sp-panel-title">维护供应商</span>
+        <span class="pm-panel-badge" id="sp-panel-badge">新增</span>
+      </div>
+      <button class="pm-panel-close" onclick="spClosePanel()">&#10005;</button>
+    </div>
+    <div class="pm-panel-body">
+      <div class="pm-form-grid">
+        <div class="pm-form-item required"><label>供应商编码</label><input type="text" id="sp-form-code" readonly class="pm-readonly" placeholder="系统自增"></div>
+        <div class="pm-form-item required"><label>供应商简称</label><input type="text" id="sp-form-short-name" placeholder="请输入"></div>
+        <div class="pm-form-item required"><label>供应商全称</label><input type="text" id="sp-form-full-name" placeholder="请输入"></div>
+        <div class="pm-form-item required"><label>统一社会信用代码</label><input type="text" id="sp-form-credit-code" placeholder="18位纳税人识别号(税号)" maxlength="18"></div>
+        <div class="pm-form-item"><label>供应商联系人</label><input type="text" id="sp-form-contact" placeholder="请输入"></div>
+        <div class="pm-form-item"><label>供应商电话</label><input type="text" id="sp-form-phone" placeholder="请输入"></div>
+        <div class="pm-form-item"><label>财务联系人</label><input type="text" id="sp-form-fin-contact" placeholder="请输入"></div>
+        <div class="pm-form-item"><label>财务电话</label><input type="text" id="sp-form-fin-phone" placeholder="请输入"></div>
+        <div class="pm-form-item"><label>财务邮箱</label><input type="text" id="sp-form-fin-email" placeholder="请输入"></div>
+        <div class="pm-form-item" style="grid-column:1/-1"><label>供货说明</label><input type="text" id="sp-form-desc" placeholder="可以写供应什么货"></div>
+        <div class="pm-form-item" style="grid-column:1/-1"><label>供应商地址</label><input type="text" id="sp-form-address" placeholder="≤50字"></div>
+      </div>
+    </div>
+    <div class="pm-panel-footer">
+      <button class="lt-btn lt-btn-default" onclick="spClosePanel()">取消</button>
+      <button class="lt-btn lt-btn-primary" onclick="spClosePanel()">确定</button>
+    </div>
+  </div>
+
+  <!-- ========== 配件主数据 侧拉面板 ========== -->
+  <div class="pm-panel-overlay" id="pm-panel-overlay" onclick="pmClosePanel()"></div>
+  <div class="pm-panel" id="pm-panel">
+    <div class="pm-panel-header">
+      <div style="display:flex;align-items:center">
+        <span class="pm-panel-title" id="pm-panel-title">配件维护</span>
+        <span class="pm-panel-badge" id="pm-panel-badge">编辑</span>
+      </div>
+      <button class="pm-panel-close" onclick="pmClosePanel()">&#10005;</button>
+    </div>
+    <div class="pm-panel-body">
+      <!-- ====== 区块1：配件维护(奕境) ====== -->
+      <div id="pmp-body-yj" style="display:none">
+        <div class="pm-section-title">基本属性</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item"><label>配件编码</label><input type="text" id="yj-code" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>配件名称</label><input type="text" id="yj-name" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>配件状态</label>
+            <select id="yj-status"><option>可用</option><option>不可用</option></select>
+          </div>
+          <div class="pm-form-item"><label>配件类别</label><input type="text" id="yj-category-pcc" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>物料组</label><input type="text" id="yj-material-group" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>配件销售属性</label>
+            <select id="yj-attribute"><option>关键配件</option><option>自制件</option><option>沿用件</option><option>保养件</option><option>车身件</option><option>发动机件</option><option>变速箱件</option><option>电器</option><option>空调及安全设备</option><option>化学类原辅材料</option><option>精品</option><option>随车工具</option></select>
+          </div>
+          <div class="pm-form-item"><label>计量单位</label><input type="text" id="yj-unit" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>适用车系</label><input type="text" id="yj-series" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>适用车型</label><input type="text" id="yj-model" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>直营外采件</label><input type="text" id="yj-direct-purchase" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>替换件编码</label><input type="text" id="yj-replace" placeholder="替换件编码"></div>
+        </div>
+        <div class="pm-section-title">采购相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item"><label>采购开关</label>
+            <select id="yj-purchase-switch"><option>是</option><option>否</option></select>
+          </div>
+          <div class="pm-form-item"><label>正常采购价(含税)</label><input type="text" id="yj-price-normal" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>紧急采购价(含税)</label><input type="text" id="yj-price-urgent" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>采购SNP</label><input type="number" id="yj-snp" value="1"></div>
+          <div class="pm-form-item"><label>最小采购量</label><input type="number" id="yj-min-qty" value="10"></div>
+          <div class="pm-form-item"><label>最大订单量/次</label><input type="number" id="yj-max-qty" value="100"></div>
+        </div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item pm-checkbox-row">
+            <label><input type="checkbox" id="yj-oil"> 是否油品(可维护)</label>
+            <label><input type="checkbox" id="yj-no-urgent" checked> 不可下紧急订单</label>
+            <label><input type="checkbox" id="yj-direct"> 直发件</label>
+          </div>
+        </div>
+        <div class="pm-section-title">客户相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="yj-out-snp" value="1.00"></div>
+          <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="yj-ref-price" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>销售价(含税)</label><input type="text" id="yj-sell-price" readonly class="pm-readonly"></div>
+        </div>
+      </div>
+
+      <!-- ====== 区块2：新增配件(门店) ====== -->
+      <div id="pmp-body-add-store" style="display:none">
+        <div class="pm-tip-warn">外采件名称库不够，联系对应的备件订单人员进行维护</div>
+        <div class="pm-section-title">基本属性</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>配件编码</label><input type="text" id="add-store-code" value="WC+6位流水号自增" readonly class="pm-readonly"></div>
+          <div class="pm-form-item required"><label>配件名称</label><input type="text" id="add-store-name" placeholder="从外采名称库里选"></div>
+          <div class="pm-form-item"><label>外采件品牌</label><input type="text" id="add-store-brand" placeholder="请选择(从该外采品牌里选)"></div>
+          <div class="pm-form-item required"><label>配件类别</label>
+            <select id="add-store-category" disabled><option>辅料</option></select>
+          </div>
+          <div class="pm-form-item required"><label>配件销售属性</label>
+            <select id="add-store-attribute"><option value="">请选择</option><option>关键配件</option><option>自制件</option><option>沿用件</option><option>保养件</option><option>车身件</option><option>发动机件</option><option>变速箱件</option><option>电器</option><option>空调及安全设备</option><option>化学类原辅材料</option><option>精品</option><option>随车工具</option></select>
+          </div>
+          <div class="pm-form-item required"><label>计量单位</label>
+            <select id="add-store-unit"><option>EA</option><option>L</option></select>
+          </div>
+          <div class="pm-form-item"><label>适用车系</label><input type="text" id="add-store-series" placeholder="下拉模糊搜索，可多选"></div>
+          <div class="pm-form-item"><label>适用车型</label><input type="text" id="add-store-model" placeholder="选车型后自动填充车系"></div>
+          <div class="pm-form-item required"><label>配件状态</label>
+            <select id="add-store-status"><option>可用</option><option>不可用</option></select>
+          </div>
+        </div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item pm-upload-row">
+            <label>实物图</label>
+            <div class="pm-upload-area">
+              <span class="pm-upload-btn">上传文件</span>
+              <span class="pm-upload-hint">jpg, jpeg, png, ≤5张图片，单个文件≤10M</span>
+            </div>
+          </div>
+        </div>
+        <div class="pm-section-title">采购相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>采购开关</label>
+            <select id="add-store-purchase"><option>是</option><option>否</option></select>
+          </div>
+          <div class="pm-form-item"><label>正常采购价(含税)</label><input type="number" id="add-store-price-normal" value="300.00"></div>
+          <div class="pm-form-item"><label>紧急采购价(含税)</label><input type="number" id="add-store-price-urgent" value="300.00"></div>
+          <div class="pm-form-item"><label>采购SNP</label><input type="number" id="add-store-snp" value="1"></div>
+          <div class="pm-form-item"><label>最小采购量</label><input type="number" id="add-store-min" value="10"></div>
+          <div class="pm-form-item"><label>最大订单量/次</label><input type="number" id="add-store-max" value="100"></div>
+        </div>
+        <div class="pm-section-title">客户相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="add-store-out-snp" value="1.00"></div>
+          <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="add-store-ref-price" placeholder="请输入"></div>
+          <div class="pm-form-item required"><label>销售价(含税)</label><input type="number" id="add-store-sell-price" value="350.00"></div>
+        </div>
+      </div>
+
+      <!-- ====== 区块3：配件维护(门店) ====== -->
+      <div id="pmp-body-edit-store" style="display:none">
+        <div class="pm-tip-warn">外采件名称库不够，联系对应的备件订单人员进行维护</div>
+        <div class="pm-section-title">基本属性</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>配件编码</label><input type="text" id="edit-store-code" readonly class="pm-readonly"></div>
+          <div class="pm-form-item required"><label>配件名称</label><input type="text" id="edit-store-name" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>外采件品牌</label><input type="text" id="edit-store-brand" readonly class="pm-readonly"></div>
+          <div class="pm-form-item required"><label>配件类别</label>
+            <select id="edit-store-category" disabled><option>辅料</option></select>
+          </div>
+          <div class="pm-form-item required"><label>配件销售属性</label>
+            <select id="edit-store-attribute"><option value="">请选择</option><option>关键配件</option><option>自制件</option><option>沿用件</option><option>保养件</option><option>车身件</option><option>发动机件</option><option>变速箱件</option><option>电器</option><option>空调及安全设备</option><option>化学类原辅材料</option><option>精品</option><option>随车工具</option></select>
+          </div>
+          <div class="pm-form-item required"><label>计量单位</label>
+            <select id="edit-store-unit"><option>EA</option><option>L</option></select>
+          </div>
+          <div class="pm-form-item"><label>适用车系</label><input type="text" id="edit-store-series" placeholder="下拉模糊搜索，可多选"></div>
+          <div class="pm-form-item"><label>适用车型</label><input type="text" id="edit-store-model" placeholder="选车型后自动填充车系"></div>
+          <div class="pm-form-item required"><label>配件状态</label>
+            <select id="edit-store-status"><option>可用</option><option>不可用</option></select>
+          </div>
+        </div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item pm-upload-row">
+            <label>实物图</label>
+            <div class="pm-upload-area">
+              <span class="pm-upload-btn">上传文件</span>
+              <span class="pm-upload-file">附件1.png &times;</span>
+              <span class="pm-upload-hint">jpg, jpeg, png, ≤5张图片，单个文件≤10M。请遵守信息安全规范，不要上传与业务无关的文件!</span>
+            </div>
+          </div>
+        </div>
+        <div class="pm-section-title">采购相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>采购开关</label>
+            <select id="edit-store-purchase"><option>是</option><option>否</option></select>
+          </div>
+          <div class="pm-form-item"><label>正常采购价(含税)</label><input type="number" id="edit-store-price-normal" value="300.00"></div>
+          <div class="pm-form-item"><label>紧急采购价(含税)</label><input type="number" id="edit-store-price-urgent" value="300.00"></div>
+          <div class="pm-form-item"><label>采购SNP</label><input type="number" id="edit-store-snp" value="1"></div>
+          <div class="pm-form-item"><label>最小采购量</label><input type="number" id="edit-store-min" value="10"></div>
+          <div class="pm-form-item"><label>最大订单量/次</label><input type="number" id="edit-store-max" value="100"></div>
+        </div>
+        <div class="pm-section-title">客户相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="edit-store-out-snp" value="1.00"></div>
+          <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="edit-store-ref-price" placeholder="请输入"></div>
+          <div class="pm-form-item required"><label>销售价(含税)</label><input type="number" id="edit-store-sell-price" value="350.00"></div>
+        </div>
+      </div>
+    </div>
+    <div class="pm-panel-footer" id="pm-panel-footer">
+      <button class="lt-btn lt-btn-default" onclick="pmClosePanel()">取消</button>
+      <button class="lt-btn lt-btn-primary" onclick="pmClosePanel()">保存</button>
+    </div>
+  </div>
+
+  <!-- 以下为旧弹窗代码已废弃，保留注释标记 -->
+  <div style="display:none"><!-- 旧居中弹窗已替换为侧拉面板 -->
+    <div class="pm-modal" onclick="event.stopPropagation()">
+      <div class="pm-modal-header">
+        <span class="pm-modal-title">配件维护(奕境)</span>
+        <span class="pm-modal-close" onclick="pmCloseModal('pm-modal-edit-yj')">&times;</span>
+      </div>
+      <div class="pm-modal-body">
+        <div class="pm-section-title">基本属性</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item"><label>配件编码</label><input type="text" id="yj-code" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>配件名称</label><input type="text" id="yj-name" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>配件状态</label>
+            <select id="yj-status"><option>可用</option><option>不可用</option></select>
+          </div>
+          <div class="pm-form-item"><label>配件销售属性</label>
+            <select id="yj-attribute"><option>关键配件</option><option>自制件</option><option>沿用件</option><option>保养件</option><option>车身件</option><option>发动机件</option><option>变速箱件</option><option>电器</option><option>空调及安全设备</option><option>化学类原辅材料</option><option>精品</option><option>随车工具</option></select>
+          </div>
+          <div class="pm-form-item"><label>配件类别</label><input type="text" id="yj-category-pcc" readonly class="pm-readonly" value="事故件"></div>
+          <div class="pm-form-item"><label>物料组</label><input type="text" id="yj-category" readonly class="pm-readonly" value="事故件"></div>
+          <div class="pm-form-item"><label>计量单位</label><input type="text" id="yj-unit" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>适用车系</label><input type="text" id="yj-series" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>适用车型</label><input type="text" id="yj-model" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>直营外采件</label><input type="text" id="yj-direct-purchase" readonly class="pm-readonly" value="否"></div>
+          <div class="pm-form-item"><label>替换件编码</label><input type="text" id="yj-replace" placeholder="替换件编码"></div>
+        </div>
+
+        <div class="pm-section-title">采购相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item"><label>采购开关</label>
+            <select id="yj-purchase-switch"><option>是</option><option>否</option></select>
+          </div>
+          <div class="pm-form-item"><label>正常采购价(含税)</label><input type="text" id="yj-price-normal" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>紧急采购价(含税)</label><input type="text" id="yj-price-urgent" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>采购SNP</label><input type="number" id="yj-snp" value="1"></div>
+          <div class="pm-form-item"><label>最小采购量</label><input type="number" id="yj-min-qty" value="10"></div>
+          <div class="pm-form-item"><label>最大订单量/次</label><input type="number" id="yj-max-qty" value="100"></div>
+        </div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item pm-checkbox-row">
+            <label><input type="checkbox" id="yj-oil"> 是否油品(可维护)</label>
+            <label><input type="checkbox" id="yj-no-urgent" checked> 不可下紧急订单</label>
+            <label><input type="checkbox" id="yj-direct"> 直发件</label>
+          </div>
+        </div>
+
+        <div class="pm-section-title">客户相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="yj-out-snp" value="1.00"></div>
+          <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="yj-ref-price" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>销售价(含税)</label><input type="text" id="yj-sell-price" readonly class="pm-readonly"></div>
+        </div>
+      </div>
+      <div class="pm-modal-footer">
+        <button class="lt-btn lt-btn-default" onclick="pmCloseModal('pm-modal-edit-yj')">重置</button>
+        <button class="lt-btn lt-btn-primary" onclick="pmCloseModal('pm-modal-edit-yj')">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 新增配件(门店) 弹窗 ========== -->
+  <div class="pm-modal-overlay" id="pm-modal-add-store" onclick="pmCloseModal('pm-modal-add-store')">
+    <div class="pm-modal" onclick="event.stopPropagation()">
+      <div class="pm-modal-header">
+        <span class="pm-modal-title">新增配件(门店)</span>
+        <span class="pm-modal-close" onclick="pmCloseModal('pm-modal-add-store')">&times;</span>
+      </div>
+      <div class="pm-modal-body">
+        <div class="pm-tip-warn">外采件名称库不够，联系对应的备件订单人员进行维护</div>
+        <div class="pm-section-title">基本属性</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>配件编码</label><input type="text" id="add-store-code" value="WC+6位流水号自增" readonly class="pm-readonly"></div>
+          <div class="pm-form-item required"><label>配件名称</label><input type="text" id="add-store-name" placeholder="从外采名称库里选"></div>
+          <div class="pm-form-item"><label>外采件品牌</label><input type="text" id="add-store-brand" placeholder="请选择(从该外采品牌里选)"></div>
+          <div class="pm-form-item required"><label>配件类别</label>
+            <select id="add-store-category" disabled><option>辅料</option></select>
+          </div>
+          <div class="pm-form-item required"><label>配件销售属性</label>
+            <select id="add-store-attribute"><option value="">请选择</option><option>关键配件</option><option>自制件</option><option>沿用件</option><option>保养件</option><option>车身件</option><option>发动机件</option><option>变速箱件</option><option>电器</option><option>空调及安全设备</option><option>化学类原辅材料</option><option>精品</option><option>随车工具</option></select>
+          </div>
+          <div class="pm-form-item required"><label>计量单位</label>
+            <select id="add-store-unit"><option>EA</option><option>L</option></select>
+          </div>
+          <div class="pm-form-item"><label>适用车系</label><input type="text" id="add-store-series" placeholder="下拉模糊搜索，可多选"></div>
+          <div class="pm-form-item"><label>适用车型</label><input type="text" id="add-store-model" placeholder="选车型后自动填充车系"></div>
+          <div class="pm-form-item required"><label>配件状态</label>
+            <select id="add-store-status"><option>可用</option><option>不可用</option></select>
+          </div>
+        </div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item pm-upload-row">
+            <label>实物图</label>
+            <div class="pm-upload-area">
+              <span class="pm-upload-btn">上传文件</span>
+              <span class="pm-upload-hint">jpg, jpeg, png, ≤5张图片，单个文件≤10M</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pm-section-title">采购相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>采购开关</label>
+            <select id="add-store-purchase"><option>是</option><option>否</option></select>
+          </div>
+          <div class="pm-form-item"><label>正常采购价(含税)</label><input type="number" id="add-store-price-normal" value="300.00"></div>
+          <div class="pm-form-item"><label>紧急采购价(含税)</label><input type="number" id="add-store-price-urgent" value="300.00"></div>
+          <div class="pm-form-item"><label>采购SNP</label><input type="number" id="add-store-snp" value="1"></div>
+          <div class="pm-form-item"><label>最小采购量</label><input type="number" id="add-store-min" value="10"></div>
+          <div class="pm-form-item"><label>最大订单量/次</label><input type="number" id="add-store-max" value="100"></div>
+        </div>
+
+        <div class="pm-section-title">客户相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="add-store-out-snp" value="1.00"></div>
+          <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="add-store-ref-price" placeholder="请输入"></div>
+          <div class="pm-form-item required"><label>销售价(含税)</label><input type="number" id="add-store-sell-price" value="350.00"></div>
+        </div>
+      </div>
+      <div class="pm-modal-footer">
+        <button class="lt-btn lt-btn-default" onclick="pmCloseModal('pm-modal-add-store')">重置</button>
+        <button class="lt-btn lt-btn-primary" onclick="pmCloseModal('pm-modal-add-store')">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 配件维护(门店) 弹窗 ========== -->
+  <div class="pm-modal-overlay" id="pm-modal-edit-store" onclick="pmCloseModal('pm-modal-edit-store')">
+    <div class="pm-modal" onclick="event.stopPropagation()">
+      <div class="pm-modal-header">
+        <span class="pm-modal-title">配件维护(门店)</span>
+        <span class="pm-modal-close" onclick="pmCloseModal('pm-modal-edit-store')">&times;</span>
+      </div>
+      <div class="pm-modal-body">
+        <div class="pm-tip-warn">外采件名称库不够，联系对应的备件订单人员进行维护</div>
+        <div class="pm-section-title">基本属性</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>配件编码</label><input type="text" id="edit-store-code" readonly class="pm-readonly"></div>
+          <div class="pm-form-item required"><label>配件名称</label><input type="text" id="edit-store-name" readonly class="pm-readonly" value="外采件名称不可修改"></div>
+          <div class="pm-form-item"><label>外采件品牌</label><input type="text" id="edit-store-brand" readonly class="pm-readonly" value="外采件品牌不可修改"></div>
+          <div class="pm-form-item required"><label>配件类别</label>
+            <select id="edit-store-category" disabled><option>辅料</option></select>
+          </div>
+          <div class="pm-form-item required"><label>配件销售属性</label>
+            <select id="edit-store-attribute"><option value="">请选择</option><option>关键配件</option><option>自制件</option><option>沿用件</option><option>保养件</option><option>车身件</option><option>发动机件</option><option>变速箱件</option><option>电器</option><option>空调及安全设备</option><option>化学类原辅材料</option><option>精品</option><option>随车工具</option></select>
+          </div>
+          <div class="pm-form-item required"><label>计量单位</label>
+            <select id="edit-store-unit"><option>EA</option><option>L</option></select>
+          </div>
+          <div class="pm-form-item"><label>适用车系</label><input type="text" id="edit-store-series" placeholder="下拉模糊搜索，可多选"></div>
+          <div class="pm-form-item"><label>适用车型</label><input type="text" id="edit-store-model" placeholder="选车型后自动填充车系"></div>
+          <div class="pm-form-item required"><label>配件状态</label>
+            <select id="edit-store-status"><option>可用</option><option>不可用</option></select>
+          </div>
+        </div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item pm-upload-row">
+            <label>实物图</label>
+            <div class="pm-upload-area">
+              <span class="pm-upload-btn">上传文件</span>
+              <span class="pm-upload-file">附件1.png &times;</span>
+              <span class="pm-upload-hint">jpg, jpeg, png, ≤5张图片，单个文件≤10M。请遵守信息安全规范，不要上传与业务无关的文件!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pm-section-title">采购相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>采购开关</label>
+            <select id="edit-store-purchase"><option>是</option><option>否</option></select>
+          </div>
+          <div class="pm-form-item"><label>正常采购价(含税)</label><input type="number" id="edit-store-price-normal" value="300.00"></div>
+          <div class="pm-form-item"><label>紧急采购价(含税)</label><input type="number" id="edit-store-price-urgent" value="300.00"></div>
+          <div class="pm-form-item"><label>采购SNP</label><input type="number" id="edit-store-snp" value="1"></div>
+          <div class="pm-form-item"><label>最小采购量</label><input type="number" id="edit-store-min" value="10"></div>
+          <div class="pm-form-item"><label>最大订单量/次</label><input type="number" id="edit-store-max" value="100"></div>
+        </div>
+
+        <div class="pm-section-title">客户相关</div>
+        <div class="pm-form-grid">
+          <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="edit-store-out-snp" value="1.00"></div>
+          <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="edit-store-ref-price" placeholder="请输入"></div>
+          <div class="pm-form-item required"><label>销售价(含税)</label><input type="number" id="edit-store-sell-price" value="350.00"></div>
+        </div>
+      </div>
+      <div class="pm-modal-footer">
+        <button class="lt-btn lt-btn-default" onclick="pmCloseModal('pm-modal-edit-store')">重置</button>
+        <button class="lt-btn lt-btn-primary" onclick="pmCloseModal('pm-modal-edit-store')">保存</button>
+      </div>
+    </div>
+  </div><!-- /display:none wrapping old modals -->
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="js/app.js"></script>

@@ -1058,8 +1058,8 @@
     /* 右侧抽屉 */
     .page-desc-drawer {
       position: fixed;
-      top: 44px; right: -320px; bottom: 0;
-      width: 320px;
+      top: 44px; right: -480px; bottom: 0;
+      width: 480px;
       background: #fff;
       border-left: 1px solid #e0e0e0;
       z-index: 60;
@@ -1080,7 +1080,10 @@
     }
     .page-desc-drawer-close:hover { color: #333; }
     .page-desc-drawer-body {
-      padding: 18px 14px; flex: 1; overflow-y: auto;
+      padding: 18px 14px; flex: 1; overflow-y: auto; min-height: 0;
+    }
+    .page-desc-drawer-footer {
+      padding: 12px 14px; border-top: 1px solid #eee; background: #fafafa; flex-shrink: 0; text-align: center;
     }
 
     /* 空状态 */
@@ -1128,7 +1131,6 @@
     .ts-form-item.full { grid-column:1/-1; }
     .ts-form-item.span2, .ts-form-item-inline.span2 { grid-column:span 2; }
     .ts-form-label { font-size:12px; color:#666; }
-    .ts-form-label .req { color:#861B2F; }
     .ts-form-item input, .ts-form-item select, .ts-form-item textarea { width:100%; height:32px; border:1px solid #d9d9d9; border-radius:4px; padding:0 8px; font-size:12px; color:#333; background:#fff; font-family:inherit; }
     .ts-form-item textarea { height:80px; resize:vertical; padding:6px 8px; }
     .ts-form-item input:focus, .ts-form-item select:focus, .ts-form-item textarea:focus { border-color:#861B2F; outline:none; }
@@ -1157,7 +1159,9 @@
     .ts-form-item-inline { display:flex; align-items:center; border:1px solid #d9d9d9; border-radius:4px; background:#fff; position:relative; }
     .ts-form-item-inline:focus-within { border-color:#861B2F; }
     .ts-form-item-inline .ts-form-label-inline { flex-shrink:0; color:#333; font-size:12px; padding:0 4px 0 10px; white-space:nowrap; display:flex; align-items:center; }
-    .ts-form-item-inline .ts-form-label-inline .req { color:#861B2F; }
+    /* 全局统一必填*样式：required class + ::before 替代 span.req */
+    .ts-form-item-inline.required .ts-form-label-inline::before,
+    .qr-form-item-inline.required .qr-form-label-inline::before { content:'*'; color:#861B2F; margin-right:2px; }
     .ts-form-item-inline input,
     .ts-form-item-inline select { height:32px; flex:1; min-width:0; border:none; outline:none; padding:0 10px; font-size:12px; color:#333; background:transparent; font-family:inherit; }
     .ts-form-item-inline select { cursor:pointer; appearance:none; -webkit-appearance:none; padding-right:24px; }
@@ -1224,7 +1228,6 @@
     .qr-form-item { display:flex; flex-direction:column; gap:4px; }
     .qr-form-item.full { grid-column:1/-1; }
     .qr-form-label { font-size:12px; color:#666; }
-    .qr-form-label .req { color:#861B2F; }
     .qr-form-item input, .qr-form-item select, .qr-form-item textarea { width:100%; height:32px; border:1px solid #d9d9d9; border-radius:4px; padding:0 8px; font-size:12px; color:#333; background:#fff; font-family:inherit; }
     .qr-form-item textarea { height:80px; resize:vertical; padding:6px 8px; }
     .qr-form-item input:focus, .qr-form-item select:focus, .qr-form-item textarea:focus { border-color:#861B2F; outline:none; }
@@ -1233,7 +1236,6 @@
     .qr-form-item-inline { display:flex; align-items:center; border:1px solid #d9d9d9; border-radius:4px; background:#fff; position:relative; }
     .qr-form-item-inline:focus-within { border-color:#861B2F; }
     .qr-form-item-inline .qr-form-label-inline { flex-shrink:0; color:#333; font-size:12px; padding:0 4px 0 10px; white-space:nowrap; display:flex; align-items:center; }
-    .qr-form-item-inline .qr-form-label-inline .req { color:#861B2F; }
     .qr-form-item-inline input,
     .qr-form-item-inline select { height:32px; flex:1; min-width:0; border:none; outline:none; padding:0 10px; font-size:12px; color:#333; background:transparent; font-family:inherit; }
     .qr-form-item-inline select { cursor:pointer; appearance:none; -webkit-appearance:none; padding-right:24px; }
@@ -1442,7 +1444,7 @@
 
     .qr-form-label { font-size:12px; color:#666; }
 
-    .qr-form-label .req { color:#861B2F; }
+
 
     .qr-form-item input, .qr-form-item select, .qr-form-item textarea { width:100%; height:32px; border:1px solid #d9d9d9; border-radius:4px; padding:0 8px; font-size:12px; color:#333; background:#fff; font-family:inherit; }
 
@@ -1493,7 +1495,6 @@
 
     .qr-form-item-inline .qr-form-label-inline { flex-shrink:0; color:#333; font-size:12px; padding:0 4px 0 10px; white-space:nowrap; display:flex; align-items:center; }
 
-    .qr-form-item-inline .qr-form-label-inline .req { color:#861B2F; }
 
     .qr-form-item-inline input,
     .qr-form-item-inline select { height:32px; flex:1; min-width:0; border:none; outline:none; padding:0 10px; font-size:12px; color:#333; background:transparent; font-family:inherit; }
@@ -1572,7 +1573,7 @@
     .audit-modal-field-inline { display:flex; align-items:center; gap:12px; }
     .audit-modal-field-inline .audit-modal-label { display:inline-block; margin-bottom:0; margin-right:8px; }
     .audit-modal-label { display:block; margin-bottom:6px; font-size:13px; color:#333; }
-    .audit-modal-label .req { color:#861B2F; }
+    .audit-modal-field.required .audit-modal-label::before { content:'*'; color:#861B2F; margin-right:2px; }
     .audit-modal-radio-group { display:flex; gap:16px; }
     .audit-radio { display:flex; align-items:center; gap:4px; font-size:13px; cursor:pointer; }
     .audit-radio input[type="radio"] { margin:0; }
@@ -1581,3 +1582,74 @@
     .audit-modal-footer { display:flex; justify-content:flex-end; gap:8px; padding:12px 20px; border-top:1px solid #e8e8e8; background:#fafafa; border-radius:0 0 8px 8px; }
     /* ========== 质量报告相关 CSS（沿用 qr-panel 风格，独立组件） ========== */
     .qr-panel-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:200; display:none; }
+
+    /* ========== 配件主数据 弹窗 & 页面样式 ========== */
+    .pm-modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.45); z-index:1000; justify-content:center; align-items:flex-start; padding-top:40px; }
+    .pm-modal-overlay.active { display:flex; }
+    .pm-modal { background:#fff; border-radius:8px; width:900px; max-width:92vw; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 8px 30px rgba(0,0,0,0.18); }
+    .pm-modal-header { display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:1px solid #e8e8e8; }
+    .pm-modal-title { font-size:16px; font-weight:600; color:#1a1a1a; }
+    .pm-modal-close { font-size:22px; cursor:pointer; color:#999; line-height:1; }
+    .pm-modal-close:hover { color:#333; }
+    .pm-modal-body { padding:20px 24px; overflow-y:auto; flex:1; }
+    .pm-modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:14px 24px; border-top:1px solid #e8e8e8; background:#fafbfc; border-radius:0 0 8px 8px; }
+    .pm-section-title { font-size:14px; font-weight:600; color:#185FA5; margin:18px 0 10px 0; padding-left:10px; border-left:3px solid #185FA5; }
+    .pm-section-title:first-child { margin-top:0; }
+    .pm-form-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px 20px; margin-bottom:10px; }
+    .pm-form-item { display:flex; flex-direction:column; gap:4px; }
+    .pm-form-item label { font-size:12px; color:#666; white-space:nowrap; }
+    .pm-form-item input, .pm-form-item select { height:32px; padding:0 10px; border:1px solid #dcdfe6; border-radius:4px; font-size:13px; box-sizing:border-box; }
+    .pm-form-item input:focus, .pm-form-item select:focus { outline:none; border-color:#185FA5; }
+    .pm-form-item.required > label::before { content:'*'; color:#861B2F; margin-right:2px; }
+    .lt-input-wrap.required .lt-filter-prefix::before { content:'*'; color:#861B2F; margin-right:2px; }
+    .pm-readonly { background:#f5f7fa !important; color:#999 !important; cursor:not-allowed; }
+    .pm-checkbox-row { flex-direction:row !important; gap:20px !important; align-items:center; grid-column:1/-1; padding-top:4px; }
+    .pm-checkbox-row label { font-size:13px; color:#333; display:flex; align-items:center; gap:4px; cursor:pointer; }
+    .pm-tip-warn { background:#fff7e6; border:1px solid #ffd591; border-radius:4px; padding:8px 14px; font-size:12px; color:#d46b08; margin-bottom:14px; }
+    .pm-upload-row { grid-column:1/-1; flex-direction:row !important; align-items:flex-start; gap:12px !important; }
+    .pm-upload-area { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+    .pm-upload-btn { display:inline-block; padding:4px 14px; border:1px dashed #d9d9d9; border-radius:4px; font-size:12px; color:#666; cursor:pointer; }
+    .pm-upload-btn:hover { border-color:#185FA5; color:#185FA5; }
+    .pm-upload-file { font-size:12px; color:#185FA5; }
+    .pm-upload-hint { font-size:11px; color:#999; display:block; width:100%; margin-top:2px; }
+    /* 配件主数据 - 序号列左侧固定 */
+    #page-parts-master .lt-table th.col-seq, #page-parts-master .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:50px; min-width:50px; max-width:50px; }
+    #page-parts-master .lt-table thead th.col-seq { z-index:4; }
+    /* 配件主数据 - 操作列右侧固定 */
+    #page-parts-master .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:110px; min-width:110px; max-width:110px; overflow:hidden; border-left:1px solid #ccc; background:#fff; }
+    #page-parts-master .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:110px; min-width:110px; max-width:110px; overflow:hidden; border-left:1px solid #ccc; background:#f0f0f0; }
+    #page-parts-master .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
+    #page-parts-master .lt-table tbody tr:hover td.col-actions { background:#fdf5f6; }
+    /* 配件主数据 - 侧拉面板 */
+    .pm-panel-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:200; display:none; }
+    .pm-panel-overlay.show { display:block; }
+    .pm-panel { position:fixed; top:0; right:-1050px; bottom:0; width:1000px; max-width:95vw; background:#fff; z-index:201; transition:right 0.3s ease; display:flex; flex-direction:column; box-shadow:-4px 0 20px rgba(0,0,0,0.15); }
+    .pm-panel.show { right:0; }
+    .pm-panel-header { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-bottom:1px solid #e8e8e8; background:#fafafa; flex-shrink:0; }
+    .pm-panel-title { font-size:16px; font-weight:600; color:#333; }
+    .pm-panel-badge { font-size:12px; padding:2px 10px; border-radius:10px; margin-left:10px; background:#e6f0ff; color:#185FA5; }
+    .pm-panel-badge.detail { background:#f5f0e6; color:#c97a0a; }
+    .pm-panel-badge.add { background:#e6f7e6; color:#389e0d; }
+    .pm-panel-close { background:none; border:none; font-size:20px; cursor:pointer; color:#999; padding:4px 8px; line-height:1; }
+    .pm-panel-close:hover { color:#333; }
+    .pm-panel-body { flex:1; overflow-y:auto; padding:20px 24px; }
+    .pm-panel-footer { display:flex; justify-content:flex-end; gap:10px; padding:14px 20px; border-top:1px solid #e8e8e8; background:#fafafa; flex-shrink:0; }
+    .pm-page-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+    .pm-page-title { font-size:16px; font-weight:600; color:#1a1a1a; margin:0; }
+    .lt-btn-link { background:none; border:none; color:#185FA5; cursor:pointer; font-size:13px; padding:4px 0; }
+    .lt-btn-link:hover { text-decoration:underline; }
+    /* Tab 栏 */
+    .pm-tab-bar { display:flex; gap:0; border-bottom:2px solid #e8e8e8; margin-bottom:16px; }
+    .pm-tab { padding:10px 20px; font-size:14px; color:#666; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; }
+    .pm-tab.active { color:#185FA5; font-weight:600; border-bottom-color:#185FA5; }
+    .pm-tab:hover { color:#185FA5; }
+    /* 外采供应商 - 面板宽度 */
+    .pm-panel.sp-panel { width:700px; right:-750px; }
+    .pm-panel.sp-panel.show { right:0; }
+    /* 外采供应商 - 操作列 */
+    #page-supplier-manage .lt-table th.col-seq, #page-supplier-manage .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:50px; min-width:50px; max-width:50px; }
+    #page-supplier-manage .lt-table thead th.col-seq { z-index:4; }
+    #page-supplier-manage .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:110px; min-width:110px; max-width:110px; border-left:1px solid #ccc; background:#fff; }
+    #page-supplier-manage .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:110px; min-width:110px; max-width:110px; border-left:1px solid #ccc; background:#f0f0f0; }
+    #page-supplier-manage .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
+    #page-supplier-manage .lt-table tbody tr:hover td.col-actions { background:#fdf5f6; }

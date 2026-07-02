@@ -3626,19 +3626,23 @@
       }
       document.getElementById('audit-opinion').value = '';
       // 隐藏审核意见的必填*
-      var req = document.getElementById('audit-opinion-req');
-      if (req) req.style.display = 'none';
+      var field = document.getElementById('audit-opinion-field');
+      if (field) field.classList.remove('required');
     }
     function qrCloseAuditModal() {
       document.getElementById('audit-modal-overlay').style.display = 'none';
       document.getElementById('audit-modal').style.display = 'none';
     }
     function qrOnAuditResultChange() {
-      var req = document.getElementById('audit-opinion-req');
-      if (!req) return;
+      var field = document.getElementById('audit-opinion-field');
+      if (!field) return;
       var selected = document.querySelector('input[name="audit-result"]:checked');
       // 只有"驳回"时才显示必填*
-      req.style.display = (selected && selected.value === '驳回') ? 'inline' : 'none';
+      if (selected && selected.value === '驳回') {
+        field.classList.add('required');
+      } else {
+        field.classList.remove('required');
+      }
     }
     function qrConfirmAudit() {
       var selected = document.querySelector('input[name="audit-result"]:checked');
@@ -5173,3 +5177,574 @@
       qrtUploadedFiles.splice(idx, 1);
       qrtRenderFileList();
     }
+
+// ========== 配件主数据模块 ==========
+(function(){
+  // 模拟数据
+  const pmData = [
+    {seq:1, code:'290F60471R', name:'减速器加油口密封垫', status:'可用', category:'事故件', attribute:'关键配件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:2, code:'TEST01101', name:'减速器加油口密封垫', status:'可用', category:'常规件', attribute:'自制件', isOil:'否', directPurchase:'-', series:'车系1', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:3, code:'290F60472R', name:'前保险杠总成', status:'可用', category:'事故件', attribute:'沿用件', isOil:'否', directPurchase:'否', series:'车系2', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:4, code:'TEST01102', name:'机油滤芯器', status:'可用', category:'常规件', attribute:'保养件', isOil:'是', directPurchase:'-', series:'车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:12.00, outSNP:2.00, minQty:12.00, maxQty:20.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:5, code:'290F60473R', name:'后视镜壳体LH', status:'可用', category:'X', attribute:'事故/车身件', isOil:'否', directPurchase:'是', series:'车系1,车系2,车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:24.00, outSNP:2.00, minQty:24.00, maxQty:1000.00, replaceCode:'配件编码', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:6, code:'TEST01103', name:'空气滤芯', status:'可用', category:'事故件', attribute:'发动机件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:7, code:'290F60474R', name:'变速箱油5L', status:'可用', category:'事故件', attribute:'变速箱件', isOil:'是', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:1000.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:8, code:'TEST01104', name:'刹车片前', status:'可用', category:'X', attribute:'电器', isOil:'否', directPurchase:'是', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:9, code:'290F60475R', name:'防冻液4L', status:'不可用', category:'事故件', attribute:'空调及安全设备', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:10, code:'TEST01105', name:'玻璃水2L', status:'不可用', category:'常规件', attribute:'化学类原辅材料', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:11, code:'290F60476R', name:'雨刮片24寸', status:'不可用', category:'事故件', attribute:'精品', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:12, code:'WC000001', name:'车载香薰', status:'不可用', category:'常规件', attribute:'随车工具', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+  ];
+
+  let pmPage = 1, pmPageSize = 20;
+
+  function pmRenderTable() {
+    const tbody = document.getElementById('pm-tbody');
+    if (!tbody) return;
+    let html = '';
+    pmData.forEach(function(r, i) {
+      html += '<tr>'
+        + '<td class="sticky col-seq">'+ r.seq +'</td>'
+        + '<td>'+ r.code +'</td>'
+        + '<td>'+ r.name +'</td>'
+        + '<td>'+ r.status +'</td>'
+        + '<td>'+ r.category +'</td>'
+        + '<td>'+ r.attribute +'</td>'
+        + '<td>'+ r.isOil +'</td>'
+        + '<td>'+ r.directPurchase +'</td>'
+        + '<td>'+ r.series +'</td>'
+        + '<td>'+ r.model +'</td>'
+        + '<td>'+ r.refPrice.toFixed(2) +'</td>'
+        + '<td>'+ r.sellPrice.toFixed(2) +'</td>'
+        + '<td>'+ r.normalPrice.toFixed(2) +'</td>'
+        + '<td>'+ r.urgentPrice.toFixed(2) +'</td>'
+        + '<td>'+ r.purchaseSwitch +'</td>'
+        + '<td>'+ r.unit +'</td>'
+        + '<td>'+ r.source +'</td>'
+        + '<td>'+ r.purchaseSNP +'</td>'
+        + '<td>'+ r.outSNP +'</td>'
+        + '<td>'+ r.minQty +'</td>'
+        + '<td>'+ r.maxQty +'</td>'
+        + '<td>'+ r.replaceCode +'</td>'
+        + '<td>'+ r.updateTime +'</td>'
+        + '<td>'+ r.createTime +'</td>'
+        + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="pmOpenEditModal('+ i +')" style="color:#185FA5;cursor:pointer">编辑</a> <a href="javascript:void(0)" onclick="pmOpenDetailPanel('+ i +')" style="color:#185FA5;cursor:pointer;margin-left:6px">详情</a></td>'
+        + '</tr>';
+    });
+    tbody.innerHTML = html;
+    document.getElementById('pm-pg-total').textContent = '共 '+ pmData.length +' 条';
+    var pgEl = document.getElementById('pm-pg-pages');
+    if(pgEl) pgEl.innerHTML = '<span class="pg-num active">1</span>';
+  }
+
+  // 隐藏所有面板区块
+  function pmHideAllBodies() {
+    document.getElementById('pmp-body-yj').style.display = 'none';
+    document.getElementById('pmp-body-add-store').style.display = 'none';
+    document.getElementById('pmp-body-edit-store').style.display = 'none';
+  }
+
+  // 打开面板
+  function pmOpenPanel() {
+    document.getElementById('pm-panel-overlay').classList.add('show');
+    document.getElementById('pm-panel').classList.add('show');
+  }
+
+  // 关闭面板
+  window.pmClosePanel = function() {
+    document.getElementById('pm-panel-overlay').classList.remove('show');
+    document.getElementById('pm-panel').classList.remove('show');
+  };
+
+  // 设置某个区块为全部只读（详情模式）
+  function pmSetBodyReadonly(bodyId) {
+    var body = document.getElementById(bodyId);
+    body.querySelectorAll('select').forEach(function(el) { el.disabled = true; });
+    body.querySelectorAll('input').forEach(function(el) { el.readOnly = true; el.classList.add('pm-readonly'); });
+    body.querySelectorAll('input[type="checkbox"]').forEach(function(el) { el.disabled = true; });
+  }
+
+  // 编辑入口
+  window.pmOpenEditModal = function(idx) {
+    var row = pmData[idx];
+    if (!row) return;
+    var title = document.getElementById('pm-panel-title');
+    var badge = document.getElementById('pm-panel-badge');
+    var footer = document.getElementById('pm-panel-footer');
+    pmHideAllBodies();
+    footer.style.display = '';
+
+    if (row.source === '奕境') {
+      title.textContent = '配件维护(奕境)';
+      badge.textContent = '编辑';
+      badge.className = 'pm-panel-badge';
+      document.getElementById('pmp-body-yj').style.display = 'block';
+      // 填充奕境字段
+      document.getElementById('yj-code').value = row.code;
+      document.getElementById('yj-name').value = row.name;
+      document.getElementById('yj-status').value = row.status;
+      document.getElementById('yj-attribute').value = row.attribute;
+      document.getElementById('yj-category-pcc').value = row.category;
+      document.getElementById('yj-material-group').value = (row.category === 'X') ? '辅料' : row.category;
+      document.getElementById('yj-unit').value = row.unit;
+      document.getElementById('yj-series').value = row.series;
+      document.getElementById('yj-model').value = row.model;
+      document.getElementById('yj-direct-purchase').value = row.directPurchase;
+      document.getElementById('yj-replace').value = row.replaceCode || '';
+      document.getElementById('yj-purchase-switch').value = row.purchaseSwitch;
+      document.getElementById('yj-price-normal').value = row.normalPrice.toFixed(2);
+      document.getElementById('yj-price-urgent').value = row.urgentPrice.toFixed(2);
+      document.getElementById('yj-snp').value = row.purchaseSNP;
+      document.getElementById('yj-min-qty').value = row.minQty;
+      document.getElementById('yj-max-qty').value = row.maxQty;
+      document.getElementById('yj-oil').checked = (row.isOil === '是');
+      document.getElementById('yj-no-urgent').checked = true;
+      document.getElementById('yj-direct').checked = false;
+      document.getElementById('yj-out-snp').value = row.outSNP;
+      document.getElementById('yj-ref-price').value = row.refPrice.toFixed(2);
+      document.getElementById('yj-sell-price').value = row.sellPrice.toFixed(2);
+    } else {
+      title.textContent = '配件维护(门店)';
+      badge.textContent = '编辑';
+      badge.className = 'pm-panel-badge';
+      document.getElementById('pmp-body-edit-store').style.display = 'block';
+      // 填充门店编辑字段
+      document.getElementById('edit-store-code').value = row.code;
+      document.getElementById('edit-store-name').value = row.name;
+      document.getElementById('edit-store-brand').value = row.name.indexOf('香薰') >= 0 ? '某品牌' : '';
+      document.getElementById('edit-store-attribute').value = row.attribute;
+      document.getElementById('edit-store-series').value = row.series;
+      document.getElementById('edit-store-model').value = row.model;
+      document.getElementById('edit-store-status').value = row.status;
+      document.getElementById('edit-store-purchase').value = row.purchaseSwitch;
+      document.getElementById('edit-store-price-normal').value = row.normalPrice.toFixed(2);
+      document.getElementById('edit-store-price-urgent').value = row.urgentPrice.toFixed(2);
+      document.getElementById('edit-store-snp').value = row.purchaseSNP;
+      document.getElementById('edit-store-min').value = row.minQty;
+      document.getElementById('edit-store-max').value = row.maxQty;
+      document.getElementById('edit-store-out-snp').value = row.outSNP;
+      document.getElementById('edit-store-ref-price').value = row.refPrice.toFixed(2);
+      document.getElementById('edit-store-sell-price').value = row.sellPrice.toFixed(2);
+    }
+    pmOpenPanel();
+  };
+
+  // 详情入口
+  window.pmOpenDetailPanel = function(idx) {
+    var row = pmData[idx];
+    if (!row) return;
+    var title = document.getElementById('pm-panel-title');
+    var badge = document.getElementById('pm-panel-badge');
+    var footer = document.getElementById('pm-panel-footer');
+    pmHideAllBodies();
+    title.textContent = '配件详情';
+    badge.textContent = '详情';
+    badge.className = 'pm-panel-badge detail';
+    footer.style.display = 'none';
+
+    if (row.source === '奕境') {
+      document.getElementById('pmp-body-yj').style.display = 'block';
+      document.getElementById('yj-code').value = row.code;
+      document.getElementById('yj-name').value = row.name;
+      document.getElementById('yj-status').value = row.status;
+      document.getElementById('yj-attribute').value = row.attribute;
+      document.getElementById('yj-category-pcc').value = row.category;
+      document.getElementById('yj-material-group').value = (row.category === 'X') ? '辅料' : row.category;
+      document.getElementById('yj-unit').value = row.unit;
+      document.getElementById('yj-series').value = row.series;
+      document.getElementById('yj-model').value = row.model;
+      document.getElementById('yj-direct-purchase').value = row.directPurchase;
+      document.getElementById('yj-replace').value = row.replaceCode || '';
+      document.getElementById('yj-purchase-switch').value = row.purchaseSwitch;
+      document.getElementById('yj-price-normal').value = row.normalPrice.toFixed(2);
+      document.getElementById('yj-price-urgent').value = row.urgentPrice.toFixed(2);
+      document.getElementById('yj-snp').value = row.purchaseSNP;
+      document.getElementById('yj-min-qty').value = row.minQty;
+      document.getElementById('yj-max-qty').value = row.maxQty;
+      document.getElementById('yj-oil').checked = (row.isOil === '是');
+      document.getElementById('yj-out-snp').value = row.outSNP;
+      document.getElementById('yj-ref-price').value = row.refPrice.toFixed(2);
+      document.getElementById('yj-sell-price').value = row.sellPrice.toFixed(2);
+      pmSetBodyReadonly('pmp-body-yj');
+    } else {
+      document.getElementById('pmp-body-edit-store').style.display = 'block';
+      document.getElementById('edit-store-code').value = row.code;
+      document.getElementById('edit-store-name').value = row.name;
+      document.getElementById('edit-store-brand').value = '';
+      document.getElementById('edit-store-attribute').value = row.attribute;
+      document.getElementById('edit-store-series').value = row.series;
+      document.getElementById('edit-store-model').value = row.model;
+      document.getElementById('edit-store-status').value = row.status;
+      document.getElementById('edit-store-purchase').value = row.purchaseSwitch;
+      document.getElementById('edit-store-price-normal').value = row.normalPrice.toFixed(2);
+      document.getElementById('edit-store-price-urgent').value = row.urgentPrice.toFixed(2);
+      document.getElementById('edit-store-snp').value = row.purchaseSNP;
+      document.getElementById('edit-store-min').value = row.minQty;
+      document.getElementById('edit-store-max').value = row.maxQty;
+      document.getElementById('edit-store-out-snp').value = row.outSNP;
+      document.getElementById('edit-store-ref-price').value = row.refPrice.toFixed(2);
+      document.getElementById('edit-store-sell-price').value = row.sellPrice.toFixed(2);
+      pmSetBodyReadonly('pmp-body-edit-store');
+    }
+    pmOpenPanel();
+  };
+
+  // 新增入口
+  window.pmOpenAddModal = function() {
+    var title = document.getElementById('pm-panel-title');
+    var badge = document.getElementById('pm-panel-badge');
+    var footer = document.getElementById('pm-panel-footer');
+    pmHideAllBodies();
+    title.textContent = '新增配件(门店)';
+    badge.textContent = '新增';
+    badge.className = 'pm-panel-badge add';
+    footer.style.display = '';
+    document.getElementById('pmp-body-add-store').style.display = 'block';
+    // 默认值
+    document.getElementById('add-store-code').value = 'WC+6位流水号自增';
+    document.getElementById('add-store-name').value = '';
+    document.getElementById('add-store-brand').value = '';
+    document.getElementById('add-store-series').value = '';
+    document.getElementById('add-store-model').value = '';
+    document.getElementById('add-store-price-normal').value = '300.00';
+    document.getElementById('add-store-price-urgent').value = '300.00';
+    document.getElementById('add-store-snp').value = '1';
+    document.getElementById('add-store-min').value = '10';
+    document.getElementById('add-store-max').value = '100';
+    document.getElementById('add-store-out-snp').value = '1.00';
+    document.getElementById('add-store-ref-price').value = '';
+    document.getElementById('add-store-sell-price').value = '350.00';
+    pmOpenPanel();
+  };
+
+  // 兼容旧调用
+  window.pmCloseModal = function() { pmClosePanel(); };
+
+  // 筛选逻辑
+  function pmGetFilteredData() {
+    var source = document.getElementById('pm-flt-source').value;
+    var code = document.getElementById('pm-flt-code').value.trim().toLowerCase();
+    var name = document.getElementById('pm-flt-name').value.trim().toLowerCase();
+    var purchaseSwitch = document.getElementById('pm-flt-purchase-switch').value;
+    var category = document.getElementById('pm-flt-category').value;
+    var attribute = document.getElementById('pm-flt-attribute').value;
+    var status = document.getElementById('pm-flt-status').value;
+    var oil = document.getElementById('pm-flt-oil').value;
+    var series = document.getElementById('pm-flt-series').value.trim().toLowerCase();
+    var model = document.getElementById('pm-flt-model').value.trim().toLowerCase();
+    var urgent = document.getElementById('pm-flt-urgent').value;
+    var direct = document.getElementById('pm-flt-direct').value;
+    var directPurchase = document.getElementById('pm-flt-direct-purchase').value;
+
+    return pmData.filter(function(r) {
+      if (source && r.source !== source) return false;
+      if (code && r.code.toLowerCase().indexOf(code) === -1) return false;
+      if (name && r.name.toLowerCase().indexOf(name) === -1) return false;
+      if (purchaseSwitch && r.purchaseSwitch !== (purchaseSwitch === '开' ? '是' : '否')) return false;
+      if (category && r.category !== category) return false;
+      if (attribute && r.attribute !== attribute) return false;
+      if (status && r.status !== status) return false;
+      if (oil && r.isOil !== oil) return false;
+      if (series && r.series.toLowerCase().indexOf(series) === -1) return false;
+      if (model && r.model.toLowerCase().indexOf(model) === -1) return false;
+      if (directPurchase && r.directPurchase !== directPurchase) return false;
+      return true;
+    });
+  }
+
+  window.pmApplyFilter = function() {
+    var filtered = pmGetFilteredData();
+    pmRenderFilteredTable(filtered);
+  };
+
+  function pmRenderFilteredTable(data) {
+    var tbody = document.getElementById('pm-tbody');
+    if (!tbody) return;
+    var html = '';
+    data.forEach(function(r, i) {
+      var origIdx = pmData.indexOf(r);
+      html += '<tr>'
+        + '<td class="sticky col-seq">'+ (i+1) +'</td>'
+        + '<td>'+ r.code +'</td>'
+        + '<td>'+ r.name +'</td>'
+        + '<td>'+ r.status +'</td>'
+        + '<td>'+ r.category +'</td>'
+        + '<td>'+ r.attribute +'</td>'
+        + '<td>'+ r.isOil +'</td>'
+        + '<td>'+ r.directPurchase +'</td>'
+        + '<td>'+ r.series +'</td>'
+        + '<td>'+ r.model +'</td>'
+        + '<td>'+ r.refPrice.toFixed(2) +'</td>'
+        + '<td>'+ r.sellPrice.toFixed(2) +'</td>'
+        + '<td>'+ r.normalPrice.toFixed(2) +'</td>'
+        + '<td>'+ r.urgentPrice.toFixed(2) +'</td>'
+        + '<td>'+ r.purchaseSwitch +'</td>'
+        + '<td>'+ r.unit +'</td>'
+        + '<td>'+ r.source +'</td>'
+        + '<td>'+ r.purchaseSNP +'</td>'
+        + '<td>'+ r.outSNP +'</td>'
+        + '<td>'+ r.minQty +'</td>'
+        + '<td>'+ r.maxQty +'</td>'
+        + '<td>'+ r.replaceCode +'</td>'
+        + '<td>'+ r.updateTime +'</td>'
+        + '<td>'+ r.createTime +'</td>'
+        + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="pmOpenEditModal('+ origIdx +')" style="color:#185FA5;cursor:pointer">编辑</a> <a href="javascript:void(0)" onclick="pmOpenDetailPanel('+ origIdx +')" style="color:#185FA5;cursor:pointer;margin-left:6px">详情</a></td>'
+        + '</tr>';
+    });
+    tbody.innerHTML = html;
+    document.getElementById('pm-pg-total').textContent = '共 '+ data.length +' 条';
+    var pgEl = document.getElementById('pm-pg-pages');
+    if(pgEl) pgEl.innerHTML = '<span class="pg-num active">1</span>';
+  }
+
+  window.pmResetFilter = function() {
+    document.getElementById('pm-flt-source').value = '';
+    document.getElementById('pm-flt-code').value = '';
+    document.getElementById('pm-flt-name').value = '';
+    document.getElementById('pm-flt-purchase-switch').value = '开';
+    document.getElementById('pm-flt-category').value = '';
+    document.getElementById('pm-flt-attribute').value = '';
+    document.getElementById('pm-flt-status').value = '可用';
+    document.getElementById('pm-flt-oil').value = '';
+    document.getElementById('pm-flt-series').value = '';
+    document.getElementById('pm-flt-model').value = '';
+    document.getElementById('pm-flt-urgent').value = '';
+    document.getElementById('pm-flt-direct').value = '';
+    document.getElementById('pm-flt-direct-purchase').value = '';
+    pmRenderTable();
+  };
+  window.pmToggleFilter = function() {};
+  window.pmChangePage = function() {};
+  window.pmGotoPage = function() {};
+  window.pmChangePageSize = function() {};
+
+  // 价格调整历史 模拟数据
+  const phData = [
+    {seq:1, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'正常采购价', before:150.00, after:150.00, updater:'SAP', time:'2025-03-24 13:00:00'},
+    {seq:2, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'紧急采购价', before:180.00, after:180.00, updater:'SAP', time:'2025-01-01 13:00:00'},
+    {seq:3, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'参考销售价', before:200.00, after:200.00, updater:'SAP', time:'2025-01-01 13:00:00'},
+    {seq:4, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'销售价', before:120.00, after:120.00, updater:'更新人的账号', time:'2025-01-01 13:00:00'},
+    {seq:5, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:6, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:7, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:8, code:'290F60471R', name:'减速器加油口密封垫', category:'物料', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:9, code:'290F60471R', name:'减速器加油口密封垫', category:'物料', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:10, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:11, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-01-01 13:00:00'},
+    {seq:12, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-01-01 13:00:00'},
+  ];
+
+  function phRenderTable() {
+    const tbody = document.getElementById('ph-tbody');
+    if (!tbody) return;
+    let html = '';
+    phData.forEach(function(r) {
+      html += '<tr>'
+        + '<td>'+ r.seq +'</td>'
+        + '<td>'+ r.code +'</td>'
+        + '<td>'+ r.name +'</td>'
+        + '<td>'+ r.category +'</td>'
+        + '<td>'+ r.priceType +'</td>'
+        + '<td>'+ r.before.toFixed(2) +'</td>'
+        + '<td>'+ r.after.toFixed(2) +'</td>'
+        + '<td>'+ r.updater +'</td>'
+        + '<td>'+ r.time +'</td>'
+        + '</tr>';
+    });
+    tbody.innerHTML = html;
+    document.getElementById('ph-pg-total').textContent = '共 '+ phData.length +' 条';
+    var pgEl = document.getElementById('ph-pg-pages');
+    if(pgEl) pgEl.innerHTML = '<span class="pg-num active">1</span>';
+  }
+  window.phRenderTable = phRenderTable;
+  window.phResetFilter = function() {};
+  window.phChangePage = function() {};
+  window.phGotoPage = function() {};
+  window.phChangePageSize = function() {};
+
+  // 页面说明内容切换
+  function pmUpdatePageDesc(module) {
+    var defEl = document.getElementById('page-desc-default');
+    var pmEl = document.getElementById('page-desc-parts-master');
+    var spEl = document.getElementById('page-desc-supplier-manage');
+    if (!defEl || !pmEl) return;
+    // 先全部隐藏
+    defEl.style.display = 'none';
+    pmEl.style.display = 'none';
+    if (spEl) spEl.style.display = 'none';
+    // 根据模块显示对应内容
+    if (module === 'parts-master') {
+      pmEl.style.display = 'block';
+    } else if (module === 'supplier-manage') {
+      if (spEl) spEl.style.display = 'block';
+    } else {
+      defEl.style.display = '';
+    }
+  }
+
+  // 页面初始化：监听showContent切换时渲染
+  var origShowContent = window.showContent;
+  window.showContent = function(id) {
+    if (origShowContent) origShowContent(id);
+    if (id === 'parts-master') { setTimeout(pmRenderTable, 50); }
+    if (id === 'parts-price-history') { setTimeout(phRenderTable, 50); }
+    pmUpdatePageDesc(id);
+  };
+
+  // 如果已经在配件主数据页面（直接刷新的情况）
+  setTimeout(function(){
+    if (document.getElementById('page-parts-master') &&
+        document.getElementById('page-parts-master').classList.contains('active')) {
+      pmRenderTable();
+    }
+  }, 100);
+})();
+
+// ========== 外采供应商管理模块 ==========
+(function(){
+  var spData = [
+    {seq:1, code:'WG00001', shortName:'联友科技武汉', fullName:'联友科技武汉分公司', creditCode:'91420100MA4K2XYZ0A', store:'系统默认', storeCode:'-', contact:'王经理', phone:'13800001111', finContact:'赵会计', finPhone:'13800002222', finEmail:'zhao@lanyou.com', address:'湖北省武汉市东湖高新区XX路XX号', desc:'直营店外采默认供应商'},
+    {seq:2, code:'WG00002', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS1B', store:'广州风丽', storeCode:'BJ001', contact:'张三', phone:'15899886688', finContact:'张三', finPhone:'15899886688', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
+    {seq:3, code:'WG00003', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS2C', store:'广州风丽', storeCode:'SH001', contact:'李四', phone:'13148710520', finContact:'李四', finPhone:'13148710520', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
+    {seq:4, code:'WG00004', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS3D', store:'广州风丽', storeCode:'GZ001', contact:'刘美美', phone:'13148714521', finContact:'刘美美', finPhone:'13148714521', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
+  ];
+
+  function spRenderTable(data) {
+    var list = data || spData;
+    var tbody = document.getElementById('sp-tbody');
+    if (!tbody) return;
+    var html = '';
+    list.forEach(function(r, i) {
+      html += '<tr>'
+        + '<td class="sticky col-seq">'+ r.seq +'</td>'
+        + '<td>'+ r.code +'</td>'
+        + '<td>'+ r.shortName +'</td>'
+        + '<td>'+ r.fullName +'</td>'
+        + '<td>'+ r.creditCode +'</td>'
+        + '<td>'+ r.store +'</td>'
+        + '<td>'+ r.storeCode +'</td>'
+        + '<td>'+ r.contact +'</td>'
+        + '<td>'+ r.phone +'</td>'
+        + '<td>'+ r.finContact +'</td>'
+        + '<td>'+ r.finPhone +'</td>'
+        + '<td>'+ r.finEmail +'</td>'
+        + '<td>'+ r.address +'</td>'
+        + '<td>'+ r.desc +'</td>'
+        + '<td class="sticky col-actions">'+ (r.code === 'WG00001' ? '' : '<a href="javascript:void(0)" onclick="spOpenEditPanel('+ i +')" style="color:#185FA5;cursor:pointer">编辑</a> ') +'<a href="javascript:void(0)" onclick="spOpenViewPanel('+ i +')" style="color:#185FA5;cursor:pointer">查看</a></td>'
+        + '</tr>';
+    });
+    tbody.innerHTML = html;
+    document.getElementById('sp-pg-total').textContent = '共 '+ list.length +' 条';
+    var pgEl = document.getElementById('sp-pg-pages');
+    if(pgEl) pgEl.innerHTML = '<span class="pg-num active">1</span>';
+  }
+
+  window.spApplyFilter = function() {
+    var code = (document.getElementById('sp-flt-code').value || '').trim().toLowerCase();
+    var name = (document.getElementById('sp-flt-name').value || '').trim().toLowerCase();
+    var desc = (document.getElementById('sp-flt-desc').value || '').trim().toLowerCase();
+    var filtered = spData.filter(function(r) {
+      if (code && r.code.toLowerCase().indexOf(code) === -1) return false;
+      if (name && r.shortName.toLowerCase().indexOf(name) === -1) return false;
+      if (desc && r.desc.toLowerCase().indexOf(desc) === -1) return false;
+      return true;
+    });
+    spRenderTable(filtered);
+  };
+
+  window.spResetFilter = function() {
+    document.getElementById('sp-flt-code').value = '';
+    document.getElementById('sp-flt-name').value = '';
+    document.getElementById('sp-flt-desc').value = '';
+    spRenderTable();
+  };
+
+  // 打开新增面板
+  window.spOpenAddPanel = function() {
+    document.getElementById('sp-panel-title').textContent = '维护供应商';
+    var badge = document.getElementById('sp-panel-badge');
+    badge.textContent = '新增'; badge.className = 'pm-panel-badge add';
+    // 清空表单
+    document.getElementById('sp-form-code').value = 'WG+5位流水号自增';
+    document.getElementById('sp-form-short-name').value = '';
+    document.getElementById('sp-form-full-name').value = '';
+    document.getElementById('sp-form-credit-code').value = '';
+    document.getElementById('sp-form-contact').value = '';
+    document.getElementById('sp-form-phone').value = '';
+    document.getElementById('sp-form-desc').value = '';
+    document.getElementById('sp-form-fin-contact').value = '';
+    document.getElementById('sp-form-fin-phone').value = '';
+    document.getElementById('sp-form-fin-email').value = '';
+    document.getElementById('sp-form-address').value = '';
+    document.getElementById('sp-panel-overlay').classList.add('show');
+    document.getElementById('sp-panel').classList.add('show');
+  };
+
+  // 打开编辑面板
+  window.spOpenEditPanel = function(idx) {
+    var row = spData[idx];
+    if (!row) return;
+    document.getElementById('sp-panel-title').textContent = '维护供应商';
+    var badge = document.getElementById('sp-panel-badge');
+    badge.textContent = '编辑'; badge.className = 'pm-panel-badge';
+    document.getElementById('sp-form-code').value = row.code;
+    document.getElementById('sp-form-short-name').value = row.shortName;
+    document.getElementById('sp-form-full-name').value = row.fullName;
+    document.getElementById('sp-form-credit-code').value = row.creditCode;
+    document.getElementById('sp-form-contact').value = row.contact;
+    document.getElementById('sp-form-phone').value = row.phone;
+    document.getElementById('sp-form-desc').value = row.desc;
+    document.getElementById('sp-form-fin-contact').value = row.finContact;
+    document.getElementById('sp-form-fin-phone').value = row.finPhone;
+    document.getElementById('sp-form-fin-email').value = row.finEmail;
+    document.getElementById('sp-form-address').value = row.address;
+    document.getElementById('sp-panel-overlay').classList.add('show');
+    document.getElementById('sp-panel').classList.add('show');
+  };
+
+  // 查看面板（只读）
+  window.spOpenViewPanel = function(idx) {
+    var row = spData[idx];
+    if (!row) return;
+    document.getElementById('sp-panel-title').textContent = '供应商详情';
+    var badge = document.getElementById('sp-panel-badge');
+    badge.textContent = '详情'; badge.className = 'pm-panel-badge detail';
+    document.getElementById('sp-form-code').value = row.code;
+    document.getElementById('sp-form-short-name').value = row.shortName;
+    document.getElementById('sp-form-full-name').value = row.fullName;
+    document.getElementById('sp-form-credit-code').value = row.creditCode;
+    document.getElementById('sp-form-contact').value = row.contact;
+    document.getElementById('sp-form-phone').value = row.phone;
+    document.getElementById('sp-form-desc').value = row.desc;
+    document.getElementById('sp-form-fin-contact').value = row.finContact;
+    document.getElementById('sp-form-fin-phone').value = row.finPhone;
+    document.getElementById('sp-form-fin-email').value = row.finEmail;
+    document.getElementById('sp-form-address').value = row.address;
+    // 全部只读
+    var panel = document.getElementById('sp-panel');
+    panel.querySelectorAll('input').forEach(function(el){ el.readOnly = true; el.classList.add('pm-readonly'); });
+    // 隐藏底部按钮
+    panel.querySelector('.pm-panel-footer').style.display = 'none';
+    document.getElementById('sp-panel-overlay').classList.add('show');
+    document.getElementById('sp-panel').classList.add('show');
+  };
+
+  // 关闭面板
+  window.spClosePanel = function() {
+    document.getElementById('sp-panel-overlay').classList.remove('show');
+    document.getElementById('sp-panel').classList.remove('show');
+    // 恢复可编辑状态
+    var panel = document.getElementById('sp-panel');
+    panel.querySelectorAll('input').forEach(function(el){
+      if (el.id !== 'sp-form-code') { el.readOnly = false; el.classList.remove('pm-readonly'); }
+    });
+    panel.querySelector('.pm-panel-footer').style.display = '';
+  };
+
+  // 挂载到 showContent 切换
+  var origShowContent2 = window.showContent;
+  window.showContent = function(id) {
+    if (origShowContent2) origShowContent2(id);
+    if (id === 'supplier-manage') { setTimeout(function(){ spRenderTable(); }, 50); }
+  };
+})();
