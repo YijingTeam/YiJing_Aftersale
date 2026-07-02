@@ -3518,9 +3518,9 @@
       if (ac1) { ac1.innerHTML = '<option value="">请选择</option>'; }
       if (ac2) { ac2.innerHTML = '<option value="">请选择</option>'; }
       if (ac3) { ac3.innerHTML = '<option value="">请选择</option>'; }
-      var ids = ['qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-repair-case-no','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
+      var ids = ['qr-form-template-select','qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el){if(el.tagName==='SELECT')el.value='';else el.value='';} });
-      var selIds = ['qr-form-importance','qr-form-is-pdi','qr-form-repair-status-state','qr-form-has-fault-code','qr-form-has-repair-case'];
+      var selIds = ['qr-form-importance','qr-form-is-pdi','qr-form-repair-status-state','qr-form-has-fault-code'];
       // 清空图片和附件
       qrUploadedImages = [];
       qrUploadedFiles = [];
@@ -3813,8 +3813,9 @@
       
       if (document.getElementById('qr-form-has-fault-code')) document.getElementById('qr-form-has-fault-code').value = item.hasFaultCode || '';
       if (document.getElementById('qr-form-fault-code')) document.getElementById('qr-form-fault-code').value = item.faultCode || '';
-      if (document.getElementById('qr-form-has-repair-case')) document.getElementById('qr-form-has-repair-case').value = item.hasRepairCase || '';
-      if (document.getElementById('qr-form-repair-case-no')) document.getElementById('qr-form-repair-case-no').value = item.repairCaseNo || '';
+      // 'qr-form-has-repair-case' / 'qr-form-repair-case-no' 已从"故障信息"移除
+      // if (document.getElementById('qr-form-has-repair-case')) document.getElementById('qr-form-has-repair-case').value = item.hasRepairCase || '';
+      // if (document.getElementById('qr-form-repair-case-no')) document.getElementById('qr-form-repair-case-no').value = item.repairCaseNo || '';
       // 回填图片（详情模式）
       if (item.images && item.images.length) {
         qrUploadedImages = item.images.slice();
@@ -3867,9 +3868,9 @@
       if (ac1) { ac1.innerHTML = '<option value="">请选择</option>'; }
       if (ac2) { ac2.innerHTML = '<option value="">请选择</option>'; }
       if (ac3) { ac3.innerHTML = '<option value="">请选择</option>'; }
-      var ids = ['qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-repair-case-no','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
+      var ids = ['qr-form-template-select','qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el){if(el.tagName==='SELECT')el.value='';else el.value='';} });
-      var selIds = ['qr-form-importance','qr-form-is-pdi','qr-form-repair-status-state','qr-form-has-fault-code','qr-form-has-repair-case'];
+      var selIds = ['qr-form-importance','qr-form-is-pdi','qr-form-repair-status-state','qr-form-has-fault-code'];
       // 清空图片和附件
       qrUploadedImages = [];
       qrUploadedFiles = [];
@@ -4009,6 +4010,62 @@
 
 
       alert('已自动带出关联信息，内容可手动修改');
+    }
+    // ========== 选择模版（下拉模糊搜索） ==========
+    function qrRenderTemplateList() {
+      // 从模板数据中筛选"启用"状态的模板，渲染到下拉列表
+      var list = document.getElementById('qr-tpl-list');
+      if (!list) return;
+      var enabled = qrtAllData.filter(function(r) { return r.status === '启用'; });
+      var h = '';
+      if (enabled.length === 0) {
+        h = '<li onclick="qrSelectTemplate(this)" data-id="">暂无可用模版</li>';
+      } else {
+        enabled.forEach(function(r) {
+          h += '<li onclick="qrSelectTemplate(this)" data-id="' + r.id + '" data-name="' + r.name + '">' + r.name + '</li>';
+        });
+      }
+      list.innerHTML = h;
+    }
+    function qrFilterTemplateSelect(input) {
+      // 模糊搜索过滤模板列表：先重建完整列表，再按输入内容过滤
+      qrRenderTemplateList();
+      var list = document.getElementById('qr-tpl-list');
+      if (!list) return;
+      var val = input.value.toLowerCase();
+      var items = list.querySelectorAll('li');
+      items.forEach(function(item) {
+        var text = (item.getAttribute('data-name') || item.textContent).toLowerCase();
+        item.classList.toggle('hidden', !text.includes(val));
+      });
+    }
+    function qrSelectTemplate(li) {
+      // 选中模板后自动填入表单对应字段
+      var id = parseInt(li.getAttribute('data-id'));
+      if (!id) return;
+      var tpl = qrtAllData.find(function(r) { return r.id === id; });
+      if (!tpl) return;
+      // 填入输入框显示模版名称
+      document.getElementById('qr-form-template-select').value = tpl.name;
+      // 模板字段 → 质量报告表单字段映射
+      var map = {
+        'qr-form-subject': tpl.name,                          // 主题
+        'qr-form-fault-description': tpl.customerComplaint,   // 故障描述
+        'qr-form-fault-system': tpl.faultSystem,              // 故障系统
+        'qr-form-fault-part-code': tpl.faultPartCode,         // 主故障件编码
+        'qr-form-fault-part-reason': tpl.faultPartName,       // 主故障件名称
+        'qr-form-importance': tpl.importance,                 // 重要程度
+        'qr-form-customer-complaint': tpl.customerComplaint,  // 故障现象描述
+        'qr-form-fault-condition-full': tpl.faultCondition,   // 故障发生条件
+        'qr-form-repair-solution': tpl.repairSolution         // 排查内容及结果
+      };
+      for (var key in map) {
+        var el = document.getElementById(key);
+        if (el) el.value = map[key] || '';
+      }
+      // 关闭下拉列表
+      var list = document.getElementById('qr-tpl-list');
+      if (list) list.classList.remove('show');
     }
     function qrOpenFaultCodeModal() {
       fcInitMockData();
@@ -4617,14 +4674,15 @@
       document.getElementById('qrt-form-subject').value = item.subject || '';
       if (document.getElementById('qrt-form-has-fault-code')) document.getElementById('qrt-form-has-fault-code').value = item.hasFaultCode || '';
       if (document.getElementById('qrt-form-fault-code')) document.getElementById('qrt-form-fault-code').value = item.faultCode || '';
-      if (document.getElementById('qrt-form-has-repair-case')) document.getElementById('qrt-form-has-repair-case').value = item.hasRepairCase || '';
-      if (document.getElementById('qrt-form-repair-case-no')) document.getElementById('qrt-form-repair-case-no').value = item.repairCaseNo || '';
+      // 'qrt-form-has-repair-case' / 'qrt-form-repair-case-no' 已从"故障信息"移除
+      // if (document.getElementById('qrt-form-has-repair-case')) document.getElementById('qrt-form-has-repair-case').value = item.hasRepairCase || '';
+      // if (document.getElementById('qrt-form-repair-case-no')) document.getElementById('qrt-form-repair-case-no').value = item.repairCaseNo || '';
       // 回填关单人、关单时间
       if (document.getElementById('qrt-form-close-user')) document.getElementById('qrt-form-close-user').value = item.closeUser || '';
       if (document.getElementById('qrt-form-close-time')) document.getElementById('qrt-form-close-time').value = item.closeTime || '';
     }
     function qrtClearPanelForm() {
-      var ids = ['qrt-form-name','qrt-form-customer-complaint','qrt-form-fault-condition-full','qrt-form-repair-solution','qrt-form-fault-part-code','qrt-form-fault-part-name','qrt-form-conclusion','qrt-form-fault-description','qrt-form-subject','qrt-form-fault-code','qrt-form-repair-case-no','qrt-form-close-user','qrt-form-close-time'];
+      var ids = ['qrt-form-name','qrt-form-customer-complaint','qrt-form-fault-condition-full','qrt-form-repair-solution','qrt-form-fault-part-code','qrt-form-fault-part-name','qrt-form-conclusion','qrt-form-fault-description','qrt-form-subject','qrt-form-fault-code','qrt-form-close-user','qrt-form-close-time'];
       ids.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.value = '';
@@ -4633,7 +4691,6 @@
       document.getElementById('qrt-form-importance').value = '';
       document.getElementById('qrt-form-fault-system').value = '';
       if (document.getElementById('qrt-form-has-fault-code')) document.getElementById('qrt-form-has-fault-code').value = '';
-      if (document.getElementById('qrt-form-has-repair-case')) document.getElementById('qrt-form-has-repair-case').value = '';
     }
     function qrtUpdatePanelButtons() {
       var topDiv = document.getElementById('qrt-panel-actions');

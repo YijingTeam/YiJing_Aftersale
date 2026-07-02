@@ -1573,8 +1573,6 @@
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">重要程度</span><select id="qrt-form-importance"><option value="">请选择</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">有无显示故障码</span><select id="qrt-form-has-fault-code" onchange="qrtToggleFaultCode()"><option value="">请选择</option><option>是</option><option>否</option></select></div>
             <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="qrtOpenFaultCodeModal()"><span class="lt-filter-prefix">故障代码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qrt-form-fault-code" placeholder="请点击搜索" readonly onclick="event.stopPropagation();qrtOpenFaultCodeModal()" onfocus="this.blur()"></div>
-            <div class="qr-form-item-inline"><span class="qr-form-label-inline">查询过维修案例</span><select id="qrt-form-has-repair-case"><option value="">请选择</option><option>是</option><option>否</option></select></div>
-            <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">维修案例号</span><input type="text" id="qrt-form-repair-case-no" placeholder="请输入"></div>
             <!-- 5. 故障现象描述 -->
             <div class="qr-form-item full"><label class="qr-form-label">故障现象描述</label><textarea id="qrt-form-customer-complaint" placeholder="基于用户的描述，同时向用户提出一些引导性的问题，综合来显现详细的故障现象" maxlength="1000"></textarea></div>
             <!-- 6. 故障发生条件 -->
@@ -1877,6 +1875,8 @@
         <div class="qr-section-title" onclick="qrToggleSection('fault')"><span class="qr-section-toggle"></span>故障信息</div>
         <div class="qr-section-body">
           <div class="qr-form-grid col4">
+            <!-- 0. 选择模版（新增/编辑时显示，详情时隐藏，占据4列） -->
+            <div class="qr-form-item-inline qr-combobox full" data-qr-hide-on="detail"><span class="qr-form-label-inline">选择模版</span><input type="text" id="qr-form-template-select" placeholder="请选择或输入模版名称模糊搜索" onfocus="qrRenderTemplateList();qrShowCombobox(this,'qr-tpl-list')" oninput="qrFilterTemplateSelect(this)"><span class="cb-arrow" onclick="qrToggleComboboxArrow('qr-tpl-list')">▼</span><ul class="lt-datalist" id="qr-tpl-list"></ul></div>
             <!-- 1. 主题 -->
             <div class="qr-form-item-inline full plain"><span class="qr-form-label-inline">主题（限50字）</span><input type="text" id="qr-form-subject" placeholder="门店简称 车型-VIN号后6位 故障现象简述，例如：武汉龙阳大道店X9-001888大屏偶发无网络" maxlength="50"></div>
             <!-- 3. 故障描述（模糊搜索下拉） -->
@@ -1889,8 +1889,6 @@
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">重要程度</span><select id="qr-form-importance"><option value="">请选择</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">有无显示故障码</span><select id="qr-form-has-fault-code" onchange="qrToggleFaultCode()"><option value="">请选择</option><option>是</option><option>否</option></select></div>
             <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="qrOpenFaultCodeModal()"><span class="lt-filter-prefix">故障代码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qr-form-fault-code" placeholder="请点击搜索" readonly onclick="event.stopPropagation();qrOpenFaultCodeModal()" onfocus="this.blur()"></div>
-            <div class="qr-form-item-inline"><span class="qr-form-label-inline">查询过维修案例</span><select id="qr-form-has-repair-case"><option value="">请选择</option><option>是</option><option>否</option></select></div>
-            <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">维修案例号</span><input type="text" id="qr-form-repair-case-no" placeholder="请输入"></div>
             <!-- 6. 故障现象描述 -->
             <div class="qr-form-item full"><label class="qr-form-label">故障现象描述</label><textarea id="qr-form-customer-complaint" placeholder="基于用户的描述，同时向用户提出一些引导性的问题，综合来显现详细的故障现象" maxlength="1000"></textarea></div>
             <!-- 7. 故障发生条件 -->
