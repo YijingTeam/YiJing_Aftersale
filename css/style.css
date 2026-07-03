@@ -1641,8 +1641,8 @@
     /* Tab 栏 */
     .pm-tab-bar { display:flex; gap:0; border-bottom:2px solid #e8e8e8; margin-bottom:16px; }
     .pm-tab { padding:10px 20px; font-size:14px; color:#666; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; }
-    .pm-tab.active { color:#185FA5; font-weight:600; border-bottom-color:#185FA5; }
-    .pm-tab:hover { color:#185FA5; }
+    .pm-tab.active { color:#861B2F; font-weight:600; border-bottom-color:#861B2F; }
+    .pm-tab:hover { color:#861B2F; }
     /* 外采供应商 - 面板宽度 */
     .pm-panel.sp-panel { width:700px; right:-750px; }
     .pm-panel.sp-panel.show { right:0; }
@@ -1653,3 +1653,49 @@
     #page-supplier-manage .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:110px; min-width:110px; max-width:110px; border-left:1px solid #ccc; background:#f0f0f0; }
     #page-supplier-manage .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
     #page-supplier-manage .lt-table tbody tr:hover td.col-actions { background:#fdf5f6; }
+    /* ===== 配件采购 冻结列 ===== */
+    #page-parts-procurement .lt-table th.col-seq, #page-parts-procurement .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
+    #page-parts-procurement .lt-table thead th.col-seq { z-index:4; }
+    #page-parts-procurement .lt-table th.col-po-no, #page-parts-procurement .lt-table td.col-po-no { position:sticky; left:40px; z-index:2; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
+    #page-parts-procurement .lt-table thead th.col-po-no { z-index:4; }
+    #page-parts-procurement .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#fff; }
+    #page-parts-procurement .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#f0f0f0; }
+    #page-parts-procurement .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
+    #page-parts-procurement .lt-table tbody tr:hover td.col-actions { background:#fdf5f6; }
+    /* ===== 配件采购明细 冻结列 ===== */
+    #page-parts-procurement-detail .lt-table th.col-seq, #page-parts-procurement-detail .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
+    #page-parts-procurement-detail .lt-table thead th.col-seq { z-index:4; }
+    /* ===== 配件发货及交期 冻结列 ===== */
+    #page-parts-delivery-schedule .lt-table th.col-seq, #page-parts-delivery-schedule .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
+    #page-parts-delivery-schedule .lt-table thead th.col-seq { z-index:4; }
+    #page-parts-delivery-schedule .lt-table th.col-purchase-no, #page-parts-delivery-schedule .lt-table td.col-purchase-no { position:sticky; left:40px; z-index:2; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
+    #page-parts-delivery-schedule .lt-table thead th.col-purchase-no { z-index:4; }
+    /* ===== 厂端缺件查询 冻结列 ===== */
+    #page-factory-shortage-query .lt-table th.col-seq, #page-factory-shortage-query .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
+    #page-factory-shortage-query .lt-table thead th.col-seq { z-index:4; }
+    #page-factory-shortage-query .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:80px; min-width:80px; max-width:80px; border-left:1px solid #ccc; background:#fff; }
+    #page-factory-shortage-query .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:80px; min-width:80px; max-width:80px; border-left:1px solid #ccc; background:#f0f0f0; }
+    #page-factory-shortage-query .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
+    #page-factory-shortage-query .lt-table tbody tr:hover td.col-actions { background:#fdf5f6; }
+    /* ===== 配件外采 冻结列 ===== */
+    #page-external-procurement .lt-table th.col-seq, #page-external-procurement .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
+    #page-external-procurement .lt-table thead th.col-seq { z-index:4; }
+    #page-external-procurement .lt-table th.col-ext-order-no, #page-external-procurement .lt-table td.col-ext-order-no { position:sticky; left:40px; z-index:2; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
+    #page-external-procurement .lt-table thead th.col-ext-order-no { z-index:4; }
+    #page-external-procurement .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#fff; }
+    #page-external-procurement .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#f0f0f0; }
+    #page-external-procurement .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
+    #page-external-procurement .lt-table tbody tr:hover td.col-actions { background:#fdf5f6; }
+    /* ===== 配件采购/外采 面板配件明细表 ===== */
+    .pp-parts-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .pp-parts-table th { background:#f5f5f5; padding:6px 4px; text-align:left; font-weight:600; border-bottom:1px solid #e8e8e8; white-space:nowrap; }
+    .pp-parts-table td { padding:4px; border-bottom:1px solid #f0f0f0; }
+    .pp-parts-table td input, .pp-parts-table td select { width:100%; padding:4px; border:1px solid #d9d9d9; border-radius:3px; font-size:12px; box-sizing:border-box; }
+    .pp-parts-table td input:focus { border-color:#185FA5; outline:none; }
+    .pp-panel-totals { text-align:right; padding:10px 0 0 0; font-size:13px; color:#333; }
+    .pp-panel-totals b { color:#185FA5; }
+    .pp-audit-area { margin-top:8px; }
+    .pp-audit-area .pm-section-title { border-left-color:#861B2F; color:#861B2F; }
+    .pp-audit-btns { display:flex; gap:12px; justify-content:flex-end; padding-top:12px; }
+    .pm-panel-badge.pass { background:#e6f7e6; color:#1D9E75; }
+    .pm-panel-badge.reject { background:#fde6e6; color:#861B2F; }

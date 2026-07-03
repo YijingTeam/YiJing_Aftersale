@@ -135,6 +135,26 @@
         if (module === 'quality-report') {
           initQr();
         }
+        // 配件采购
+        if (module === 'parts-procurement') {
+          initPp();
+        }
+        // 配件采购明细
+        if (module === 'parts-procurement-detail') {
+          initPpd();
+        }
+        // 配件发货及交期
+        if (module === 'parts-delivery-schedule') {
+          initPds();
+        }
+        // 厂端缺件查询
+        if (module === 'factory-shortage-query') {
+          initFsq();
+        }
+        // 配件外采
+        if (module === 'external-procurement') {
+          initEp();
+        }
       }
     }
 
@@ -3342,6 +3362,9 @@
       var importance = (document.getElementById('qr-flt-importance')||{}).value || '';
       var repairOrder = (document.getElementById('qr-flt-repair-order')||{}).value || '';
       var complaintOrder = (document.getElementById('qr-flt-complaint-order')||{}).value || '';
+      var isPdi = (document.getElementById('qr-flt-is-pdi')||{}).value || '';
+      var pdiOrder = (document.getElementById('qr-flt-pdi-order')||{}).value || '';
+      var alarmOrder = (document.getElementById('qr-flt-alarm-order')||{}).value || '';
       return qrAllData.filter(function(r) {
         if (orderNo && r.orderNo.toLowerCase().indexOf(orderNo.toLowerCase()) < 0) return false;
         if (carSeriesV && r.carSeries.toLowerCase().indexOf(carSeriesV.toLowerCase()) < 0) return false;
@@ -5182,18 +5205,18 @@
 (function(){
   // 模拟数据
   const pmData = [
-    {seq:1, code:'290F60471R', name:'减速器加油口密封垫', status:'可用', category:'事故件', attribute:'关键配件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:2, code:'TEST01101', name:'减速器加油口密封垫', status:'可用', category:'常规件', attribute:'自制件', isOil:'否', directPurchase:'-', series:'车系1', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:3, code:'290F60472R', name:'前保险杠总成', status:'可用', category:'事故件', attribute:'沿用件', isOil:'否', directPurchase:'否', series:'车系2', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:4, code:'TEST01102', name:'机油滤芯器', status:'可用', category:'常规件', attribute:'保养件', isOil:'是', directPurchase:'-', series:'车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:12.00, outSNP:2.00, minQty:12.00, maxQty:20.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:5, code:'290F60473R', name:'后视镜壳体LH', status:'可用', category:'X', attribute:'事故/车身件', isOil:'否', directPurchase:'是', series:'车系1,车系2,车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:24.00, outSNP:2.00, minQty:24.00, maxQty:1000.00, replaceCode:'配件编码', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:6, code:'TEST01103', name:'空气滤芯', status:'可用', category:'事故件', attribute:'发动机件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:7, code:'290F60474R', name:'变速箱油5L', status:'可用', category:'事故件', attribute:'变速箱件', isOil:'是', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:1000.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:8, code:'TEST01104', name:'刹车片前', status:'可用', category:'X', attribute:'电器', isOil:'否', directPurchase:'是', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:9, code:'290F60475R', name:'防冻液4L', status:'不可用', category:'事故件', attribute:'空调及安全设备', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:10, code:'TEST01105', name:'玻璃水2L', status:'不可用', category:'常规件', attribute:'化学类原辅材料', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:11, code:'290F60476R', name:'雨刮片24寸', status:'不可用', category:'事故件', attribute:'精品', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:12, code:'WC000001', name:'车载香薰', status:'不可用', category:'常规件', attribute:'随车工具', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:1, code:'290F60471R', name:'减速器加油口密封垫', status:'可用', category:'事故件', attribute:'关键配件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', urgent:'是', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:2, code:'TEST01101', name:'减速器加油口密封垫', status:'可用', category:'常规件', attribute:'自制件', isOil:'否', directPurchase:'-', series:'车系1', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:3, code:'290F60472R', name:'前保险杠总成', status:'可用', category:'事故件', attribute:'沿用件', isOil:'否', directPurchase:'否', series:'车系2', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'', urgent:'否', direct:'是', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:4, code:'TEST01102', name:'机油滤芯器', status:'可用', category:'常规件', attribute:'保养件', isOil:'是', directPurchase:'-', series:'车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:12.00, outSNP:2.00, minQty:12.00, maxQty:20.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:5, code:'290F60473R', name:'后视镜壳体LH', status:'可用', category:'X', attribute:'事故/车身件', isOil:'否', directPurchase:'是', series:'车系1,车系2,车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:24.00, outSNP:2.00, minQty:24.00, maxQty:1000.00, replaceCode:'配件编码', urgent:'是', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:6, code:'TEST01103', name:'空气滤芯', status:'可用', category:'事故件', attribute:'发动机件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:7, code:'290F60474R', name:'变速箱油5L', status:'可用', category:'事故件', attribute:'变速箱件', isOil:'是', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:1000.00, replaceCode:'', urgent:'否', direct:'是', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:8, code:'TEST01104', name:'刹车片前', status:'可用', category:'X', attribute:'电器', isOil:'否', directPurchase:'是', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:9, code:'290F60475R', name:'防冻液4L', status:'不可用', category:'事故件', attribute:'空调及安全设备', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:10, code:'TEST01105', name:'玻璃水2L', status:'不可用', category:'常规件', attribute:'化学类原辅材料', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:11, code:'290F60476R', name:'雨刮片24寸', status:'不可用', category:'事故件', attribute:'精品', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:12, code:'WC000001', name:'车载香薰', status:'不可用', category:'常规件', attribute:'随车工具', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
   ];
 
   let pmPage = 1, pmPageSize = 20;
@@ -5448,6 +5471,8 @@
       if (series && r.series.toLowerCase().indexOf(series) === -1) return false;
       if (model && r.model.toLowerCase().indexOf(model) === -1) return false;
       if (directPurchase && r.directPurchase !== directPurchase) return false;
+      if (urgent && r.urgent !== urgent) return false;
+      if (direct && r.direct !== direct) return false;
       return true;
     });
   }
@@ -5520,25 +5545,43 @@
 
   // 价格调整历史 模拟数据
   const phData = [
-    {seq:1, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'正常采购价', before:150.00, after:150.00, updater:'SAP', time:'2025-03-24 13:00:00'},
-    {seq:2, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'紧急采购价', before:180.00, after:180.00, updater:'SAP', time:'2025-01-01 13:00:00'},
-    {seq:3, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'参考销售价', before:200.00, after:200.00, updater:'SAP', time:'2025-01-01 13:00:00'},
-    {seq:4, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'销售价', before:120.00, after:120.00, updater:'更新人的账号', time:'2025-01-01 13:00:00'},
-    {seq:5, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
-    {seq:6, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
-    {seq:7, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
-    {seq:8, code:'290F60471R', name:'减速器加油口密封垫', category:'物料', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
-    {seq:9, code:'290F60471R', name:'减速器加油口密封垫', category:'物料', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
-    {seq:10, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
-    {seq:11, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-01-01 13:00:00'},
-    {seq:12, code:'290F60471R', name:'减速器加油口密封垫', category:'配件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-01-01 13:00:00'},
+    {seq:1, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'事故件', priceType:'正常采购价', before:150.00, after:150.00, updater:'SAP', time:'2025-03-24 13:00:00'},
+    {seq:2, code:'290F60471R', name:'减速器加油口密封垫', source:'门店', category:'事故件', priceType:'紧急采购价', before:180.00, after:180.00, updater:'SAP', time:'2025-01-01 13:00:00'},
+    {seq:3, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'事故件', priceType:'参考销售价', before:200.00, after:200.00, updater:'SAP', time:'2025-01-01 13:00:00'},
+    {seq:4, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'事故件', priceType:'销售价', before:120.00, after:120.00, updater:'更新人的账号', time:'2025-01-01 13:00:00'},
+    {seq:5, code:'290F60471R', name:'减速器加油口密封垫', source:'门店', category:'常规件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:6, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'常规件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:7, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'常规件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:8, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'常规件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:9, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'常规件', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:10, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'辅料', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-03-24 13:00:00'},
+    {seq:11, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'辅料', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-01-01 13:00:00'},
+    {seq:12, code:'290F60471R', name:'减速器加油口密封垫', source:'奕境', category:'辅料', priceType:'', before:120.00, after:120.00, updater:'', time:'2025-01-01 13:00:00'},
   ];
 
   function phRenderTable() {
     const tbody = document.getElementById('ph-tbody');
     if (!tbody) return;
+    // 读取筛选项
+    var source = (document.getElementById('ph-flt-source')||{}).value || '';
+    var code = (document.getElementById('ph-flt-code')||{}).value || '';
+    var name = (document.getElementById('ph-flt-name')||{}).value || '';
+    var priceType = (document.getElementById('ph-flt-price-type')||{}).value || '';
+    var category = (document.getElementById('ph-flt-category')||{}).value || '';
+    var dateStart = (document.getElementById('ph-flt-date-start')||{}).value || '';
+    var dateEnd = (document.getElementById('ph-flt-date-end')||{}).value || '';
+    var filtered = phData.filter(function(r) {
+      if (source && r.source !== source) return false;
+      if (code && r.code.toLowerCase().indexOf(code.toLowerCase()) < 0) return false;
+      if (name && r.name.toLowerCase().indexOf(name.toLowerCase()) < 0) return false;
+      if (priceType && r.priceType !== priceType) return false;
+      if (category && r.category !== category) return false;
+      if (dateStart && r.time < dateStart) return false;
+      if (dateEnd && r.time > dateEnd + ' 23:59:59') return false;
+      return true;
+    });
     let html = '';
-    phData.forEach(function(r) {
+    filtered.forEach(function(r) {
       html += '<tr>'
         + '<td>'+ r.seq +'</td>'
         + '<td>'+ r.code +'</td>'
@@ -5552,12 +5595,25 @@
         + '</tr>';
     });
     tbody.innerHTML = html;
-    document.getElementById('ph-pg-total').textContent = '共 '+ phData.length +' 条';
+    document.getElementById('ph-pg-total').textContent = '共 '+ filtered.length +' 条';
     var pgEl = document.getElementById('ph-pg-pages');
     if(pgEl) pgEl.innerHTML = '<span class="pg-num active">1</span>';
   }
   window.phRenderTable = phRenderTable;
-  window.phResetFilter = function() {};
+  window.phResetFilter = function() {
+    document.getElementById('ph-flt-source').value = '';
+    document.getElementById('ph-flt-code').value = '';
+    document.getElementById('ph-flt-name').value = '';
+    document.getElementById('ph-flt-price-type').value = '';
+    document.getElementById('ph-flt-category').value = '';
+    var startEl = document.getElementById('ph-flt-date-start');
+    var endEl = document.getElementById('ph-flt-date-end');
+    if (startEl) startEl.value = '';
+    if (endEl) endEl.value = '';
+    var textEl = document.querySelector('#page-parts-price-history .lt-date-range-text');
+    if (textEl) textEl.value = '';
+    phRenderTable();
+  };
   window.phChangePage = function() {};
   window.phGotoPage = function() {};
   window.phChangePageSize = function() {};
@@ -5748,3 +5804,1085 @@
     if (id === 'supplier-manage') { setTimeout(function(){ spRenderTable(); }, 50); }
   };
 })();
+
+// ===== 配件采购 JS =====
+var ppAllData = [
+  {seq:1,po:'PO202605001',type:'常规',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-05-20 14:30',edate:'2026-06-15',submitter:'张三',stime:'2026-05-18 10:00',sync:'2026-05-18 15:00'},
+  {seq:2,po:'PO202605002',type:'油品',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-05-21 09:15',edate:'2026-06-18',submitter:'李四',stime:'2026-05-19 11:00',sync:'2026-05-19 16:30'},
+  {seq:3,po:'PO202605003',type:'紧急',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:5,amount:'18,500.00',shortage:'DQ202605001',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-20 08:30',sync:'—'},
+  {seq:4,po:'PO202605004',type:'常规',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'赵六',stime:'2026-05-21 14:00',sync:'—'},
+  {seq:5,po:'PO202605005',type:'绿色',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:6,amount:'28,300.00',shortage:'—',status:'已驳回',remark:'配件编码不匹配',auditor:'李明',atime:'2026-05-22 10:00',edate:'—',submitter:'孙七',stime:'2026-05-21 16:00',sync:'—'},
+  {seq:6,po:'PO202606001',type:'常规',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:10,amount:'41,200.00',shortage:'—',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-06-01 11:20',edate:'2026-06-25',submitter:'周八',stime:'2026-05-30 09:00',sync:'2026-05-30 14:00'},
+  {seq:7,po:'PO202606002',type:'定制',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:3,amount:'62,100.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-06-02 15:40',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-01 10:30',sync:'2026-06-01 16:00'},
+  {seq:8,po:'PO202606003',type:'油品',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:7,amount:'35,600.00',shortage:'DQ202606001',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-06-28',submitter:'郑十',stime:'2026-06-03 13:00',sync:'—'},
+  {seq:9,po:'PO202606004',type:'常规',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',shortage:'—',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-06-05 09:00',edate:'2026-06-30',submitter:'张三',stime:'2026-06-04 08:00',sync:'2026-06-04 16:30'},
+  {seq:10,po:'PO202606005',type:'紧急',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:4,amount:'22,800.00',shortage:'DQ202606002',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'李四',stime:'2026-06-06 15:00',sync:'—'},
+  {seq:11,po:'PO202606006',type:'常规',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'43,500.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-06-08 10:30',edate:'2026-07-02',submitter:'王五',stime:'2026-06-07 09:30',sync:'2026-06-07 17:00'},
+  {seq:12,po:'PO202606007',type:'绿色',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:13,amount:'51,200.00',shortage:'—',status:'已驳回',remark:'超出预算额度',auditor:'王芳',atime:'2026-06-09 14:00',edate:'—',submitter:'赵六',stime:'2026-06-08 11:00',sync:'—'},
+  {seq:13,po:'PO202607001',type:'常规',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:6,amount:'26,400.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-07-01 08:30',edate:'2026-07-20',submitter:'孙七',stime:'2026-06-30 10:00',sync:'2026-06-30 16:00'},
+  {seq:14,po:'PO202607002',type:'油品',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'33,700.00',shortage:'DQ202607001',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-22',submitter:'周八',stime:'2026-07-01 09:00',sync:'—'},
+  {seq:15,po:'PO202607003',type:'定制',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'55,000.00',shortage:'—',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-07-25',submitter:'吴九',stime:'2026-07-02 14:30',sync:'—'},
+  {seq:16,po:'PO202607004',type:'常规',region:'华北',district:'石家庄',store:'石家庄长安店',scode:'SJZ001',variety:10,amount:'40,100.00',shortage:'—',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-02 16:00',edate:'2026-07-28',submitter:'郑十',stime:'2026-07-02 08:00',sync:'2026-07-02 17:30'},
+  {seq:17,po:'PO202607005',type:'紧急',region:'西南',district:'昆明',store:'昆明五华店',scode:'KM001',variety:3,amount:'15,200.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-07-03 10:00',edate:'2026-07-18',submitter:'张三',stime:'2026-07-02 11:00',sync:'2026-07-02 15:30'},
+  {seq:18,po:'PO202607006',type:'绿色',region:'华南',district:'厦门',store:'厦门思明店',scode:'XM001',variety:7,amount:'29,800.00',shortage:'—',status:'已取消',remark:'门店主动取消',auditor:'王芳',atime:'2026-07-03 11:00',edate:'—',submitter:'李四',stime:'2026-07-02 16:00',sync:'—'},
+  {seq:19,po:'PO202607007',type:'常规',region:'华东',district:'宁波',store:'宁波鄞州店',scode:'NB001',variety:14,amount:'52,600.00',shortage:'DQ202607002',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-08-01',submitter:'王五',stime:'2026-07-03 08:30',sync:'—'},
+  {seq:20,po:'PO202607008',type:'油品',region:'华北',district:'济南',store:'济南历下店',scode:'JN001',variety:5,amount:'21,300.00',shortage:'—',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-07-30',submitter:'赵六',stime:'2026-07-03 09:00',sync:'—'}
+];
+var ppFilteredData = [];
+var ppCurrentPage = 1;
+var ppPageSize = 20;
+var ppFilterExpanded = false;
+var ppInitialized = false;
+
+function ppRenderTable() {
+  var start = (ppCurrentPage - 1) * ppPageSize;
+  var pageData = ppFilteredData.slice(start, start + ppPageSize);
+  var tbody = document.getElementById('pp-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = pageData.map(function(r, idx) {
+    var ri = start + idx;
+    return '<tr>'
+      + '<td class="sticky col-seq">'+r.seq+'</td>'
+      + '<td class="sticky col-po-no">'+r.po+'</td>'
+      + '<td class="col-order-type">'+r.type+'</td>'
+      + '<td class="col-region">'+r.region+'</td>'
+      + '<td class="col-district">'+r.district+'</td>'
+      + '<td class="col-store-name">'+r.store+'</td>'
+      + '<td class="col-store-code">'+r.scode+'</td>'
+      + '<td class="col-variety-count">'+r.variety+'</td>'
+      + '<td class="col-total-amount">'+r.amount+'</td>'
+      + '<td class="col-shortage-no">'+r.shortage+'</td>'
+      + '<td class="col-order-status">'+r.status+'</td>'
+      + '<td class="col-audit-remark">'+r.remark+'</td>'
+      + '<td class="col-auditor">'+r.auditor+'</td>'
+      + '<td class="col-audit-time">'+r.atime+'</td>'
+      + '<td class="col-expected-date">'+r.edate+'</td>'
+      + '<td class="col-submitter">'+r.submitter+'</td>'
+      + '<td class="col-submit-time">'+r.stime+'</td>'
+      + '<td class="col-sync-time">'+r.sync+'</td>'
+      + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="ppOpenView('+ ri +')" style="color:#185FA5;cursor:pointer">查看</a> <a href="javascript:void(0)" onclick="ppOpenEdit('+ ri +')" style="color:#185FA5;cursor:pointer">编辑</a> <a href="javascript:void(0)" onclick="alert(\'删除功能待开发\')" style="color:#185FA5;cursor:pointer">删除</a> <a href="javascript:void(0)" onclick="ppOpenAudit('+ ri +')" style="color:#185FA5;cursor:pointer">审核</a></td>'
+      + '</tr>';
+  }).join('');
+  document.getElementById('pp-pg-total').textContent = '共 ' + ppFilteredData.length + ' 条';
+  ppRenderPages();
+}
+function ppRenderPages() {
+  var totalPages = Math.ceil(ppFilteredData.length / ppPageSize) || 1;
+  var pages = document.getElementById('pp-pg-pages');
+  var html = '';
+  for (var i = 1; i <= totalPages; i++) {
+    html += i === ppCurrentPage ? '<button class="active" onclick="ppGoPage('+i+')">'+i+'</button>' : '<button onclick="ppGoPage('+i+')">'+i+'</button>';
+  }
+  pages.innerHTML = html;
+  document.getElementById('pp-pg-prev').disabled = ppCurrentPage === 1;
+  document.getElementById('pp-pg-next').disabled = ppCurrentPage >= totalPages;
+}
+function ppGoPage(p) { ppCurrentPage = p; ppRenderTable(); }
+function ppChangePage(d) { ppGoPage(Math.max(1, Math.min(ppCurrentPage + d, Math.ceil(ppFilteredData.length / ppPageSize) || 1))); }
+function ppChangePageSize(s) { ppPageSize = parseInt(s); ppCurrentPage = 1; ppRenderTable(); }
+function ppGotoPage(v) { var p = parseInt(v); if (p) ppGoPage(p); }
+function ppApplyFilter() {
+  var qPo = (document.getElementById('pp-flt-po-no')?.value || '').toLowerCase();
+  var qType = document.getElementById('pp-flt-order-type')?.value || '';
+  var qStatus = document.getElementById('pp-flt-status')?.value || '';
+  var qShortage = (document.getElementById('pp-flt-shortage')?.value || '').toLowerCase();
+  var qRegion = (document.getElementById('pp-flt-region')?.value || '').toLowerCase();
+  var qDistrict = (document.getElementById('pp-flt-district')?.value || '').toLowerCase();
+  var qStore = (document.getElementById('pp-flt-store')?.value || '').toLowerCase();
+  var ds = document.getElementById('pp-flt-date-start')?.value || '';
+  var de = document.getElementById('pp-flt-date-end')?.value || '';
+  ppFilteredData = ppAllData.filter(function(r) {
+    if (qPo && r.po.toLowerCase().indexOf(qPo) === -1) return false;
+    if (qType && r.type !== qType) return false;
+    if (qStatus && r.status !== qStatus) return false;
+    if (qShortage && r.shortage.toLowerCase().indexOf(qShortage) === -1) return false;
+    if (qRegion && r.region.toLowerCase().indexOf(qRegion) === -1) return false;
+    if (qDistrict && r.district.toLowerCase().indexOf(qDistrict) === -1) return false;
+    if (qStore && r.store.toLowerCase().indexOf(qStore) === -1) return false;
+    if (ds && r.stime < ds) return false;
+    if (de && r.stime > de + ' 23:59:59') return false;
+    return true;
+  });
+  ppCurrentPage = 1;
+  ppRenderTable();
+}
+function ppResetFilter() {
+  document.getElementById('pp-flt-po-no') && (document.getElementById('pp-flt-po-no').value = '');
+  document.getElementById('pp-flt-order-type') && (document.getElementById('pp-flt-order-type').value = '');
+  document.getElementById('pp-flt-status') && (document.getElementById('pp-flt-status').value = '');
+  document.getElementById('pp-flt-shortage') && (document.getElementById('pp-flt-shortage').value = '');
+  document.getElementById('pp-flt-region') && (document.getElementById('pp-flt-region').value = '');
+  document.getElementById('pp-flt-district') && (document.getElementById('pp-flt-district').value = '');
+  document.getElementById('pp-flt-store') && (document.getElementById('pp-flt-store').value = '');
+  var dtext = document.querySelector('#page-parts-procurement .lt-date-range-text');
+  if (dtext) dtext.value = '';
+  document.getElementById('pp-flt-date-start') && (document.getElementById('pp-flt-date-start').value = '');
+  document.getElementById('pp-flt-date-end') && (document.getElementById('pp-flt-date-end').value = '');
+  ppFilteredData = [].concat(ppAllData);
+  ppCurrentPage = 1;
+  ppRenderTable();
+}
+function ppExportData() { alert('导出 ' + ppFilteredData.length + ' 条配件采购数据'); }
+function ppToggleFilter() {
+  ppFilterExpanded = !ppFilterExpanded;
+  var grid = document.getElementById('pp-filterGrid');
+  var items = grid.querySelectorAll('.lt-filter-item');
+  for (var i = 7; i < items.length; i++) { items[i].style.display = ppFilterExpanded ? '' : 'none'; }
+  var toggleEl = grid.querySelector('.lt-filter-toggle');
+  if (toggleEl) toggleEl.innerHTML = ppFilterExpanded ? '&#xFE40; 收起' : '&#xFE40; 展开';
+}
+function ppFilterCombobox(input) {
+  var wrap = input.closest('.lt-input-wrap.combobox');
+  if (!wrap) return;
+  var list = wrap.querySelector('.lt-datalist');
+  if (!list) return;
+  var val = input.value.toLowerCase();
+  list.querySelectorAll('li').forEach(function(li) { li.classList.toggle('hidden', val && li.textContent.toLowerCase().indexOf(val) === -1); });
+}
+function ppShowCombobox(input) {
+  var list = input.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist');
+  if (list) list.classList.add('show');
+}
+function ppToggleCombobox(arrow) {
+  var list = arrow.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist');
+  if (!list) return;
+  list.classList.toggle('show');
+  if (list.classList.contains('show')) { var inp = arrow.closest('.lt-input-wrap.combobox').querySelector('input'); if (inp) inp.focus(); }
+}
+function ppSelectCombobox(li) {
+  var wrap = li.closest('.lt-input-wrap.combobox');
+  wrap.querySelector('input').value = li.textContent;
+  wrap.querySelector('.lt-datalist').classList.remove('show');
+  ppApplyFilter();
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.lt-input-wrap.combobox')) {
+    document.querySelectorAll('#page-parts-procurement .lt-datalist.show').forEach(function(l) { l.classList.remove('show'); });
+  }
+});
+function initPp() {
+  if (!ppInitialized) {
+    ppInitialized = true;
+    var now = new Date();
+    var s = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    if (s.getMonth() !== ((now.getMonth() - 1 + 12) % 12)) s = new Date(now.getFullYear(), now.getMonth(), 0);
+    var ds = s.toISOString().split('T')[0], de = now.toISOString().split('T')[0];
+    var se = document.getElementById('pp-flt-date-start'), ee = document.getElementById('pp-flt-date-end');
+    if (se) se.value = ds; if (ee) ee.value = de;
+    var te = document.querySelector('#page-parts-procurement .lt-date-range-text');
+    if (te) te.value = ds + '-' + de;
+  }
+  ppFilteredData = [].concat(ppAllData);
+  ppRenderTable();
+  var grid = document.getElementById('pp-filterGrid');
+  var items = grid.querySelectorAll('.lt-filter-item');
+  for (var i = 7; i < items.length; i++) { items[i].style.display = 'none'; }
+}
+
+// ===== 配件采购明细 JS =====
+var ppdAllData = [
+  {seq:1,code:'PJ001',name:'刹车片（前）',region:'华东',district:'上海',store:'上海浦东店',po:'PO202605001',adate:'2026-05-20',oem:'OE202605001',dno:'DH202605001',pqty:50,dqty:50,uprice:'380.00',amount:'19,000.00'},
+  {seq:2,code:'PJ002',name:'机油滤清器',region:'华南',district:'广州',store:'广州风丽店',po:'PO202605002',adate:'2026-05-21',oem:'OE202605002',dno:'DH202605002',pqty:80,dqty:80,uprice:'85.00',amount:'6,800.00'},
+  {seq:3,code:'PJ003',name:'空气滤芯',region:'华北',district:'北京',store:'北京朝阳店',po:'PO202605003',adate:'2026-05-22',oem:'OE202605003',dno:'DH202605003',pqty:60,dqty:0,uprice:'120.00',amount:'7,200.00'},
+  {seq:4,code:'PJ004',name:'火花塞',region:'西南',district:'成都',store:'成都武侯店',po:'PO202605004',adate:'2026-05-23',oem:'OE202605004',dno:'DH202605004',pqty:40,dqty:40,uprice:'95.00',amount:'3,800.00'},
+  {seq:5,code:'PJ005',name:'刹车油',region:'东北',district:'沈阳',store:'沈阳和平店',po:'PO202605005',adate:'2026-05-24',oem:'OE202605005',dno:'DH202605005',pqty:30,dqty:30,uprice:'150.00',amount:'4,500.00'},
+  {seq:6,code:'PJ006',name:'空调滤芯',region:'华东',district:'杭州',store:'杭州西湖店',po:'PO202606001',adate:'2026-06-01',oem:'OE202606001',dno:'DH202606001',pqty:70,dqty:70,uprice:'90.00',amount:'6,300.00'},
+  {seq:7,code:'PJ001',name:'刹车片（前）',region:'华中',district:'武汉',store:'武汉光谷店',po:'PO202606002',adate:'2026-06-02',oem:'OE202606002',dno:'DH202606002',pqty:35,dqty:35,uprice:'380.00',amount:'13,300.00'},
+  {seq:8,code:'PJ007',name:'变速箱油',region:'华南',district:'深圳',store:'深圳福田店',po:'PO202606003',adate:'2026-06-03',oem:'OE202606003',dno:'DH202606003',pqty:25,dqty:0,uprice:'260.00',amount:'6,500.00'},
+  {seq:9,code:'PJ002',name:'机油滤清器',region:'华北',district:'天津',store:'天津和平店',po:'PO202606004',adate:'2026-06-05',oem:'OE202606004',dno:'DH202606004',pqty:90,dqty:90,uprice:'85.00',amount:'7,650.00'},
+  {seq:10,code:'PJ008',name:'雨刮器',region:'西南',district:'重庆',store:'重庆渝中店',po:'PO202606005',adate:'2026-06-06',oem:'OE202606005',dno:'DH202606005',pqty:45,dqty:0,uprice:'65.00',amount:'2,925.00'},
+  {seq:11,code:'PJ003',name:'空气滤芯',region:'华东',district:'南京',store:'南京建邺店',po:'PO202606006',adate:'2026-06-08',oem:'OE202606006',dno:'DH202606006',pqty:55,dqty:55,uprice:'120.00',amount:'6,600.00'},
+  {seq:12,code:'PJ004',name:'火花塞',region:'华南',district:'广州',store:'广州天河店',po:'PO202606007',adate:'2026-06-09',oem:'OE202606007',dno:'DH202606007',pqty:38,dqty:38,uprice:'95.00',amount:'3,610.00'},
+  {seq:13,code:'PJ005',name:'刹车油',region:'东北',district:'大连',store:'大连中山店',po:'PO202607001',adate:'2026-07-01',oem:'OE202607001',dno:'DH202607001',pqty:42,dqty:42,uprice:'150.00',amount:'6,300.00'},
+  {seq:14,code:'PJ006',name:'空调滤芯',region:'华中',district:'长沙',store:'长沙岳麓店',po:'PO202607002',adate:'2026-07-02',oem:'OE202607002',dno:'DH202607002',pqty:65,dqty:0,uprice:'90.00',amount:'5,850.00'},
+  {seq:15,code:'PJ001',name:'刹车片（前）',region:'华东',district:'苏州',store:'苏州园区店',po:'PO202607003',adate:'2026-07-03',oem:'OE202607003',dno:'DH202607003',pqty:28,dqty:0,uprice:'380.00',amount:'10,640.00'}
+];
+var ppdFilteredData = [];
+var ppdCurrentPage = 1;
+var ppdPageSize = 20;
+var ppdInitialized = false;
+
+function ppdRenderTable() {
+  var start = (ppdCurrentPage - 1) * ppdPageSize;
+  var pageData = ppdFilteredData.slice(start, start + ppdPageSize);
+  var tbody = document.getElementById('ppd-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = pageData.map(function(r) {
+    return '<tr>'
+      + '<td class="sticky col-seq">'+r.seq+'</td>'
+      + '<td class="col-code">'+r.code+'</td>'
+      + '<td class="col-name">'+r.name+'</td>'
+      + '<td class="col-region">'+r.region+'</td>'
+      + '<td class="col-district">'+r.district+'</td>'
+      + '<td class="col-store-name">'+r.store+'</td>'
+      + '<td class="col-purchase-no">'+r.po+'</td>'
+      + '<td class="col-audit-time">'+r.adate+'</td>'
+      + '<td class="col-oem-order-no">'+r.oem+'</td>'
+      + '<td class="col-delivery-no">'+r.dno+'</td>'
+      + '<td class="col-purchase-qty">'+r.pqty+'</td>'
+      + '<td class="col-delivery-qty">'+r.dqty+'</td>'
+      + '<td class="col-unit-price">'+r.uprice+'</td>'
+      + '<td class="col-amount">'+r.amount+'</td>'
+      + '</tr>';
+  }).join('');
+  document.getElementById('ppd-pg-total').textContent = '共 ' + ppdFilteredData.length + ' 条';
+  ppdRenderPages();
+}
+function ppdRenderPages() {
+  var totalPages = Math.ceil(ppdFilteredData.length / ppdPageSize) || 1;
+  var pages = document.getElementById('ppd-pg-pages');
+  var html = '';
+  for (var i = 1; i <= totalPages; i++) { html += i === ppdCurrentPage ? '<button class="active" onclick="ppdGoPage('+i+')">'+i+'</button>' : '<button onclick="ppdGoPage('+i+')">'+i+'</button>'; }
+  pages.innerHTML = html;
+  document.getElementById('ppd-pg-prev').disabled = ppdCurrentPage === 1;
+  document.getElementById('ppd-pg-next').disabled = ppdCurrentPage >= totalPages;
+}
+function ppdGoPage(p) { ppdCurrentPage = p; ppdRenderTable(); }
+function ppdChangePage(d) { ppdGoPage(Math.max(1, Math.min(ppdCurrentPage + d, Math.ceil(ppdFilteredData.length / ppdPageSize) || 1))); }
+function ppdChangePageSize(s) { ppdPageSize = parseInt(s); ppdCurrentPage = 1; ppdRenderTable(); }
+function ppdGotoPage(v) { var p = parseInt(v); if (p) ppdGoPage(p); }
+function ppdApplyFilter() {
+  var qCode = (document.getElementById('ppd-flt-code')?.value || '').toLowerCase();
+  var qName = (document.getElementById('ppd-flt-name')?.value || '').toLowerCase();
+  var qPo = (document.getElementById('ppd-flt-po-no')?.value || '').toLowerCase();
+  var qRegion = (document.getElementById('ppd-flt-region')?.value || '').toLowerCase();
+  var qDistrict = (document.getElementById('ppd-flt-district')?.value || '').toLowerCase();
+  var qStore = (document.getElementById('ppd-flt-store')?.value || '').toLowerCase();
+  var ds = document.getElementById('ppd-flt-date-start')?.value || '';
+  var de = document.getElementById('ppd-flt-date-end')?.value || '';
+  ppdFilteredData = ppdAllData.filter(function(r) {
+    if (qCode && r.code.toLowerCase().indexOf(qCode) === -1) return false;
+    if (qName && r.name.toLowerCase().indexOf(qName) === -1) return false;
+    if (qPo && r.po.toLowerCase().indexOf(qPo) === -1) return false;
+    if (qRegion && r.region.toLowerCase().indexOf(qRegion) === -1) return false;
+    if (qDistrict && r.district.toLowerCase().indexOf(qDistrict) === -1) return false;
+    if (qStore && r.store.toLowerCase().indexOf(qStore) === -1) return false;
+    if (ds && r.adate < ds) return false;
+    if (de && r.adate > de) return false;
+    return true;
+  });
+  ppdCurrentPage = 1;
+  ppdRenderTable();
+}
+function ppdResetFilter() {
+  ['ppd-flt-code','ppd-flt-name','ppd-flt-po-no','ppd-flt-region','ppd-flt-district','ppd-flt-store'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var dtext = document.querySelector('#page-parts-procurement-detail .lt-date-range-text');
+  if (dtext) dtext.value = '';
+  document.getElementById('ppd-flt-date-start') && (document.getElementById('ppd-flt-date-start').value = '');
+  document.getElementById('ppd-flt-date-end') && (document.getElementById('ppd-flt-date-end').value = '');
+  ppdFilteredData = [].concat(ppdAllData);
+  ppdCurrentPage = 1;
+  ppdRenderTable();
+}
+function ppdExportData() { alert('导出 ' + ppdFilteredData.length + ' 条配件采购明细数据'); }
+function ppdFilterCombobox(input) {
+  var wrap = input.closest('.lt-input-wrap.combobox');
+  if (!wrap) return;
+  var list = wrap.querySelector('.lt-datalist');
+  if (!list) return;
+  var val = input.value.toLowerCase();
+  list.querySelectorAll('li').forEach(function(li) { li.classList.toggle('hidden', val && li.textContent.toLowerCase().indexOf(val) === -1); });
+}
+function ppdShowCombobox(input) {
+  var list = input.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist');
+  if (list) list.classList.add('show');
+}
+function ppdToggleCombobox(arrow) {
+  var list = arrow.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist');
+  if (!list) return;
+  list.classList.toggle('show');
+  if (list.classList.contains('show')) { var inp = arrow.closest('.lt-input-wrap.combobox').querySelector('input'); if (inp) inp.focus(); }
+}
+function ppdSelectCombobox(li) {
+  var wrap = li.closest('.lt-input-wrap.combobox');
+  wrap.querySelector('input').value = li.textContent;
+  wrap.querySelector('.lt-datalist').classList.remove('show');
+  ppdApplyFilter();
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.lt-input-wrap.combobox')) {
+    document.querySelectorAll('#page-parts-procurement-detail .lt-datalist.show').forEach(function(l) { l.classList.remove('show'); });
+  }
+});
+function initPpd() {
+  if (!ppdInitialized) {
+    ppdInitialized = true;
+    var now = new Date();
+    var s = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    if (s.getMonth() !== ((now.getMonth() - 1 + 12) % 12)) s = new Date(now.getFullYear(), now.getMonth(), 0);
+    var ds = s.toISOString().split('T')[0], de = now.toISOString().split('T')[0];
+    var se = document.getElementById('ppd-flt-date-start'), ee = document.getElementById('ppd-flt-date-end');
+    if (se) se.value = ds; if (ee) ee.value = de;
+    var te = document.querySelector('#page-parts-procurement-detail .lt-date-range-text');
+    if (te) te.value = ds + '-' + de;
+  }
+  ppdFilteredData = [].concat(ppdAllData);
+  ppdRenderTable();
+}
+
+// ===== 配件发货及交期 JS =====
+var pdsAllData = [
+  {seq:1,po:'PO202605001',store:'上海浦东店',scode:'SH001',province:'上海',stime:'2026-05-18 10:00',hqno:'HQ202605001',hqtime:'2026-05-18 16:00',dno:'DH202605001',dtime:'2026-05-22 09:00',lno:'SF1234567890',ltime:'2026-05-23 14:00',lnode:'已到达上海分拨中心',est:'2026-05-25',signtime:'2026-05-25 15:30',pcode:'PJ001',pname:'刹车片（前）'},
+  {seq:2,po:'PO202605002',store:'广州风丽店',scode:'GZ001',province:'广东',stime:'2026-05-19 11:00',hqno:'HQ202605002',hqtime:'2026-05-19 17:30',dno:'DH202605002',dtime:'2026-05-23 10:00',lno:'YT9876543210',ltime:'2026-05-24 08:00',lnode:'已签收',est:'2026-05-26',signtime:'2026-05-26 10:00',pcode:'PJ002',pname:'机油滤清器'},
+  {seq:3,po:'PO202605003',store:'北京朝阳店',scode:'BJ001',province:'北京',stime:'2026-05-20 08:30',hqno:'HQ202605003',hqtime:'2026-05-20 15:00',dno:'—',dtime:'—',lno:'—',ltime:'—',lnode:'待发货',est:'2026-06-10',signtime:'—',pcode:'PJ003',pname:'空气滤芯'},
+  {seq:4,po:'PO202606001',store:'杭州西湖店',scode:'HZ001',province:'浙江',stime:'2026-05-30 09:00',hqno:'HQ202606001',hqtime:'2026-05-30 16:00',dno:'DH202606001',dtime:'2026-06-05 08:00',lno:'ZTO202606001',ltime:'2026-06-06 10:00',lnode:'运输中-已离开杭州',est:'2026-06-08',signtime:'2026-06-08 14:00',pcode:'PJ004',pname:'火花塞'},
+  {seq:5,po:'PO202606002',store:'武汉光谷店',scode:'WH001',province:'湖北',stime:'2026-06-01 10:30',hqno:'HQ202606002',hqtime:'2026-06-01 17:00',dno:'DH202606002',dtime:'2026-06-06 09:00',lno:'SF202606002',ltime:'2026-06-07 11:00',lnode:'运输中-已到达武汉',est:'2026-06-08',signtime:'2026-06-08 16:00',pcode:'PJ001',pname:'刹车片（前）'},
+  {seq:6,po:'PO202606003',store:'深圳福田店',scode:'SZ001',province:'广东',stime:'2026-06-03 13:00',hqno:'HQ202606003',hqtime:'2026-06-03 18:00',dno:'DH202606003',dtime:'2026-06-08 10:00',lno:'YT202606003',ltime:'2026-06-09 09:00',lnode:'运输中-已到达深圳',est:'2026-06-10',signtime:'—',pcode:'PJ005',pname:'刹车油'},
+  {seq:7,po:'PO202606004',store:'天津和平店',scode:'TJ001',province:'天津',stime:'2026-06-04 08:00',hqno:'HQ202606004',hqtime:'2026-06-04 15:00',dno:'DH202606004',dtime:'2026-06-09 11:00',lno:'ZTO202606004',ltime:'2026-06-10 08:00',lnode:'已签收',est:'2026-06-11',signtime:'2026-06-11 09:30',pcode:'PJ006',pname:'空调滤芯'},
+  {seq:8,po:'PO202606005',store:'重庆渝中店',scode:'CQ001',province:'重庆',stime:'2026-06-06 15:00',hqno:'HQ202606005',hqtime:'2026-06-06 19:00',dno:'DH202606005',dtime:'2026-06-11 09:00',lno:'SF202606005',ltime:'2026-06-12 14:00',lnode:'待发货',est:'2026-06-20',signtime:'—',pcode:'PJ007',pname:'变速箱油'},
+  {seq:9,po:'PO202606006',store:'南京建邺店',scode:'NJ001',province:'江苏',stime:'2026-06-07 09:30',hqno:'HQ202606006',hqtime:'2026-06-07 17:00',dno:'DH202606006',dtime:'2026-06-12 08:00',lno:'YT202606006',ltime:'2026-06-13 10:00',lnode:'已签收',est:'2026-06-14',signtime:'2026-06-14 15:00',pcode:'PJ008',pname:'雨刮器'},
+  {seq:10,po:'PO202607001',store:'大连中山店',scode:'DL001',province:'辽宁',stime:'2026-06-30 10:00',hqno:'HQ202607001',hqtime:'2026-06-30 17:30',dno:'DH202607001',dtime:'2026-07-03 09:00',lno:'SF202607001',ltime:'2026-07-03 14:00',lnode:'运输中',est:'2026-07-05',signtime:'—',pcode:'PJ002',pname:'机油滤清器'}
+];
+var pdsFilteredData = [];
+var pdsCurrentPage = 1;
+var pdsPageSize = 20;
+var pdsFilterExpanded = false;
+var pdsInitialized = false;
+
+function pdsRenderTable() {
+  var start = (pdsCurrentPage - 1) * pdsPageSize;
+  var pageData = pdsFilteredData.slice(start, start + pdsPageSize);
+  var tbody = document.getElementById('pds-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = pageData.map(function(r) {
+    return '<tr>'
+      + '<td class="sticky col-seq">'+r.seq+'</td>'
+      + '<td class="sticky col-purchase-no">'+r.po+'</td>'
+      + '<td class="col-store-name">'+r.store+'</td>'
+      + '<td class="col-store-code">'+r.scode+'</td>'
+      + '<td class="col-province">'+r.province+'</td>'
+      + '<td class="col-submit-time">'+r.stime+'</td>'
+      + '<td class="col-hq-order-no">'+r.hqno+'</td>'
+      + '<td class="col-hq-receive-time">'+r.hqtime+'</td>'
+      + '<td class="col-delivery-no">'+r.dno+'</td>'
+      + '<td class="col-delivery-time">'+r.dtime+'</td>'
+      + '<td class="col-logistics-no">'+r.lno+'</td>'
+      + '<td class="col-logistics-time">'+r.ltime+'</td>'
+      + '<td class="col-logistics-node">'+r.lnode+'</td>'
+      + '<td class="col-est-arrival">'+r.est+'</td>'
+      + '<td class="col-sign-time">'+r.signtime+'</td>'
+      + '</tr>';
+  }).join('');
+  document.getElementById('pds-pg-total').textContent = '共 ' + pdsFilteredData.length + ' 条';
+  pdsRenderPages();
+}
+function pdsRenderPages() {
+  var totalPages = Math.ceil(pdsFilteredData.length / pdsPageSize) || 1;
+  var pages = document.getElementById('pds-pg-pages');
+  var html = '';
+  for (var i = 1; i <= totalPages; i++) { html += i === pdsCurrentPage ? '<button class="active" onclick="pdsGoPage('+i+')">'+i+'</button>' : '<button onclick="pdsGoPage('+i+')">'+i+'</button>'; }
+  pages.innerHTML = html;
+  document.getElementById('pds-pg-prev').disabled = pdsCurrentPage === 1;
+  document.getElementById('pds-pg-next').disabled = pdsCurrentPage >= totalPages;
+}
+function pdsGoPage(p) { pdsCurrentPage = p; pdsRenderTable(); }
+function pdsChangePage(d) { pdsGoPage(Math.max(1, Math.min(pdsCurrentPage + d, Math.ceil(pdsFilteredData.length / pdsPageSize) || 1))); }
+function pdsChangePageSize(s) { pdsPageSize = parseInt(s); pdsCurrentPage = 1; pdsRenderTable(); }
+function pdsGotoPage(v) { var p = parseInt(v); if (p) pdsGoPage(p); }
+function pdsApplyFilter() {
+  var qPo = (document.getElementById('pds-flt-po-no')?.value || '').toLowerCase();
+  var qCode = (document.getElementById('pds-flt-code')?.value || '').toLowerCase();
+  var qName = (document.getElementById('pds-flt-name')?.value || '').toLowerCase();
+  var qDno = (document.getElementById('pds-flt-delivery')?.value || '').toLowerCase();
+  var qLno = (document.getElementById('pds-flt-logistics')?.value || '').toLowerCase();
+  var qSigned = document.getElementById('pds-flt-signed')?.value || '';
+  var qStore = (document.getElementById('pds-flt-store')?.value || '').toLowerCase();
+  var qRegion = (document.getElementById('pds-flt-region')?.value || '').toLowerCase();
+  var qDistrict = (document.getElementById('pds-flt-district')?.value || '').toLowerCase();
+  var ds = document.getElementById('pds-flt-date-start')?.value || '';
+  var de = document.getElementById('pds-flt-date-end')?.value || '';
+  pdsFilteredData = pdsAllData.filter(function(r) {
+    if (qPo && r.po.toLowerCase().indexOf(qPo) === -1) return false;
+    if (qCode && r.pcode.toLowerCase().indexOf(qCode) === -1) return false;
+    if (qName && r.pname.toLowerCase().indexOf(qName) === -1) return false;
+    if (qDno && r.dno.toLowerCase().indexOf(qDno) === -1) return false;
+    if (qLno && r.lno.toLowerCase().indexOf(qLno) === -1) return false;
+    if (qSigned) { var signed = r.signtime !== '—'; if (qSigned === '是' && !signed) return false; if (qSigned === '否' && signed) return false; }
+    if (qStore && r.store.toLowerCase().indexOf(qStore) === -1) return false;
+    if (ds && r.stime < ds) return false;
+    if (de && r.stime > de + ' 23:59:59') return false;
+    return true;
+  });
+  pdsCurrentPage = 1;
+  pdsRenderTable();
+}
+function pdsResetFilter() {
+  ['pds-flt-po-no','pds-flt-code','pds-flt-name','pds-flt-delivery','pds-flt-logistics','pds-flt-region','pds-flt-district','pds-flt-store'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('pds-flt-signed') && (document.getElementById('pds-flt-signed').value = '');
+  var dtext = document.querySelector('#page-parts-delivery-schedule .lt-date-range-text');
+  if (dtext) dtext.value = '';
+  document.getElementById('pds-flt-date-start') && (document.getElementById('pds-flt-date-start').value = '');
+  document.getElementById('pds-flt-date-end') && (document.getElementById('pds-flt-date-end').value = '');
+  pdsFilteredData = [].concat(pdsAllData);
+  pdsCurrentPage = 1;
+  pdsRenderTable();
+}
+function pdsExportData() { alert('导出 ' + pdsFilteredData.length + ' 条配件发货及交期数据'); }
+function pdsToggleFilter() {
+  pdsFilterExpanded = !pdsFilterExpanded;
+  var grid = document.getElementById('pds-filterGrid');
+  var items = grid.querySelectorAll('.lt-filter-item');
+  for (var i = 7; i < items.length; i++) { items[i].style.display = pdsFilterExpanded ? '' : 'none'; }
+  var toggleEl = grid.querySelector('.lt-filter-toggle');
+  if (toggleEl) toggleEl.innerHTML = pdsFilterExpanded ? '&#xFE40; 收起' : '&#xFE40; 展开';
+}
+function pdsFilterCombobox(input) {
+  var wrap = input.closest('.lt-input-wrap.combobox');
+  if (!wrap) return;
+  var list = wrap.querySelector('.lt-datalist');
+  if (!list) return;
+  var val = input.value.toLowerCase();
+  list.querySelectorAll('li').forEach(function(li) { li.classList.toggle('hidden', val && li.textContent.toLowerCase().indexOf(val) === -1); });
+}
+function pdsShowCombobox(input) { var list = input.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist'); if (list) list.classList.add('show'); }
+function pdsToggleCombobox(arrow) {
+  var list = arrow.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist');
+  if (!list) return;
+  list.classList.toggle('show');
+  if (list.classList.contains('show')) { var inp = arrow.closest('.lt-input-wrap.combobox').querySelector('input'); if (inp) inp.focus(); }
+}
+function pdsSelectCombobox(li) {
+  var wrap = li.closest('.lt-input-wrap.combobox');
+  wrap.querySelector('input').value = li.textContent;
+  wrap.querySelector('.lt-datalist').classList.remove('show');
+  pdsApplyFilter();
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.lt-input-wrap.combobox')) {
+    document.querySelectorAll('#page-parts-delivery-schedule .lt-datalist.show').forEach(function(l) { l.classList.remove('show'); });
+  }
+});
+function initPds() {
+  if (!pdsInitialized) {
+    pdsInitialized = true;
+    var now = new Date();
+    var s = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    if (s.getMonth() !== ((now.getMonth() - 1 + 12) % 12)) s = new Date(now.getFullYear(), now.getMonth(), 0);
+    var ds = s.toISOString().split('T')[0], de = now.toISOString().split('T')[0];
+    var se = document.getElementById('pds-flt-date-start'), ee = document.getElementById('pds-flt-date-end');
+    if (se) se.value = ds; if (ee) ee.value = de;
+    var te = document.querySelector('#page-parts-delivery-schedule .lt-date-range-text');
+    if (te) te.value = ds + '-' + de;
+  }
+  pdsFilteredData = [].concat(pdsAllData);
+  pdsRenderTable();
+  var grid = document.getElementById('pds-filterGrid');
+  var items = grid.querySelectorAll('.lt-filter-item');
+  for (var i = 7; i < items.length; i++) { items[i].style.display = 'none'; }
+}
+
+// ===== 厂端缺件查询 JS =====
+var fsqAllData = [
+  {seq:1,name:'刹车片（前）',code:'PJ001',store:'上海浦东店',scode:'SH001',province:'上海',po:'PO202605003',type:'紧急',oem:'OE202605003',pqty:50,aqty:35,sqty:15,shours:'72',sync:'2026-05-18 15:00',oreply:'2026-05-19 14:00',capply:'—',caudit:'—'},
+  {seq:2,name:'机油滤清器',code:'PJ002',store:'广州风丽店',scode:'GZ001',province:'广东',po:'PO202605004',type:'常规',oem:'OE202605004',pqty:80,aqty:60,sqty:20,shours:'48',sync:'2026-05-19 16:30',oreply:'2026-05-20 10:00',capply:'—',caudit:'—'},
+  {seq:3,name:'空气滤芯',code:'PJ003',store:'北京朝阳店',scode:'BJ001',province:'北京',po:'PO202605005',type:'绿色',oem:'OE202605005',pqty:60,aqty:60,sqty:0,shours:'0',sync:'2026-05-20 09:00',oreply:'—',capply:'—',caudit:'—'},
+  {seq:4,name:'火花塞',code:'PJ004',store:'成都武侯店',scode:'CD001',province:'四川',po:'PO202606001',type:'常规',oem:'OE202606001',pqty:40,aqty:25,sqty:15,shours:'96',sync:'2026-05-30 14:00',oreply:'2026-05-31 16:00',capply:'—',caudit:'—'},
+  {seq:5,name:'刹车油',code:'PJ005',store:'沈阳和平店',scode:'SY001',province:'辽宁',po:'PO202606005',type:'绿色',oem:'OE202606005',pqty:30,aqty:10,sqty:20,shours:'120',sync:'2026-06-06 15:30',oreply:'2026-06-08 09:00',capply:'2026-06-09',caudit:'2026-06-10 10:00'},
+  {seq:6,name:'空调滤芯',code:'PJ006',store:'杭州西湖店',scode:'HZ001',province:'浙江',po:'PO202606002',type:'定制',oem:'OE202606002',pqty:70,aqty:70,sqty:0,shours:'0',sync:'2026-06-01 16:00',oreply:'—',capply:'—',caudit:'—'},
+  {seq:7,name:'变速箱油',code:'PJ007',store:'深圳福田店',scode:'SZ001',province:'广东',po:'PO202606007',type:'绿色',oem:'OE202606007',pqty:25,aqty:10,sqty:15,shours:'168',sync:'2026-06-09 10:00',oreply:'2026-06-12 11:00',capply:'2026-06-13',caudit:'—'},
+  {seq:8,name:'雨刮器',code:'PJ008',store:'天津和平店',scode:'TJ001',province:'天津',po:'PO202607001',type:'油品',oem:'OE202607001',pqty:45,aqty:45,sqty:0,shours:'0',sync:'2026-06-30 16:00',oreply:'—',capply:'—',caudit:'—'},
+  {seq:9,name:'刹车片（后）',code:'PJ009',store:'重庆渝中店',scode:'CQ001',province:'重庆',po:'PO202607003',type:'定制',oem:'OE202607003',pqty:28,aqty:8,sqty:20,shours:'240',sync:'2026-07-02 15:00',oreply:'—',capply:'2026-07-03',caudit:'—'},
+  {seq:10,name:'空调压缩机',code:'PJ010',store:'南京建邺店',scode:'NJ001',province:'江苏',po:'PO202607004',type:'紧急',oem:'OE202607004',pqty:10,aqty:5,sqty:5,shours:'36',sync:'2026-07-02 08:00',oreply:'2026-07-02 16:00',capply:'—',caudit:'—'},
+  {seq:11,name:'机油滤清器',code:'PJ002',store:'武汉光谷店',scode:'WH001',province:'湖北',po:'PO202607005',type:'油品',oem:'OE202607005',pqty:55,aqty:40,sqty:15,shours:'48',sync:'2026-07-03 09:00',oreply:'—',capply:'—',caudit:'—'},
+  {seq:12,name:'空气滤芯',code:'PJ003',store:'大连中山店',scode:'DL001',province:'辽宁',po:'PO202607006',type:'绿色',oem:'OE202607006',pqty:38,aqty:38,sqty:0,shours:'0',sync:'2026-07-02 11:00',oreply:'—',capply:'—',caudit:'—'}
+];
+var fsqFilteredData = [];
+var fsqCurrentPage = 1;
+var fsqPageSize = 20;
+var fsqFilterExpanded = false;
+var fsqInitialized = false;
+
+function fsqRenderTable() {
+  var start = (fsqCurrentPage - 1) * fsqPageSize;
+  var pageData = fsqFilteredData.slice(start, start + fsqPageSize);
+  var tbody = document.getElementById('fsq-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = pageData.map(function(r) {
+    return '<tr>'
+      + '<td class="sticky col-seq">'+r.seq+'</td>'
+      + '<td class="col-name">'+r.name+'</td>'
+      + '<td class="col-code">'+r.code+'</td>'
+      + '<td class="col-store-name">'+r.store+'</td>'
+      + '<td class="col-store-code">'+r.scode+'</td>'
+      + '<td class="col-province">'+r.province+'</td>'
+      + '<td class="col-purchase-no">'+r.po+'</td>'
+      + '<td class="col-order-type">'+r.type+'</td>'
+      + '<td class="col-oem-order-no">'+r.oem+'</td>'
+      + '<td class="col-purchase-qty">'+r.pqty+'</td>'
+      + '<td class="col-actual-qty">'+r.aqty+'</td>'
+      + '<td class="col-shortage-qty">'+r.sqty+'</td>'
+      + '<td class="col-shortage-hours">'+r.shours+'</td>'
+      + '<td class="col-sync-time">'+r.sync+'</td>'
+      + '<td class="col-oem-reply-time">'+r.oreply+'</td>'
+      + '<td class="col-cancel-apply-time">'+r.capply+'</td>'
+      + '<td class="col-cancel-audit-time">'+r.caudit+'</td>'
+      + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="alert(\'查看详情\')" style="color:#185FA5;cursor:pointer">查看</a></td>'
+      + '</tr>';
+  }).join('');
+  document.getElementById('fsq-pg-total').textContent = '共 ' + fsqFilteredData.length + ' 条';
+  fsqRenderPages();
+}
+function fsqRenderPages() {
+  var totalPages = Math.ceil(fsqFilteredData.length / fsqPageSize) || 1;
+  var pages = document.getElementById('fsq-pg-pages');
+  var html = '';
+  for (var i = 1; i <= totalPages; i++) { html += i === fsqCurrentPage ? '<button class="active" onclick="fsqGoPage('+i+')">'+i+'</button>' : '<button onclick="fsqGoPage('+i+')">'+i+'</button>'; }
+  pages.innerHTML = html;
+  document.getElementById('fsq-pg-prev').disabled = fsqCurrentPage === 1;
+  document.getElementById('fsq-pg-next').disabled = fsqCurrentPage >= totalPages;
+}
+function fsqGoPage(p) { fsqCurrentPage = p; fsqRenderTable(); }
+function fsqChangePage(d) { fsqGoPage(Math.max(1, Math.min(fsqCurrentPage + d, Math.ceil(fsqFilteredData.length / fsqPageSize) || 1))); }
+function fsqChangePageSize(s) { fsqPageSize = parseInt(s); fsqCurrentPage = 1; fsqRenderTable(); }
+function fsqGotoPage(v) { var p = parseInt(v); if (p) fsqGoPage(p); }
+function fsqApplyFilter() {
+  var qPo = (document.getElementById('fsq-flt-po-no')?.value || '').toLowerCase();
+  var qCode = (document.getElementById('fsq-flt-code')?.value || '').toLowerCase();
+  var qName = (document.getElementById('fsq-flt-name')?.value || '').toLowerCase();
+  var qRegion = (document.getElementById('fsq-flt-region')?.value || '').toLowerCase();
+  var qDistrict = (document.getElementById('fsq-flt-district')?.value || '').toLowerCase();
+  var qStore = (document.getElementById('fsq-flt-store')?.value || '').toLowerCase();
+  var qCancel = document.getElementById('fsq-flt-cancel')?.value || '';
+  var ds = document.getElementById('fsq-flt-date-start')?.value || '';
+  var de = document.getElementById('fsq-flt-date-end')?.value || '';
+  fsqFilteredData = fsqAllData.filter(function(r) {
+    if (qPo && r.po.toLowerCase().indexOf(qPo) === -1) return false;
+    if (qCode && r.code.toLowerCase().indexOf(qCode) === -1) return false;
+    if (qName && r.name.toLowerCase().indexOf(qName) === -1) return false;
+    if (qRegion && r.store.indexOf(qRegion) === -1) return false;
+    if (qDistrict && r.store.indexOf(qDistrict) === -1) return false;
+    if (qStore && r.store.toLowerCase().indexOf(qStore) === -1) return false;
+    if (qCancel) { if (qCancel === '未取消' && r.capply !== '—') return false; if (qCancel === '申请中' && (r.capply === '—' || r.caudit !== '—')) return false; if (qCancel === '已取消' && r.caudit === '—') return false; }
+    if (ds && r.sync < ds) return false;
+    if (de && r.sync > de + ' 23:59:59') return false;
+    return true;
+  });
+  fsqCurrentPage = 1;
+  fsqRenderTable();
+}
+function fsqResetFilter() {
+  ['fsq-flt-po-no','fsq-flt-code','fsq-flt-name','fsq-flt-region','fsq-flt-district','fsq-flt-store'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('fsq-flt-cancel') && (document.getElementById('fsq-flt-cancel').value = '');
+  var dtext = document.querySelector('#page-factory-shortage-query .lt-date-range-text');
+  if (dtext) dtext.value = '';
+  document.getElementById('fsq-flt-date-start') && (document.getElementById('fsq-flt-date-start').value = '');
+  document.getElementById('fsq-flt-date-end') && (document.getElementById('fsq-flt-date-end').value = '');
+  fsqFilteredData = [].concat(fsqAllData);
+  fsqCurrentPage = 1;
+  fsqRenderTable();
+}
+function fsqExportData() { alert('导出 ' + fsqFilteredData.length + ' 条厂端缺件查询数据'); }
+function fsqToggleFilter() {
+  fsqFilterExpanded = !fsqFilterExpanded;
+  var grid = document.getElementById('fsq-filterGrid');
+  var items = grid.querySelectorAll('.lt-filter-item');
+  for (var i = 7; i < items.length; i++) { items[i].style.display = fsqFilterExpanded ? '' : 'none'; }
+  var toggleEl = grid.querySelector('.lt-filter-toggle');
+  if (toggleEl) toggleEl.innerHTML = fsqFilterExpanded ? '&#xFE40; 收起' : '&#xFE40; 展开';
+}
+function fsqFilterCombobox(input) {
+  var wrap = input.closest('.lt-input-wrap.combobox');
+  if (!wrap) return;
+  var list = wrap.querySelector('.lt-datalist');
+  if (!list) return;
+  var val = input.value.toLowerCase();
+  list.querySelectorAll('li').forEach(function(li) { li.classList.toggle('hidden', val && li.textContent.toLowerCase().indexOf(val) === -1); });
+}
+function fsqShowCombobox(input) { var list = input.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist'); if (list) list.classList.add('show'); }
+function fsqToggleCombobox(arrow) {
+  var list = arrow.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist');
+  if (!list) return;
+  list.classList.toggle('show');
+  if (list.classList.contains('show')) { var inp = arrow.closest('.lt-input-wrap.combobox').querySelector('input'); if (inp) inp.focus(); }
+}
+function fsqSelectCombobox(li) {
+  var wrap = li.closest('.lt-input-wrap.combobox');
+  wrap.querySelector('input').value = li.textContent;
+  wrap.querySelector('.lt-datalist').classList.remove('show');
+  fsqApplyFilter();
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.lt-input-wrap.combobox')) {
+    document.querySelectorAll('#page-factory-shortage-query .lt-datalist.show').forEach(function(l) { l.classList.remove('show'); });
+  }
+});
+function initFsq() {
+  if (!fsqInitialized) {
+    fsqInitialized = true;
+    var now = new Date();
+    var s = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    if (s.getMonth() !== ((now.getMonth() - 1 + 12) % 12)) s = new Date(now.getFullYear(), now.getMonth(), 0);
+    var ds = s.toISOString().split('T')[0], de = now.toISOString().split('T')[0];
+    var se = document.getElementById('fsq-flt-date-start'), ee = document.getElementById('fsq-flt-date-end');
+    if (se) se.value = ds; if (ee) ee.value = de;
+    var te = document.querySelector('#page-factory-shortage-query .lt-date-range-text');
+    if (te) te.value = ds + '-' + de;
+  }
+  fsqFilteredData = [].concat(fsqAllData);
+  fsqRenderTable();
+  var grid = document.getElementById('fsq-filterGrid');
+  var items = grid.querySelectorAll('.lt-filter-item');
+  for (var i = 7; i < items.length; i++) { items[i].style.display = 'none'; }
+}
+
+// ===== 配件外采 JS =====
+var epAllData = [
+  {seq:1,orderNo:'WC202605001',supplier:'联友科技武汉',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:8,amount:'32,500.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-05-20 15:00',edate:'2026-06-12',submitter:'张三',stime:'2026-05-18 09:00'},
+  {seq:2,orderNo:'WC202605002',supplier:'XX科技',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:5,amount:'18,200.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-05-21 10:00',edate:'2026-06-15',submitter:'李四',stime:'2026-05-19 14:00'},
+  {seq:3,orderNo:'WC202605003',supplier:'联友科技武汉',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:3,amount:'28,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-22 11:00'},
+  {seq:4,orderNo:'WC202606001',supplier:'XX科技',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:6,amount:'22,400.00',status:'已驳回',remark:'供应商资质过期',auditor:'李明',atime:'2026-06-02 09:30',edate:'—',submitter:'赵六',stime:'2026-06-01 08:00'},
+  {seq:5,orderNo:'WC202606002',supplier:'联友科技武汉',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:10,amount:'45,800.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-06-05 14:00',edate:'2026-06-25',submitter:'孙七',stime:'2026-06-04 10:30'},
+  {seq:6,orderNo:'WC202606003',supplier:'XX科技',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:7,amount:'31,200.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-06-28',submitter:'周八',stime:'2026-06-08 15:00'},
+  {seq:7,orderNo:'WC202606004',supplier:'联友科技武汉',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:12,amount:'52,100.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-06-10 11:00',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-09 09:00'},
+  {seq:8,orderNo:'WC202606005',supplier:'XX科技',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:4,amount:'15,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-30',submitter:'郑十',stime:'2026-06-12 16:00'},
+  {seq:9,orderNo:'WC202607001',supplier:'联友科技武汉',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-01 10:30',edate:'2026-07-20',submitter:'张三',stime:'2026-06-30 08:00'},
+  {seq:10,orderNo:'WC202607002',supplier:'XX科技',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:5,amount:'19,700.00',status:'已取消',remark:'门店预算调整',auditor:'李明',atime:'2026-07-02 16:00',edate:'—',submitter:'李四',stime:'2026-07-01 13:00'},
+  {seq:11,orderNo:'WC202607003',supplier:'联友科技武汉',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'44,300.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-22',submitter:'王五',stime:'2026-07-02 10:00'},
+  {seq:12,orderNo:'WC202607004',supplier:'XX科技',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:6,amount:'25,100.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-03 09:00',edate:'2026-07-25',submitter:'赵六',stime:'2026-07-02 14:00'},
+  {seq:13,orderNo:'WC202607005',supplier:'联友科技武汉',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:3,amount:'12,800.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-07-15',submitter:'孙七',stime:'2026-07-03 09:30'},
+  {seq:14,orderNo:'WC202607006',supplier:'XX科技',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'35,200.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-07-03 14:00',edate:'2026-07-28',submitter:'周八',stime:'2026-07-03 08:00'},
+  {seq:15,orderNo:'WC202607007',supplier:'联友科技武汉',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'58,000.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-30',submitter:'吴九',stime:'2026-07-03 11:00'}
+];
+var epFilteredData = [];
+var epCurrentPage = 1;
+var epPageSize = 20;
+var epFilterExpanded = false;
+var epInitialized = false;
+
+function epRenderTable() {
+  var start = (epCurrentPage - 1) * epPageSize;
+  var pageData = epFilteredData.slice(start, start + epPageSize);
+  var tbody = document.getElementById('ep-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = pageData.map(function(r, idx) {
+    var ri = start + idx;
+    return '<tr>'
+      + '<td class="sticky col-seq">'+r.seq+'</td>'
+      + '<td class="sticky col-ext-order-no">'+r.orderNo+'</td>'
+      + '<td class="col-ext-supplier">'+r.supplier+'</td>'
+      + '<td class="col-region">'+r.region+'</td>'
+      + '<td class="col-district">'+r.district+'</td>'
+      + '<td class="col-store-name">'+r.store+'</td>'
+      + '<td class="col-store-code">'+r.scode+'</td>'
+      + '<td class="col-variety-count">'+r.variety+'</td>'
+      + '<td class="col-total-amount">'+r.amount+'</td>'
+      + '<td class="col-order-status">'+r.status+'</td>'
+      + '<td class="col-audit-remark">'+r.remark+'</td>'
+      + '<td class="col-auditor">'+r.auditor+'</td>'
+      + '<td class="col-audit-time">'+r.atime+'</td>'
+      + '<td class="col-expected-date">'+r.edate+'</td>'
+      + '<td class="col-submitter">'+r.submitter+'</td>'
+      + '<td class="col-submit-time">'+r.stime+'</td>'
+      + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="epOpenView('+ ri +')" style="color:#185FA5;cursor:pointer">查看</a> <a href="javascript:void(0)" onclick="epOpenEdit('+ ri +')" style="color:#185FA5;cursor:pointer">编辑</a> <a href="javascript:void(0)" onclick="alert(\'删除功能待开发\')" style="color:#185FA5;cursor:pointer">删除</a> <a href="javascript:void(0)" onclick="epOpenAudit('+ ri +')" style="color:#185FA5;cursor:pointer">审核</a></td>'
+      + '</tr>';
+  }).join('');
+  document.getElementById('ep-pg-total').textContent = '共 ' + epFilteredData.length + ' 条';
+  epRenderPages();
+}
+function epRenderPages() {
+  var totalPages = Math.ceil(epFilteredData.length / epPageSize) || 1;
+  var pages = document.getElementById('ep-pg-pages');
+  var html = '';
+  for (var i = 1; i <= totalPages; i++) { html += i === epCurrentPage ? '<button class="active" onclick="epGoPage('+i+')">'+i+'</button>' : '<button onclick="epGoPage('+i+')">'+i+'</button>'; }
+  pages.innerHTML = html;
+  document.getElementById('ep-pg-prev').disabled = epCurrentPage === 1;
+  document.getElementById('ep-pg-next').disabled = epCurrentPage >= totalPages;
+}
+function epGoPage(p) { epCurrentPage = p; epRenderTable(); }
+function epChangePage(d) { epGoPage(Math.max(1, Math.min(epCurrentPage + d, Math.ceil(epFilteredData.length / epPageSize) || 1))); }
+function epChangePageSize(s) { epPageSize = parseInt(s); epCurrentPage = 1; epRenderTable(); }
+function epGotoPage(v) { var p = parseInt(v); if (p) epGoPage(p); }
+function epApplyFilter() {
+  var qOrderNo = (document.getElementById('ep-flt-order-no')?.value || '').toLowerCase();
+  var qSupplier = document.getElementById('ep-flt-supplier')?.value || '';
+  var qStatus = document.getElementById('ep-flt-status')?.value || '';
+  var qRegion = (document.getElementById('ep-flt-region')?.value || '').toLowerCase();
+  var qDistrict = (document.getElementById('ep-flt-district')?.value || '').toLowerCase();
+  var qDealer = (document.getElementById('ep-flt-dealer')?.value || '').toLowerCase();
+  var qStore = (document.getElementById('ep-flt-store')?.value || '').toLowerCase();
+  var ds = document.getElementById('ep-flt-date-start')?.value || '';
+  var de = document.getElementById('ep-flt-date-end')?.value || '';
+  epFilteredData = epAllData.filter(function(r) {
+    if (qOrderNo && r.orderNo.toLowerCase().indexOf(qOrderNo) === -1) return false;
+    if (qSupplier && r.supplier !== qSupplier) return false;
+    if (qStatus && r.status !== qStatus) return false;
+    if (qRegion && r.region.toLowerCase().indexOf(qRegion) === -1) return false;
+    if (qDistrict && r.district.toLowerCase().indexOf(qDistrict) === -1) return false;
+    if (qStore && r.store.toLowerCase().indexOf(qStore) === -1) return false;
+    if (ds && r.stime < ds) return false;
+    if (de && r.stime > de + ' 23:59:59') return false;
+    return true;
+  });
+  epCurrentPage = 1;
+  epRenderTable();
+}
+function epResetFilter() {
+  ['ep-flt-order-no','ep-flt-region','ep-flt-district','ep-flt-dealer','ep-flt-store'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('ep-flt-supplier') && (document.getElementById('ep-flt-supplier').value = '');
+  document.getElementById('ep-flt-status') && (document.getElementById('ep-flt-status').value = '');
+  var dtext = document.querySelector('#page-external-procurement .lt-date-range-text');
+  if (dtext) dtext.value = '';
+  document.getElementById('ep-flt-date-start') && (document.getElementById('ep-flt-date-start').value = '');
+  document.getElementById('ep-flt-date-end') && (document.getElementById('ep-flt-date-end').value = '');
+  epFilteredData = [].concat(epAllData);
+  epCurrentPage = 1;
+  epRenderTable();
+}
+function epExportData() { alert('导出 ' + epFilteredData.length + ' 条配件外采数据'); }
+function epToggleFilter() {
+  epFilterExpanded = !epFilterExpanded;
+  var grid = document.getElementById('ep-filterGrid');
+  var items = grid.querySelectorAll('.lt-filter-item');
+  for (var i = 7; i < items.length; i++) { items[i].style.display = epFilterExpanded ? '' : 'none'; }
+  var toggleEl = grid.querySelector('.lt-filter-toggle');
+  if (toggleEl) toggleEl.innerHTML = epFilterExpanded ? '&#xFE40; 收起' : '&#xFE40; 展开';
+}
+function epFilterCombobox(input) {
+  var wrap = input.closest('.lt-input-wrap.combobox');
+  if (!wrap) return;
+  var list = wrap.querySelector('.lt-datalist');
+  if (!list) return;
+  var val = input.value.toLowerCase();
+  list.querySelectorAll('li').forEach(function(li) { li.classList.toggle('hidden', val && li.textContent.toLowerCase().indexOf(val) === -1); });
+}
+function epShowCombobox(input) { var list = input.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist'); if (list) list.classList.add('show'); }
+function epToggleCombobox(arrow) {
+  var list = arrow.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist');
+  if (!list) return;
+  list.classList.toggle('show');
+  if (list.classList.contains('show')) { var inp = arrow.closest('.lt-input-wrap.combobox').querySelector('input'); if (inp) inp.focus(); }
+}
+function epSelectCombobox(li) {
+  var wrap = li.closest('.lt-input-wrap.combobox');
+  wrap.querySelector('input').value = li.textContent;
+  wrap.querySelector('.lt-datalist').classList.remove('show');
+  epApplyFilter();
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.lt-input-wrap.combobox')) {
+    document.querySelectorAll('#page-external-procurement .lt-datalist.show').forEach(function(l) { l.classList.remove('show'); });
+  }
+});
+function initEp() {
+  if (!epInitialized) {
+    epInitialized = true;
+    var now = new Date();
+    var s = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    if (s.getMonth() !== ((now.getMonth() - 1 + 12) % 12)) s = new Date(now.getFullYear(), now.getMonth(), 0);
+    var ds = s.toISOString().split('T')[0], de = now.toISOString().split('T')[0];
+    var se = document.getElementById('ep-flt-date-start'), ee = document.getElementById('ep-flt-date-end');
+    if (se) se.value = ds; if (ee) ee.value = de;
+    var te = document.querySelector('#page-external-procurement .lt-date-range-text');
+    if (te) te.value = ds + '-' + de;
+  }
+  epFilteredData = [].concat(epAllData);
+  epRenderTable();
+  var grid = document.getElementById('ep-filterGrid');
+  var items = grid.querySelectorAll('.lt-filter-item');
+  for (var i = 7; i < items.length; i++) { items[i].style.display = 'none'; }
+}
+
+// ===== 配件采购 面板（新增/编辑/查看）=====
+var ppFormMode = 'add';
+var ppCurrentRec = null;
+var ppPartsList = [];
+
+function ppOpenAdd() { ppFormMode = 'add'; ppCurrentRec = null; ppRenderPanel(); }
+function ppOpenView(idx) { ppFormMode = 'view'; ppCurrentRec = ppFilteredData[idx]; ppRenderPanel(); }
+function ppOpenEdit(idx) { ppFormMode = 'edit'; ppCurrentRec = ppFilteredData[idx]; ppRenderPanel(); }
+function ppClosePanel() { document.getElementById('pp-panel-overlay').classList.remove('show'); document.getElementById('pp-panel').classList.remove('show'); }
+
+function ppfGetPrice(name) {
+  var m = {'刹车片':380,'机油滤清器':85,'空气滤芯':120,'火花塞':95,'刹车油':150,'空调滤芯':90,'变速箱油':260,'雨刮器':65,'空调压缩机':850,'发电机':1200};
+  for (var k in m) { if (name && name.indexOf(k) !== -1) return m[k]; }
+  return 200;
+}
+function ppfAddPart() {
+  var idx = ppPartsList.length;
+  ppPartsList.push({code:'PJ'+(idx+1).toString().padStart(3,'0'), name:'刹车片（前）', series:'Model S', model:'2025款 Model S', unit:'个', qty:1, price:380, amount:380});
+  ppfRenderParts();
+}
+function ppfRemovePart(idx) { ppPartsList.splice(idx, 1); ppfRenderParts(); }
+function ppfRenderParts() {
+  var tbody = document.getElementById('ppf-parts-tbody');
+  if (!tbody) return;
+  if (ppPartsList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#999;padding:16px">暂无配件明细，请点击"添加配件"</td></tr>';
+  } else {
+    tbody.innerHTML = ppPartsList.map(function(p, i) {
+      return '<tr>'
+        + '<td>'+(i+1)+'</td>'
+        + '<td><input value="'+p.code+'" onchange="ppPartsList['+i+'].code=this.value"></td>'
+        + '<td><input value="'+p.name+'" onchange="ppPartsList['+i+'].name=this.value;var pr=ppfGetPrice(this.value);ppPartsList['+i+'].price=pr;ppPartsList['+i+'].amount=pr*ppPartsList['+i+'].qty;ppfRenderParts()"></td>'
+        + '<td><input value="'+p.series+'" onchange="ppPartsList['+i+'].series=this.value"></td>'
+        + '<td><input value="'+p.model+'" onchange="ppPartsList['+i+'].model=this.value"></td>'
+        + '<td><select onchange="ppPartsList['+i+'].unit=this.value"><option>'+p.unit+'</option><option>个</option><option>套</option><option>瓶</option><option>条</option></select></td>'
+        + '<td><input type="number" min="1" value="'+p.qty+'" onchange="ppPartsList['+i+'].qty=parseInt(this.value)||1;ppPartsList['+i+'].amount=ppPartsList['+i+'].price*ppPartsList['+i+'].qty;ppfRenderParts()" style="width:60px"></td>'
+        + '<td><input type="number" min="0" step="0.01" value="'+p.price+'" onchange="ppPartsList['+i+'].price=parseFloat(this.value)||0;ppPartsList['+i+'].amount=ppPartsList['+i+'].price*ppPartsList['+i+'].qty;ppfRenderParts()" style="width:80px"></td>'
+        + '<td>¥'+p.amount.toFixed(2)+'</td>'
+        + '<td><a href="javascript:void(0)" onclick="ppfRemovePart('+i+')" style="color:#861B2F">删除</a></td>'
+        + '</tr>';
+    }).join('');
+  }
+  ppfUpdateTotals();
+}
+function ppfUpdateTotals() {
+  var c = ppPartsList.length;
+  var t = ppPartsList.reduce(function(s, p) { return s + (p.amount || 0); }, 0);
+  var el = document.getElementById('ppf-totals');
+  if (el) el.innerHTML = '合计品种: <b>'+c+'</b> &nbsp; 合计金额(含税): <b>¥'+t.toFixed(2)+'</b>';
+}
+function ppRenderPanel() {
+  ppPartsList = [];
+  var title = document.getElementById('pp-panel-title');
+  var badge = document.getElementById('pp-panel-badge');
+  if (ppFormMode === 'add') {
+    if (title) title.textContent = '配件采购';
+    if (badge) { badge.textContent = '新增'; badge.className = 'pm-panel-badge'; }
+    ppSetPanelReadonly(false);
+    document.getElementById('pp-form-po-no').value = 'PO'+new Date().toISOString().slice(0,10).replace(/-/g,'')+String(Math.floor(Math.random()*900+100));
+    document.getElementById('pp-form-apply-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('pp-form-type').value = ''; document.getElementById('pp-form-store').value = '';
+    document.getElementById('pp-form-edate').value = ''; document.getElementById('pp-form-shortage').value = ''; document.getElementById('pp-form-remark').value = '';
+  } else if (ppFormMode === 'edit' && ppCurrentRec) {
+    if (title) title.textContent = '配件采购';
+    if (badge) { badge.textContent = '编辑'; badge.className = 'pm-panel-badge'; }
+    ppSetPanelReadonly(false);
+    document.getElementById('pp-form-po-no').value = ppCurrentRec.po || '';
+    document.getElementById('pp-form-type').value = ppCurrentRec.type || '';
+    document.getElementById('pp-form-store').value = ppCurrentRec.store || '';
+    document.getElementById('pp-form-edate').value = ppCurrentRec.edate || '';
+    document.getElementById('pp-form-shortage').value = ppCurrentRec.shortage === '—' ? '' : (ppCurrentRec.shortage || '');
+    document.getElementById('pp-form-remark').value = ppCurrentRec.remark === '—' ? '' : (ppCurrentRec.remark || '');
+    document.getElementById('pp-form-apply-date').value = ppCurrentRec.stime ? ppCurrentRec.stime.split(' ')[0] : '';
+    ppPartsList = [{code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款 Model S',unit:'个',qty:5,price:380,amount:1900}];
+  } else if (ppFormMode === 'view' && ppCurrentRec) {
+    if (title) title.textContent = '配件采购';
+    if (badge) { badge.textContent = '查看详情'; badge.className = 'pm-panel-badge'; }
+    ppSetPanelReadonly(true);
+    document.getElementById('pp-form-po-no').value = ppCurrentRec.po || '';
+    document.getElementById('pp-form-type').value = ppCurrentRec.type || '';
+    document.getElementById('pp-form-store').value = ppCurrentRec.store || '';
+    document.getElementById('pp-form-edate').value = ppCurrentRec.edate || '';
+    document.getElementById('pp-form-shortage').value = ppCurrentRec.shortage === '—' ? '' : (ppCurrentRec.shortage || '');
+    document.getElementById('pp-form-remark').value = ppCurrentRec.remark === '—' ? '' : (ppCurrentRec.remark || '');
+    document.getElementById('pp-form-apply-date').value = ppCurrentRec.stime ? ppCurrentRec.stime.split(' ')[0] : '';
+    ppPartsList = [{code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款',unit:'个',qty:5,price:380,amount:1900},{code:'PJ002',name:'机油滤清器',series:'Model 3',model:'2025款',unit:'个',qty:10,price:85,amount:850}];
+  }
+  document.getElementById('pp-panel-overlay').classList.add('show');
+  document.getElementById('pp-panel').classList.add('show');
+  ppfRenderParts();
+}
+function ppSetPanelReadonly(readonly) {
+  var wrap = document.getElementById('pp-panel');
+  if (!wrap) return;
+  wrap.querySelectorAll('.pp-parts-table input, .pp-parts-table select').forEach(function(el) {
+    if (readonly) { el.readOnly = true; el.disabled = true; el.style.background = '#f5f5f5'; }
+    else { el.readOnly = false; el.disabled = false; el.style.background = ''; }
+  });
+  document.getElementById('ppf-add-btn').style.display = readonly ? 'none' : '';
+  document.getElementById('ppf-del-col').style.display = readonly ? 'none' : '';
+  document.getElementById('pp-panel-footer').style.display = readonly ? 'none' : '';
+}
+function ppfSubmit() { alert('提交成功'); ppClosePanel(); }
+function ppfSaveDraft() { alert('草稿已保存'); ppClosePanel(); }
+function ppfResetForm() {
+  ppPartsList = []; ppfRenderParts();
+  document.getElementById('pp-form-type').value = ''; document.getElementById('pp-form-store').value = '';
+  document.getElementById('pp-form-edate').value = ''; document.getElementById('pp-form-shortage').value = ''; document.getElementById('pp-form-remark').value = '';
+}
+
+// ===== 配件采购 审核面板 =====
+function ppOpenAudit(idx) { ppCurrentRec = ppFilteredData[idx]; ppaRenderPanel(); }
+function ppCloseAuditPanel() { document.getElementById('pp-audit-overlay').classList.remove('show'); document.getElementById('pp-audit-panel').classList.remove('show'); }
+function ppaRenderPanel() {
+  if (!ppCurrentRec) return;
+  document.getElementById('ppa-status-badge').textContent = ppCurrentRec.status || '';
+  var cls = ppCurrentRec.status === '已通过' ? 'pass' : (ppCurrentRec.status === '已驳回' ? 'reject' : '');
+  document.getElementById('ppa-status-badge').className = 'pm-panel-badge ' + cls;
+  var info = document.getElementById('ppa-basic-info');
+  var fs = [
+    {l:'采购单号',v:ppCurrentRec.po},{l:'订单类型',v:ppCurrentRec.type},{l:'门店',v:ppCurrentRec.store},
+    {l:'大区',v:ppCurrentRec.region||'—'},{l:'小区',v:ppCurrentRec.district||'—'},{l:'关联的缺件单',v:ppCurrentRec.shortage||'—'},
+    {l:'期望到货日期',v:ppCurrentRec.edate||'—'},{l:'备注',v:ppCurrentRec.remark||'—'}
+  ];
+  info.innerHTML = fs.map(function(f){return '<div class="pm-form-item"><label>'+f.l+'</label><input readonly class="pm-readonly" value="'+f.v+'"></div>';}).join('');
+  var items = [{s:1,code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款',unit:'个',q:5,price:380,amt:1900},{s:2,code:'PJ002',name:'机油滤清器',series:'Model 3',model:'2025款',unit:'个',q:10,price:85,amt:850}];
+  document.getElementById('ppa-parts-tbody').innerHTML = items.map(function(p){return '<tr><td>'+p.s+'</td><td>'+p.code+'</td><td>'+p.name+'</td><td>'+p.series+'</td><td>'+p.model+'</td><td>'+p.unit+'</td><td>'+p.q+'</td><td>'+p.price.toFixed(2)+'</td><td>¥'+p.amt.toFixed(2)+'</td></tr>';}).join('');
+  document.getElementById('ppa-totals').innerHTML = '合计品种: <b>2</b> &nbsp; 合计金额(含税): <b>¥2750.00</b>';
+  var atb = document.getElementById('ppa-audit-tbody');
+  if (ppCurrentRec.status === '已通过' || ppCurrentRec.status === '已驳回') {
+    atb.innerHTML = '<tr><td>'+(ppCurrentRec.auditor||'—')+'</td><td>'+(ppCurrentRec.atime||'—')+'</td><td>'+(ppCurrentRec.status||'—')+'</td><td>'+(ppCurrentRec.remark||'—')+'</td></tr>';
+    document.getElementById('ppa-audit-area').style.display = 'none';
+  } else {
+    atb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:16px">暂无审核记录</td></tr>';
+    document.getElementById('ppa-audit-area').style.display = '';
+  }
+  document.getElementById('ppa-comment').value = '';
+  document.getElementById('pp-audit-overlay').classList.add('show');
+  document.getElementById('pp-audit-panel').classList.add('show');
+}
+function ppaApprove() {
+  var c = document.getElementById('ppa-comment').value;
+  if (!c) { alert('请输入审核意见'); return; }
+  ppCurrentRec.status = '已通过'; ppCurrentRec.auditor = '当前用户'; ppCurrentRec.remark = c;
+  ppCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
+  alert('审核通过'); ppCloseAuditPanel();
+}
+function ppaReject() {
+  var c = document.getElementById('ppa-comment').value;
+  if (!c) { alert('请输入审核意见'); return; }
+  ppCurrentRec.status = '已驳回'; ppCurrentRec.auditor = '当前用户'; ppCurrentRec.remark = c;
+  ppCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
+  alert('审核驳回'); ppCloseAuditPanel();
+}
+
+// ===== 配件外采 面板（新增/编辑/查看）=====
+var epFormMode = 'add';
+var epCurrentRec = null;
+var epPartsList = [];
+
+function epOpenAdd() { epFormMode = 'add'; epCurrentRec = null; epRenderPanel(); }
+function epOpenView(idx) { epFormMode = 'view'; epCurrentRec = epFilteredData[idx]; epRenderPanel(); }
+function epOpenEdit(idx) { epFormMode = 'edit'; epCurrentRec = epFilteredData[idx]; epRenderPanel(); }
+function epClosePanel() { document.getElementById('ep-panel-overlay').classList.remove('show'); document.getElementById('ep-panel').classList.remove('show'); }
+
+function epfAddPart() {
+  var idx = epPartsList.length;
+  epPartsList.push({code:'PJ'+(idx+1).toString().padStart(3,'0'), name:'刹车片（前）', series:'Model S', model:'2025款 Model S', unit:'个', qty:1, price:380, amount:380});
+  epfRenderParts();
+}
+function epfRemovePart(idx) { epPartsList.splice(idx, 1); epfRenderParts(); }
+function epfRenderParts() {
+  var tbody = document.getElementById('epf-parts-tbody');
+  if (!tbody) return;
+  if (epPartsList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#999;padding:16px">暂无配件明细，请点击"添加配件"</td></tr>';
+  } else {
+    tbody.innerHTML = epPartsList.map(function(p, i) {
+      return '<tr>'
+        + '<td>'+(i+1)+'</td>'
+        + '<td><input value="'+p.code+'" onchange="epPartsList['+i+'].code=this.value"></td>'
+        + '<td><input value="'+p.name+'" onchange="epPartsList['+i+'].name=this.value;var pr=ppfGetPrice(this.value);epPartsList['+i+'].price=pr;epPartsList['+i+'].amount=pr*epPartsList['+i+'].qty;epfRenderParts()"></td>'
+        + '<td><input value="'+p.series+'" onchange="epPartsList['+i+'].series=this.value"></td>'
+        + '<td><input value="'+p.model+'" onchange="epPartsList['+i+'].model=this.value"></td>'
+        + '<td><select onchange="epPartsList['+i+'].unit=this.value"><option>'+p.unit+'</option><option>个</option><option>套</option><option>瓶</option><option>条</option></select></td>'
+        + '<td><input type="number" min="1" value="'+p.qty+'" onchange="epPartsList['+i+'].qty=parseInt(this.value)||1;epPartsList['+i+'].amount=epPartsList['+i+'].price*epPartsList['+i+'].qty;epfRenderParts()" style="width:60px"></td>'
+        + '<td><input type="number" min="0" step="0.01" value="'+p.price+'" onchange="epPartsList['+i+'].price=parseFloat(this.value)||0;epPartsList['+i+'].amount=epPartsList['+i+'].price*epPartsList['+i+'].qty;epfRenderParts()" style="width:80px"></td>'
+        + '<td>¥'+p.amount.toFixed(2)+'</td>'
+        + '<td><a href="javascript:void(0)" onclick="epfRemovePart('+i+')" style="color:#861B2F">删除</a></td>'
+        + '</tr>';
+    }).join('');
+  }
+  epfUpdateTotals();
+}
+function epfUpdateTotals() {
+  var c = epPartsList.length;
+  var t = epPartsList.reduce(function(s, p) { return s + (p.amount || 0); }, 0);
+  var el = document.getElementById('epf-totals');
+  if (el) el.innerHTML = '合计品种: <b>'+c+'</b> &nbsp; 合计金额(含税): <b>¥'+t.toFixed(2)+'</b>';
+}
+function epRenderPanel() {
+  epPartsList = [];
+  var title = document.getElementById('ep-panel-title');
+  var badge = document.getElementById('ep-panel-badge');
+  if (epFormMode === 'add') {
+    if (title) title.textContent = '配件外采';
+    if (badge) { badge.textContent = '新增'; badge.className = 'pm-panel-badge'; }
+    epSetPanelReadonly(false);
+    document.getElementById('ep-form-order-no').value = 'WC'+new Date().toISOString().slice(0,10).replace(/-/g,'')+String(Math.floor(Math.random()*900+100));
+    document.getElementById('ep-form-apply-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('ep-form-supplier').value = ''; document.getElementById('ep-form-store').value = '';
+    document.getElementById('ep-form-edate').value = ''; document.getElementById('ep-form-remark').value = '';
+  } else if (epFormMode === 'edit' && epCurrentRec) {
+    if (title) title.textContent = '配件外采';
+    if (badge) { badge.textContent = '编辑'; badge.className = 'pm-panel-badge'; }
+    epSetPanelReadonly(false);
+    document.getElementById('ep-form-order-no').value = epCurrentRec.orderNo || '';
+    document.getElementById('ep-form-supplier').value = epCurrentRec.supplier || '';
+    document.getElementById('ep-form-store').value = epCurrentRec.store || '';
+    document.getElementById('ep-form-edate').value = epCurrentRec.edate || '';
+    document.getElementById('ep-form-remark').value = epCurrentRec.remark === '—' ? '' : (epCurrentRec.remark || '');
+    document.getElementById('ep-form-apply-date').value = epCurrentRec.stime ? epCurrentRec.stime.split(' ')[0] : '';
+    epPartsList = [{code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款 Model S',unit:'个',qty:5,price:380,amount:1900}];
+  } else if (epFormMode === 'view' && epCurrentRec) {
+    if (title) title.textContent = '配件外采';
+    if (badge) { badge.textContent = '查看详情'; badge.className = 'pm-panel-badge'; }
+    epSetPanelReadonly(true);
+    document.getElementById('ep-form-order-no').value = epCurrentRec.orderNo || '';
+    document.getElementById('ep-form-supplier').value = epCurrentRec.supplier || '';
+    document.getElementById('ep-form-store').value = epCurrentRec.store || '';
+    document.getElementById('ep-form-edate').value = epCurrentRec.edate || '';
+    document.getElementById('ep-form-remark').value = epCurrentRec.remark === '—' ? '' : (epCurrentRec.remark || '');
+    document.getElementById('ep-form-apply-date').value = epCurrentRec.stime ? epCurrentRec.stime.split(' ')[0] : '';
+    epPartsList = [{code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款',unit:'个',qty:5,price:380,amount:1900},{code:'PJ003',name:'空气滤芯',series:'Model X',model:'2025款',unit:'个',qty:3,price:120,amount:360}];
+  }
+  document.getElementById('ep-panel-overlay').classList.add('show');
+  document.getElementById('ep-panel').classList.add('show');
+  epfRenderParts();
+}
+function epSetPanelReadonly(readonly) {
+  var wrap = document.getElementById('ep-panel');
+  if (!wrap) return;
+  wrap.querySelectorAll('.pp-parts-table input, .pp-parts-table select').forEach(function(el) {
+    if (readonly) { el.readOnly = true; el.disabled = true; el.style.background = '#f5f5f5'; }
+    else { el.readOnly = false; el.disabled = false; el.style.background = ''; }
+  });
+  document.getElementById('epf-add-btn').style.display = readonly ? 'none' : '';
+  document.getElementById('epf-del-col').style.display = readonly ? 'none' : '';
+  document.getElementById('ep-panel-footer').style.display = readonly ? 'none' : '';
+}
+function epfSubmit() { alert('提交成功'); epClosePanel(); }
+function epfSaveDraft() { alert('草稿已保存'); epClosePanel(); }
+function epfResetForm() {
+  epPartsList = []; epfRenderParts();
+  document.getElementById('ep-form-supplier').value = ''; document.getElementById('ep-form-store').value = '';
+  document.getElementById('ep-form-edate').value = ''; document.getElementById('ep-form-remark').value = '';
+}
+
+// ===== 配件外采 审核面板 =====
+function epOpenAudit(idx) { epCurrentRec = epFilteredData[idx]; epaRenderPanel(); }
+function epCloseAuditPanel() { document.getElementById('ep-audit-overlay').classList.remove('show'); document.getElementById('ep-audit-panel').classList.remove('show'); }
+function epaRenderPanel() {
+  if (!epCurrentRec) return;
+  document.getElementById('epa-status-badge').textContent = epCurrentRec.status || '';
+  var cls = epCurrentRec.status === '已通过' ? 'pass' : (epCurrentRec.status === '已驳回' ? 'reject' : '');
+  document.getElementById('epa-status-badge').className = 'pm-panel-badge ' + cls;
+  var info = document.getElementById('epa-basic-info');
+  var fs = [
+    {l:'外采单号',v:epCurrentRec.orderNo},{l:'外采供应商',v:epCurrentRec.supplier},{l:'门店',v:epCurrentRec.store},
+    {l:'大区',v:epCurrentRec.region||'—'},{l:'小区',v:epCurrentRec.district||'—'},
+    {l:'期望到货日期',v:epCurrentRec.edate||'—'},{l:'备注',v:epCurrentRec.remark||'—'}
+  ];
+  info.innerHTML = fs.map(function(f){return '<div class="pm-form-item"><label>'+f.l+'</label><input readonly class="pm-readonly" value="'+f.v+'"></div>';}).join('');
+  var items = [{s:1,code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款',unit:'个',q:5,price:380,amt:1900},{s:2,code:'PJ003',name:'空气滤芯',series:'Model X',model:'2025款',unit:'个',q:3,price:120,amt:360}];
+  document.getElementById('epa-parts-tbody').innerHTML = items.map(function(p){return '<tr><td>'+p.s+'</td><td>'+p.code+'</td><td>'+p.name+'</td><td>'+p.series+'</td><td>'+p.model+'</td><td>'+p.unit+'</td><td>'+p.q+'</td><td>'+p.price.toFixed(2)+'</td><td>¥'+p.amt.toFixed(2)+'</td></tr>';}).join('');
+  document.getElementById('epa-totals').innerHTML = '合计品种: <b>2</b> &nbsp; 合计金额(含税): <b>¥2260.00</b>';
+  var atb = document.getElementById('epa-audit-tbody');
+  if (epCurrentRec.status === '已通过' || epCurrentRec.status === '已驳回') {
+    atb.innerHTML = '<tr><td>'+(epCurrentRec.auditor||'—')+'</td><td>'+(epCurrentRec.atime||'—')+'</td><td>'+(epCurrentRec.status||'—')+'</td><td>'+(epCurrentRec.remark||'—')+'</td></tr>';
+    document.getElementById('epa-audit-area').style.display = 'none';
+  } else {
+    atb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:16px">暂无审核记录</td></tr>';
+    document.getElementById('epa-audit-area').style.display = '';
+  }
+  document.getElementById('epa-comment').value = '';
+  document.getElementById('ep-audit-overlay').classList.add('show');
+  document.getElementById('ep-audit-panel').classList.add('show');
+}
+function epaApprove() {
+  var c = document.getElementById('epa-comment').value;
+  if (!c) { alert('请输入审核意见'); return; }
+  epCurrentRec.status = '已通过'; epCurrentRec.auditor = '当前用户'; epCurrentRec.remark = c;
+  epCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
+  alert('审核通过'); epCloseAuditPanel();
+}
+function epaReject() {
+  var c = document.getElementById('epa-comment').value;
+  if (!c) { alert('请输入审核意见'); return; }
+  epCurrentRec.status = '已驳回'; epCurrentRec.auditor = '当前用户'; epCurrentRec.remark = c;
+  epCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
+  alert('审核驳回'); epCloseAuditPanel();
+}

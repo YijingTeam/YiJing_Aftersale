@@ -57,6 +57,11 @@
           </div>
           <div class="submenu-item">配件订单管理</div>
           <div class="submenu submenu-nested">
+            <div class="submenu-item submenu-item-nested" onclick="showContent('parts-procurement')" data-module="parts-procurement">配件采购</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('parts-procurement-detail')" data-module="parts-procurement-detail">配件采购明细</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('parts-delivery-schedule')" data-module="parts-delivery-schedule">配件发货及交期</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('factory-shortage-query')" data-module="factory-shortage-query">厂端缺件查询</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('external-procurement')" data-module="external-procurement">配件外采</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('supplier-manage')" data-module="supplier-manage">外采供应商管理</div>
           </div>
         </div>
@@ -291,7 +296,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">线索创建日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="renderLeadTable">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="renderLeadTable">
                 <div class="lt-date-range-drop">
                   <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="lt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
                   <span>—</span>
@@ -518,7 +523,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">出入库日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="pinApplyFilter">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="pinApplyFilter">
                 <div class="lt-date-range-drop">
                   <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="pin-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
                   <span>—</span>
@@ -676,7 +681,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">出入库日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="psdApplyFilter">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="psdApplyFilter">
                 <div class="lt-date-range-drop">
                   <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="psd-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
                   <span>—</span>
@@ -859,7 +864,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">出入库日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="rrdApplyFilter">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rrdApplyFilter">
                 <div class="lt-date-range-drop">
                   <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rrd-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
                   <span>—</span>
@@ -973,7 +978,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">结算日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="rrdApplyFilter">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rrdApplyFilter">
                 <div class="lt-date-range-drop">
                   <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rrd-flt-settle-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
                   <span>—</span>
@@ -983,7 +988,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">提交结算日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="rrdApplyFilter">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rrdApplyFilter">
                 <div class="lt-date-range-drop">
                   <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rrd-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
                   <span>—</span>
@@ -1089,7 +1094,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">出库日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="prdApplyFilter">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="prdApplyFilter">
                 <div class="lt-date-range-drop">
                   <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="prd-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
                   <span>—</span>
@@ -1238,8 +1243,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-date-range"><span class="lt-filter-prefix">出入库时间</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="intApplyFilter">
+              <div class="lt-date-range"><span class="lt-filter-prefix">出入库日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="intApplyFilter">
                 <div class="lt-date-range-drop">
                   <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="int-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
                   <span>—</span>
@@ -1354,7 +1359,7 @@
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件编码</span><input type="text" id="icd-flt-part-code" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件名称</span><input type="text" id="icd-flt-part-name" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">盈亏状态</span><select id="icd-flt-status" onchange="icdApplyFilter()"><option value="">全部</option><option>盘盈</option><option>盘亏</option></select></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">出入库日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="icdApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="icd-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="icd-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">出入库日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="icdApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="icd-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="icd-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">盘点单号</span><input type="text" id="icd-flt-check-no" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">出入库单号</span><input type="text" id="icd-flt-io-no" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="icd-flt-region" placeholder="请选择" oninput="icdFilterCombobox(this)" onfocus="icdShowCombobox(this)"><span class="cb-arrow" onclick="icdToggleCombobox(this)">▼</span><ul class="lt-datalist" id="icd-region-list"><li onclick="icdSelectCombobox(this)">华北区</li><li onclick="icdSelectCombobox(this)">华东区</li><li onclick="icdSelectCombobox(this)">华南区</li><li onclick="icdSelectCombobox(this)">西南区</li><li onclick="icdSelectCombobox(this)">西北区</li></ul></div></div>
@@ -1379,7 +1384,7 @@
       <div class="lt-wrap">
         <div class="lt-filter"><div class="lt-filter-grid" id="ts-filterGrid">
             <!-- 第1行：提交日期、申请单号、VIN、主题 -->
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="tsApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="tsApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">申请单号</span><input type="text" id="ts-flt-order-no" placeholder="请输入" oninput="tsApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">VIN</span><input type="text" id="ts-flt-vin" placeholder="请输入" oninput="tsApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">主题</span><input type="text" id="ts-flt-subject" placeholder="请输入" oninput="tsApplyFilter()"></div></div>
@@ -1389,10 +1394,10 @@
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">处理状态</span><select id="ts-flt-status" onchange="tsApplyFilter()"></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">重要程度</span><select id="ts-flt-importance" onchange="tsApplyFilter()"><option value="">全部</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div></div>
             <!-- 第3行：故障日期、故障系统、故障性质、生产日期 -->
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">故障日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="tsApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-fault-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-fault-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">故障日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="tsApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-fault-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-fault-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障系统</span><select id="ts-flt-fault-system" onchange="tsApplyFilter()"><option value="">全部</option><option>发动机系统</option><option>变速箱系统</option><option>制动系统</option><option>转向系统</option><option>电气系统</option><option>空调系统</option><option>底盘系统</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障性质</span><select id="ts-flt-fault-nature" onchange="tsApplyFilter()"><option value="">全部</option><option>产品质量</option><option>使用问题</option><option>维修导致</option></select></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="tsApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="tsApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ts-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <!-- 第4行：归档分类、维修工单、客诉单 -->
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">归档分类</span><select id="ts-flt-archive-category" onchange="tsApplyFilter()"><option value="">全部</option><option>发动机</option><option>变速箱</option><option>电气</option><option>底盘</option><option>车身</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修工单</span><input type="text" id="ts-flt-repair-order" placeholder="请输入" oninput="tsApplyFilter()"></div></div>
@@ -1419,7 +1424,7 @@
       <div class="lt-wrap">
         <div class="lt-filter"><div class="lt-filter-grid" id="qr-filterGrid">
             <!-- 第1行：提交日期、申请单号、VIN、主题 -->
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="qrApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">申请单号</span><input type="text" id="qr-flt-order-no" placeholder="请输入" oninput="qrApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">VIN</span><input type="text" id="qr-flt-vin" placeholder="请输入" oninput="qrApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">主题</span><input type="text" id="qr-flt-subject" placeholder="请输入" oninput="qrApplyFilter()"></div></div>
@@ -1429,10 +1434,10 @@
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">处理状态</span><select id="qr-flt-status" onchange="qrApplyFilter()"><option value="">全部</option><option>待提交</option><option>审核中</option><option>已退回</option><option>已驳回</option><option>审核通过</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">重要程度</span><select id="qr-flt-importance" onchange="qrApplyFilter()"><option value="">全部</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div></div>
             <!-- 第3行：故障日期、故障系统、故障性质、生产日期 -->
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">故障日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="qrApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-fault-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-fault-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">故障日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-fault-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-fault-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障系统</span><select id="qr-flt-fault-system" onchange="qrApplyFilter()"><option value="">全部</option><option>发动机系统</option><option>变速箱系统</option><option>制动系统</option><option>转向系统</option><option>电气系统</option><option>空调系统</option><option>底盘系统</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障性质</span><select id="qr-flt-fault-nature" onchange="qrApplyFilter()"><option value="">全部</option><option>产品质量</option><option>使用问题</option><option>维修导致</option></select></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="qrApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qr-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <!-- 第4行：维修工单、客诉单 -->
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修工单</span><input type="text" id="qr-flt-repair-order" placeholder="请输入" oninput="qrApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">客诉单</span><input type="text" id="qr-flt-complaint-order" placeholder="请输入" oninput="qrApplyFilter()"></div></div>
@@ -1464,11 +1469,11 @@
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">处理状态</span><select id="thq-flt-status" onchange="thqApplyFilter()"></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">VIN</span><input type="text" id="thq-flt-vin" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">主题</span><input type="text" id="thq-flt-subject" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">故障日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-fault-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-fault-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">故障日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-fault-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-fault-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障系统</span><select id="thq-flt-fault-system" onchange="thqApplyFilter()"><option value="">全部</option><option>发动机系统</option><option>变速箱系统</option><option>制动系统</option><option>转向系统</option><option>电气系统</option><option>空调系统</option><option>底盘系统</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障性质</span><select id="thq-flt-fault-nature" onchange="thqApplyFilter()"><option value="">全部</option><option>产品质量</option><option>使用问题</option><option>维修导致</option></select></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="thq-flt-store" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">省份</span><input type="text" id="thq-flt-province" placeholder="请选择" oninput="thqFilterCombobox(this)" onfocus="thqShowCombobox(this)"><span class="cb-arrow" onclick="thqToggleCombobox(this)">▼</span><ul class="lt-datalist" id="thq-province-list"><li onclick="thqSelectCombobox(this)">北京</li><li onclick="thqSelectCombobox(this)">上海</li><li onclick="thqSelectCombobox(this)">广东</li><li onclick="thqSelectCombobox(this)">浙江</li><li onclick="thqSelectCombobox(this)">江苏</li><li onclick="thqSelectCombobox(this)">四川</li><li onclick="thqSelectCombobox(this)">湖北</li></ul></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">城市</span><input type="text" id="thq-flt-city" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
@@ -1503,11 +1508,11 @@
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">处理状态</span><select id="qrhq-flt-status" onchange="qrhqApplyFilter()"><option value="">全部</option><option>待提交</option><option>审核中</option><option>已退回</option><option>已驳回</option><option>审核通过</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">VIN</span><input type="text" id="qrhq-flt-vin" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">主题</span><input type="text" id="qrhq-flt-subject" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">故障日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-fault-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-fault-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">故障日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-fault-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-fault-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障系统</span><select id="qrhq-flt-fault-system" onchange="qrhqApplyFilter()"><option value="">全部</option><option>发动机系统</option><option>变速箱系统</option><option>制动系统</option><option>转向系统</option><option>电气系统</option><option>空调系统</option><option>底盘系统</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障性质</span><select id="qrhq-flt-fault-nature" onchange="qrhqApplyFilter()"><option value="">全部</option><option>产品质量</option><option>使用问题</option><option>维修导致</option></select></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qrhq-flt-store" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">省份</span><input type="text" id="qrhq-flt-province" placeholder="请选择" oninput="qrhqFilterCombobox(this)" onfocus="qrhqShowCombobox(this)"><span class="cb-arrow" onclick="qrhqToggleCombobox(this)">▼</span><ul class="lt-datalist" id="qrhq-province-list"><li onclick="qrhqSelectCombobox(this)">北京</li><li onclick="qrhqSelectCombobox(this)">上海</li><li onclick="qrhqSelectCombobox(this)">广东</li><li onclick="qrhqSelectCombobox(this)">浙江</li><li onclick="qrhqSelectCombobox(this)">江苏</li><li onclick="qrhqSelectCombobox(this)">四川</li><li onclick="qrhqSelectCombobox(this)">湖北</li></ul></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">城市</span><input type="text" id="qrhq-flt-city" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
@@ -1894,7 +1899,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">更新日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始-结束" onclick="toggleDateRangePicker(this)">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)">
                 <div class="lt-date-range-drop">
                   <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ph-flt-date-start" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
                   <span>-</span>
@@ -1959,7 +1964,7 @@
       <div class="lt-wrap">
         <!-- Tab 栏 -->
         <div class="pm-tab-bar">
-          <span class="pm-tab">配件外采</span>
+          <span class="pm-tab" onclick="showContent('external-procurement')">配件外采</span>
           <span class="pm-tab active">外采供应商管理</span>
         </div>
         <!-- 筛选区 -->
@@ -2037,6 +2042,345 @@
         </div>
       </div>
     </div><!-- /#page-supplier-manage -->
+
+    <!-- ========== 配件采购 ========== -->
+    <div id="page-parts-procurement" class="page-content">
+      <div class="lt-wrap">
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="pp-filterGrid">
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">采购单号</span><input type="text" id="pp-flt-po-no" placeholder="请输入" oninput="ppApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">订单类型</span>
+                <select id="pp-flt-order-type" onchange="ppApplyFilter()"><option value="">请选择</option><option>常规</option><option>油品</option><option>紧急</option><option>绿色</option><option>定制</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">订单状态</span>
+                <select id="pp-flt-status" onchange="ppApplyFilter()"><option value="">请选择</option><option>待审核</option><option>审核中</option><option>已通过</option><option>已驳回</option><option>已取消</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">关联的缺件单</span><input type="text" id="pp-flt-shortage" placeholder="请输入" oninput="ppApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">单据提交日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="ppApplyFilter">
+                <div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="pp-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="pp-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="pp-flt-region" placeholder="请选择" oninput="ppFilterCombobox(this)" onfocus="ppShowCombobox(this)"><span class="cb-arrow" onclick="ppToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="pp-region-list"><li onclick="ppSelectCombobox(this)">华东</li><li onclick="ppSelectCombobox(this)">华南</li><li onclick="ppSelectCombobox(this)">华北</li><li onclick="ppSelectCombobox(this)">西南</li><li onclick="ppSelectCombobox(this)">东北</li><li onclick="ppSelectCombobox(this)">华中</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="pp-flt-district" placeholder="请选择" oninput="ppFilterCombobox(this)" onfocus="ppShowCombobox(this)"><span class="cb-arrow" onclick="ppToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="pp-district-list"><li onclick="ppSelectCombobox(this)">上海</li><li onclick="ppSelectCombobox(this)">广州</li><li onclick="ppSelectCombobox(this)">北京</li><li onclick="ppSelectCombobox(this)">成都</li><li onclick="ppSelectCombobox(this)">沈阳</li><li onclick="ppSelectCombobox(this)">杭州</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
+                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <input type="text" id="pp-flt-store" placeholder="请输入" oninput="ppApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn lt-btn-primary" onclick="ppApplyFilter()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="ppResetFilter()">重置</button>
+              <a href="javascript:void(0)" class="lt-filter-toggle" onclick="ppToggleFilter()">&#xFE40; 展开</a>
+            </div>
+          </div>
+        </div>
+        <div class="lt-list-area">
+          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-primary" onclick="ppOpenAdd()">新增</button><button class="lt-btn lt-btn-default" onclick="ppExportData()">导出</button></div></div>
+          <div class="lt-table-wrap">
+            <table class="lt-table">
+              <thead><tr>
+                <th class="sticky col-seq">序号</th><th class="sticky col-po-no">采购单号</th><th class="col-order-type">订单类型</th><th class="col-region">大区</th><th class="col-district">小区</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-variety-count">合计品种</th><th class="col-total-amount">合计金额(含税)</th><th class="col-shortage-no">关联的缺件单</th><th class="col-order-status">订单状态</th><th class="col-audit-remark">审核备注</th><th class="col-auditor">审核人</th><th class="col-audit-time">审核时间</th><th class="col-expected-date">期望到货日期</th><th class="col-submitter">提交人</th><th class="col-submit-time">提交时间</th><th class="col-sync-time">同步主机厂时间</th><th class="sticky col-actions">操作</th>
+              </tr></thead>
+              <tbody id="pp-tbody"></tbody>
+            </table>
+          </div>
+          <div class="lt-pager">
+            <div class="lt-pager-left"><span class="pager-total" id="pp-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button id="pp-pg-prev" onclick="ppChangePage(-1)">上一页</button><span id="pp-pg-pages" class="pg-pages"></span><button id="pp-pg-next" onclick="ppChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="pp-pg-goto" onkeydown="if(event.key==='Enter')ppGotoPage(this.value)"> 页</div><select class="pager-size" id="pp-pg-size" onchange="ppChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-parts-procurement -->
+
+    <!-- ========== 配件采购明细 ========== -->
+    <div id="page-parts-procurement-detail" class="page-content">
+      <div class="lt-wrap">
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="ppd-filterGrid">
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件编码</span><input type="text" id="ppd-flt-code" placeholder="请输入" oninput="ppdApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件名称</span><input type="text" id="ppd-flt-name" placeholder="请输入" oninput="ppdApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">采购单号</span><input type="text" id="ppd-flt-po-no" placeholder="请输入" oninput="ppdApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">审核通过日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="ppdApplyFilter">
+                <div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ppd-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ppd-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="ppd-flt-region" placeholder="请选择" oninput="ppdFilterCombobox(this)" onfocus="ppdShowCombobox(this)"><span class="cb-arrow" onclick="ppdToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ppd-region-list"><li onclick="ppdSelectCombobox(this)">华东</li><li onclick="ppdSelectCombobox(this)">华南</li><li onclick="ppdSelectCombobox(this)">华北</li><li onclick="ppdSelectCombobox(this)">西南</li><li onclick="ppdSelectCombobox(this)">东北</li><li onclick="ppdSelectCombobox(this)">华中</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="ppd-flt-district" placeholder="请选择" oninput="ppdFilterCombobox(this)" onfocus="ppdShowCombobox(this)"><span class="cb-arrow" onclick="ppdToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ppd-district-list"><li onclick="ppdSelectCombobox(this)">上海</li><li onclick="ppdSelectCombobox(this)">广州</li><li onclick="ppdSelectCombobox(this)">北京</li><li onclick="ppdSelectCombobox(this)">成都</li><li onclick="ppdSelectCombobox(this)">沈阳</li><li onclick="ppdSelectCombobox(this)">杭州</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
+                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <input type="text" id="ppd-flt-store" placeholder="请输入" oninput="ppdApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn lt-btn-primary" onclick="ppdApplyFilter()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="ppdResetFilter()">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="lt-list-area">
+          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-default" onclick="ppdExportData()">导出</button></div></div>
+          <div class="lt-table-wrap">
+            <table class="lt-table">
+              <thead><tr>
+                <th class="sticky col-seq">序号</th><th class="col-code">配件编码</th><th class="col-name">配件名称</th><th class="col-region">大区</th><th class="col-district">小区</th><th class="col-store-name">门店</th><th class="col-purchase-no">采购单号</th><th class="col-audit-time">审核通过日期</th><th class="col-oem-order-no">主机厂订单号</th><th class="col-delivery-no">发货单号</th><th class="col-purchase-qty">采购数量</th><th class="col-delivery-qty">发货数量</th><th class="col-unit-price">单价(含税)</th><th class="col-amount">金额(含税)</th>
+              </tr></thead>
+              <tbody id="ppd-tbody"></tbody>
+            </table>
+          </div>
+          <div class="lt-pager">
+            <div class="lt-pager-left"><span class="pager-total" id="ppd-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button id="ppd-pg-prev" onclick="ppdChangePage(-1)">上一页</button><span id="ppd-pg-pages" class="pg-pages"></span><button id="ppd-pg-next" onclick="ppdChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="ppd-pg-goto" onkeydown="if(event.key==='Enter')ppdGotoPage(this.value)"> 页</div><select class="pager-size" id="ppd-pg-size" onchange="ppdChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-parts-procurement-detail -->
+
+    <!-- ========== 配件发货及交期 ========== -->
+    <div id="page-parts-delivery-schedule" class="page-content">
+      <div class="lt-wrap">
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="pds-filterGrid">
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">采购单号</span><input type="text" id="pds-flt-po-no" placeholder="请输入" oninput="pdsApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件编码</span><input type="text" id="pds-flt-code" placeholder="请输入" oninput="pdsApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件名称</span><input type="text" id="pds-flt-name" placeholder="请输入" oninput="pdsApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">单据提交日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="pdsApplyFilter">
+                <div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="pds-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="pds-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">发货单号</span><input type="text" id="pds-flt-delivery" placeholder="请输入" oninput="pdsApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">物流单号</span><input type="text" id="pds-flt-logistics" placeholder="请输入" oninput="pdsApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">已签收入库</span>
+                <select id="pds-flt-signed" onchange="pdsApplyFilter()"><option value="">请选择</option><option>是</option><option>否</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
+                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <input type="text" id="pds-flt-store" placeholder="请输入" oninput="pdsApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="pds-flt-region" placeholder="请选择" oninput="pdsFilterCombobox(this)" onfocus="pdsShowCombobox(this)"><span class="cb-arrow" onclick="pdsToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="pds-region-list"><li onclick="pdsSelectCombobox(this)">华东</li><li onclick="pdsSelectCombobox(this)">华南</li><li onclick="pdsSelectCombobox(this)">华北</li><li onclick="pdsSelectCombobox(this)">西南</li><li onclick="pdsSelectCombobox(this)">东北</li><li onclick="pdsSelectCombobox(this)">华中</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="pds-flt-district" placeholder="请选择" oninput="pdsFilterCombobox(this)" onfocus="pdsShowCombobox(this)"><span class="cb-arrow" onclick="pdsToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="pds-district-list"><li onclick="pdsSelectCombobox(this)">上海</li><li onclick="pdsSelectCombobox(this)">广州</li><li onclick="pdsSelectCombobox(this)">北京</li><li onclick="pdsSelectCombobox(this)">成都</li><li onclick="pdsSelectCombobox(this)">沈阳</li><li onclick="pdsSelectCombobox(this)">杭州</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn lt-btn-primary" onclick="pdsApplyFilter()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="pdsResetFilter()">重置</button>
+              <a href="javascript:void(0)" class="lt-filter-toggle" onclick="pdsToggleFilter()">&#xFE40; 展开</a>
+            </div>
+          </div>
+        </div>
+        <div class="lt-list-area">
+          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-default" onclick="pdsExportData()">导出</button></div></div>
+          <div class="lt-table-wrap">
+            <table class="lt-table">
+              <thead><tr>
+                <th class="sticky col-seq">序号</th><th class="sticky col-purchase-no">采购单号</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-province">省份</th><th class="col-submit-time">单据提交时间</th><th class="col-hq-order-no">总部订单号</th><th class="col-hq-receive-time">总部接收时间</th><th class="col-delivery-no">发货单号</th><th class="col-delivery-time">发货单时间</th><th class="col-logistics-no">物流单号</th><th class="col-logistics-time">物流单时间</th><th class="col-logistics-node">物流节点</th><th class="col-est-arrival">预计到货时间</th><th class="col-sign-time">签收入库时间</th>
+              </tr></thead>
+              <tbody id="pds-tbody"></tbody>
+            </table>
+          </div>
+          <div class="lt-pager">
+            <div class="lt-pager-left"><span class="pager-total" id="pds-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button id="pds-pg-prev" onclick="pdsChangePage(-1)">上一页</button><span id="pds-pg-pages" class="pg-pages"></span><button id="pds-pg-next" onclick="pdsChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="pds-pg-goto" onkeydown="if(event.key==='Enter')pdsGotoPage(this.value)"> 页</div><select class="pager-size" id="pds-pg-size" onchange="pdsChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-parts-delivery-schedule -->
+
+    <!-- ========== 厂端缺件查询 ========== -->
+    <div id="page-factory-shortage-query" class="page-content">
+      <div class="lt-wrap">
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="fsq-filterGrid">
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">采购单号</span><input type="text" id="fsq-flt-po-no" placeholder="请输入" oninput="fsqApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件编码</span><input type="text" id="fsq-flt-code" placeholder="请输入" oninput="fsqApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件名称</span><input type="text" id="fsq-flt-name" placeholder="请输入" oninput="fsqApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">审核通过日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="fsqApplyFilter">
+                <div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="fsq-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="fsq-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="fsq-flt-region" placeholder="请选择" oninput="fsqFilterCombobox(this)" onfocus="fsqShowCombobox(this)"><span class="cb-arrow" onclick="fsqToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="fsq-region-list"><li onclick="fsqSelectCombobox(this)">华东</li><li onclick="fsqSelectCombobox(this)">华南</li><li onclick="fsqSelectCombobox(this)">华北</li><li onclick="fsqSelectCombobox(this)">西南</li><li onclick="fsqSelectCombobox(this)">东北</li><li onclick="fsqSelectCombobox(this)">华中</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="fsq-flt-district" placeholder="请选择" oninput="fsqFilterCombobox(this)" onfocus="fsqShowCombobox(this)"><span class="cb-arrow" onclick="fsqToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="fsq-district-list"><li onclick="fsqSelectCombobox(this)">上海</li><li onclick="fsqSelectCombobox(this)">广州</li><li onclick="fsqSelectCombobox(this)">北京</li><li onclick="fsqSelectCombobox(this)">成都</li><li onclick="fsqSelectCombobox(this)">沈阳</li><li onclick="fsqSelectCombobox(this)">杭州</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
+                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <input type="text" id="fsq-flt-store" placeholder="请输入" oninput="fsqApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">取消状态</span>
+                <select id="fsq-flt-cancel" onchange="fsqApplyFilter()"><option value="">请选择</option><option>未取消</option><option>申请中</option><option>已取消</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn lt-btn-primary" onclick="fsqApplyFilter()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="fsqResetFilter()">重置</button>
+              <a href="javascript:void(0)" class="lt-filter-toggle" onclick="fsqToggleFilter()">&#xFE40; 展开</a>
+            </div>
+          </div>
+        </div>
+        <div class="lt-list-area">
+          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-default" onclick="fsqExportData()">导出</button></div></div>
+          <div class="lt-table-wrap">
+            <table class="lt-table">
+              <thead><tr>
+                <th class="sticky col-seq">序号</th><th class="col-name">配件名称</th><th class="col-code">配件编码</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-province">省份</th><th class="col-purchase-no">采购单号</th><th class="col-order-type">订单类型</th><th class="col-oem-order-no">主机厂订单号</th><th class="col-purchase-qty">采购数量</th><th class="col-actual-qty">实际数量</th><th class="col-shortage-qty">缺货数量</th><th class="col-shortage-hours">缺货时长(h)</th><th class="col-sync-time">同步厂端时间</th><th class="col-oem-reply-time">厂家答复时间</th><th class="col-cancel-apply-time">申请取消时间</th><th class="col-cancel-audit-time">取消审核时间</th><th class="sticky col-actions">操作</th>
+              </tr></thead>
+              <tbody id="fsq-tbody"></tbody>
+            </table>
+          </div>
+          <div class="lt-pager">
+            <div class="lt-pager-left"><span class="pager-total" id="fsq-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button id="fsq-pg-prev" onclick="fsqChangePage(-1)">上一页</button><span id="fsq-pg-pages" class="pg-pages"></span><button id="fsq-pg-next" onclick="fsqChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="fsq-pg-goto" onkeydown="if(event.key==='Enter')fsqGotoPage(this.value)"> 页</div><select class="pager-size" id="fsq-pg-size" onchange="fsqChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-factory-shortage-query -->
+
+    <!-- ========== 配件外采 ========== -->
+    <div id="page-external-procurement" class="page-content">
+      <div class="lt-wrap">
+        <!-- Tab 栏 -->
+        <div class="pm-tab-bar">
+          <span class="pm-tab active">配件外采</span>
+          <span class="pm-tab" onclick="showContent('supplier-manage')">外采供应商管理</span>
+        </div>
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="ep-filterGrid">
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">外采单号</span><input type="text" id="ep-flt-order-no" placeholder="请输入" oninput="epApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">外采供应商</span>
+                <select id="ep-flt-supplier" onchange="epApplyFilter()"><option value="">请选择</option><option>联友科技武汉</option><option>XX科技</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">订单状态</span>
+                <select id="ep-flt-status" onchange="epApplyFilter()"><option value="">请选择</option><option>待审核</option><option>审核中</option><option>已通过</option><option>已驳回</option><option>已取消</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">单据提交日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="epApplyFilter">
+                <div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ep-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="ep-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="ep-flt-region" placeholder="请选择" oninput="epFilterCombobox(this)" onfocus="epShowCombobox(this)"><span class="cb-arrow" onclick="epToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ep-region-list"><li onclick="epSelectCombobox(this)">华东</li><li onclick="epSelectCombobox(this)">华南</li><li onclick="epSelectCombobox(this)">华北</li><li onclick="epSelectCombobox(this)">西南</li><li onclick="epSelectCombobox(this)">东北</li><li onclick="epSelectCombobox(this)">华中</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="ep-flt-district" placeholder="请选择" oninput="epFilterCombobox(this)" onfocus="epShowCombobox(this)"><span class="cb-arrow" onclick="epToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ep-district-list"><li onclick="epSelectCombobox(this)">上海</li><li onclick="epSelectCombobox(this)">广州</li><li onclick="epSelectCombobox(this)">北京</li><li onclick="epSelectCombobox(this)">成都</li><li onclick="epSelectCombobox(this)">沈阳</li><li onclick="epSelectCombobox(this)">杭州</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">经销商</span><input type="text" id="ep-flt-dealer" placeholder="请输入" oninput="epApplyFilter()"></div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
+                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <input type="text" id="ep-flt-store" placeholder="请输入" oninput="epApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn lt-btn-primary" onclick="epApplyFilter()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="epResetFilter()">重置</button>
+              <a href="javascript:void(0)" class="lt-filter-toggle" onclick="epToggleFilter()">&#xFE40; 展开</a>
+            </div>
+          </div>
+        </div>
+        <div class="lt-list-area">
+          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-primary" onclick="epOpenAdd()">新增</button><button class="lt-btn lt-btn-default" onclick="epExportData()">导出</button></div></div>
+          <div class="lt-table-wrap">
+            <table class="lt-table">
+              <thead><tr>
+                <th class="sticky col-seq">序号</th><th class="sticky col-ext-order-no">外采单号</th><th class="col-ext-supplier">外采供应商</th><th class="col-region">大区</th><th class="col-district">小区</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-variety-count">合计品种</th><th class="col-total-amount">合计金额(含税)</th><th class="col-order-status">订单状态</th><th class="col-audit-remark">审核备注</th><th class="col-auditor">审核人</th><th class="col-audit-time">审核时间</th><th class="col-expected-date">期望到货日期</th><th class="col-submitter">提交人</th><th class="col-submit-time">提交时间</th><th class="sticky col-actions">操作</th>
+              </tr></thead>
+              <tbody id="ep-tbody"></tbody>
+            </table>
+          </div>
+          <div class="lt-pager">
+            <div class="lt-pager-left"><span class="pager-total" id="ep-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button id="ep-pg-prev" onclick="epChangePage(-1)">上一页</button><span id="ep-pg-pages" class="pg-pages"></span><button id="ep-pg-next" onclick="epChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="ep-pg-goto" onkeydown="if(event.key==='Enter')epGotoPage(this.value)"> 页</div><select class="pager-size" id="ep-pg-size" onchange="epChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-external-procurement -->
 
 
   </main>
@@ -2969,6 +3313,161 @@
       </div>
     </div>
   </div><!-- /display:none wrapping old modals -->
+
+  <!-- ========== 配件采购 侧滑面板 ========== -->
+  <div class="pm-panel-overlay" id="pp-panel-overlay" onclick="ppClosePanel()"></div>
+  <div class="pm-panel" id="pp-panel" style="width:1000px">
+    <div class="pm-panel-header">
+      <div style="display:flex;align-items:center">
+        <span class="pm-panel-title" id="pp-panel-title">配件采购</span>
+        <span class="pm-panel-badge" id="pp-panel-badge">新增</span>
+      </div>
+      <button class="pm-panel-close" onclick="ppClosePanel()">&#10005;</button>
+    </div>
+    <div class="pm-panel-body">
+      <div class="pm-section-title">基本信息</div>
+      <div class="pm-form-grid">
+        <div class="pm-form-item"><label>采购单号</label><input type="text" id="pp-form-po-no" readonly class="pm-readonly"></div>
+        <div class="pm-form-item required"><label>订单类型</label><select id="pp-form-type"><option value="">请选择</option><option>常规</option><option>油品</option><option>紧急</option><option>绿色</option><option>定制</option></select></div>
+        <div class="pm-form-item required"><label>门店</label><input type="text" id="pp-form-store" placeholder="请输入"></div>
+        <div class="pm-form-item"><label>大区</label><input type="text" readonly class="pm-readonly" value="—"></div>
+        <div class="pm-form-item"><label>小区</label><input type="text" readonly class="pm-readonly" value="—"></div>
+        <div class="pm-form-item"><label>申请日期</label><input type="text" id="pp-form-apply-date" readonly class="pm-readonly"></div>
+        <div class="pm-form-item required"><label>期望到货日期</label><input type="text" id="pp-form-edate" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" onchange="this.classList.remove('date-shim')"></div>
+        <div class="pm-form-item"><label>关联的缺件单</label><input type="text" id="pp-form-shortage" placeholder="请输入"></div>
+      </div>
+      <div class="pm-form-item" style="margin-top:12px"><label>备注</label><textarea id="pp-form-remark" rows="2" placeholder="请输入备注" style="width:100%;padding:6px 10px;border:1px solid #dcdfe6;border-radius:4px;font-size:13px;box-sizing:border-box"></textarea></div>
+      <div class="pm-section-title">配件明细 <button class="lt-btn lt-btn-primary" id="ppf-add-btn" onclick="ppfAddPart()" style="font-size:12px;padding:2px 10px">+ 添加配件</button></div>
+      <div style="overflow-x:auto;margin-bottom:8px">
+        <table class="pp-parts-table">
+          <thead><tr><th style="width:40px">#</th><th>配件编码</th><th>配件名称</th><th style="width:80px">车系</th><th style="width:100px">车型</th><th style="width:60px">单位</th><th style="width:70px">数量</th><th style="width:90px">单价(含税)</th><th style="width:100px">金额(含税)</th><th id="ppf-del-col" style="width:50px">操作</th></tr></thead>
+          <tbody id="ppf-parts-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pp-panel-totals" id="ppf-totals">合计品种: <b>0</b> &nbsp; 合计金额(含税): <b>¥0.00</b></div>
+    </div>
+    <div class="pm-panel-footer" id="pp-panel-footer">
+      <button class="lt-btn lt-btn-default" onclick="ppfSaveDraft()">保存草稿</button>
+      <button class="lt-btn lt-btn-default" onclick="ppfResetForm()">重置</button>
+      <button class="lt-btn lt-btn-primary" onclick="ppfSubmit()">提交</button>
+    </div>
+  </div>
+
+  <!-- ========== 配件采购 审核面板 ========== -->
+  <div class="pm-panel-overlay" id="pp-audit-overlay" onclick="ppCloseAuditPanel()"></div>
+  <div class="pm-panel" id="pp-audit-panel" style="width:1000px">
+    <div class="pm-panel-header">
+      <div style="display:flex;align-items:center">
+        <span class="pm-panel-title">配件采购 · 审核</span>
+        <span class="pm-panel-badge" id="ppa-status-badge"></span>
+      </div>
+      <button class="pm-panel-close" onclick="ppCloseAuditPanel()">&#10005;</button>
+    </div>
+    <div class="pm-panel-body">
+      <div class="pm-section-title">基本信息（只读）</div>
+      <div class="pm-form-grid" id="ppa-basic-info"></div>
+      <div class="pm-section-title">配件明细（只读）</div>
+      <div style="overflow-x:auto;margin-bottom:8px">
+        <table class="pp-parts-table">
+          <thead><tr><th style="width:40px">#</th><th>配件编码</th><th>配件名称</th><th style="width:80px">车系</th><th style="width:100px">车型</th><th style="width:60px">单位</th><th style="width:70px">数量</th><th style="width:90px">单价(含税)</th><th style="width:100px">金额(含税)</th></tr></thead>
+          <tbody id="ppa-parts-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pp-panel-totals" id="ppa-totals"></div>
+      <div class="pm-section-title">审核记录</div>
+      <div style="overflow-x:auto;margin-bottom:8px">
+        <table class="pp-parts-table">
+          <thead><tr><th>审核人</th><th>审核时间</th><th>结果</th><th style="min-width:200px">审核意见</th></tr></thead>
+          <tbody id="ppa-audit-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pp-audit-area" id="ppa-audit-area">
+        <div class="pm-section-title" style="color:#861B2F;border-left-color:#861B2F">审核操作</div>
+        <div class="pm-form-item"><label>审核意见</label><textarea id="ppa-comment" rows="2" placeholder="请输入审核意见" style="width:100%;padding:6px 10px;border:1px solid #dcdfe6;border-radius:4px;font-size:13px;box-sizing:border-box"></textarea></div>
+        <div class="pp-audit-btns">
+          <button class="lt-btn lt-btn-primary" onclick="ppaApprove()">审核通过</button>
+          <button class="lt-btn" style="background:#861B2F;color:#fff" onclick="ppaReject()">审核驳回</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 配件外采 侧滑面板 ========== -->
+  <div class="pm-panel-overlay" id="ep-panel-overlay" onclick="epClosePanel()"></div>
+  <div class="pm-panel" id="ep-panel" style="width:1000px">
+    <div class="pm-panel-header">
+      <div style="display:flex;align-items:center">
+        <span class="pm-panel-title" id="ep-panel-title">配件外采</span>
+        <span class="pm-panel-badge" id="ep-panel-badge">新增</span>
+      </div>
+      <button class="pm-panel-close" onclick="epClosePanel()">&#10005;</button>
+    </div>
+    <div class="pm-panel-body">
+      <div class="pm-section-title">基本信息</div>
+      <div class="pm-form-grid">
+        <div class="pm-form-item"><label>外采单号</label><input type="text" id="ep-form-order-no" readonly class="pm-readonly"></div>
+        <div class="pm-form-item required"><label>外采供应商</label><select id="ep-form-supplier"><option value="">请选择</option><option>联友科技武汉</option><option>XX科技</option></select></div>
+        <div class="pm-form-item required"><label>门店</label><input type="text" id="ep-form-store" placeholder="请输入"></div>
+        <div class="pm-form-item"><label>大区</label><input type="text" readonly class="pm-readonly" value="—"></div>
+        <div class="pm-form-item"><label>小区</label><input type="text" readonly class="pm-readonly" value="—"></div>
+        <div class="pm-form-item"><label>申请日期</label><input type="text" id="ep-form-apply-date" readonly class="pm-readonly"></div>
+        <div class="pm-form-item required"><label>期望到货日期</label><input type="text" id="ep-form-edate" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" onchange="this.classList.remove('date-shim')"></div>
+      </div>
+      <div class="pm-form-item" style="margin-top:12px"><label>备注</label><textarea id="ep-form-remark" rows="2" placeholder="请输入备注" style="width:100%;padding:6px 10px;border:1px solid #dcdfe6;border-radius:4px;font-size:13px;box-sizing:border-box"></textarea></div>
+      <div class="pm-section-title">配件明细 <button class="lt-btn lt-btn-primary" id="epf-add-btn" onclick="epfAddPart()" style="font-size:12px;padding:2px 10px">+ 添加配件</button></div>
+      <div style="overflow-x:auto;margin-bottom:8px">
+        <table class="pp-parts-table">
+          <thead><tr><th style="width:40px">#</th><th>配件编码</th><th>配件名称</th><th style="width:80px">车系</th><th style="width:100px">车型</th><th style="width:60px">单位</th><th style="width:70px">数量</th><th style="width:90px">单价(含税)</th><th style="width:100px">金额(含税)</th><th id="epf-del-col" style="width:50px">操作</th></tr></thead>
+          <tbody id="epf-parts-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pp-panel-totals" id="epf-totals">合计品种: <b>0</b> &nbsp; 合计金额(含税): <b>¥0.00</b></div>
+    </div>
+    <div class="pm-panel-footer" id="ep-panel-footer">
+      <button class="lt-btn lt-btn-default" onclick="epfSaveDraft()">保存草稿</button>
+      <button class="lt-btn lt-btn-default" onclick="epfResetForm()">重置</button>
+      <button class="lt-btn lt-btn-primary" onclick="epfSubmit()">提交</button>
+    </div>
+  </div>
+
+  <!-- ========== 配件外采 审核面板 ========== -->
+  <div class="pm-panel-overlay" id="ep-audit-overlay" onclick="epCloseAuditPanel()"></div>
+  <div class="pm-panel" id="ep-audit-panel" style="width:1000px">
+    <div class="pm-panel-header">
+      <div style="display:flex;align-items:center">
+        <span class="pm-panel-title">配件外采 · 审核</span>
+        <span class="pm-panel-badge" id="epa-status-badge"></span>
+      </div>
+      <button class="pm-panel-close" onclick="epCloseAuditPanel()">&#10005;</button>
+    </div>
+    <div class="pm-panel-body">
+      <div class="pm-section-title">基本信息（只读）</div>
+      <div class="pm-form-grid" id="epa-basic-info"></div>
+      <div class="pm-section-title">配件明细（只读）</div>
+      <div style="overflow-x:auto;margin-bottom:8px">
+        <table class="pp-parts-table">
+          <thead><tr><th style="width:40px">#</th><th>配件编码</th><th>配件名称</th><th style="width:80px">车系</th><th style="width:100px">车型</th><th style="width:60px">单位</th><th style="width:70px">数量</th><th style="width:90px">单价(含税)</th><th style="width:100px">金额(含税)</th></tr></thead>
+          <tbody id="epa-parts-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pp-panel-totals" id="epa-totals"></div>
+      <div class="pm-section-title">审核记录</div>
+      <div style="overflow-x:auto;margin-bottom:8px">
+        <table class="pp-parts-table">
+          <thead><tr><th>审核人</th><th>审核时间</th><th>结果</th><th style="min-width:200px">审核意见</th></tr></thead>
+          <tbody id="epa-audit-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pp-audit-area" id="epa-audit-area">
+        <div class="pm-section-title" style="color:#861B2F;border-left-color:#861B2F">审核操作</div>
+        <div class="pm-form-item"><label>审核意见</label><textarea id="epa-comment" rows="2" placeholder="请输入审核意见" style="width:100%;padding:6px 10px;border:1px solid #dcdfe6;border-radius:4px;font-size:13px;box-sizing:border-box"></textarea></div>
+        <div class="pp-audit-btns">
+          <button class="lt-btn lt-btn-primary" onclick="epaApprove()">审核通过</button>
+          <button class="lt-btn" style="background:#861B2F;color:#fff" onclick="epaReject()">审核驳回</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="js/app.js"></script>
