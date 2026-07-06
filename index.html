@@ -81,6 +81,9 @@
             <div class="submenu-item submenu-item-nested" onclick="showContent('lead-tracking')" data-module="lead-tracking">用户线索跟踪情况</div>
           </div>
           <div class="submenu-item" onclick="showContent('manage-report')" data-module="manage-report">管理报表</div>
+          <div class="submenu submenu-nested open">
+            <div class="submenu-item submenu-item-nested" onclick="showContent('user-service-satisfaction')" data-module="user-service-satisfaction">用户服务满意度</div>
+          </div>
           <div class="submenu-item" onclick="showContent('parts-report')" data-module="parts-report">配件报表</div>
           <div class="submenu submenu-nested open">
             <div class="submenu-item submenu-item-nested" onclick="showContent('parts-inventory-ledger')" data-module="parts-inventory-ledger">配件库存台账</div>
@@ -486,6 +489,176 @@
     <div id="page-manage-report" class="page-content">
       <div style="padding:40px;text-align:center;color:#666;">管理报表页面开发中...</div>
     </div>
+
+    <!-- 用户服务满意度 -->
+    <div id="page-user-service-satisfaction" class="page-content">
+      <div class="lt-wrap">
+        <!-- 筛选区 -->
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="uss-filterGrid">
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">服务日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="ussApplyFilter">
+                <div class="lt-date-range-drop">
+                  <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="uss-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                  <span>—</span>
+                  <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="uss-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                </div>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">服务类型</span>
+                <input type="text" id="uss-servicetype-text" placeholder="请选择或输入" onfocus="ussShowServicetypeDropdown()" oninput="ussFilterServicetype(this.value)">
+                <span class="cb-arrow" onclick="ussToggleServicetypeDropdown()">▼</span>
+                <ul class="lt-datalist" id="uss-servicetype-list">
+                  <li data-val="" onclick="ussSelectServicetype(this)">请选择</li>
+                  <li data-val="保养" onclick="ussSelectServicetype(this)">保养</li>
+                  <li data-val="一般维修" onclick="ussSelectServicetype(this)">一般维修</li>
+                  <li data-val="钣喷" onclick="ussSelectServicetype(this)">钣喷</li>
+                  <li data-val="保险理赔" onclick="ussSelectServicetype(this)">保险理赔</li>
+                  <li data-val="召回" onclick="ussSelectServicetype(this)">召回</li>
+                  <li data-val="索赔" onclick="ussSelectServicetype(this)">索赔</li>
+                  <li data-val="事故维修" onclick="ussSelectServicetype(this)">事故维修</li>
+                </ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">整体满意度</span>
+                <input type="text" id="uss-score-text" placeholder="请选择或输入" onfocus="ussShowScoreDropdown()" oninput="ussFilterScore(this.value)">
+                <span class="cb-arrow" onclick="ussToggleScoreDropdown()">▼</span>
+                <ul class="lt-datalist" id="uss-score-list">
+                  <li data-val="" onclick="ussSelectScore(this)">全部</li>
+                  <li data-val="10" onclick="ussSelectScore(this)">10分</li>
+                  <li data-val="9" onclick="ussSelectScore(this)">9分</li>
+                  <li data-val="8" onclick="ussSelectScore(this)">8分</li>
+                  <li data-val="7" onclick="ussSelectScore(this)">7分</li>
+                  <li data-val="6" onclick="ussSelectScore(this)">6分</li>
+                  <li data-val="5" onclick="ussSelectScore(this)">5分</li>
+                  <li data-val="4" onclick="ussSelectScore(this)">4分</li>
+                  <li data-val="3" onclick="ussSelectScore(this)">3分</li>
+                  <li data-val="2" onclick="ussSelectScore(this)">2分</li>
+                  <li data-val="1" onclick="ussSelectScore(this)">1分</li>
+                </ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">NPS分类</span>
+                <input type="text" id="uss-nps-text" placeholder="请选择或输入" onfocus="ussShowNpsDropdown()" oninput="ussFilterNps(this.value)">
+                <span class="cb-arrow" onclick="ussToggleNpsDropdown()">▼</span>
+                <ul class="lt-datalist" id="uss-nps-list">
+                  <li data-val="" onclick="ussSelectNps(this)">全部</li>
+                  <li data-val="推荐者" onclick="ussSelectNps(this)">推荐者</li>
+                  <li data-val="被动者" onclick="ussSelectNps(this)">被动者</li>
+                  <li data-val="贬损者" onclick="ussSelectNps(this)">贬损者</li>
+                </ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">大区</span>
+                <input type="text" id="uss-region-text" placeholder="请选择或输入" onfocus="ussShowRegionDropdown()" oninput="ussFilterRegion(this.value)">
+                <span class="cb-arrow" onclick="ussToggleRegionDropdown()">▼</span>
+                <ul class="lt-datalist" id="uss-region-list">
+                  <li data-val="" onclick="ussSelectRegion(this)">请选择</li>
+                  <li data-val="华东" onclick="ussSelectRegion(this)">华东</li>
+                  <li data-val="华南" onclick="ussSelectRegion(this)">华南</li>
+                  <li data-val="华北" onclick="ussSelectRegion(this)">华北</li>
+                  <li data-val="西南" onclick="ussSelectRegion(this)">西南</li>
+                  <li data-val="东北" onclick="ussSelectRegion(this)">东北</li>
+                  <li data-val="华中" onclick="ussSelectRegion(this)">华中</li>
+                </ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">小区</span>
+                <input type="text" id="uss-district-text" placeholder="请选择或输入" onfocus="ussShowDistrictDropdown()" oninput="ussFilterDistrict(this.value)">
+                <span class="cb-arrow" onclick="ussToggleDistrictDropdown()">▼</span>
+                <ul class="lt-datalist" id="uss-district-list">
+                  <li data-val="" onclick="ussSelectDistrict(this)">请选择</li>
+                  <li data-val="上海" onclick="ussSelectDistrict(this)">上海</li>
+                  <li data-val="广州" onclick="ussSelectDistrict(this)">广州</li>
+                  <li data-val="北京" onclick="ussSelectDistrict(this)">北京</li>
+                  <li data-val="成都" onclick="ussSelectDistrict(this)">成都</li>
+                  <li data-val="沈阳" onclick="ussSelectDistrict(this)">沈阳</li>
+                  <li data-val="杭州" onclick="ussSelectDistrict(this)">杭州</li>
+                  <li data-val="深圳" onclick="ussSelectDistrict(this)">深圳</li>
+                  <li data-val="武汉" onclick="ussSelectDistrict(this)">武汉</li>
+                </ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
+                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <input type="text" id="uss-store" placeholder="请输入" oninput="ussApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn-filter primary" onclick="ussApplyFilter()">查询</button>
+              <button class="lt-btn-filter default" onclick="ussResetFilter()">重置</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 表格工具栏 + 数据表 -->
+        <div class="lt-list-area">
+          <div class="lt-toolbar">
+            <div class="lt-toolbar-left">
+              <button class="lt-btn-filter default">导出</button>
+              <button class="lt-btn-filter default">导出明细</button>
+            </div>
+            <div class="lt-toolbar-right">
+              <button class="lt-btn-filter link">报表说明</button>
+            </div>
+          </div>
+
+          <div class="lt-table-wrap">
+            <table class="lt-table">
+              <thead>
+                <tr>
+                  <th class="sticky col-seq">序号</th>
+                  <th class="sticky col-store-code">门店编码</th>
+                  <th class="sticky col-store-name">门店名称</th>
+                  <th class="col-region">大区</th>
+                  <th class="col-district">小区</th>
+                  <th class="col-order-no">服务工单号</th>
+                  <th class="col-cust-name">客户姓名</th>
+                  <th class="col-svc-type">服务类型</th>
+                  <th class="col-date-in">进厂日期</th>
+                  <th class="col-overall">整体满意度</th>
+                  <th class="col-advisor">服务顾问</th>
+                  <th class="col-facility">服务设施</th>
+                  <th class="col-aftersales">售后服务</th>
+                  <th class="col-parts">配件满意度</th>
+                  <th class="col-recommend">推荐意愿</th>
+                  <th class="col-nps">NPS分类</th>
+                  <th class="col-comment">评价内容</th>
+                  <th class="col-revisit">回访状态</th>
+                </tr>
+              </thead>
+              <tbody id="uss-tbody"></tbody>
+            </table>
+          </div>
+          <!-- 分页 -->
+          <div class="lt-pager" id="uss-pager">
+            <div class="lt-pager-left">
+              <span class="pager-total" id="uss-pg-total">共 0 条</span>
+            </div>
+            <div class="lt-pager-right">
+              <button onclick="ussChangePage(-1)" id="uss-pg-prev">上一页</button>
+              <span id="uss-pg-pages" class="pg-pages"></span>
+              <button onclick="ussChangePage(1)" id="uss-pg-next">下一页</button>
+              <span class="pager-goto">前往 <input type="text" id="uss-pg-goto" onkeydown="if(event.key==='Enter')ussGotoPage(this.value)"> 页</span>
+              <select class="pager-size" id="uss-pg-size" onchange="ussChangePageSize(this.value)">
+                <option value="10">10条/页</option>
+                <option value="20" selected>20条/页</option>
+                <option value="50">50条/页</option>
+                <option value="100">100条/页</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-user-service-satisfaction -->
+
     <div id="page-parts-report" class="page-content">
       <div style="padding:40px;text-align:center;color:#666;">配件报表页面开发中...</div>
     </div>
@@ -1465,7 +1638,6 @@
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">申请单号</span><input type="text" id="thq-flt-order-no" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap search"><span class="lt-filter-prefix">车系</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="thq-flt-car-series" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap search"><span class="lt-filter-prefix">车型</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="thq-flt-car-model" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">申请类型</span><select id="thq-flt-apply-type" onchange="thqApplyFilter()"><option value="">全部</option><option>故障诊断</option><option>技术咨询</option><option>维修方案</option><option>客诉处理</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">处理状态</span><select id="thq-flt-status" onchange="thqApplyFilter()"></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">VIN</span><input type="text" id="thq-flt-vin" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">主题</span><input type="text" id="thq-flt-subject" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
@@ -1624,16 +1796,11 @@
           <div class="qr-form-grid col4">
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">关单人</span><input type="text" id="qrt-form-close-user" readonly placeholder="自动带入"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">关单时间</span><input type="text" id="qrt-form-close-time" readonly placeholder="自动带入"></div>
-            <div></div>
-            <div></div>
-            <div class="qr-form-item-inline full">
+            <div class="qr-form-item-inline">
               <span class="qr-form-label-inline">归档分类</span>
-              <div style="display:flex;gap:4px;flex:1;align-items:center">
-                <select id="qrt-form-archive-cat1" onchange="qrtOnArchiveChange(1)" style="flex:1;min-width:0"><option value="">请选择</option></select>
-                <select id="qrt-form-archive-cat2" onchange="qrtOnArchiveChange(2)" style="flex:1;min-width:0"><option value="">请选择</option></select>
-                <select id="qrt-form-archive-cat3" style="flex:1;min-width:0"><option value="">请选择</option></select>
-              </div>
+              <input type="text" id="qrt-form-archive-cat" readonly placeholder="自动带入">
             </div>
+            <div></div>
             <div class="qr-form-item full">
               <label class="qr-form-label">处理结论及技术方案</label>
               <textarea id="qrt-form-conclusion" placeholder="请输入处理结论及技术方案"></textarea>
@@ -2510,16 +2677,11 @@
           <div class="ts-form-grid col4">
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">关单人</span><input type="text" id="ts-form-close-user" readonly placeholder="自动带入"></div>
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">关单时间</span><input type="text" id="ts-form-close-time" readonly placeholder="自动带入"></div>
-            <div></div>
-            <div></div>
-            <div class="ts-form-item-inline full">
+            <div class="ts-form-item-inline">
               <span class="ts-form-label-inline">归档分类</span>
-              <div style="display:flex;gap:4px;flex:1;align-items:center">
-                <select id="ts-form-archive-cat1" onchange="tsOnArchiveChange(1)" style="flex:1;min-width:0"><option value="">请选择</option></select>
-                <select id="ts-form-archive-cat2" onchange="tsOnArchiveChange(2)" style="flex:1;min-width:0"><option value="">请选择</option></select>
-                <select id="ts-form-archive-cat3" style="flex:1;min-width:0"><option value="">请选择</option></select>
-              </div>
+              <input type="text" id="ts-form-archive-cat" readonly placeholder="自动带入">
             </div>
+            <div></div>
             <div class="ts-form-item full">
               <label class="ts-form-label">处理结论及技术方案</label>
               <textarea id="ts-form-conclusion" placeholder="请输入处理结论及技术方案"></textarea>
@@ -2674,16 +2836,11 @@
           <div class="qr-form-grid col4">
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">关单人</span><input type="text" id="qr-form-close-user" readonly placeholder="自动带入"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">关单时间</span><input type="text" id="qr-form-close-time" readonly placeholder="自动带入"></div>
-            <div></div>
-            <div></div>
-            <div class="qr-form-item-inline full">
+            <div class="qr-form-item-inline">
               <span class="qr-form-label-inline">归档分类</span>
-              <div style="display:flex;gap:4px;flex:1;align-items:center">
-                <select id="qr-form-archive-cat1" onchange="qrOnArchiveChange(1)" style="flex:1;min-width:0"><option value="">请选择</option></select>
-                <select id="qr-form-archive-cat2" onchange="qrOnArchiveChange(2)" style="flex:1;min-width:0"><option value="">请选择</option></select>
-                <select id="qr-form-archive-cat3" style="flex:1;min-width:0"><option value="">请选择</option></select>
-              </div>
+              <input type="text" id="qr-form-archive-cat" readonly placeholder="自动带入">
             </div>
+            <div></div>
             <div class="qr-form-item full">
               <label class="qr-form-label">处理结论及技术方案</label>
               <textarea id="qr-form-conclusion" placeholder="请输入处理结论及技术方案"></textarea>
@@ -2881,10 +3038,15 @@
       <div class="close-modal-body">
         <div class="close-modal-field">
           <span class="close-modal-label">归档分类</span>
-          <div class="close-modal-selects">
-            <select id="ts-close-archive1"><option value="">请选择</option></select>
-            <select id="ts-close-archive2"><option value="">请选择</option></select>
-            <select id="ts-close-archive3"><option value="">请选择</option></select>
+          <div class="cascader" id="ts-close-cascader">
+            <input type="hidden" class="cascader-value" value="">
+            <input type="text" class="cascader-display" readonly placeholder="请选择">
+            <span class="cascader-arrow">▼</span>
+            <div class="cascader-panel">
+              <ul class="cascader-col" data-level="1"></ul>
+              <ul class="cascader-col" data-level="2"></ul>
+              <ul class="cascader-col" data-level="3"></ul>
+            </div>
           </div>
         </div>
         <div class="close-modal-field">

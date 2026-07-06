@@ -1295,6 +1295,26 @@
     /* 新增列 */
     .col-fault-name { min-width:140px; } .col-fault-code { min-width:130px; } .col-importance { min-width:90px; } .col-fault-system { min-width:110px; }
 
+    /* 用户服务满意度列宽 */
+    #page-user-service-satisfaction .lt-table th.col-seq, #page-user-service-satisfaction .lt-table td.col-seq { left: 0; width: 40px; min-width: 40px; max-width: 40px; overflow: hidden; }
+    #page-user-service-satisfaction .lt-table th.col-store-code, #page-user-service-satisfaction .lt-table td.col-store-code { left: 40px; width: 80px; min-width: 80px; max-width: 80px; overflow: hidden; }
+    #page-user-service-satisfaction .lt-table th.col-store-name, #page-user-service-satisfaction .lt-table td.col-store-name { left: 120px; width: 160px; min-width: 160px; max-width: 160px; overflow: hidden; text-align: left; }
+    #page-user-service-satisfaction .lt-table th.col-region, #page-user-service-satisfaction .lt-table td.col-region { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-district, #page-user-service-satisfaction .lt-table td.col-district { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-order-no, #page-user-service-satisfaction .lt-table td.col-order-no { min-width: 120px; }
+    #page-user-service-satisfaction .lt-table th.col-cust-name, #page-user-service-satisfaction .lt-table td.col-cust-name { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-svc-type, #page-user-service-satisfaction .lt-table td.col-svc-type { min-width: 90px; }
+    #page-user-service-satisfaction .lt-table th.col-date-in, #page-user-service-satisfaction .lt-table td.col-date-in { min-width: 100px; }
+    #page-user-service-satisfaction .lt-table th.col-overall, #page-user-service-satisfaction .lt-table td.col-overall { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-advisor, #page-user-service-satisfaction .lt-table td.col-advisor { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-facility, #page-user-service-satisfaction .lt-table td.col-facility { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-aftersales, #page-user-service-satisfaction .lt-table td.col-aftersales { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-parts, #page-user-service-satisfaction .lt-table td.col-parts { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-recommend, #page-user-service-satisfaction .lt-table td.col-recommend { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-nps, #page-user-service-satisfaction .lt-table td.col-nps { min-width: 80px; }
+    #page-user-service-satisfaction .lt-table th.col-comment, #page-user-service-satisfaction .lt-table td.col-comment { min-width: 160px; }
+    #page-user-service-satisfaction .lt-table th.col-revisit, #page-user-service-satisfaction .lt-table td.col-revisit { min-width: 80px; }
+
     /* 列表操作按钮行内样式 */
     .op-links { display:flex; gap:8px; }
     .op-links a { color:#185FA5; text-decoration:none; font-size:12px; cursor:pointer; }
@@ -1699,3 +1719,20 @@
     .pp-audit-btns { display:flex; gap:12px; justify-content:flex-end; padding-top:12px; }
     .pm-panel-badge.pass { background:#e6f7e6; color:#1D9E75; }
     .pm-panel-badge.reject { background:#fde6e6; color:#861B2F; }
+    /* ========== 级联下拉组件 ========== */
+    .cascader { display:flex; position:relative; align-items:center; flex:1; min-width:0; }
+    .cascader input.cascader-display { flex:1; min-width:0; height:32px; border:1px solid #d9d9d9; border-radius:4px; padding:0 28px 0 8px; font-size:12px; color:#333; background:#fff; cursor:pointer; user-select:none; font-family:inherit; }
+    .cascader input.cascader-display:focus { border-color:#861B2F; outline:none; }
+    .cascader input.cascader-display:disabled { background:#f5f5f5; color:#999; cursor:not-allowed; }
+    .cascader input.cascader-display[readonly] { background:#f9f9f9; }
+    .cascader-arrow { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:10px; color:#999; pointer-events:none; transition:transform 0.2s; }
+    .cascader.open .cascader-arrow { transform:translateY(-50%) rotate(180deg); }
+    .cascader-panel { display:none; position:absolute; top:100%; left:0; margin-top:4px; background:#fff; border:1px solid #d9d9d9; border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,0.12); z-index:300; min-width:480px; }
+    .cascader-panel.show { display:flex; }
+    .cascader-col { flex:1; min-width:0; max-height:200px; overflow-y:auto; border-right:1px solid #f0f0f0; padding:4px 0; list-style:none; margin:0; }
+    .cascader-col:last-child { border-right:none; }
+    .cascader-col li { padding:6px 12px; font-size:12px; color:#333; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cascader-col li:hover { background:#f5f5f5; }
+    .cascader-col li.selected { background:#E8F0FE; color:#185FA5; }
+    .cascader-col li.placeholder { color:#999; cursor:default; }
+    .cascader-col li.placeholder:hover { background:transparent; }

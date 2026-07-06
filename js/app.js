@@ -115,6 +115,10 @@
         if (module === 'inventory-check-detail') {
           initIcd();
         }
+        // 用户服务满意度
+        if (module === 'user-service-satisfaction') {
+          initUss();
+        }
         // 技术支持
         if (module === 'tech-support') {
           initTs();
@@ -2329,6 +2333,110 @@
       }
     };
 
+    // ========== 级联下拉组件（通用） ==========
+    function initCascader(containerId, data) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      var display = container.querySelector('.cascader-display');
+      var hidden = container.querySelector('.cascader-value');
+      var panel = container.querySelector('.cascader-panel');
+      var col1 = container.querySelector('.cascader-col[data-level="1"]');
+      var col2 = container.querySelector('.cascader-col[data-level="2"]');
+      var col3 = container.querySelector('.cascader-col[data-level="3"]');
+      // 构建一级列
+      col1.innerHTML = '';
+      for (var k in data) {
+        (function(l1Key) {
+          var li = document.createElement('li'); li.textContent = l1Key;
+          li.onclick = function(e) {
+            e.stopPropagation();
+            col1.querySelectorAll('li').forEach(function(l) { l.classList.remove('selected'); });
+            this.classList.add('selected');
+            col2.innerHTML = ''; col3.innerHTML = '';
+            var l2Data = data[l1Key];
+            for (var k2 in l2Data) {
+              (function(l2Key, l2Children) {
+                var li2 = document.createElement('li'); li2.textContent = l2Key;
+                li2.onclick = function(e) {
+                  e.stopPropagation();
+                  col2.querySelectorAll('li').forEach(function(l) { l.classList.remove('selected'); });
+                  this.classList.add('selected');
+                  col3.innerHTML = '';
+                  l2Children.forEach(function(v) {
+                    var li3 = document.createElement('li'); li3.textContent = v;
+                    li3.onclick = function(e) {
+                      e.stopPropagation();
+                      col3.querySelectorAll('li').forEach(function(l) { l.classList.remove('selected'); });
+                      this.classList.add('selected');
+                      hidden.value = v;
+                      display.value = v;
+                      panel.classList.remove('show');
+                      container.classList.remove('open');
+                    };
+                    col3.appendChild(li3);
+                  });
+                };
+                col2.appendChild(li2);
+              })(k2, l2Data[k2]);
+            }
+            var ph3 = document.createElement('li'); ph3.textContent = '请选择'; ph3.className = 'placeholder';
+            col3.appendChild(ph3);
+          };
+          col1.appendChild(li);
+        })(k);
+      }
+      var ph2 = document.createElement('li'); ph2.textContent = '请选择'; ph2.className = 'placeholder';
+      col2.appendChild(ph2);
+      var ph3 = document.createElement('li'); ph3.textContent = '请选择'; ph3.className = 'placeholder';
+      col3.appendChild(ph3);
+      // 展开/收起（只绑定一次）
+      if (!container._cascaderInited) {
+        container._cascaderInited = true;
+        display.onclick = function(e) {
+          e.stopPropagation();
+          if (display.disabled) return;
+          var isOpen = panel.classList.contains('show');
+          document.querySelectorAll('.cascader-panel.show').forEach(function(p) { p.classList.remove('show'); });
+          document.querySelectorAll('.cascader.open').forEach(function(c) { c.classList.remove('open'); });
+          if (!isOpen) { panel.classList.add('show'); container.classList.add('open'); }
+        };
+        document.addEventListener('click', function(e) {
+          if (!container.contains(e.target)) { panel.classList.remove('show'); container.classList.remove('open'); }
+        });
+      }
+    }
+    function setCascaderValue(containerId, level3Value, data) {
+      var container = document.getElementById(containerId);
+      if (!container || !level3Value) return;
+      var display = container.querySelector('.cascader-display');
+      var hidden = container.querySelector('.cascader-value');
+      display.value = level3Value;
+      hidden.value = level3Value;
+    }
+    function clearCascader(containerId) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      var display = container.querySelector('.cascader-display');
+      var hidden = container.querySelector('.cascader-value');
+      var col1 = container.querySelector('.cascader-col[data-level="1"]');
+      var col2 = container.querySelector('.cascader-col[data-level="2"]');
+      var col3 = container.querySelector('.cascader-col[data-level="3"]');
+      display.value = '';
+      hidden.value = '';
+      if (col1) col1.querySelectorAll('li').forEach(function(l) { l.classList.remove('selected'); });
+      if (col2) col2.innerHTML = '';
+      if (col3) col3.innerHTML = '';
+      // 恢复占位符
+      if (col2) { var ph2 = document.createElement('li'); ph2.textContent = '请选择'; ph2.className = 'placeholder'; col2.appendChild(ph2); }
+      if (col3) { var ph3 = document.createElement('li'); ph3.textContent = '请选择'; ph3.className = 'placeholder'; col3.appendChild(ph3); }
+    }
+    function disableCascader(containerId, disabled) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      var display = container.querySelector('.cascader-display');
+      if (display) display.disabled = disabled;
+    }
+
     (function initTsMockData() {
       // '已退回' 已废弃，不再使用
       var statuses = ['待提交','待提交','待技术援助答复','待技术援助答复','已关单','已关单','已作废'/*,'已退废弃'*/];
@@ -2578,12 +2686,7 @@
       if (closeUser) closeUser.value = '';
       if (closeTime) closeTime.value = '';
       if (conc) conc.value = '';
-      var ac1 = document.getElementById('ts-form-archive-cat1');
-      var ac2 = document.getElementById('ts-form-archive-cat2');
-      var ac3 = document.getElementById('ts-form-archive-cat3');
-      if (ac1) { ac1.innerHTML = '<option value="">请选择</option>'; }
-      if (ac2) { ac2.innerHTML = '<option value="">请选择</option>'; }
-      if (ac3) { ac3.innerHTML = '<option value="">请选择</option>'; }
+      document.getElementById('ts-form-archive-cat').value = '';
       var ids = ['ts-form-order-no','ts-form-submit-date','ts-form-store-name','ts-form-store-code','ts-form-city','ts-form-submitter','ts-form-contact-phone','ts-form-repair-order','ts-form-complaint-order','ts-form-warning-order','ts-form-pdi-order','ts-form-vin','ts-form-car-series','ts-form-car-model','ts-form-body-color','ts-form-engine-no','ts-form-front-motor-no','ts-form-rear-motor-no','ts-form-front-motor-sn','ts-form-rear-motor-sn','ts-form-battery-model','ts-form-battery-sn','ts-form-vehicle-version','ts-form-latest-ota-time','ts-form-customer-name','ts-form-customer-phone','ts-form-prod-date','ts-form-delivery-date','ts-form-fault-date','ts-form-fault-mileage','ts-form-fault-part-code','ts-form-fault-part-reason','ts-form-subject','ts-form-fault-description','ts-form-fault-system','ts-form-customer-complaint','ts-form-fault-condition-full','ts-form-repair-solution','ts-form-cause-analysis','ts-form-suggestion','ts-form-fault-code','ts-form-repair-case-no','ts-form-image-desc','ts-form-repair-status-order','ts-form-quality-check-time'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el){if(el.tagName==='SELECT')el.value='';else el.value='';} });
       var selIds = ['ts-form-importance','ts-form-part-info','ts-form-is-pdi','ts-form-repair-status-state','ts-form-has-fault-code','ts-form-has-repair-case'];
@@ -2648,25 +2751,8 @@
       if (closeUser) closeUser.value = item.closeUser || '';
       if (closeTime) closeTime.value = item.closeTime || '';
       if (conc) conc.value = item.conclusion || '';
-      // 回填归档分类三级
-      var ac1 = document.getElementById('ts-form-archive-cat1');
-      var ac2 = document.getElementById('ts-form-archive-cat2');
-      var ac3 = document.getElementById('ts-form-archive-cat3');
-      if (ac1) {
-        ac1.innerHTML = '<option value="">请选择</option>';
-        for (var k in tsArchiveData) { ac1.innerHTML += '<option>' + k + '</option>'; }
-        if (item.archiveCat1) {
-          ac1.value = item.archiveCat1;
-          ac2.innerHTML = '<option value="">请选择</option>';
-          for (var k2 in tsArchiveData[item.archiveCat1]) { ac2.innerHTML += '<option>' + k2 + '</option>'; }
-          if (item.archiveCat2) {
-            ac2.value = item.archiveCat2;
-            ac3.innerHTML = '<option value="">请选择</option>';
-            tsArchiveData[item.archiveCat1][item.archiveCat2].forEach(function(v) { ac3.innerHTML += '<option>' + v + '</option>'; });
-            if (item.archiveCat3) ac3.value = item.archiveCat3;
-          }
-        }
-      }
+      // 回填归档分类
+      document.getElementById('ts-form-archive-cat').value = item.archiveCat3 || '';
       tsToggleFaultCode();
     }
     function tsSetPanelReadonly(readonly) {
@@ -2709,7 +2795,7 @@
       } else if (tsPanelMode === 'detail') {
         if (isHq) {
           if (status === '待技术援助答复') {
-            topBtns = '<button class="lt-btn" style="background:#185FA5;color:#fff" onclick="tsHqReply()">答复</button><button class="lt-btn" style="background:#c97a0a;color:#fff" onclick="tsHqReject()">退回修改</button><button class="lt-btn" style="background:#861B2F;color:#fff" onclick="tsHqClose()">关单</button>';
+            topBtns = '<button class="lt-btn" style="background:#861B2F;color:#fff" onclick="tsHqClose()">关单</button>';
           }
         } else {
           if (status === '待提交') {
@@ -2749,54 +2835,13 @@
     }
     function tsHqReply() { alert('答复已发送'); tsClosePanel(); }
     function tsHqReject() { alert('已退回修改'); tsClosePanel(); }
-    // 处理结论区块内：归档分类三级联动
-    function tsOnArchiveChange(level) {
-      var sel1 = document.getElementById('ts-form-archive-cat1');
-      var sel2 = document.getElementById('ts-form-archive-cat2');
-      var sel3 = document.getElementById('ts-form-archive-cat3');
-      if (level === 1) {
-        sel2.innerHTML = '<option value="">请选择</option>';
-        sel3.innerHTML = '<option value="">请选择</option>';
-        if (sel1.value && tsArchiveData[sel1.value]) {
-          for (var k in tsArchiveData[sel1.value]) { sel2.innerHTML += '<option>' + k + '</option>'; }
-        }
-      } else if (level === 2) {
-        sel3.innerHTML = '<option value="">请选择</option>';
-        if (sel1.value && sel2.value && tsArchiveData[sel1.value] && tsArchiveData[sel1.value][sel2.value]) {
-          tsArchiveData[sel1.value][sel2.value].forEach(function(v) { sel3.innerHTML += '<option>' + v + '</option>'; });
-        }
-      }
-    }
     function tsHqClose() {
       // 打开关单归档弹窗
       var overlay = document.getElementById('ts-close-modal-overlay');
       if (!overlay) { alert('关单弹窗未找到'); return; }
-      // 初始化弹窗内归档分类一级下拉框
-      var sel1 = document.getElementById('ts-close-archive1');
-      if (sel1) {
-        sel1.innerHTML = '<option value="">请选择</option>';
-        for (var k in tsArchiveData) { sel1.innerHTML += '<option>' + k + '</option>'; }
-        sel1.onchange = function() {
-          var s1 = this.value, s2 = document.getElementById('ts-close-archive2');
-          s2.innerHTML = '<option value="">请选择</option>';
-          document.getElementById('ts-close-archive3').innerHTML = '<option value="">请选择</option>';
-          if (s1 && tsArchiveData[s1]) {
-            for (var k2 in tsArchiveData[s1]) { s2.innerHTML += '<option>' + k2 + '</option>'; }
-          }
-        };
-      }
-      var sel2 = document.getElementById('ts-close-archive2');
-      if (sel2) {
-        sel2.onchange = function() {
-          var s1 = document.getElementById('ts-close-archive1').value;
-          var s2v = this.value;
-          var s3 = document.getElementById('ts-close-archive3');
-          s3.innerHTML = '<option value="">请选择</option>';
-          if (s1 && s2v && tsArchiveData[s1] && tsArchiveData[s1][s2v]) {
-            tsArchiveData[s1][s2v].forEach(function(v) { s3.innerHTML += '<option>' + v + '</option>'; });
-          }
-        };
-      }
+      // 初始化级联下拉
+      clearCascader('ts-close-cascader');
+      initCascader('ts-close-cascader', tsArchiveData);
       var conc = document.getElementById('ts-close-conclusion');
       if (conc) conc.value = '';
       overlay.style.display = 'flex';
@@ -2806,20 +2851,19 @@
       if (overlay) overlay.style.display = 'none';
     }
     function tsConfirmCloseOrder() {
-      var s1 = document.getElementById('ts-close-archive1');
-      var s2 = document.getElementById('ts-close-archive2');
-      var s3 = document.getElementById('ts-close-archive3');
+      var cascader = document.getElementById('ts-close-cascader');
+      var catValue = cascader ? (cascader.querySelector('.cascader-value') || {}).value || '' : '';
       var conc = document.getElementById('ts-close-conclusion');
-      if (!s3 || !s3.value) { alert('请选择完整的归档分类（三级）'); return; }
+      if (!catValue) { alert('请选择完整的归档分类（三级）'); return; }
       if (!conc || !conc.value.trim()) { alert('请输入处理结论及技术方案'); return; }
       if (tsCurrentItem) {
         tsCurrentItem.status = '已关单';
         tsCurrentItem.closeUser = '张三';  // 原型固定值
         var now = new Date();
         tsCurrentItem.closeTime = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
-        tsCurrentItem.archiveCat1 = s1 ? s1.value : '';
-        tsCurrentItem.archiveCat2 = s2 ? s2.value : '';
-        tsCurrentItem.archiveCat3 = s3 ? s3.value : '';
+        tsCurrentItem.archiveCat1 = catValue;
+        tsCurrentItem.archiveCat2 = catValue;
+        tsCurrentItem.archiveCat3 = catValue;
         tsCurrentItem.conclusion = conc ? conc.value : '';
       }
       tsCloseCloseModal();
@@ -3514,11 +3558,11 @@
       // 显示/隐藏故障维修情况区块
       var repairSec = document.getElementById('qr-section-repair-status');
       if (repairSec) {
-        repairSec.style.display = (role === 'hq' && qrPanelMode === 'detail') ? '' : 'none';
+        repairSec.style.display = (qrPanelMode === 'detail') ? '' : 'none';
       }
       var auditSec = document.getElementById('qr-section-audit-log');
       if (auditSec) {
-        auditSec.style.display = (qrPanelMode === 'detail') ? '' : 'none';
+        auditSec.style.display = (qrPanelMode === 'detail' && (!qrCurrentItem || qrCurrentItem.status !== '待提交')) ? '' : 'none';
       }
       document.getElementById('qr-panel').classList.add('show');
       document.getElementById('qr-panel-overlay').classList.add('show');
@@ -3860,25 +3904,8 @@
       if (closeUser) closeUser.value = item.closeUser || '';
       if (closeTime) closeTime.value = item.closeTime || '';
       if (conc) conc.value = item.conclusion || '';
-      // 回填归档分类三级
-      var ac1 = document.getElementById('qr-form-archive-cat1');
-      var ac2 = document.getElementById('qr-form-archive-cat2');
-      var ac3 = document.getElementById('qr-form-archive-cat3');
-      if (ac1) {
-        ac1.innerHTML = '<option value="">请选择</option>';
-        for (var k in qrArchiveData) { ac1.innerHTML += '<option>' + k + '</option>'; }
-        if (item.archiveCat1) {
-          ac1.value = item.archiveCat1;
-          ac2.innerHTML = '<option value="">请选择</option>';
-          for (var k2 in qrArchiveData[item.archiveCat1]) { ac2.innerHTML += '<option>' + k2 + '</option>'; }
-          if (item.archiveCat2) {
-            ac2.value = item.archiveCat2;
-            ac3.innerHTML = '<option value="">请选择</option>';
-            qrArchiveData[item.archiveCat1][item.archiveCat2].forEach(function(v) { ac3.innerHTML += '<option>' + v + '</option>'; });
-            if (item.archiveCat3) ac3.value = item.archiveCat3;
-          }
-        }
-      }
+      // 回填归档分类
+      document.getElementById('qr-form-archive-cat').value = item.archiveCat3 || '';
       qrToggleFaultCode();
     }
     function qrClearPanelForm() {
@@ -3889,12 +3916,7 @@
       if (closeUser) closeUser.value = '';
       if (closeTime) closeTime.value = '';
       if (conc) conc.value = '';
-      var ac1 = document.getElementById('qr-form-archive-cat1');
-      var ac2 = document.getElementById('qr-form-archive-cat2');
-      var ac3 = document.getElementById('qr-form-archive-cat3');
-      if (ac1) { ac1.innerHTML = '<option value="">请选择</option>'; }
-      if (ac2) { ac2.innerHTML = '<option value="">请选择</option>'; }
-      if (ac3) { ac3.innerHTML = '<option value="">请选择</option>'; }
+      document.getElementById('qr-form-archive-cat').value = '';
       var ids = ['qr-form-template-select','qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el){if(el.tagName==='SELECT')el.value='';else el.value='';} });
       var selIds = ['qr-form-importance','qr-form-is-pdi','qr-form-repair-status-state','qr-form-has-fault-code'];
@@ -3935,23 +3957,6 @@
       var sec = document.getElementById('qr-section-' + name);
       if (!sec) return;
       sec.classList.toggle('collapsed');
-    }
-    function qrOnArchiveChange(level) {
-      var sel1 = document.getElementById('qr-form-archive-cat1');
-      var sel2 = document.getElementById('qr-form-archive-cat2');
-      var sel3 = document.getElementById('qr-form-archive-cat3');
-      if (level === 1) {
-        sel2.innerHTML = '<option value="">请选择</option>';
-        sel3.innerHTML = '<option value="">请选择</option>';
-        if (sel1.value && qrArchiveData[sel1.value]) {
-          for (var k in qrArchiveData[sel1.value]) { sel2.innerHTML += '<option>' + k + '</option>'; }
-        }
-      } else if (level === 2) {
-        sel3.innerHTML = '<option value="">请选择</option>';
-        if (sel1.value && sel2.value && qrArchiveData[sel1.value] && qrArchiveData[sel1.value][sel2.value]) {
-          qrArchiveData[sel1.value][sel2.value].forEach(function(v) { sel3.innerHTML += '<option>' + v + '</option>'; });
-        }
-      }
     }
     function qrOnRepairStatusChange() {
       var st = document.getElementById('qr-form-repair-status-state');
@@ -4269,7 +4274,6 @@
       var orderNo = (document.getElementById('thq-flt-order-no')||{}).value || '';
       var carSeriesV = (document.getElementById('thq-flt-car-series')||{}).value || '';
       var carModel = (document.getElementById('thq-flt-car-model')||{}).value || '';
-      var applyType = (document.getElementById('thq-flt-apply-type')||{}).value || '';
       var status = (document.getElementById('thq-flt-status')||{}).value || '';
       var vin = (document.getElementById('thq-flt-vin')||{}).value || '';
       var subject = (document.getElementById('thq-flt-subject')||{}).value || '';
@@ -4665,6 +4669,7 @@
       document.getElementById('qrt-panel-badge').className = 'qrt-panel-mode-badge add';
       qrtClearPanelForm();
       qrtSetPanelReadonly(false);
+      qrtUpdatePanelButtons();
       document.getElementById('qrt-panel').classList.add('show');
       document.getElementById('qrt-panel-overlay').classList.add('show');
     }
@@ -4718,6 +4723,7 @@
       document.getElementById('qrt-form-importance').value = '';
       document.getElementById('qrt-form-fault-system').value = '';
       if (document.getElementById('qrt-form-has-fault-code')) document.getElementById('qrt-form-has-fault-code').value = '';
+      document.getElementById('qrt-form-archive-cat').value = '';
     }
     function qrtUpdatePanelButtons() {
       var topDiv = document.getElementById('qrt-panel-actions');
@@ -5023,23 +5029,6 @@
       sec.classList.toggle('collapsed');
     }
 
-    function qrtOnArchiveChange(level) {
-      var sel1 = document.getElementById('qrt-form-archive-cat1');
-      var sel2 = document.getElementById('qrt-form-archive-cat2');
-      var sel3 = document.getElementById('qrt-form-archive-cat3');
-      if (level === 1) {
-        sel2.innerHTML = '<option value="">请选择</option>';
-        sel3.innerHTML = '<option value="">请选择</option>';
-        if (sel1.value && qrArchiveData[sel1.value]) {
-          for (var k in qrArchiveData[sel1.value]) { sel2.innerHTML += '<option>' + k + '</option>'; }
-        }
-      } else if (level === 2) {
-        sel3.innerHTML = '<option value="">请选择</option>';
-        if (sel1.value && sel2.value && qrArchiveData[sel1.value] && qrArchiveData[sel1.value][sel2.value]) {
-          qrArchiveData[sel1.value][sel2.value].forEach(function(v) { sel3.innerHTML += '<option>' + v + '</option>'; });
-        }
-      }
-    }
 
     function qrtToggleFaultCode() {
       var sel = document.getElementById('qrt-form-has-fault-code');
@@ -6886,3 +6875,299 @@ function epaReject() {
   epCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
   alert('审核驳回'); epCloseAuditPanel();
 }
+
+// ======= 用户服务满意度 =======
+var ussAllData = [];
+var ussFilteredData = [];
+var ussPage = 1;
+var ussPageSize = 20;
+
+(function() {
+  var regions = ['华东','华东','华东','华南','华南','华北','华北','西南','西南','东北','东北','华中','华中'];
+  var districts = ['上海','上海','杭州','广州','深圳','北京','石家庄','成都','重庆','沈阳','大连','武汉','长沙'];
+  var storeCodes = ['SH001','SH002','HZ001','GZ001','SZ001','BJ001','SJZ01','CD001','CQ001','SY001','DL001','WH001','CS001'];
+  var storeNames = ['上海浦东店','上海徐汇店','杭州西湖店','广州天河店','深圳南山店','北京朝阳店','石家庄桥西店','成都锦江店','重庆渝中店','沈阳和平店','大连中山店','武汉江汉店','长沙岳麓店'];
+  var plates = ['沪A88888','沪B12345','浙A66666','粤A99999','粤B55555','京A11111','冀A77777','川A33333','渝A22222','辽A44444','辽B88888','鄂A66666','湘A77777'];
+  var custNames = ['张伟','李娜','王强','陈敏','刘洋','赵磊','孙丽','周杰','吴芳','郑宇','钱峰','马杰','朱琳'];
+  var svcTypes = ['保养','一般维修','钣喷','保险理赔','保养','召回','索赔','事故维修','保养','一般维修','钣喷','保险理赔','索赔'];
+  var comments = [
+    '服务态度很好，技师专业','非常满意，下次还来','等待时间稍长，其他可以','满意','非常满意，态度热情','还行吧，一般','不太满意，工期超了','体验不错，环境干净','师傅手艺好，推荐','中规中矩，没有惊喜','很好，效率高','差评，配件等了很久','不错的体验，满意','整体满意','态度不好，不会再来了','尚可，还有改进空间','挺满意的','非常不错，速度快','一般般','很满意，客服态度好'
+  ];
+  var revisitStatuses = ['已回访','已回访','已回访','已回访','已回访','未回访','已回访','已回访','已回访','未回访','已回访','已回访','未回访','已回访','已回访','已回访','已回访','未回访','已回访','未回访'];
+
+  ussAllData = [];
+  for (var i = 0; i < 20; i++) {
+    var sIdx = i % 13;
+    var baseDate = new Date(2026, 5, 15);
+    baseDate.setDate(baseDate.getDate() - Math.floor(Math.random() * 30));
+    var ds = baseDate.getFullYear() + '-' + String(baseDate.getMonth()+1).padStart(2,'0') + '-' + String(baseDate.getDate()).padStart(2,'0');
+
+    var isLow = (i === 11 || i === 14); // 低分记录
+    var overall = isLow ? Math.floor(Math.random() * 5) + 1 : (Math.floor(Math.random() * 4) + 7);
+    var advisor = isLow ? Math.floor(Math.random() * 5) + 1 : (Math.floor(Math.random() * 4) + 7);
+    var facility = isLow ? Math.floor(Math.random() * 5) + 1 : (Math.floor(Math.random() * 4) + 7);
+    var aftersales = isLow ? Math.floor(Math.random() * 5) + 1 : (Math.floor(Math.random() * 4) + 7);
+    var parts = isLow ? Math.floor(Math.random() * 5) + 1 : (Math.floor(Math.random() * 4) + 7);
+    var recommend = isLow ? Math.floor(Math.random() * 5) + 1 : (Math.floor(Math.random() * 4) + 7);
+    var nps = recommend >= 9 ? '推荐者' : (recommend >= 7 ? '被动者' : '贬损者');
+
+    ussAllData.push({
+      seq: i + 1,
+      storeCode: storeCodes[sIdx],
+      storeName: storeNames[sIdx],
+      region: regions[sIdx],
+      district: districts[sIdx],
+      orderNo: 'WO2026' + String(5000 + i).padStart(4,'0'),
+      custName: custNames[Math.floor(Math.random() * custNames.length)],
+      svcType: svcTypes[sIdx],
+      dateIn: ds,
+      overallScore: overall,
+      advisorScore: advisor,
+      facilityScore: facility,
+      aftersalesScore: aftersales,
+      partsScore: parts,
+      recommendScore: recommend,
+      nps: nps,
+      comment: comments[i % comments.length],
+      revisit: revisitStatuses[i % revisitStatuses.length]
+    });
+  }
+
+  // 排序：按日期降序
+  ussAllData.sort(function(a,b) { return b.dateIn.localeCompare(a.dateIn); });
+  for (var k = 0; k < ussAllData.length; k++) { ussAllData[k].seq = k + 1; }
+})();
+
+function initUss() {
+  // 设置默认日期范围（上月今天 ～ 今天）
+  var now = new Date();
+  var endStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  var start = new Date(now);
+  start.setMonth(start.getMonth() - 1);
+  var startStr = start.getFullYear() + '-' + String(start.getMonth()+1).padStart(2,'0') + '-' + String(start.getDate()).padStart(2,'0');
+
+  var dsEl = document.getElementById('uss-date-start');
+  var deEl = document.getElementById('uss-date-end');
+  if (dsEl) dsEl.value = startStr;
+  if (deEl) deEl.value = endStr;
+
+  // 同步日期范围显示文本
+  ussSyncDateDisplay();
+  ussApplyFilter();
+}
+
+function ussSyncDateDisplay() {
+  var ds = document.getElementById('uss-date-start');
+  var de = document.getElementById('uss-date-end');
+  var textEl = document.querySelector('#page-user-service-satisfaction .lt-date-range-text');
+  if (textEl && ds && de) {
+    textEl.value = (ds.value || de.value) ? (ds.value || '起始') + ' — ' + (de.value || '截止') : '';
+  }
+}
+
+function ussApplyFilter() {
+  ussSyncDateDisplay();
+  var region = document.getElementById('uss-region-text');
+  var district = document.getElementById('uss-district-text');
+  var store = document.getElementById('uss-store');
+  var ds = document.getElementById('uss-date-start');
+  var de = document.getElementById('uss-date-end');
+  var svcType = document.getElementById('uss-servicetype-text');
+  var score = document.getElementById('uss-score-text');
+  var nps = document.getElementById('uss-nps-text');
+
+  var rv = region ? region.value.trim() : '';
+  var dv = district ? district.value.trim() : '';
+  var sv = store ? store.value.trim().toLowerCase() : '';
+  var dsv = ds ? ds.value : '';
+  var dev = de ? de.value : '';
+  var stv = svcType ? svcType.value.trim() : '';
+  var scv = score ? score.value.trim() : '';
+  var nv = nps ? nps.value.trim() : '';
+
+  ussFilteredData = ussAllData.filter(function(r) {
+    if (rv && r.region !== rv) return false;
+    if (dv && r.district !== dv) return false;
+    if (sv && r.storeName.toLowerCase().indexOf(sv) === -1 && r.storeCode.toLowerCase().indexOf(sv) === -1) return false;
+    if (dsv && r.dateIn < dsv) return false;
+    if (dev && r.dateIn > dev) return false;
+    if (stv && r.svcType !== stv) return false;
+    if (scv && String(r.overallScore) !== scv) return false;
+    if (nv && r.nps !== nv) return false;
+    return true;
+  });
+
+  ussPage = 1;
+  renderUssTable();
+}
+
+function ussResetFilter() {
+  var ids = ['uss-region-text','uss-district-text','uss-store','uss-servicetype-text','uss-score-text','uss-nps-text'];
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (el) el.value = '';
+  }
+  var ds = document.getElementById('uss-date-start');
+  var de = document.getElementById('uss-date-end');
+  if (ds) ds.value = '';
+  if (de) de.value = '';
+  ussSyncDateDisplay();
+  ussApplyFilter();
+}
+
+function renderUssTable() {
+  var tbody = document.getElementById('uss-tbody');
+  if (!tbody) return;
+
+  var total = ussFilteredData.length;
+  var totalPages = Math.ceil(total / ussPageSize);
+  if (totalPages < 1) totalPages = 1;
+  if (ussPage > totalPages) ussPage = totalPages;
+
+  var start = (ussPage - 1) * ussPageSize;
+  var end = Math.min(start + ussPageSize, total);
+  var pageData = ussFilteredData.slice(start, end);
+
+  var h = '';
+  for (var i = 0; i < pageData.length; i++) {
+    var r = pageData[i];
+
+    function fmtScore(s) {
+      var c = s >= 9 ? '#2E7D32' : (s >= 7 ? '#E65100' : '#C62828');
+      return '<span style="font-weight:600;color:' + c + '">' + s + '分</span>';
+    }
+
+    var npsBadge = '';
+    if (r.nps === '推荐者') npsBadge = '<span style="background:#E8F5E9;color:#2E7D32;padding:2px 8px;border-radius:4px;font-size:12px;">推荐者</span>';
+    else if (r.nps === '被动者') npsBadge = '<span style="background:#FFF3E0;color:#E65100;padding:2px 8px;border-radius:4px;font-size:12px;">被动者</span>';
+    else npsBadge = '<span style="background:#FFEBEE;color:#C62828;padding:2px 8px;border-radius:4px;font-size:12px;">贬损者</span>';
+
+    h += '<tr>';
+    h += '<td>' + (start + i + 1) + '</td>';
+    h += '<td>' + r.storeCode + '</td>';
+    h += '<td style="text-align:left">' + r.storeName + '</td>';
+    h += '<td>' + r.region + '</td>';
+    h += '<td>' + r.district + '</td>';
+    h += '<td>' + r.orderNo + '</td>';
+    h += '<td>' + r.custName + '</td>';
+    h += '<td>' + r.svcType + '</td>';
+    h += '<td>' + r.dateIn + '</td>';
+    h += '<td>' + fmtScore(r.overallScore) + '</td>';
+    h += '<td>' + fmtScore(r.advisorScore) + '</td>';
+    h += '<td>' + fmtScore(r.facilityScore) + '</td>';
+    h += '<td>' + fmtScore(r.aftersalesScore) + '</td>';
+    h += '<td>' + fmtScore(r.partsScore) + '</td>';
+    h += '<td>' + fmtScore(r.recommendScore) + '</td>';
+    h += '<td>' + npsBadge + '</td>';
+    h += '<td style="text-align:left;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + r.comment + '">' + r.comment + '</td>';
+    h += '<td>' + r.revisit + '</td>';
+    h += '</tr>';
+  }
+  if (pageData.length === 0) {
+    h = '<tr><td colspan="18" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+  }
+
+  tbody.innerHTML = h;
+
+  // 更新分页
+  document.getElementById('uss-pg-total').textContent = '共 ' + total + ' 条';
+  document.getElementById('uss-pg-prev').disabled = (ussPage <= 1);
+  document.getElementById('uss-pg-next').disabled = (ussPage >= totalPages);
+
+  var pagesHtml = '';
+  for (var p = 1; p <= totalPages; p++) {
+    pagesHtml += '<span class="pg-num' + (p === ussPage ? ' current' : '') + '" onclick="ussGotoPage(' + p + ')">' + p + '</span>';
+  }
+  document.getElementById('uss-pg-pages').innerHTML = pagesHtml;
+  document.getElementById('uss-pg-goto').value = '';
+  document.getElementById('uss-pg-size').value = String(ussPageSize);
+}
+
+function ussChangePage(dir) {
+  var totalPages = Math.ceil(ussFilteredData.length / ussPageSize) || 1;
+  ussPage = Math.max(1, Math.min(totalPages, ussPage + dir));
+  renderUssTable();
+}
+
+function ussChangePageSize(size) {
+  ussPageSize = parseInt(size) || 20;
+  ussPage = 1;
+  renderUssTable();
+}
+
+function ussGotoPage(p) {
+  var totalPages = Math.ceil(ussFilteredData.length / ussPageSize) || 1;
+  p = parseInt(p);
+  if (isNaN(p) || p < 1) p = 1;
+  if (p > totalPages) p = totalPages;
+  ussPage = p;
+  renderUssTable();
+}
+
+// ---------- US 下拉框控制 ----------
+function _ussToggleDD(listId) {
+  var list = document.getElementById(listId);
+  if (!list) return;
+  list.style.display = (list.style.display === 'block') ? 'none' : 'block';
+}
+function _ussShowDD(listId, inputId) {
+  var list = document.getElementById(listId);
+  if (!list) return;
+  var all = document.querySelectorAll('#page-user-service-satisfaction .lt-datalist');
+  for (var i = 0; i < all.length; i++) { if (all[i] !== list) all[i].style.display = 'none'; }
+  list.style.display = 'block';
+  // 过滤
+  var input = document.getElementById(inputId);
+  var v = input ? input.value.trim().toLowerCase() : '';
+  var lis = list.querySelectorAll('li');
+  for (var j = 0; j < lis.length; j++) {
+    lis[j].style.display = (v === '' || lis[j].textContent.toLowerCase().indexOf(v) >= 0) ? '' : 'none';
+  }
+}
+function _ussSelectDD(listId, inputId, li) {
+  var list = document.getElementById(listId);
+  var input = document.getElementById(inputId);
+  if (input) input.value = li.getAttribute('data-val');
+  if (list) list.style.display = 'none';
+  ussApplyFilter();
+}
+function _ussFilterDD(listId, inputId, value) {
+  var list = document.getElementById(listId);
+  if (!list) return;
+  var v = value.toLowerCase();
+  var lis = list.querySelectorAll('li');
+  for (var j = 0; j < lis.length; j++) {
+    lis[j].style.display = (v === '' || lis[j].textContent.toLowerCase().indexOf(v) >= 0) ? '' : 'none';
+  }
+  list.style.display = 'block';
+}
+
+// 大区
+function ussToggleRegionDropdown() { _ussToggleDD('uss-region-list'); }
+function ussShowRegionDropdown() { _ussShowDD('uss-region-list', 'uss-region-text'); }
+function ussSelectRegion(li) { _ussSelectDD('uss-region-list', 'uss-region-text', li); }
+function ussFilterRegion(val) { _ussFilterDD('uss-region-list', 'uss-region-text', val); }
+
+// 小区
+function ussToggleDistrictDropdown() { _ussToggleDD('uss-district-list'); }
+function ussShowDistrictDropdown() { _ussShowDD('uss-district-list', 'uss-district-text'); }
+function ussSelectDistrict(li) { _ussSelectDD('uss-district-list', 'uss-district-text', li); }
+function ussFilterDistrict(val) { _ussFilterDD('uss-district-list', 'uss-district-text', val); }
+
+// 服务类型
+function ussToggleServicetypeDropdown() { _ussToggleDD('uss-servicetype-list'); }
+function ussShowServicetypeDropdown() { _ussShowDD('uss-servicetype-list', 'uss-servicetype-text'); }
+function ussSelectServicetype(li) { _ussSelectDD('uss-servicetype-list', 'uss-servicetype-text', li); }
+function ussFilterServicetype(val) { _ussFilterDD('uss-servicetype-list', 'uss-servicetype-text', val); }
+
+// 满意度评分
+function ussToggleScoreDropdown() { _ussToggleDD('uss-score-list'); }
+function ussShowScoreDropdown() { _ussShowDD('uss-score-list', 'uss-score-text'); }
+function ussSelectScore(li) { _ussSelectDD('uss-score-list', 'uss-score-text', li); }
+function ussFilterScore(val) { _ussFilterDD('uss-score-list', 'uss-score-text', val); }
+
+// NPS分类
+function ussToggleNpsDropdown() { _ussToggleDD('uss-nps-list'); }
+function ussShowNpsDropdown() { _ussShowDD('uss-nps-list', 'uss-nps-text'); }
+function ussSelectNps(li) { _ussSelectDD('uss-nps-list', 'uss-nps-text', li); }
+function ussFilterNps(val) { _ussFilterDD('uss-nps-list', 'uss-nps-text', val); }
