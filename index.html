@@ -2222,7 +2222,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-input-wrap"><span class="lt-filter-prefix">订单状态</span>
-                <select id="pp-flt-status" onchange="ppApplyFilter()"><option value="">请选择</option><option>待审核</option><option>审核中</option><option>已通过</option><option>已驳回</option><option>已取消</option></select>
+                <select id="pp-flt-status" onchange="ppApplyFilter()"><option value="">请选择</option><option>未提交</option><option>门店审核中</option><option>门店审核通过</option><option>总部审核中</option><option>门店审核不通过</option><option>主机厂已审核</option><option>主机厂已拒绝</option></select>
               </div>
             </div>
             <div class="lt-filter-item">
@@ -2263,7 +2263,7 @@
           </div>
         </div>
         <div class="lt-list-area">
-          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-primary" onclick="ppOpenAdd()">新增</button><button class="lt-btn lt-btn-default" onclick="ppExportData()">导出</button></div></div>
+          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-primary" onclick="ppOpenAdd()">新增</button><button class="lt-btn lt-btn-default" onclick="ppExportData()">导出</button></div><div class="lt-toolbar-right"><div class="pp-role-tabs"><span class="pp-role-tab active" id="pp-role-门店" onclick="ppSetRole('门店')">门店</span><span class="pp-role-tab" id="pp-role-总部" onclick="ppSetRole('总部')">总部</span></div></div></div>
           <div class="lt-table-wrap">
             <table class="lt-table">
               <thead><tr>

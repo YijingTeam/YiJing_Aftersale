@@ -5797,27 +5797,28 @@
 })();
 
 // ===== 配件采购 JS =====
-var ppAllData = [
-  {seq:1,po:'PO202605001',type:'常规',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-05-20 14:30',edate:'2026-06-15',submitter:'张三',stime:'2026-05-18 10:00',sync:'2026-05-18 15:00'},
-  {seq:2,po:'PO202605002',type:'油品',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-05-21 09:15',edate:'2026-06-18',submitter:'李四',stime:'2026-05-19 11:00',sync:'2026-05-19 16:30'},
-  {seq:3,po:'PO202605003',type:'紧急',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:5,amount:'18,500.00',shortage:'DQ202605001',status:'待审核',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-20 08:30',sync:'—'},
-  {seq:4,po:'PO202605004',type:'常规',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'赵六',stime:'2026-05-21 14:00',sync:'—'},
-  {seq:5,po:'PO202605005',type:'绿色',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:6,amount:'28,300.00',shortage:'—',status:'已驳回',source:'主机厂代下',remark:'配件编码不匹配',auditor:'李明',atime:'2026-05-22 10:00',edate:'—',submitter:'孙七',stime:'2026-05-21 16:00',sync:'—'},
-  {seq:6,po:'PO202606001',type:'常规',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:10,amount:'41,200.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-06-01 11:20',edate:'2026-06-25',submitter:'周八',stime:'2026-05-30 09:00',sync:'2026-05-30 14:00'},
-  {seq:7,po:'PO202606002',type:'定制',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:3,amount:'62,100.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-06-02 15:40',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-01 10:30',sync:'2026-06-01 16:00'},
-  {seq:8,po:'PO202606003',type:'油品',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:7,amount:'35,600.00',shortage:'DQ202606001',status:'审核中',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-28',submitter:'郑十',stime:'2026-06-03 13:00',sync:'—'},
-  {seq:9,po:'PO202606004',type:'常规',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-06-05 09:00',edate:'2026-06-30',submitter:'张三',stime:'2026-06-04 08:00',sync:'2026-06-04 16:30'},
-  {seq:10,po:'PO202606005',type:'紧急',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:4,amount:'22,800.00',shortage:'DQ202606002',status:'待审核',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'李四',stime:'2026-06-06 15:00',sync:'—'},
-  {seq:11,po:'PO202606006',type:'常规',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'43,500.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-06-08 10:30',edate:'2026-07-02',submitter:'王五',stime:'2026-06-07 09:30',sync:'2026-06-07 17:00'},
-  {seq:12,po:'PO202606007',type:'绿色',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:13,amount:'51,200.00',shortage:'—',status:'已驳回',source:'主机厂代下',remark:'超出预算额度',auditor:'王芳',atime:'2026-06-09 14:00',edate:'—',submitter:'赵六',stime:'2026-06-08 11:00',sync:'—'},
-  {seq:13,po:'PO202607001',type:'常规',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:6,amount:'26,400.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-07-01 08:30',edate:'2026-07-20',submitter:'孙七',stime:'2026-06-30 10:00',sync:'2026-06-30 16:00'},
-  {seq:14,po:'PO202607002',type:'油品',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'33,700.00',shortage:'DQ202607001',status:'审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-07-22',submitter:'周八',stime:'2026-07-01 09:00',sync:'—'},
-  {seq:15,po:'PO202607003',type:'定制',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'55,000.00',shortage:'—',status:'待审核',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-07-25',submitter:'吴九',stime:'2026-07-02 14:30',sync:'—'},
-  {seq:16,po:'PO202607004',type:'常规',region:'华北',district:'石家庄',store:'石家庄长安店',scode:'SJZ001',variety:10,amount:'40,100.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-07-02 16:00',edate:'2026-07-28',submitter:'郑十',stime:'2026-07-02 08:00',sync:'2026-07-02 17:30'},
-  {seq:17,po:'PO202607005',type:'紧急',region:'西南',district:'昆明',store:'昆明五华店',scode:'KM001',variety:3,amount:'15,200.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-07-03 10:00',edate:'2026-07-18',submitter:'张三',stime:'2026-07-02 11:00',sync:'2026-07-02 15:30'},
-  {seq:18,po:'PO202607006',type:'绿色',region:'华南',district:'厦门',store:'厦门思明店',scode:'XM001',variety:7,amount:'29,800.00',shortage:'—',status:'已取消',source:'门店下单',remark:'门店主动取消',auditor:'王芳',atime:'2026-07-03 11:00',edate:'—',submitter:'李四',stime:'2026-07-02 16:00',sync:'—'},
-  {seq:19,po:'PO202607007',type:'常规',region:'华东',district:'宁波',store:'宁波鄞州店',scode:'NB001',variety:14,amount:'52,600.00',shortage:'DQ202607002',status:'审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-08-01',submitter:'王五',stime:'2026-07-03 08:30',sync:'—'},
-  {seq:20,po:'PO202607008',type:'油品',region:'华北',district:'济南',store:'济南历下店',scode:'JN001',variety:5,amount:'21,300.00',shortage:'—',status:'待审核',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-07-30',submitter:'赵六',stime:'2026-07-03 09:00',sync:'—'}
+var ppRole = '门店';
+  var ppAllData = [
+  {seq:1,po:'PO202605001',type:'常规',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-15',submitter:'—',stime:'—',sync:'—'},
+  {seq:2,po:'PO202605002',type:'油品',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-18',submitter:'—',stime:'—',sync:'—'},
+  {seq:3,po:'PO202605003',type:'紧急',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:5,amount:'18,500.00',shortage:'DQ202605001',status:'门店审核中',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-20 08:30',sync:'—'},
+  {seq:4,po:'PO202605004',type:'常规',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'门店审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'赵六',stime:'2026-05-21 14:00',sync:'—'},
+  {seq:5,po:'PO202605005',type:'绿色',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:6,amount:'28,300.00',shortage:'—',status:'门店审核中',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'—',submitter:'孙七',stime:'2026-05-21 16:00',sync:'—'},
+  {seq:6,po:'PO202606001',type:'常规',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:10,amount:'41,200.00',shortage:'—',status:'门店审核通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-06-01 11:20',edate:'2026-06-25',submitter:'周八',stime:'2026-05-30 09:00',sync:'2026-05-30 14:00'},
+  {seq:7,po:'PO202606002',type:'定制',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:3,amount:'62,100.00',shortage:'—',status:'门店审核通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-06-02 15:40',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-01 10:30',sync:'2026-06-01 16:00'},
+  {seq:8,po:'PO202606003',type:'油品',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:7,amount:'35,600.00',shortage:'DQ202606001',status:'门店审核通过',source:'主机厂代下',remark:'—',auditor:'王芳',atime:'2026-06-03 14:00',edate:'2026-06-28',submitter:'郑十',stime:'2026-06-03 13:00',sync:'—'},
+  {seq:9,po:'PO202606004',type:'常规',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',shortage:'—',status:'总部审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-30',submitter:'张三',stime:'2026-06-04 08:00',sync:'—'},
+  {seq:10,po:'PO202606005',type:'紧急',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:4,amount:'22,800.00',shortage:'DQ202606002',status:'总部审核中',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'李四',stime:'2026-06-06 15:00',sync:'—'},
+  {seq:11,po:'PO202606006',type:'常规',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'43,500.00',shortage:'—',status:'总部审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-07-02',submitter:'王五',stime:'2026-06-07 09:30',sync:'2026-06-07 17:00'},
+  {seq:12,po:'PO202606007',type:'绿色',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:13,amount:'51,200.00',shortage:'—',status:'门店审核不通过',source:'主机厂代下',remark:'超出预算额度',auditor:'王芳',atime:'2026-06-09 14:00',edate:'—',submitter:'赵六',stime:'2026-06-08 11:00',sync:'—'},
+  {seq:13,po:'PO202607001',type:'常规',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:6,amount:'26,400.00',shortage:'—',status:'门店审核不通过',source:'门店下单',remark:'配件编码不匹配',auditor:'李明',atime:'2026-07-01 08:30',edate:'2026-07-20',submitter:'孙七',stime:'2026-06-30 10:00',sync:'2026-06-30 16:00'},
+  {seq:14,po:'PO202607002',type:'油品',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'33,700.00',shortage:'DQ202607001',status:'主机厂已审核',source:'门店下单',remark:'—',auditor:'主机厂',atime:'2026-07-22 10:00',edate:'2026-07-22',submitter:'周八',stime:'2026-07-01 09:00',sync:'2026-07-22 10:00'},
+  {seq:15,po:'PO202607003',type:'定制',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'55,000.00',shortage:'—',status:'主机厂已审核',source:'主机厂代下',remark:'—',auditor:'主机厂',atime:'2026-07-25 09:00',edate:'2026-07-25',submitter:'吴九',stime:'2026-07-02 14:30',sync:'2026-07-25 09:00'},
+  {seq:16,po:'PO202607004',type:'常规',region:'华北',district:'石家庄',store:'石家庄长安店',scode:'SJZ001',variety:10,amount:'40,100.00',shortage:'—',status:'主机厂已审核',source:'门店下单',remark:'—',auditor:'主机厂',atime:'2026-07-28 09:00',edate:'2026-07-28',submitter:'郑十',stime:'2026-07-02 08:00',sync:'2026-07-28 09:00'},
+  {seq:17,po:'PO202607005',type:'紧急',region:'西南',district:'昆明',store:'昆明五华店',scode:'KM001',variety:3,amount:'15,200.00',shortage:'—',status:'主机厂已审核',source:'门店下单',remark:'—',auditor:'主机厂',atime:'2026-07-18 09:00',edate:'2026-07-18',submitter:'张三',stime:'2026-07-02 11:00',sync:'2026-07-18 09:00'},
+  {seq:18,po:'PO202607006',type:'绿色',region:'华南',district:'厦门',store:'厦门思明店',scode:'XM001',variety:7,amount:'29,800.00',shortage:'—',status:'主机厂已拒绝',source:'门店下单',remark:'主机厂驳回：规格不符',auditor:'主机厂',atime:'2026-07-03 11:00',edate:'—',submitter:'李四',stime:'2026-07-02 16:00',sync:'—'},
+  {seq:19,po:'PO202607007',type:'常规',region:'华东',district:'宁波',store:'宁波鄞州店',scode:'NB001',variety:14,amount:'52,600.00',shortage:'DQ202607002',status:'主机厂已拒绝',source:'门店下单',remark:'主机厂驳回：库存充足不采购',auditor:'主机厂',atime:'2026-08-01 09:00',edate:'—',submitter:'王五',stime:'2026-07-03 08:30',sync:'—'},
+  {seq:20,po:'PO202607008',type:'油品',region:'华北',district:'济南',store:'济南历下店',scode:'JN001',variety:5,amount:'21,300.00',shortage:'—',status:'主机厂已拒绝',source:'门店下单',remark:'主机厂驳回：重复下单',auditor:'主机厂',atime:'2026-07-30 09:00',edate:'—',submitter:'赵六',stime:'2026-07-03 09:00',sync:'—'}
 ];
 var ppFilteredData = [];
 var ppCurrentPage = 1;
@@ -5852,7 +5853,7 @@ function ppRenderTable() {
       + '<td class="col-submitter">'+r.submitter+'</td>'
       + '<td class="col-submit-time">'+r.stime+'</td>'
       + '<td class="col-sync-time">'+r.sync+'</td>'
-      + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="ppOpenView('+ ri +')" style="color:#185FA5;cursor:pointer">查看</a> <a href="javascript:void(0)" onclick="ppOpenEdit('+ ri +')" style="color:#185FA5;cursor:pointer">编辑</a> <a href="javascript:void(0)" onclick="alert(\'删除功能待开发\')" style="color:#185FA5;cursor:pointer">删除</a> <a href="javascript:void(0)" onclick="ppOpenAudit('+ ri +')" style="color:#185FA5;cursor:pointer">审核</a></td>'
+      + '<td class="sticky col-actions">' + ppGetActions(ri, r) + '</td>'
       + '</tr>';
   }).join('');
   document.getElementById('pp-pg-total').textContent = '共 ' + ppFilteredData.length + ' 条';
@@ -6645,6 +6646,32 @@ var ppCurrentRec = null;
 var ppPartsList = [];
 
 function ppOpenAdd() { ppFormMode = 'add'; ppCurrentRec = null; ppRenderPanel(); }
+function ppGetActions(ri, r) {
+  var s = r.status || '';
+  var role = ppRole || '门店';
+  var btns = ['<a href="javascript:void(0)" onclick="ppOpenView(' + ri + ')" style="color:#185FA5;cursor:pointer">查看</a>'];
+  if (role === '门店') {
+    if (s === '未提交' || s === '门店审核不通过') {
+      btns.push('<a href="javascript:void(0)" onclick="ppOpenEdit(' + ri + ')" style="color:#185FA5;cursor:pointer">编辑</a>');
+      btns.push('<a href="javascript:void(0)" onclick="alert(\'删除功能待开发\')" style="color:#185FA5;cursor:pointer">删除</a>');
+    }
+    if (s === '门店审核中') {
+      btns.push('<a href="javascript:void(0)" onclick="ppOpenEdit(' + ri + ')" style="color:#185FA5;cursor:pointer">编辑</a>');
+      btns.push('<a href="javascript:void(0)" onclick="ppOpenAudit(' + ri + ')" style="color:#185FA5;cursor:pointer">审核</a>');
+    }
+  } else if (role === '总部') {
+    if (s === '总部审核中') {
+      btns.push('<a href="javascript:void(0)" onclick="ppOpenAudit(' + ri + ')" style="color:#185FA5;cursor:pointer">审核</a>');
+    }
+  }
+  return btns.join(' ');
+}
+function ppSetRole(role) {
+  ppRole = role;
+  var tabs = document.querySelectorAll('#page-parts-procurement .pp-role-tab');
+  for (var i = 0; i < tabs.length; i++) { tabs[i].classList.toggle('active', tabs[i].id === 'pp-role-' + role); }
+  ppRenderTable();
+}
 function ppOpenView(idx) { ppFormMode = 'view'; ppCurrentRec = ppFilteredData[idx]; ppRenderPanel(); }
 function ppOpenEdit(idx) { ppFormMode = 'edit'; ppCurrentRec = ppFilteredData[idx]; ppRenderPanel(); }
 function ppClosePanel() { document.getElementById('pp-panel-overlay').classList.remove('show'); document.getElementById('pp-panel').classList.remove('show'); }
@@ -6755,7 +6782,7 @@ function ppCloseAuditPanel() { document.getElementById('pp-audit-overlay').class
 function ppaRenderPanel() {
   if (!ppCurrentRec) return;
   document.getElementById('ppa-status-badge').textContent = ppCurrentRec.status || '';
-  var cls = ppCurrentRec.status === '已通过' ? 'pass' : (ppCurrentRec.status === '已驳回' ? 'reject' : '');
+  var cls = (ppCurrentRec.status === '门店审核通过' || ppCurrentRec.status === '主机厂已审核') ? 'pass' : ((ppCurrentRec.status === '门店审核不通过' || ppCurrentRec.status === '主机厂已拒绝') ? 'reject' : '');
   document.getElementById('ppa-status-badge').className = 'pm-panel-badge ' + cls;
   var info = document.getElementById('ppa-basic-info');
   var fs = [
@@ -6768,12 +6795,13 @@ function ppaRenderPanel() {
   document.getElementById('ppa-parts-tbody').innerHTML = items.map(function(p){return '<tr><td>'+p.s+'</td><td>'+p.code+'</td><td>'+p.name+'</td><td>'+p.series+'</td><td>'+p.model+'</td><td>'+p.unit+'</td><td>'+p.q+'</td><td>'+p.price.toFixed(2)+'</td><td>¥'+p.amt.toFixed(2)+'</td></tr>';}).join('');
   document.getElementById('ppa-totals').innerHTML = '合计品种: <b>2</b> &nbsp; 合计金额(含税): <b>¥2750.00</b>';
   var atb = document.getElementById('ppa-audit-tbody');
-  if (ppCurrentRec.status === '已通过' || ppCurrentRec.status === '已驳回') {
-    atb.innerHTML = '<tr><td>'+(ppCurrentRec.auditor||'—')+'</td><td>'+(ppCurrentRec.atime||'—')+'</td><td>'+(ppCurrentRec.status||'—')+'</td><td>'+(ppCurrentRec.remark||'—')+'</td></tr>';
-    document.getElementById('ppa-audit-area').style.display = 'none';
-  } else {
+  var ppCanAudit = (ppRole === '门店' && ppCurrentRec.status === '门店审核中') || (ppRole === '总部' && ppCurrentRec.status === '总部审核中');
+  if (ppCanAudit) {
     atb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:16px">暂无审核记录</td></tr>';
     document.getElementById('ppa-audit-area').style.display = '';
+  } else {
+    atb.innerHTML = '<tr><td>'+(ppCurrentRec.auditor||'—')+'</td><td>'+(ppCurrentRec.atime||'—')+'</td><td>'+(ppCurrentRec.status||'—')+'</td><td>'+(ppCurrentRec.remark||'—')+'</td></tr>';
+    document.getElementById('ppa-audit-area').style.display = 'none';
   }
   document.getElementById('ppa-comment').value = '';
   document.getElementById('pp-audit-overlay').classList.add('show');
@@ -6782,14 +6810,18 @@ function ppaRenderPanel() {
 function ppaApprove() {
   var c = document.getElementById('ppa-comment').value;
   if (!c) { alert('请输入审核意见'); return; }
-  ppCurrentRec.status = '已通过'; ppCurrentRec.auditor = '当前用户'; ppCurrentRec.remark = c;
+  if (ppCurrentRec.status === '门店审核中') { ppCurrentRec.status = '门店审核通过'; }
+  else if (ppCurrentRec.status === '总部审核中') { ppCurrentRec.status = '主机厂已审核'; }
+  ppCurrentRec.auditor = '当前用户'; ppCurrentRec.remark = c;
   ppCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
   alert('审核通过'); ppCloseAuditPanel();
 }
 function ppaReject() {
   var c = document.getElementById('ppa-comment').value;
   if (!c) { alert('请输入审核意见'); return; }
-  ppCurrentRec.status = '已驳回'; ppCurrentRec.auditor = '当前用户'; ppCurrentRec.remark = c;
+  if (ppCurrentRec.status === '门店审核中') { ppCurrentRec.status = '门店审核不通过'; }
+  else if (ppCurrentRec.status === '总部审核中') { ppCurrentRec.status = '主机厂已拒绝'; }
+  ppCurrentRec.auditor = '当前用户'; ppCurrentRec.remark = c;
   ppCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
   alert('审核驳回'); ppCloseAuditPanel();
 }

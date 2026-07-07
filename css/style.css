@@ -1679,6 +1679,9 @@
     #page-parts-procurement .lt-table th.col-po-no, #page-parts-procurement .lt-table td.col-po-no { position:sticky; left:40px; z-index:2; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
     #page-parts-procurement .lt-table thead th.col-po-no { z-index:4; }
     #page-parts-procurement .lt-table th.col-order-source, #page-parts-procurement .lt-table td.col-order-source { width:110px; min-width:110px; max-width:110px; }
+    #page-parts-procurement .pp-role-tabs { display:flex; gap:8px; margin:0; }
+    #page-parts-procurement .pp-role-tab { padding:5px 18px; border:1px solid #dcdfe6; border-radius:4px; cursor:pointer; font-size:13px; background:#fff; color:#333; user-select:none; }
+    #page-parts-procurement .pp-role-tab.active { background:#185FA5; border-color:#185FA5; color:#fff; }
     #page-parts-procurement .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#fff; }
     #page-parts-procurement .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#f0f0f0; }
     #page-parts-procurement .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
