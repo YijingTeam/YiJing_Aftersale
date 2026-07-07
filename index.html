@@ -603,7 +603,6 @@
           <div class="lt-toolbar">
             <div class="lt-toolbar-left">
               <button class="lt-btn-filter default">导出</button>
-              <button class="lt-btn-filter default">导出明细</button>
             </div>
             <div class="lt-toolbar-right">
               <button class="lt-btn-filter link">报表说明</button>
@@ -1748,8 +1747,6 @@
         <div class="qr-section-title" onclick="qrtToggleSection('fault')"><span class="qr-section-toggle"></span>故障信息</div>
         <div class="qr-section-body">
           <div class="qr-form-grid col4">
-            <!-- 1. 主题 -->
-            <div class="qr-form-item-inline full plain"><span class="qr-form-label-inline">主题（限50字）</span><input type="text" id="qrt-form-subject" placeholder="门店简称 车型-VIN号后6位 故障现象简述，例如：武汉龙阳大道店X9-001888大屏偶发无网络" maxlength="50"></div>
             <!-- 2. 故障描述（模糊搜索下拉） -->
             <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障描述</span><input type="text" id="qrt-form-fault-description" placeholder="请选择或输入" onfocus="qrtShowCombobox(this,'qrt-fd-list')" oninput="qrtFilterCombobox(this)"><span class="cb-arrow" onclick="qrtToggleComboboxArrow('qrt-fd-list')">▼</span><ul class="lt-datalist" id="qrt-fd-list"><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">请选择</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P001-大屏无显示</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P002-大屏偶发无网络</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P003-音响无声音</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P004-空调不制冷</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P005-转向异响</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P006-刹车偏软</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P007-电机抖动</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P008-充电缓慢</li></ul></div>
             <!-- 3. 故障系统（模糊搜索下拉） -->
@@ -2238,6 +2235,11 @@
               </div>
             </div>
             <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">订单来源</span>
+                <select id="pp-flt-source" onchange="ppApplyFilter()"><option value="">请选择</option><option>门店下单</option><option>主机厂代下</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
               <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="pp-flt-region" placeholder="请选择" oninput="ppFilterCombobox(this)" onfocus="ppShowCombobox(this)"><span class="cb-arrow" onclick="ppToggleCombobox(this)">▼</span>
                 <ul class="lt-datalist" id="pp-region-list"><li onclick="ppSelectCombobox(this)">华东</li><li onclick="ppSelectCombobox(this)">华南</li><li onclick="ppSelectCombobox(this)">华北</li><li onclick="ppSelectCombobox(this)">西南</li><li onclick="ppSelectCombobox(this)">东北</li><li onclick="ppSelectCombobox(this)">华中</li></ul>
               </div>
@@ -2265,7 +2267,7 @@
           <div class="lt-table-wrap">
             <table class="lt-table">
               <thead><tr>
-                <th class="sticky col-seq">序号</th><th class="sticky col-po-no">采购单号</th><th class="col-order-type">订单类型</th><th class="col-region">大区</th><th class="col-district">小区</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-variety-count">合计品种</th><th class="col-total-amount">合计金额(含税)</th><th class="col-shortage-no">关联的缺件单</th><th class="col-order-status">订单状态</th><th class="col-audit-remark">审核备注</th><th class="col-auditor">审核人</th><th class="col-audit-time">审核时间</th><th class="col-expected-date">期望到货日期</th><th class="col-submitter">提交人</th><th class="col-submit-time">提交时间</th><th class="col-sync-time">同步主机厂时间</th><th class="sticky col-actions">操作</th>
+                <th class="sticky col-seq">序号</th><th class="sticky col-po-no">采购单号</th><th class="col-order-type">订单类型</th><th class="col-region">大区</th><th class="col-district">小区</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-variety-count">合计品种</th><th class="col-total-amount">合计金额(含税)</th><th class="col-shortage-no">关联的缺件单</th><th class="col-order-status">订单状态</th><th class="col-audit-remark">审核备注</th><th class="col-auditor">审核人</th><th class="col-audit-time">审核时间</th><th class="col-expected-date">期望到货日期</th><th class="col-order-source">订单来源</th><th class="col-submitter">提交人</th><th class="col-submit-time">提交时间</th><th class="col-sync-time">同步主机厂时间</th><th class="sticky col-actions">操作</th>
               </tr></thead>
               <tbody id="pp-tbody"></tbody>
             </table>
@@ -2425,6 +2427,16 @@
               <div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件名称</span><input type="text" id="fsq-flt-name" placeholder="请输入" oninput="fsqApplyFilter()"></div>
             </div>
             <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">取消状态</span>
+                <select id="fsq-flt-cancel" onchange="fsqApplyFilter()"><option value="">请选择</option><option>未取消</option><option>申请中</option><option>审核驳回</option><option>已取消</option><option>自动驳回</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">缺货状态</span>
+                <select id="fsq-flt-shortage" onchange="fsqApplyFilter()"><option value="">请选择</option><option>待处理</option><option>已发货</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">审核通过日期</span>
                 <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="fsqApplyFilter">
                 <div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="fsq-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="fsq-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div>
@@ -2446,11 +2458,6 @@
                 <input type="text" id="fsq-flt-store" placeholder="请输入" oninput="fsqApplyFilter()">
               </div>
             </div>
-            <div class="lt-filter-item">
-              <div class="lt-input-wrap"><span class="lt-filter-prefix">取消状态</span>
-                <select id="fsq-flt-cancel" onchange="fsqApplyFilter()"><option value="">请选择</option><option>未取消</option><option>申请中</option><option>已取消</option></select>
-              </div>
-            </div>
             <div class="lt-filter-footer">
               <button class="lt-btn lt-btn-primary" onclick="fsqApplyFilter()">查询</button>
               <button class="lt-btn lt-btn-default" onclick="fsqResetFilter()">重置</button>
@@ -2463,7 +2470,7 @@
           <div class="lt-table-wrap">
             <table class="lt-table">
               <thead><tr>
-                <th class="sticky col-seq">序号</th><th class="col-name">配件名称</th><th class="col-code">配件编码</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-province">省份</th><th class="col-purchase-no">采购单号</th><th class="col-order-type">订单类型</th><th class="col-oem-order-no">主机厂订单号</th><th class="col-purchase-qty">采购数量</th><th class="col-actual-qty">实际数量</th><th class="col-shortage-qty">缺货数量</th><th class="col-shortage-hours">缺货时长(h)</th><th class="col-sync-time">同步厂端时间</th><th class="col-oem-reply-time">厂家答复时间</th><th class="col-cancel-apply-time">申请取消时间</th><th class="col-cancel-audit-time">取消审核时间</th><th class="sticky col-actions">操作</th>
+                <th class="sticky col-seq">序号</th><th class="col-name">配件名称</th><th class="col-code">配件编码</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-province">省份</th><th class="col-purchase-no">采购单号</th><th class="col-order-type">订单类型</th><th class="col-oem-order-no">主机厂订单号</th><th class="col-purchase-qty">采购数量</th><th class="col-actual-qty">实际数量</th><th class="col-shortage-qty">缺货数量</th><th class="col-shortage-hours">缺货时长(h)</th><th class="col-sync-time">同步厂端时间</th><th class="col-oem-reply-time">厂家答复时间</th><th class="col-shortage-status">缺货状态</th><th class="col-cancel-apply-time">申请取消时间</th><th class="col-cancel-audit-time">取消审核时间</th><th class="col-cancel-status">取消状态</th><th class="sticky col-actions">操作</th>
               </tr></thead>
               <tbody id="fsq-tbody"></tbody>
             </table>
@@ -2585,7 +2592,7 @@
             <!-- Row1 -->
             <div class="ts-form-item-inline plain ts-form-search"><span class="ts-form-label-inline">维修工单</span><input type="text" id="ts-form-repair-order" placeholder="请输入"><svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <div class="ts-form-item-inline plain ts-form-search"><span class="ts-form-label-inline">客诉单</span><input type="text" id="ts-form-complaint-order" placeholder="请输入"><svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
-            <div class="ts-form-item-inline"><span class="ts-form-label-inline">是否PDI问题</span><select id="ts-form-is-pdi"><option value="">请选择</option><option>是</option><option>否</option></select></div>
+            <div class="ts-form-item-inline required"><span class="ts-form-label-inline">是否PDI问题</span><select id="ts-form-is-pdi"><option value="">请选择</option><option>是</option><option>否</option></select></div>
             <div class="ts-form-item-inline plain ts-form-search"><span class="ts-form-label-inline">PDI单</span><input type="text" id="ts-form-pdi-order" placeholder="请输入"><svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <!-- Row2 -->
             <div class="ts-form-item-inline plain ts-form-search"><span class="ts-form-label-inline">告警单</span><input type="text" id="ts-form-warning-order" placeholder="请输入"><svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
@@ -2750,10 +2757,12 @@
             <!-- Row1 -->
             <div class="qr-form-item-inline plain qr-form-search"><span class="qr-form-label-inline">维修工单</span><input type="text" id="qr-form-repair-order" placeholder="请输入"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <div class="qr-form-item-inline plain qr-form-search"><span class="qr-form-label-inline">客诉单</span><input type="text" id="qr-form-complaint-order" placeholder="请输入"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
-            <div class="qr-form-item-inline"><span class="qr-form-label-inline">是否PDI问题</span><select id="qr-form-is-pdi"><option value="">请选择</option><option>是</option><option>否</option></select></div>
+            <div class="qr-form-item-inline required"><span class="qr-form-label-inline">是否PDI问题</span><select id="qr-form-is-pdi"><option value="">请选择</option><option>是</option><option>否</option></select></div>
             <div class="qr-form-item-inline plain qr-form-search"><span class="qr-form-label-inline">PDI单</span><input type="text" id="qr-form-pdi-order" placeholder="请输入"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <!-- Row2 -->
             <div class="qr-form-item-inline plain qr-form-search"><span class="qr-form-label-inline">告警单</span><input type="text" id="qr-form-warning-order" placeholder="请输入"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">关联技术支持单号</span><input type="text" id="qr-form-ts-order-no" readonly></div>
+            <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">技术支持建单时间</span><input type="text" id="qr-form-ts-create-time" readonly></div>
             <div class="qr-form-item-inline plain qr-form-search required"><span class="qr-form-label-inline">VIN</span><input type="text" id="qr-form-vin" placeholder="请输入VIN查询车辆"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">车系</span><input type="text" id="qr-form-car-series" readonly placeholder="自动带入"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">车型</span><input type="text" id="qr-form-car-model" readonly placeholder="自动带入"></div>

@@ -1678,6 +1678,7 @@
     #page-parts-procurement .lt-table thead th.col-seq { z-index:4; }
     #page-parts-procurement .lt-table th.col-po-no, #page-parts-procurement .lt-table td.col-po-no { position:sticky; left:40px; z-index:2; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
     #page-parts-procurement .lt-table thead th.col-po-no { z-index:4; }
+    #page-parts-procurement .lt-table th.col-order-source, #page-parts-procurement .lt-table td.col-order-source { width:110px; min-width:110px; max-width:110px; }
     #page-parts-procurement .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#fff; }
     #page-parts-procurement .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#f0f0f0; }
     #page-parts-procurement .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
@@ -1691,12 +1692,35 @@
     #page-parts-delivery-schedule .lt-table th.col-purchase-no, #page-parts-delivery-schedule .lt-table td.col-purchase-no { position:sticky; left:40px; z-index:2; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
     #page-parts-delivery-schedule .lt-table thead th.col-purchase-no { z-index:4; }
     /* ===== 厂端缺件查询 冻结列 ===== */
-    #page-factory-shortage-query .lt-table th.col-seq, #page-factory-shortage-query .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
-    #page-factory-shortage-query .lt-table thead th.col-seq { z-index:4; }
-    #page-factory-shortage-query .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:80px; min-width:80px; max-width:80px; border-left:1px solid #ccc; background:#fff; }
-    #page-factory-shortage-query .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:80px; min-width:80px; max-width:80px; border-left:1px solid #ccc; background:#f0f0f0; }
+    /* ===== 厂端缺件查询 冻结列：序号 / 配件名称 / 配件编码（标题+内容双冻结） ===== */
+    #page-factory-shortage-query .lt-table th.col-seq, #page-factory-shortage-query .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; background:#fff; }
+    #page-factory-shortage-query .lt-table thead th.col-seq { position:sticky; top:0; left:0; z-index:4; background:#f0f0f0; }
+    #page-factory-shortage-query .lt-table th.col-name, #page-factory-shortage-query .lt-table td.col-name { position:sticky; left:40px; z-index:2; width:120px; min-width:120px; max-width:120px; overflow:hidden; background:#fff; }
+    #page-factory-shortage-query .lt-table thead th.col-name { position:sticky; top:0; left:40px; z-index:4; background:#f0f0f0; }
+    #page-factory-shortage-query .lt-table th.col-code, #page-factory-shortage-query .lt-table td.col-code { position:sticky; left:160px; z-index:2; width:80px; min-width:80px; max-width:80px; overflow:hidden; background:#fff; }
+    #page-factory-shortage-query .lt-table thead th.col-code { position:sticky; top:0; left:160px; z-index:4; background:#f0f0f0; }
+    #page-factory-shortage-query .lt-table tbody tr:nth-child(even) td.col-seq,
+    #page-factory-shortage-query .lt-table tbody tr:nth-child(even) td.col-name,
+    #page-factory-shortage-query .lt-table tbody tr:nth-child(even) td.col-code { background:#fafafa; }
+    #page-factory-shortage-query .lt-table tbody tr:hover td.col-seq,
+    #page-factory-shortage-query .lt-table tbody tr:hover td.col-name,
+    #page-factory-shortage-query .lt-table tbody tr:hover td.col-code { background:#fdf5f6; }
+    #page-factory-shortage-query .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#fff; }
+    #page-factory-shortage-query .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#f0f0f0; }
     #page-factory-shortage-query .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
     #page-factory-shortage-query .lt-table tbody tr:hover td.col-actions { background:#fdf5f6; }
+    #page-factory-shortage-query .lt-table th.col-cancel-status, #page-factory-shortage-query .lt-table td.col-cancel-status { min-width:92px; width:92px; }
+    #page-factory-shortage-query .lt-table th.col-shortage-status, #page-factory-shortage-query .lt-table td.col-shortage-status { min-width:92px; width:92px; }
+    /* 状态彩色标签（与状态流转图配色一致） */
+    #page-factory-shortage-query .st-tag { display:inline-block; padding:1px 9px; border-radius:10px; font-size:11px; line-height:18px; white-space:nowrap; }
+    #page-factory-shortage-query .st-uncancel { background:#E6F1FB; color:#0C447C; border:1px solid #185FA5; }
+    #page-factory-shortage-query .st-applying { background:#FAEEDA; color:#633806; border:1px solid #854F0B; }
+    #page-factory-shortage-query .st-reject { background:#EEEDFE; color:#3C3489; border:1px solid #534AB7; }
+    #page-factory-shortage-query .st-auto { background:#FCEBEB; color:#791F1F; border:1px solid #A32D2D; }
+    #page-factory-shortage-query .st-cancelled { background:#EAF3DE; color:#27500A; border:1px solid #3B6D11; }
+    #page-factory-shortage-query .ss-wait { background:#F1EFE8; color:#5F5E5A; border:1px solid #B4B2A9; }
+    #page-factory-shortage-query .ss-shipped { background:#E1F5EE; color:#085041; border:1px solid #0F6E56; }
+    #page-factory-shortage-query .st-disabled { color:#B4B2A9; cursor:not-allowed; }
     /* ===== 配件外采 冻结列 ===== */
     #page-external-procurement .lt-table th.col-seq, #page-external-procurement .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
     #page-external-procurement .lt-table thead th.col-seq { z-index:4; }

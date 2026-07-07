@@ -2889,7 +2889,9 @@
         importance: src.importance || '',
         problemDesc: src.customerComplaint || '',
         causeAnalysis: src.faultCondition || '',
-        suggestion: src.repairSolution || ''
+        suggestion: src.repairSolution || '',
+        'ts-order-no': src.orderNo || '',
+        'ts-create-time': src.submitDate || ''
       };
       tsClosePanel();
       showContent('quality-report');
@@ -3378,7 +3380,9 @@
           submitter: ['张三','李四','王五','赵六','钱七'][i%5],
           contactPhone: '1' + String(50000000000+i).slice(1),
           deliveryDate: '2024-' + String((i%12)+1).padStart(2,'0') + '-' + String((i%28)+1).padStart(2,'0'),
-          faultMileage: (i*1234) % 50000
+          faultMileage: (i*1234) % 50000,
+          tsOrderNo: i%4!==0 ? 'TS2026'+String(i+1).padStart(4,'0') : '',
+          tsCreateTime: i%4!==0 ? (function(){ var t=new Date(d); t.setDate(t.getDate()-2); return t.toISOString().split('T')[0]+' 09:'+String(i%60).padStart(2,'0'); })() : ''
         });
       }
       qrFilteredData = qrAllData.slice();
@@ -3498,7 +3502,7 @@
       qrSetPanelReadonly(false);
       // 预填字段
       if (prefill && typeof prefill === 'object') {
-        var fields = ['orderNo','submitDate','storeName','storeCode','city','submitter','vin','carSeries','carModel','prodDate','subject','archiveCategory','faultSystem','faultNature','problemDesc','causeAnalysis','suggestion','severity','qty','batchNo','faultDate'];
+        var fields = ['orderNo','submitDate','storeName','storeCode','city','submitter','vin','carSeries','carModel','prodDate','subject','archiveCategory','faultSystem','faultNature','problemDesc','causeAnalysis','suggestion','severity','qty','batchNo','faultDate','ts-order-no','ts-create-time'];
         fields.forEach(function(k) {
           if (prefill[k] === undefined) return;
           var el = document.getElementById('qr-form-' + k);
@@ -3585,7 +3589,7 @@
       if (ac1) { ac1.innerHTML = '<option value="">请选择</option>'; }
       if (ac2) { ac2.innerHTML = '<option value="">请选择</option>'; }
       if (ac3) { ac3.innerHTML = '<option value="">请选择</option>'; }
-      var ids = ['qr-form-template-select','qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
+      var ids = ['qr-form-template-select','qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-ts-order-no','qr-form-ts-create-time','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el){if(el.tagName==='SELECT')el.value='';else el.value='';} });
       var selIds = ['qr-form-importance','qr-form-is-pdi','qr-form-repair-status-state','qr-form-has-fault-code'];
       // 清空图片和附件
@@ -3603,7 +3607,7 @@
     function qrSetPanelReadonly(readonly) {
       var panel = document.getElementById('qr-panel');
       var inputs = panel.querySelectorAll('input:not([type="button"]), select, textarea');
-      var fixedReadonlyIds = ['qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-battery-model','qr-form-battery-sn','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date'];
+      var fixedReadonlyIds = ['qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-ts-order-no','qr-form-ts-create-time','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-battery-model','qr-form-battery-sn','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date'];
       for (var i = 0; i < inputs.length; i++) {
         if (!readonly) {
           if (inputs[i].id === 'qr-form-contact-phone' && qrPanelMode==='detail') continue;
@@ -3778,6 +3782,7 @@
       var src = qrCurrentItem;
       // 暂存要带入模板的数据
       window.__qrtPrefill = {
+        subject: src.subject || '',
         faultPartCode: src.faultPartCode || '',
         faultPartName: src.faultPartName || '',
         importance: src.importance || '',
@@ -3803,12 +3808,8 @@
         if (pf.faultCondition) document.getElementById('qrt-form-fault-condition-full').value = pf.faultCondition;
         if (pf.repairSolution) document.getElementById('qrt-form-repair-solution').value = pf.repairSolution;
         if (pf.conclusion) document.getElementById('qrt-form-conclusion').value = pf.conclusion;
-        // 模板名称建议
-        var suggested = '';
-        if (pf.faultPartName) suggested += pf.faultPartName;
-        if (pf.faultSystem) suggested += (suggested ? '-' : '') + pf.faultSystem;
-        if (suggested) suggested += '模板';
-        if (suggested) document.getElementById('qrt-form-name').value = suggested;
+        // 模板名称：默认取质量报告主题（故障现象描述）
+        if (pf.subject) document.getElementById('qrt-form-name').value = pf.subject;
         window.__qrtPrefill = null;
       }, 50);
     }
@@ -3849,6 +3850,8 @@
       document.getElementById('qr-form-complaint-order').value = item.complaintOrder || '';
       document.getElementById('qr-form-warning-order').value = item.warningOrder || '';
       document.getElementById('qr-form-pdi-order').value = item.pdiOrder || '';
+      if (document.getElementById('qr-form-ts-order-no')) document.getElementById('qr-form-ts-order-no').value = item.tsOrderNo || '';
+      if (document.getElementById('qr-form-ts-create-time')) document.getElementById('qr-form-ts-create-time').value = item.tsCreateTime || '';
       if (document.getElementById('qr-form-is-pdi')) document.getElementById('qr-form-is-pdi').value = item.isPdi || '';
       document.getElementById('qr-form-vehicle-version').value = item.vehicleVersion || '';
       document.getElementById('qr-form-latest-ota-time').value = item.latestOtaTime || '';
@@ -3917,7 +3920,7 @@
       if (closeTime) closeTime.value = '';
       if (conc) conc.value = '';
       document.getElementById('qr-form-archive-cat').value = '';
-      var ids = ['qr-form-template-select','qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
+      var ids = ['qr-form-template-select','qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-ts-order-no','qr-form-ts-create-time','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el){if(el.tagName==='SELECT')el.value='';else el.value='';} });
       var selIds = ['qr-form-importance','qr-form-is-pdi','qr-form-repair-status-state','qr-form-has-fault-code'];
       // 清空图片和附件
@@ -3935,7 +3938,7 @@
     function qrSetPanelReadonly(readonly) {
       var panel = document.getElementById('qr-panel');
       var inputs = panel.querySelectorAll('input:not([type="button"]), select, textarea');
-      var fixedReadonlyIds = ['qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-battery-model','qr-form-battery-sn','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date'];
+      var fixedReadonlyIds = ['qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-ts-order-no','qr-form-ts-create-time','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-battery-model','qr-form-battery-sn','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date'];
       for (var i = 0; i < inputs.length; i++) {
         if (!readonly) {
           if (inputs[i].id === 'qr-form-contact-phone' && qrPanelMode==='detail') continue;
@@ -4703,7 +4706,6 @@
       document.getElementById('qrt-form-conclusion').value = item.conclusion || '';
       // 回填故障系统、故障描述、故障码、维修案例
       if (document.getElementById('qrt-form-fault-description')) document.getElementById('qrt-form-fault-description').value = item.faultDescription || '';
-      document.getElementById('qrt-form-subject').value = item.subject || '';
       if (document.getElementById('qrt-form-has-fault-code')) document.getElementById('qrt-form-has-fault-code').value = item.hasFaultCode || '';
       if (document.getElementById('qrt-form-fault-code')) document.getElementById('qrt-form-fault-code').value = item.faultCode || '';
       // 'qrt-form-has-repair-case' / 'qrt-form-repair-case-no' 已从"故障信息"移除
@@ -4714,7 +4716,7 @@
       if (document.getElementById('qrt-form-close-time')) document.getElementById('qrt-form-close-time').value = item.closeTime || '';
     }
     function qrtClearPanelForm() {
-      var ids = ['qrt-form-name','qrt-form-customer-complaint','qrt-form-fault-condition-full','qrt-form-repair-solution','qrt-form-fault-part-code','qrt-form-fault-part-name','qrt-form-conclusion','qrt-form-fault-description','qrt-form-subject','qrt-form-fault-code','qrt-form-close-user','qrt-form-close-time'];
+      var ids = ['qrt-form-name','qrt-form-customer-complaint','qrt-form-fault-condition-full','qrt-form-repair-solution','qrt-form-fault-part-code','qrt-form-fault-part-name','qrt-form-conclusion','qrt-form-fault-description','qrt-form-fault-code','qrt-form-close-user','qrt-form-close-time'];
       ids.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.value = '';
@@ -5796,26 +5798,26 @@
 
 // ===== 配件采购 JS =====
 var ppAllData = [
-  {seq:1,po:'PO202605001',type:'常规',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-05-20 14:30',edate:'2026-06-15',submitter:'张三',stime:'2026-05-18 10:00',sync:'2026-05-18 15:00'},
-  {seq:2,po:'PO202605002',type:'油品',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-05-21 09:15',edate:'2026-06-18',submitter:'李四',stime:'2026-05-19 11:00',sync:'2026-05-19 16:30'},
-  {seq:3,po:'PO202605003',type:'紧急',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:5,amount:'18,500.00',shortage:'DQ202605001',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-20 08:30',sync:'—'},
-  {seq:4,po:'PO202605004',type:'常规',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'赵六',stime:'2026-05-21 14:00',sync:'—'},
-  {seq:5,po:'PO202605005',type:'绿色',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:6,amount:'28,300.00',shortage:'—',status:'已驳回',remark:'配件编码不匹配',auditor:'李明',atime:'2026-05-22 10:00',edate:'—',submitter:'孙七',stime:'2026-05-21 16:00',sync:'—'},
-  {seq:6,po:'PO202606001',type:'常规',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:10,amount:'41,200.00',shortage:'—',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-06-01 11:20',edate:'2026-06-25',submitter:'周八',stime:'2026-05-30 09:00',sync:'2026-05-30 14:00'},
-  {seq:7,po:'PO202606002',type:'定制',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:3,amount:'62,100.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-06-02 15:40',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-01 10:30',sync:'2026-06-01 16:00'},
-  {seq:8,po:'PO202606003',type:'油品',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:7,amount:'35,600.00',shortage:'DQ202606001',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-06-28',submitter:'郑十',stime:'2026-06-03 13:00',sync:'—'},
-  {seq:9,po:'PO202606004',type:'常规',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',shortage:'—',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-06-05 09:00',edate:'2026-06-30',submitter:'张三',stime:'2026-06-04 08:00',sync:'2026-06-04 16:30'},
-  {seq:10,po:'PO202606005',type:'紧急',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:4,amount:'22,800.00',shortage:'DQ202606002',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'李四',stime:'2026-06-06 15:00',sync:'—'},
-  {seq:11,po:'PO202606006',type:'常规',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'43,500.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-06-08 10:30',edate:'2026-07-02',submitter:'王五',stime:'2026-06-07 09:30',sync:'2026-06-07 17:00'},
-  {seq:12,po:'PO202606007',type:'绿色',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:13,amount:'51,200.00',shortage:'—',status:'已驳回',remark:'超出预算额度',auditor:'王芳',atime:'2026-06-09 14:00',edate:'—',submitter:'赵六',stime:'2026-06-08 11:00',sync:'—'},
-  {seq:13,po:'PO202607001',type:'常规',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:6,amount:'26,400.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-07-01 08:30',edate:'2026-07-20',submitter:'孙七',stime:'2026-06-30 10:00',sync:'2026-06-30 16:00'},
-  {seq:14,po:'PO202607002',type:'油品',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'33,700.00',shortage:'DQ202607001',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-22',submitter:'周八',stime:'2026-07-01 09:00',sync:'—'},
-  {seq:15,po:'PO202607003',type:'定制',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'55,000.00',shortage:'—',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-07-25',submitter:'吴九',stime:'2026-07-02 14:30',sync:'—'},
-  {seq:16,po:'PO202607004',type:'常规',region:'华北',district:'石家庄',store:'石家庄长安店',scode:'SJZ001',variety:10,amount:'40,100.00',shortage:'—',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-02 16:00',edate:'2026-07-28',submitter:'郑十',stime:'2026-07-02 08:00',sync:'2026-07-02 17:30'},
-  {seq:17,po:'PO202607005',type:'紧急',region:'西南',district:'昆明',store:'昆明五华店',scode:'KM001',variety:3,amount:'15,200.00',shortage:'—',status:'已通过',remark:'—',auditor:'李明',atime:'2026-07-03 10:00',edate:'2026-07-18',submitter:'张三',stime:'2026-07-02 11:00',sync:'2026-07-02 15:30'},
-  {seq:18,po:'PO202607006',type:'绿色',region:'华南',district:'厦门',store:'厦门思明店',scode:'XM001',variety:7,amount:'29,800.00',shortage:'—',status:'已取消',remark:'门店主动取消',auditor:'王芳',atime:'2026-07-03 11:00',edate:'—',submitter:'李四',stime:'2026-07-02 16:00',sync:'—'},
-  {seq:19,po:'PO202607007',type:'常规',region:'华东',district:'宁波',store:'宁波鄞州店',scode:'NB001',variety:14,amount:'52,600.00',shortage:'DQ202607002',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-08-01',submitter:'王五',stime:'2026-07-03 08:30',sync:'—'},
-  {seq:20,po:'PO202607008',type:'油品',region:'华北',district:'济南',store:'济南历下店',scode:'JN001',variety:5,amount:'21,300.00',shortage:'—',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-07-30',submitter:'赵六',stime:'2026-07-03 09:00',sync:'—'}
+  {seq:1,po:'PO202605001',type:'常规',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-05-20 14:30',edate:'2026-06-15',submitter:'张三',stime:'2026-05-18 10:00',sync:'2026-05-18 15:00'},
+  {seq:2,po:'PO202605002',type:'油品',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-05-21 09:15',edate:'2026-06-18',submitter:'李四',stime:'2026-05-19 11:00',sync:'2026-05-19 16:30'},
+  {seq:3,po:'PO202605003',type:'紧急',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:5,amount:'18,500.00',shortage:'DQ202605001',status:'待审核',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-20 08:30',sync:'—'},
+  {seq:4,po:'PO202605004',type:'常规',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'赵六',stime:'2026-05-21 14:00',sync:'—'},
+  {seq:5,po:'PO202605005',type:'绿色',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:6,amount:'28,300.00',shortage:'—',status:'已驳回',source:'主机厂代下',remark:'配件编码不匹配',auditor:'李明',atime:'2026-05-22 10:00',edate:'—',submitter:'孙七',stime:'2026-05-21 16:00',sync:'—'},
+  {seq:6,po:'PO202606001',type:'常规',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:10,amount:'41,200.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-06-01 11:20',edate:'2026-06-25',submitter:'周八',stime:'2026-05-30 09:00',sync:'2026-05-30 14:00'},
+  {seq:7,po:'PO202606002',type:'定制',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:3,amount:'62,100.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-06-02 15:40',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-01 10:30',sync:'2026-06-01 16:00'},
+  {seq:8,po:'PO202606003',type:'油品',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:7,amount:'35,600.00',shortage:'DQ202606001',status:'审核中',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-28',submitter:'郑十',stime:'2026-06-03 13:00',sync:'—'},
+  {seq:9,po:'PO202606004',type:'常规',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-06-05 09:00',edate:'2026-06-30',submitter:'张三',stime:'2026-06-04 08:00',sync:'2026-06-04 16:30'},
+  {seq:10,po:'PO202606005',type:'紧急',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:4,amount:'22,800.00',shortage:'DQ202606002',status:'待审核',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'李四',stime:'2026-06-06 15:00',sync:'—'},
+  {seq:11,po:'PO202606006',type:'常规',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'43,500.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-06-08 10:30',edate:'2026-07-02',submitter:'王五',stime:'2026-06-07 09:30',sync:'2026-06-07 17:00'},
+  {seq:12,po:'PO202606007',type:'绿色',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:13,amount:'51,200.00',shortage:'—',status:'已驳回',source:'主机厂代下',remark:'超出预算额度',auditor:'王芳',atime:'2026-06-09 14:00',edate:'—',submitter:'赵六',stime:'2026-06-08 11:00',sync:'—'},
+  {seq:13,po:'PO202607001',type:'常规',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:6,amount:'26,400.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-07-01 08:30',edate:'2026-07-20',submitter:'孙七',stime:'2026-06-30 10:00',sync:'2026-06-30 16:00'},
+  {seq:14,po:'PO202607002',type:'油品',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'33,700.00',shortage:'DQ202607001',status:'审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-07-22',submitter:'周八',stime:'2026-07-01 09:00',sync:'—'},
+  {seq:15,po:'PO202607003',type:'定制',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'55,000.00',shortage:'—',status:'待审核',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-07-25',submitter:'吴九',stime:'2026-07-02 14:30',sync:'—'},
+  {seq:16,po:'PO202607004',type:'常规',region:'华北',district:'石家庄',store:'石家庄长安店',scode:'SJZ001',variety:10,amount:'40,100.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-07-02 16:00',edate:'2026-07-28',submitter:'郑十',stime:'2026-07-02 08:00',sync:'2026-07-02 17:30'},
+  {seq:17,po:'PO202607005',type:'紧急',region:'西南',district:'昆明',store:'昆明五华店',scode:'KM001',variety:3,amount:'15,200.00',shortage:'—',status:'已通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-07-03 10:00',edate:'2026-07-18',submitter:'张三',stime:'2026-07-02 11:00',sync:'2026-07-02 15:30'},
+  {seq:18,po:'PO202607006',type:'绿色',region:'华南',district:'厦门',store:'厦门思明店',scode:'XM001',variety:7,amount:'29,800.00',shortage:'—',status:'已取消',source:'门店下单',remark:'门店主动取消',auditor:'王芳',atime:'2026-07-03 11:00',edate:'—',submitter:'李四',stime:'2026-07-02 16:00',sync:'—'},
+  {seq:19,po:'PO202607007',type:'常规',region:'华东',district:'宁波',store:'宁波鄞州店',scode:'NB001',variety:14,amount:'52,600.00',shortage:'DQ202607002',status:'审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-08-01',submitter:'王五',stime:'2026-07-03 08:30',sync:'—'},
+  {seq:20,po:'PO202607008',type:'油品',region:'华北',district:'济南',store:'济南历下店',scode:'JN001',variety:5,amount:'21,300.00',shortage:'—',status:'待审核',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-07-30',submitter:'赵六',stime:'2026-07-03 09:00',sync:'—'}
 ];
 var ppFilteredData = [];
 var ppCurrentPage = 1;
@@ -5846,6 +5848,7 @@ function ppRenderTable() {
       + '<td class="col-auditor">'+r.auditor+'</td>'
       + '<td class="col-audit-time">'+r.atime+'</td>'
       + '<td class="col-expected-date">'+r.edate+'</td>'
+      + '<td class="col-order-source">'+(r.source||'—')+'</td>'
       + '<td class="col-submitter">'+r.submitter+'</td>'
       + '<td class="col-submit-time">'+r.stime+'</td>'
       + '<td class="col-sync-time">'+r.sync+'</td>'
@@ -5878,6 +5881,7 @@ function ppApplyFilter() {
   var qRegion = (document.getElementById('pp-flt-region')?.value || '').toLowerCase();
   var qDistrict = (document.getElementById('pp-flt-district')?.value || '').toLowerCase();
   var qStore = (document.getElementById('pp-flt-store')?.value || '').toLowerCase();
+  var qSource = document.getElementById('pp-flt-source')?.value || '';
   var ds = document.getElementById('pp-flt-date-start')?.value || '';
   var de = document.getElementById('pp-flt-date-end')?.value || '';
   ppFilteredData = ppAllData.filter(function(r) {
@@ -5888,6 +5892,7 @@ function ppApplyFilter() {
     if (qRegion && r.region.toLowerCase().indexOf(qRegion) === -1) return false;
     if (qDistrict && r.district.toLowerCase().indexOf(qDistrict) === -1) return false;
     if (qStore && r.store.toLowerCase().indexOf(qStore) === -1) return false;
+    if (qSource && r.source !== qSource) return false;
     if (ds && r.stime < ds) return false;
     if (de && r.stime > de + ' 23:59:59') return false;
     return true;
@@ -5903,6 +5908,7 @@ function ppResetFilter() {
   document.getElementById('pp-flt-region') && (document.getElementById('pp-flt-region').value = '');
   document.getElementById('pp-flt-district') && (document.getElementById('pp-flt-district').value = '');
   document.getElementById('pp-flt-store') && (document.getElementById('pp-flt-store').value = '');
+  document.getElementById('pp-flt-source') && (document.getElementById('pp-flt-source').value = '');
   var dtext = document.querySelector('#page-parts-procurement .lt-date-range-text');
   if (dtext) dtext.value = '';
   document.getElementById('pp-flt-date-start') && (document.getElementById('pp-flt-date-start').value = '');
@@ -5916,7 +5922,7 @@ function ppToggleFilter() {
   ppFilterExpanded = !ppFilterExpanded;
   var grid = document.getElementById('pp-filterGrid');
   var items = grid.querySelectorAll('.lt-filter-item');
-  for (var i = 7; i < items.length; i++) { items[i].style.display = ppFilterExpanded ? '' : 'none'; }
+  for (var i = 8; i < items.length; i++) { items[i].style.display = ppFilterExpanded ? '' : 'none'; }
   var toggleEl = grid.querySelector('.lt-filter-toggle');
   if (toggleEl) toggleEl.innerHTML = ppFilterExpanded ? '&#xFE40; 收起' : '&#xFE40; 展开';
 }
@@ -5965,7 +5971,7 @@ function initPp() {
   ppRenderTable();
   var grid = document.getElementById('pp-filterGrid');
   var items = grid.querySelectorAll('.lt-filter-item');
-  for (var i = 7; i < items.length; i++) { items[i].style.display = 'none'; }
+  for (var i = 8; i < items.length; i++) { items[i].style.display = 'none'; }
 }
 
 // ===== 配件采购明细 JS =====
@@ -6264,18 +6270,18 @@ function initPds() {
 
 // ===== 厂端缺件查询 JS =====
 var fsqAllData = [
-  {seq:1,name:'刹车片（前）',code:'PJ001',store:'上海浦东店',scode:'SH001',province:'上海',po:'PO202605003',type:'紧急',oem:'OE202605003',pqty:50,aqty:35,sqty:15,shours:'72',sync:'2026-05-18 15:00',oreply:'2026-05-19 14:00',capply:'—',caudit:'—'},
-  {seq:2,name:'机油滤清器',code:'PJ002',store:'广州风丽店',scode:'GZ001',province:'广东',po:'PO202605004',type:'常规',oem:'OE202605004',pqty:80,aqty:60,sqty:20,shours:'48',sync:'2026-05-19 16:30',oreply:'2026-05-20 10:00',capply:'—',caudit:'—'},
-  {seq:3,name:'空气滤芯',code:'PJ003',store:'北京朝阳店',scode:'BJ001',province:'北京',po:'PO202605005',type:'绿色',oem:'OE202605005',pqty:60,aqty:60,sqty:0,shours:'0',sync:'2026-05-20 09:00',oreply:'—',capply:'—',caudit:'—'},
-  {seq:4,name:'火花塞',code:'PJ004',store:'成都武侯店',scode:'CD001',province:'四川',po:'PO202606001',type:'常规',oem:'OE202606001',pqty:40,aqty:25,sqty:15,shours:'96',sync:'2026-05-30 14:00',oreply:'2026-05-31 16:00',capply:'—',caudit:'—'},
-  {seq:5,name:'刹车油',code:'PJ005',store:'沈阳和平店',scode:'SY001',province:'辽宁',po:'PO202606005',type:'绿色',oem:'OE202606005',pqty:30,aqty:10,sqty:20,shours:'120',sync:'2026-06-06 15:30',oreply:'2026-06-08 09:00',capply:'2026-06-09',caudit:'2026-06-10 10:00'},
-  {seq:6,name:'空调滤芯',code:'PJ006',store:'杭州西湖店',scode:'HZ001',province:'浙江',po:'PO202606002',type:'定制',oem:'OE202606002',pqty:70,aqty:70,sqty:0,shours:'0',sync:'2026-06-01 16:00',oreply:'—',capply:'—',caudit:'—'},
-  {seq:7,name:'变速箱油',code:'PJ007',store:'深圳福田店',scode:'SZ001',province:'广东',po:'PO202606007',type:'绿色',oem:'OE202606007',pqty:25,aqty:10,sqty:15,shours:'168',sync:'2026-06-09 10:00',oreply:'2026-06-12 11:00',capply:'2026-06-13',caudit:'—'},
-  {seq:8,name:'雨刮器',code:'PJ008',store:'天津和平店',scode:'TJ001',province:'天津',po:'PO202607001',type:'油品',oem:'OE202607001',pqty:45,aqty:45,sqty:0,shours:'0',sync:'2026-06-30 16:00',oreply:'—',capply:'—',caudit:'—'},
-  {seq:9,name:'刹车片（后）',code:'PJ009',store:'重庆渝中店',scode:'CQ001',province:'重庆',po:'PO202607003',type:'定制',oem:'OE202607003',pqty:28,aqty:8,sqty:20,shours:'240',sync:'2026-07-02 15:00',oreply:'—',capply:'2026-07-03',caudit:'—'},
-  {seq:10,name:'空调压缩机',code:'PJ010',store:'南京建邺店',scode:'NJ001',province:'江苏',po:'PO202607004',type:'紧急',oem:'OE202607004',pqty:10,aqty:5,sqty:5,shours:'36',sync:'2026-07-02 08:00',oreply:'2026-07-02 16:00',capply:'—',caudit:'—'},
-  {seq:11,name:'机油滤清器',code:'PJ002',store:'武汉光谷店',scode:'WH001',province:'湖北',po:'PO202607005',type:'油品',oem:'OE202607005',pqty:55,aqty:40,sqty:15,shours:'48',sync:'2026-07-03 09:00',oreply:'—',capply:'—',caudit:'—'},
-  {seq:12,name:'空气滤芯',code:'PJ003',store:'大连中山店',scode:'DL001',province:'辽宁',po:'PO202607006',type:'绿色',oem:'OE202607006',pqty:38,aqty:38,sqty:0,shours:'0',sync:'2026-07-02 11:00',oreply:'—',capply:'—',caudit:'—'}
+  {seq:1,name:'刹车片（前）',code:'PJ001',store:'上海浦东店',scode:'SH001',province:'上海',po:'PO202605003',type:'紧急',oem:'OE202605003',pqty:50,aqty:35,sqty:15,shours:'72',sync:'2026-05-18 15:00',oreply:'2026-05-19 14:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
+  {seq:2,name:'机油滤清器',code:'PJ002',store:'广州风丽店',scode:'GZ001',province:'广东',po:'PO202605004',type:'常规',oem:'OE202605004',pqty:80,aqty:60,sqty:20,shours:'48',sync:'2026-05-19 16:30',oreply:'2026-05-20 10:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
+  {seq:3,name:'空气滤芯',code:'PJ003',store:'北京朝阳店',scode:'BJ001',province:'北京',po:'PO202605005',type:'绿色',oem:'OE202605005',pqty:60,aqty:60,sqty:0,shours:'0',sync:'2026-05-20 09:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'},
+  {seq:4,name:'火花塞',code:'PJ004',store:'成都武侯店',scode:'CD001',province:'四川',po:'PO202606001',type:'常规',oem:'OE202606001',pqty:40,aqty:25,sqty:15,shours:'96',sync:'2026-05-30 14:00',oreply:'2026-05-31 16:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
+  {seq:5,name:'刹车油',code:'PJ005',store:'沈阳和平店',scode:'SY001',province:'辽宁',po:'PO202606005',type:'绿色',oem:'OE202606005',pqty:30,aqty:10,sqty:20,shours:'120',sync:'2026-06-06 15:30',oreply:'2026-06-08 09:00',capply:'2026-06-09',caudit:'2026-06-10 10:00',cstatus:'已取消',sstatus:'已发货'},
+  {seq:6,name:'空调滤芯',code:'PJ006',store:'杭州西湖店',scode:'HZ001',province:'浙江',po:'PO202606002',type:'定制',oem:'OE202606002',pqty:70,aqty:70,sqty:0,shours:'0',sync:'2026-06-01 16:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'},
+  {seq:7,name:'变速箱油',code:'PJ007',store:'深圳福田店',scode:'SZ001',province:'广东',po:'PO202606007',type:'绿色',oem:'OE202606007',pqty:25,aqty:10,sqty:15,shours:'168',sync:'2026-06-09 10:00',oreply:'2026-06-12 11:00',capply:'2026-06-13',caudit:'—',cstatus:'审核驳回',sstatus:'已发货'},
+  {seq:8,name:'雨刮器',code:'PJ008',store:'天津和平店',scode:'TJ001',province:'天津',po:'PO202607001',type:'油品',oem:'OE202607001',pqty:45,aqty:45,sqty:0,shours:'0',sync:'2026-06-30 16:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'},
+  {seq:9,name:'刹车片（后）',code:'PJ009',store:'重庆渝中店',scode:'CQ001',province:'重庆',po:'PO202607003',type:'定制',oem:'OE202607003',pqty:28,aqty:8,sqty:20,shours:'240',sync:'2026-07-02 15:00',oreply:'—',capply:'2026-07-03',caudit:'—',cstatus:'申请中',sstatus:'待处理'},
+  {seq:10,name:'空调压缩机',code:'PJ010',store:'南京建邺店',scode:'NJ001',province:'江苏',po:'PO202607004',type:'紧急',oem:'OE202607004',pqty:10,aqty:5,sqty:5,shours:'36',sync:'2026-07-02 08:00',oreply:'2026-07-02 16:00',capply:'2026-07-02',caudit:'—',cstatus:'自动驳回',sstatus:'已发货'},
+  {seq:11,name:'机油滤清器',code:'PJ002',store:'武汉光谷店',scode:'WH001',province:'湖北',po:'PO202607005',type:'油品',oem:'OE202607005',pqty:55,aqty:40,sqty:15,shours:'48',sync:'2026-07-03 09:00',oreply:'—',capply:'2026-07-01',caudit:'—',cstatus:'审核驳回',sstatus:'待处理'},
+  {seq:12,name:'空气滤芯',code:'PJ003',store:'大连中山店',scode:'DL001',province:'辽宁',po:'PO202607006',type:'绿色',oem:'OE202607006',pqty:38,aqty:38,sqty:0,shours:'0',sync:'2026-07-02 11:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'}
 ];
 var fsqFilteredData = [];
 var fsqCurrentPage = 1;
@@ -6305,9 +6311,11 @@ function fsqRenderTable() {
       + '<td class="col-shortage-hours">'+r.shours+'</td>'
       + '<td class="col-sync-time">'+r.sync+'</td>'
       + '<td class="col-oem-reply-time">'+r.oreply+'</td>'
+      + '<td class="col-shortage-status">'+fsqTag('shortage', r.sstatus)+'</td>'
       + '<td class="col-cancel-apply-time">'+r.capply+'</td>'
       + '<td class="col-cancel-audit-time">'+r.caudit+'</td>'
-      + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="alert(\'查看详情\')" style="color:#185FA5;cursor:pointer">查看</a></td>'
+      + '<td class="col-cancel-status">'+fsqTag('cancel', r.cstatus)+'</td>'
+      + '<td class="sticky col-actions">'+fsqActions(r)+'</td>'
       + '</tr>';
   }).join('');
   document.getElementById('fsq-pg-total').textContent = '共 ' + fsqFilteredData.length + ' 条';
@@ -6334,6 +6342,7 @@ function fsqApplyFilter() {
   var qDistrict = (document.getElementById('fsq-flt-district')?.value || '').toLowerCase();
   var qStore = (document.getElementById('fsq-flt-store')?.value || '').toLowerCase();
   var qCancel = document.getElementById('fsq-flt-cancel')?.value || '';
+  var qShort = document.getElementById('fsq-flt-shortage')?.value || '';
   var ds = document.getElementById('fsq-flt-date-start')?.value || '';
   var de = document.getElementById('fsq-flt-date-end')?.value || '';
   fsqFilteredData = fsqAllData.filter(function(r) {
@@ -6343,7 +6352,8 @@ function fsqApplyFilter() {
     if (qRegion && r.store.indexOf(qRegion) === -1) return false;
     if (qDistrict && r.store.indexOf(qDistrict) === -1) return false;
     if (qStore && r.store.toLowerCase().indexOf(qStore) === -1) return false;
-    if (qCancel) { if (qCancel === '未取消' && r.capply !== '—') return false; if (qCancel === '申请中' && (r.capply === '—' || r.caudit !== '—')) return false; if (qCancel === '已取消' && r.caudit === '—') return false; }
+    if (qCancel && r.cstatus !== qCancel) return false;
+    if (qShort && r.sstatus !== qShort) return false;
     if (ds && r.sync < ds) return false;
     if (de && r.sync > de + ' 23:59:59') return false;
     return true;
@@ -6354,6 +6364,7 @@ function fsqApplyFilter() {
 function fsqResetFilter() {
   ['fsq-flt-po-no','fsq-flt-code','fsq-flt-name','fsq-flt-region','fsq-flt-district','fsq-flt-store'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('fsq-flt-cancel') && (document.getElementById('fsq-flt-cancel').value = '');
+  document.getElementById('fsq-flt-shortage') && (document.getElementById('fsq-flt-shortage').value = '');
   var dtext = document.querySelector('#page-factory-shortage-query .lt-date-range-text');
   if (dtext) dtext.value = '';
   document.getElementById('fsq-flt-date-start') && (document.getElementById('fsq-flt-date-start').value = '');
@@ -6363,11 +6374,66 @@ function fsqResetFilter() {
   fsqRenderTable();
 }
 function fsqExportData() { alert('导出 ' + fsqFilteredData.length + ' 条厂端缺件查询数据'); }
+function fsqNow(){ var d=new Date(); var p=function(n){return (n<10?'0':'')+n;}; return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function fsqTag(kind, val) {
+  var map = {
+    cancel: {'未取消':'st-uncancel','申请中':'st-applying','审核驳回':'st-reject','自动驳回':'st-auto','已取消':'st-cancelled'},
+    shortage: {'待处理':'ss-wait','已发货':'ss-shipped'}
+  };
+  var cls = map[kind][val] || 'ss-wait';
+  return '<span class="st-tag '+cls+'">'+val+'</span>';
+}
+function fsqActions(r) {
+  var isCustom = r.type === '定制';
+  var shipped = r.sstatus === '已发货';
+  var html = '<a href="javascript:void(0)" onclick="alert(\'查看详情\')" style="color:#185FA5;cursor:pointer">查看</a>';
+  if (r.cstatus === '未取消' || r.cstatus === '审核驳回') {
+    if (shipped || isCustom) {
+      html += ' <span class="st-disabled">取消</span>';
+    } else {
+      html += ' <a href="javascript:void(0)" onclick="fsqDoAction('+r.seq+',\'cancel\')" style="color:#185FA5;cursor:pointer">取消</a>';
+    }
+  }
+  if (r.cstatus === '申请中') {
+    html += ' <a href="javascript:void(0)" onclick="fsqDoAction('+r.seq+',\'audit\')" style="color:#185FA5;cursor:pointer">审核</a>';
+  }
+  return html;
+}
+function fsqDoAction(seq, action) {
+  var r = null;
+  for (var i = 0; i < fsqAllData.length; i++) { if (fsqAllData[i].seq === seq) { r = fsqAllData[i]; break; } }
+  if (!r) return;
+  var today = fsqNow();
+  if (action === 'cancel') {
+    if (r.sstatus === '已发货') {
+      if (!confirm('该缺件【'+r.name+'】缺货状态为「已发货」（厂端已发货），取消将自动驳回。确认执行？')) return;
+      r.cstatus = '自动驳回';
+      if (r.capply === '—') r.capply = today;
+    } else if (r.cstatus === '审核驳回') {
+      if (!confirm('该缺件【'+r.name+'】当前为「审核驳回」且缺货待处理，再次取消不满足驳回条件，缺货状态将推进为已发货（仍维持审核驳回）。确认执行？')) return;
+      r.sstatus = '已发货';
+    } else {
+      if (!confirm('确认对缺件【'+r.name+'】执行【取消】操作？')) return;
+      r.cstatus = '申请中';
+      r.capply = today;
+    }
+  } else if (action === 'audit') {
+    if (r.sstatus === '已发货') {
+      if (!confirm('审核时厂端已发货，将自动驳回。确认执行？')) return;
+      r.cstatus = '自动驳回';
+    } else {
+      var ok = confirm('审核【'+r.name+'】\n点「确定」= 审核通过（已取消）\n点「取消」= 审核不通过（审核驳回）');
+      if (ok) { r.cstatus = '已取消'; r.caudit = today; }
+      else { r.cstatus = '审核驳回'; }
+    }
+  }
+  fsqApplyFilter();
+}
 function fsqToggleFilter() {
   fsqFilterExpanded = !fsqFilterExpanded;
   var grid = document.getElementById('fsq-filterGrid');
   var items = grid.querySelectorAll('.lt-filter-item');
-  for (var i = 7; i < items.length; i++) { items[i].style.display = fsqFilterExpanded ? '' : 'none'; }
+  for (var i = 6; i < items.length; i++) { items[i].style.display = fsqFilterExpanded ? '' : 'none'; }
   var toggleEl = grid.querySelector('.lt-filter-toggle');
   if (toggleEl) toggleEl.innerHTML = fsqFilterExpanded ? '&#xFE40; 收起' : '&#xFE40; 展开';
 }
@@ -6413,7 +6479,7 @@ function initFsq() {
   fsqRenderTable();
   var grid = document.getElementById('fsq-filterGrid');
   var items = grid.querySelectorAll('.lt-filter-item');
-  for (var i = 7; i < items.length; i++) { items[i].style.display = 'none'; }
+  for (var i = 6; i < items.length; i++) { items[i].style.display = 'none'; }
 }
 
 // ===== 配件外采 JS =====
@@ -7043,9 +7109,9 @@ function renderUssTable() {
     else npsBadge = '<span style="background:#FFEBEE;color:#C62828;padding:2px 8px;border-radius:4px;font-size:12px;">贬损者</span>';
 
     h += '<tr>';
-    h += '<td>' + (start + i + 1) + '</td>';
-    h += '<td>' + r.storeCode + '</td>';
-    h += '<td style="text-align:left">' + r.storeName + '</td>';
+    h += '<td class="sticky col-seq">' + (start + i + 1) + '</td>';
+    h += '<td class="sticky col-store-code">' + r.storeCode + '</td>';
+    h += '<td class="sticky col-store-name" style="text-align:left">' + r.storeName + '</td>';
     h += '<td>' + r.region + '</td>';
     h += '<td>' + r.district + '</td>';
     h += '<td>' + r.orderNo + '</td>';
