@@ -77,13 +77,13 @@
         <div class="submenu open">
           <div class="submenu-item" onclick="showContent('service-report')" data-module="service-report">服务报表</div>
           <div class="submenu submenu-nested open">
-            <div class="submenu-item submenu-item-nested current" onclick="showContent('repair-daily-report')" data-module="repair-daily-report" data-roles="超级管理员">维修营业日报</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('lead-tracking')" data-module="lead-tracking" data-roles="超级管理员">用户线索跟踪情况</div>
+            <div class="submenu-item submenu-item-nested current" onclick="showContent('repair-daily-report')" data-module="repair-daily-report" data-roles="超级管理员">维修营业日报(备用)</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('lead-tracking')" data-module="lead-tracking" data-roles="超级管理员">用户线索跟踪情况(备用)</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('store-operation')" data-module="store-operation" data-roles="门店 总部 超级管理员">门店经营情况</div>
           </div>
           <div class="submenu-item" onclick="showContent('manage-report')" data-module="manage-report">管理报表</div>
           <div class="submenu submenu-nested open">
-            <div class="submenu-item submenu-item-nested" onclick="showContent('user-service-satisfaction')" data-module="user-service-satisfaction" data-roles="超级管理员">用户服务满意度</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('user-service-satisfaction')" data-module="user-service-satisfaction" data-roles="超级管理员">用户服务满意度(备用)</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('repair-stats-query')" data-module="repair-stats-query">维修统计查询</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('repair-labor-hours')" data-module="repair-labor-hours">维修工时查询</div>
           </div>
@@ -678,6 +678,7 @@
             </div>
           </div>
         </div>
+        <div class="lt-list-area">
         <!-- 工具条 -->
         <div class="lt-toolbar">
           <div class="lt-toolbar-right">
@@ -706,6 +707,8 @@
             <tbody id="rsq-tbody"></tbody>
           </table>
         </div>
+        <!-- 分页 -->
+        <div class="rs-pager" id="rsq-pager"></div>
         <!-- 费用汇总 -->
         <div class="rs-summary">
           <h4>费用汇总</h4>
@@ -749,8 +752,7 @@
           </div>
           <p class="rs-note">备注：<br>1. 应收总计=实收费总计+挂账费总计+结算折扣费用+内部费用合计+保养套餐费用合计（如果查询数据中包含未收款工单，则应收总计不等于实收费总计+挂账费总计+结算折扣费用+内部费用合计+保养套餐费用合计）<br>2. 可识别明细应收总计=应收总计-内部费用合计-保养套餐费用合计</p>
         </div>
-        <!-- 分页 -->
-        <div class="rs-pager" id="rsq-pager"></div>
+        </div>
       </div>
     </div>
 
@@ -1005,9 +1007,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <label class="lt-input-wrap plain" style="gap:6px;cursor:pointer;align-items:center;">
-                <span class="lt-filter-prefix">仅追加项</span>
-                <input type="checkbox" id="ds-flt-append" onchange="dsApplyFilter()">
+              <label class="lt-check">
+                <input type="checkbox" id="ds-flt-append" onchange="dsApplyFilter()"> 仅追加项
               </label>
             </div>
             <div class="lt-filter-footer">
