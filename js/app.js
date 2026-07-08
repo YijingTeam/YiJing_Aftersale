@@ -119,6 +119,14 @@
         if (module === 'user-service-satisfaction') {
           initUss();
         }
+        // 维修工时查询
+        if (module === 'repair-labor-hours') {
+          rlhInit();
+        }
+        // 门店经营情况（派工结算明细）
+        if (module === 'store-operation') {
+          initStoreOperation();
+        }
         // 技术支持
         if (module === 'tech-support') {
           initTs();
@@ -158,6 +166,10 @@
         // 配件外采
         if (module === 'external-procurement') {
           initEp();
+        }
+        // 维修统计查询
+        if (module === 'repair-stats-query') {
+          initRepairStatsQuery();
         }
       }
     }
@@ -422,7 +434,7 @@
         }
       });
 
-      // 技师排行
+      // 工程师排行
       var techNames = ['张磊', '王刚', '陈明', '李华', '刘涛', '赵强', '周伟', '吴洋'];
       var techColors = [
         {bg: '#E6F1FB', color: '#185FA5'},
@@ -463,8 +475,12 @@
       document.getElementById('orderList').innerHTML = orderHtml;
     }
 
-    // 默认显示维修营业日报
-    showContent('repair-daily-report');
+    // 默认显示维修营业日报（Chart.js 可能未加载，用 try/catch 兜底，避免中断后续模块初始化导致白屏）
+    try {
+      showContent('repair-daily-report');
+    } catch (e) {
+      console.warn('默认页初始化失败（可能 Chart.js 未加载）：', e);
+    }
 
     // ===== 用户线索跟踪情况 JS =====
     var ltAllData = [
@@ -4911,6 +4927,7 @@
         }
         var results = [];
         for (var i = 0; i < menuIndex.length; i++) {
+          if (!menuVisibleForRole(menuIndex[i].el, gUserRole)) continue; // 角色不可见则不在搜索结果中
           if (fuzzyMatch(menuIndex[i], query)) {
             results.push(menuIndex[i]);
           }
@@ -5797,7 +5814,7 @@
 })();
 
 // ===== 配件采购 JS =====
-var ppRole = '门店';
+var gUserRole = '门店';
   var ppAllData = [
   {seq:1,po:'PO202605001',type:'常规',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-15',submitter:'—',stime:'—',sync:'—'},
   {seq:2,po:'PO202605002',type:'油品',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-18',submitter:'—',stime:'—',sync:'—'},
@@ -6648,9 +6665,10 @@ var ppPartsList = [];
 function ppOpenAdd() { ppFormMode = 'add'; ppCurrentRec = null; ppRenderPanel(); }
 function ppGetActions(ri, r) {
   var s = r.status || '';
-  var role = ppRole || '门店';
+  var role = gUserRole || '门店';
   var btns = ['<a href="javascript:void(0)" onclick="ppOpenView(' + ri + ')" style="color:#185FA5;cursor:pointer">查看</a>'];
-  if (role === '门店') {
+  // 门店规则（门店 与 超级管理员 可见）
+  if (role === '门店' || role === '超级管理员') {
     if (s === '未提交' || s === '门店审核不通过') {
       btns.push('<a href="javascript:void(0)" onclick="ppOpenEdit(' + ri + ')" style="color:#185FA5;cursor:pointer">编辑</a>');
       btns.push('<a href="javascript:void(0)" onclick="alert(\'删除功能待开发\')" style="color:#185FA5;cursor:pointer">删除</a>');
@@ -6659,19 +6677,63 @@ function ppGetActions(ri, r) {
       btns.push('<a href="javascript:void(0)" onclick="ppOpenEdit(' + ri + ')" style="color:#185FA5;cursor:pointer">编辑</a>');
       btns.push('<a href="javascript:void(0)" onclick="ppOpenAudit(' + ri + ')" style="color:#185FA5;cursor:pointer">审核</a>');
     }
-  } else if (role === '总部') {
+  }
+  // 总部规则（总部 与 超级管理员 可见）
+  if (role === '总部' || role === '超级管理员') {
     if (s === '总部审核中') {
       btns.push('<a href="javascript:void(0)" onclick="ppOpenAudit(' + ri + ')" style="color:#185FA5;cursor:pointer">审核</a>');
     }
   }
   return btns.join(' ');
 }
-function ppSetRole(role) {
-  ppRole = role;
-  var tabs = document.querySelectorAll('#page-parts-procurement .pp-role-tab');
-  for (var i = 0; i < tabs.length; i++) { tabs[i].classList.toggle('active', tabs[i].id === 'pp-role-' + role); }
-  ppRenderTable();
+// 全局角色切换（右上角）
+function toggleRoleMenu(e) {
+  e.stopPropagation();
+  var m = document.getElementById('lt-user-menu');
+  if (m) m.classList.toggle('open');
 }
+function menuVisibleForRole(el, role) {
+  var rolesAttr = (el.getAttribute('data-roles') || '').trim();
+  if (!rolesAttr) return true; // 无 data-roles 的菜单永远显示（其它菜单不动）
+  var roles = rolesAttr.split(/\s+/);
+  if (role === '超级管理员') return true; // 超级管理员可见全部
+  return roles.indexOf(role) !== -1;
+}
+function getCurrentModule() {
+  var active = document.querySelector('.page-content.active');
+  if (!active || !active.id) return null;
+  return active.id.replace(/^page-/, '');
+}
+function applyMenuByRole(role) {
+  var items = document.querySelectorAll('.submenu-item[data-roles]');
+  for (var i = 0; i < items.length; i++) {
+    items[i].classList.toggle('role-hidden', !menuVisibleForRole(items[i], role));
+  }
+  // 当前打开的页面若因角色切换而不可见，则跳回首页（工作台）
+  var cur = getCurrentModule();
+  if (cur) {
+    var curEl = document.querySelector('[data-module="' + cur + '"]');
+    if (curEl && curEl.classList.contains('role-hidden')) {
+      if (typeof showContent === 'function') showContent('dashboard');
+    }
+  }
+}
+function setGlobalRole(role, e) {
+  if (e) e.stopPropagation();
+  gUserRole = role;
+  applyMenuByRole(gUserRole);
+  var label = document.getElementById('lt-user-label');
+  if (label) label.textContent = role;
+  var items = document.querySelectorAll('#lt-user-menu .lt-user-menu-item');
+  for (var i = 0; i < items.length; i++) { items[i].classList.toggle('active', items[i].getAttribute('data-role') === role); }
+  var m = document.getElementById('lt-user-menu');
+  if (m) m.classList.remove('open');
+  if (typeof ppRenderTable === 'function') ppRenderTable();
+}
+document.addEventListener('click', function() {
+  var m = document.getElementById('lt-user-menu');
+  if (m) m.classList.remove('open');
+});
 function ppOpenView(idx) { ppFormMode = 'view'; ppCurrentRec = ppFilteredData[idx]; ppRenderPanel(); }
 function ppOpenEdit(idx) { ppFormMode = 'edit'; ppCurrentRec = ppFilteredData[idx]; ppRenderPanel(); }
 function ppClosePanel() { document.getElementById('pp-panel-overlay').classList.remove('show'); document.getElementById('pp-panel').classList.remove('show'); }
@@ -6795,7 +6857,7 @@ function ppaRenderPanel() {
   document.getElementById('ppa-parts-tbody').innerHTML = items.map(function(p){return '<tr><td>'+p.s+'</td><td>'+p.code+'</td><td>'+p.name+'</td><td>'+p.series+'</td><td>'+p.model+'</td><td>'+p.unit+'</td><td>'+p.q+'</td><td>'+p.price.toFixed(2)+'</td><td>¥'+p.amt.toFixed(2)+'</td></tr>';}).join('');
   document.getElementById('ppa-totals').innerHTML = '合计品种: <b>2</b> &nbsp; 合计金额(含税): <b>¥2750.00</b>';
   var atb = document.getElementById('ppa-audit-tbody');
-  var ppCanAudit = (ppRole === '门店' && ppCurrentRec.status === '门店审核中') || (ppRole === '总部' && ppCurrentRec.status === '总部审核中');
+  var ppCanAudit = (gUserRole === '门店' && ppCurrentRec.status === '门店审核中') || (gUserRole === '总部' && ppCurrentRec.status === '总部审核中');
   if (ppCanAudit) {
     atb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:16px">暂无审核记录</td></tr>';
     document.getElementById('ppa-audit-area').style.display = '';
@@ -7269,3 +7331,596 @@ function ussToggleNpsDropdown() { _ussToggleDD('uss-nps-list'); }
 function ussShowNpsDropdown() { _ussShowDD('uss-nps-list', 'uss-nps-text'); }
 function ussSelectNps(li) { _ussSelectDD('uss-nps-list', 'uss-nps-text', li); }
 function ussFilterNps(val) { _ussFilterDD('uss-nps-list', 'uss-nps-text', val); }
+
+// ========= 门店经营情况（派工结算明细） =========
+var DS_SHOW_COUNT = 7;
+var dsFilterExpanded = false;
+var dsCur = { date: null, plate: null, orderNo: null };
+var dsPager = {
+  orders: { page: 1, size: 10 },
+  labor:  { page: 1, size: 10 },
+  parts:  { page: 1, size: 10 },
+  others: { page: 1, size: 10 }
+};
+var dsOrders = [];
+var dsFilteredOrders = [];
+
+function dsBuildData() {
+  var seeds = [
+    { d:'2026-06-26', p:'沪A·8F2K6', v:'LVGAE21G3NG123001', t:'一般维修', a:'张伟', r:'李娜', ph:'13800001111', m:'奕境 Pro 2024款', mi:32560, it:'常规', c:'机电', s:'已结算', st:'上海浦东店', sc:'SH001', ap:false },
+    { d:'2026-06-26', p:'沪B·3K9M2', v:'LVGAE21G3NG123002', t:'保养', a:'王芳', r:'赵强', ph:'13800002222', m:'奕境 Max 2023款', mi:18230, it:'常规', c:'养护', s:'已结算', st:'上海浦东店', sc:'SH001', ap:false },
+    { d:'2026-06-26', p:'沪C·7H4T8', v:'LVGAE21G3NG123003', t:'钣喷', a:'刘洋', r:'孙丽', ph:'13800003333', m:'奕境 Air 2025款', mi:56210, it:'增值', c:'钣喷', s:'结算中', st:'北京朝阳店', sc:'BJ001', ap:true },
+    { d:'2026-06-27', p:'沪D·5R2W1', v:'LVGAE21G3NG123004', t:'一般维修', a:'陈静', r:'周涛', ph:'13800004444', m:'奕境 Pro 2024款', mi:41200, it:'常规', c:'机电', s:'已结算', st:'广州天河店', sc:'GZ001', ap:false },
+    { d:'2026-06-27', p:'沪E·9X6P3', v:'LVGAE21G3NG123005', t:'索赔', a:'李雷', r:'韩梅', ph:'13800005555', m:'奕境 Max 2023款', mi:8900, it:'索赔', c:'机电', s:'未结算', st:'深圳南山店', sc:'SZ001', ap:false }
+  ];
+  var orders = [];
+  seeds.forEach(function(s, i){
+    var orderNo = 'WO' + s.d.replace(/-/g,'') + String(i+1).padStart(3,'0');
+    var o = {
+      orderNo: orderNo, plate: s.p, vin: s.v, type: s.t, advisor: s.a, reporter: s.r, phone: s.ph,
+      carModel: s.m, mileage: s.mi, dateIn: s.d, settleDate: s.d, itemType: s.it, category: s.c,
+      status: s.s, store: s.st, storeCode: s.sc, append: s.ap, labor: [], parts: [], others: []
+    };
+    var labDesc = s.t==='保养' ? '常规保养' : (s.t==='钣喷' ? '钣金修复' : (s.t==='索赔' ? '索赔维修' : '常规维修'));
+    o.labor.push({ code:'LB'+String(i+1).padStart(3,'0'), desc: labDesc, acct: s.s==='已结算'?'自费':'保修', itemType: s.it, hours: s.c==='养护'?1.5:2.0, price: s.c==='养护'?80:120, amount:0 });
+    o.labor.push({ code:'LB'+String(i+11).padStart(3,'0'), desc:'诊断检测', acct:'自费', itemType: s.it, hours:0.5, price:100, amount:0 });
+    o.labor.forEach(function(l){ l.amount = Math.round(l.hours*l.price*100)/100; });
+    o.parts.push({ code:'PA'+String(i+1).padStart(4,'0'), name: s.t==='保养'?'全合成机油':'前刹车片', acct: s.s==='已结算'?'自费':'保修', itemType: s.it, qty: s.t==='保养'?1:2, price: s.t==='保养'?480:320, amount:0 });
+    o.parts.push({ code:'PA'+String(i+21).padStart(4,'0'), name: s.t==='钣喷'?'喷漆耗材':'机油滤清器', acct:'自费', itemType: s.it, qty:1, price:150, amount:0 });
+    o.parts.forEach(function(p){ p.amount = Math.round(p.qty*p.price*100)/100; });
+    o.others.push({ type:'洗车', acct:'自费', itemType: s.it, amount:40, remark:'交车前免费洗车' });
+    if (s.ap) o.others.push({ type:'额外检测', acct:'自费', itemType: s.it, amount:80, remark:'客户追加的空调检测' });
+    orders.push(o);
+  });
+  return orders;
+}
+
+dsOrders = dsBuildData();
+dsFilteredOrders = dsOrders.slice();
+
+function dsVal(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function dsValDate(id){ var el = document.getElementById(id); return (el && el.value) ? el.value : ''; }
+
+function dsApplyFilter() {
+  var fOrder = dsVal('ds-flt-order').toLowerCase();
+  var fVin = dsVal('ds-flt-vin').toLowerCase();
+  var fPlate = dsVal('ds-flt-plate').toLowerCase();
+  var fItemType = dsVal('ds-flt-itemtype');
+  var fCategory = dsVal('ds-flt-category');
+  var fStatus = dsVal('ds-flt-status');
+  var fAdvisor = dsVal('ds-flt-advisor');
+  var fStore = dsVal('ds-flt-store').toLowerCase();
+  var dss = dsValDate('ds-date-start');
+  var dse = dsValDate('ds-date-end');
+  var fss = dsValDate('ds-settle-start');
+  var fse = dsValDate('ds-settle-end');
+  var appendEl = document.getElementById('ds-flt-append');
+  var appendOnly = appendEl ? appendEl.checked === true : false;
+
+  dsFilteredOrders = dsOrders.filter(function(o){
+    if (fOrder && o.orderNo.toLowerCase().indexOf(fOrder) === -1) return false;
+    if (fVin && o.vin.toLowerCase().indexOf(fVin) === -1) return false;
+    if (fPlate && o.plate.toLowerCase().indexOf(fPlate) === -1) return false;
+    if (fItemType && o.itemType !== fItemType) return false;
+    if (fCategory && o.category !== fCategory) return false;
+    if (fStatus && o.status !== fStatus) return false;
+    if (fAdvisor && o.advisor.indexOf(fAdvisor) === -1) return false;
+    if (fStore && o.store.toLowerCase().indexOf(fStore) === -1 && o.storeCode.toLowerCase().indexOf(fStore) === -1) return false;
+    if (dss && o.dateIn < dss) return false;
+    if (dse && o.dateIn > dse) return false;
+    if (fss && o.settleDate < fss) return false;
+    if (fse && o.settleDate > fse) return false;
+    if (appendOnly && !o.append) return false;
+    return true;
+  });
+
+  dsCur = { date: null, plate: null, orderNo: null };
+  dsRenderTree();
+  dsRenderAll();
+}
+
+function dsResetFilter() {
+  ['ds-flt-order','ds-flt-vin','ds-flt-plate','ds-flt-itemtype','ds-flt-category','ds-flt-status','ds-flt-advisor','ds-flt-store','ds-date-start','ds-date-end','ds-settle-start','ds-settle-end'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var cb = document.getElementById('ds-flt-append'); if (cb) cb.checked = false;
+  document.querySelectorAll('#page-store-operation .lt-date-range-text').forEach(function(t){ t.value = ''; });
+  dsApplyFilter();
+}
+
+function dsToggleFilter() {
+  dsFilterExpanded = !dsFilterExpanded;
+  toggleFilterGrid('ds-filterGrid', dsFilterExpanded, DS_SHOW_COUNT);
+}
+
+function dsBuildTree() {
+  var byDate = {};
+  dsFilteredOrders.forEach(function(o){
+    if (!byDate[o.dateIn]) byDate[o.dateIn] = {};
+    byDate[o.dateIn][o.plate] = true;
+  });
+  return byDate;
+}
+
+function dsRenderTree() {
+  var tree = dsBuildTree();
+  var h = '<div class="ds-tree-root" onclick="dsClickRoot()">接车时间</div>';
+  Object.keys(tree).sort().forEach(function(date){
+    var plates = Object.keys(tree[date]).sort();
+    var dateActive = (dsCur.date === date) ? ' active' : '';
+    h += '<div class="ds-tree-date' + dateActive + '" onclick="dsClickDate(\'' + date + '\')"><span class="ds-arrow">▾</span>' + date + '</div>';
+    if (dsCur.date === date) {
+      plates.forEach(function(plate){
+        var pActive = (dsCur.plate === plate) ? ' active' : '';
+        h += '<div class="ds-tree-leaf' + pActive + '" onclick="dsClickPlate(\'' + date + '\',\'' + plate + '\')">' + plate + '</div>';
+      });
+    }
+  });
+  var el = document.getElementById('ds-tree');
+  if (el) el.innerHTML = h;
+}
+
+function dsClickRoot(){ dsCur = { date:null, plate:null, orderNo:null }; dsRenderTree(); dsRenderAll(); }
+function dsClickDate(date){ dsCur = { date:date, plate:null, orderNo:null }; dsRenderTree(); dsRenderAll(); }
+function dsClickPlate(date, plate){ dsCur = { date:date, plate:plate, orderNo:null }; dsRenderTree(); dsRenderAll(); }
+function dsClickOrder(orderNo){ dsCur = { date:null, plate:null, orderNo:orderNo }; dsRenderTree(); dsRenderAll(); }
+
+function dsGetCurrentOrders() {
+  return dsFilteredOrders.filter(function(o){
+    if (dsCur.orderNo) return o.orderNo === dsCur.orderNo;
+    if (dsCur.plate) return o.dateIn === dsCur.date && o.plate === dsCur.plate;
+    if (dsCur.date) return o.dateIn === dsCur.date;
+    return true;
+  });
+}
+
+function dsGetRows(type) {
+  var orders = dsGetCurrentOrders();
+  var rows = [];
+  orders.forEach(function(o){
+    (o[type] || []).forEach(function(r){
+      r._orderNo = o.orderNo; r._plate = o.plate; r._vin = o.vin;
+      rows.push(r);
+    });
+  });
+  return rows;
+}
+
+function dsRenderAll() {
+  dsPager.orders.page = 1; dsPager.labor.page = 1; dsPager.parts.page = 1; dsPager.others.page = 1;
+  dsRenderOrders(); dsRenderLabor(); dsRenderParts(); dsRenderOthers();
+}
+
+function dsRenderPager(key, total, totalPages) {
+  var pg = dsPager[key];
+  var totEl = document.getElementById('ds-' + key + '-pg-total');
+  var prevEl = document.getElementById('ds-' + key + '-pg-prev');
+  var nextEl = document.getElementById('ds-' + key + '-pg-next');
+  var pagesEl = document.getElementById('ds-' + key + '-pg-pages');
+  var gotoEl = document.getElementById('ds-' + key + '-pg-goto');
+  var sizeEl = document.getElementById('ds-' + key + '-pg-size');
+  if (totEl) totEl.textContent = '共 ' + total + ' 条';
+  if (prevEl) prevEl.disabled = (pg.page <= 1);
+  if (nextEl) nextEl.disabled = (pg.page >= totalPages);
+  if (pagesEl) {
+    var ph = '';
+    for (var p = 1; p <= totalPages; p++) {
+      ph += '<span class="pg-num' + (p === pg.page ? ' current' : '') + '" onclick="dsGotoPage(\'' + key + '\',' + p + ')">' + p + '</span>';
+    }
+    pagesEl.innerHTML = ph;
+  }
+  if (gotoEl) gotoEl.value = '';
+  if (sizeEl) sizeEl.value = String(pg.size);
+}
+
+function dsRenderOrders() {
+  var orders = dsGetCurrentOrders();
+  var key = 'orders', pg = dsPager[key];
+  var total = orders.length;
+  var tp = Math.max(1, Math.ceil(total / pg.size));
+  if (pg.page > tp) pg.page = tp;
+  var slice = orders.slice((pg.page - 1) * pg.size, pg.page * pg.size);
+  var h = '';
+  slice.forEach(function(o, i){
+    var active = (dsCur.orderNo === o.orderNo) ? ' ds-row-active' : '';
+    h += '<tr class="ds-order-row' + active + '" onclick="dsClickOrder(\'' + o.orderNo + '\')">';
+    h += '<td class="sticky col-seq">' + ((pg.page - 1) * pg.size + i + 1) + '</td>';
+    h += '<td class="sticky col-order-no">' + o.orderNo + '</td>';
+    h += '<td>' + o.plate + '</td>';
+    h += '<td>' + o.vin + '</td>';
+    h += '<td>' + o.type + '</td>';
+    h += '<td>' + o.advisor + '</td>';
+    h += '<td>' + o.reporter + '</td>';
+    h += '<td>' + o.phone + '</td>';
+    h += '<td style="text-align:left">' + o.carModel + '</td>';
+    h += '<td>' + o.mileage + '</td>';
+    h += '<td>' + o.dateIn + '</td>';
+    h += '<td>' + o.itemType + '</td>';
+    h += '<td>' + o.category + '</td>';
+    h += '<td>' + o.status + '</td>';
+    h += '</tr>';
+  });
+  if (!slice.length) h = '<tr><td colspan="14" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+  var tb = document.getElementById('ds-orders-tbody'); if (tb) tb.innerHTML = h;
+  dsRenderPager('orders', total, tp);
+}
+
+function dsRenderLabor() {
+  var rows = dsGetRows('labor');
+  var key = 'labor', pg = dsPager[key];
+  var total = rows.length;
+  var tp = Math.max(1, Math.ceil(total / pg.size));
+  if (pg.page > tp) pg.page = tp;
+  var slice = rows.slice((pg.page - 1) * pg.size, pg.page * pg.size);
+  var h = '';
+  slice.forEach(function(r, i){
+    h += '<tr>';
+    h += '<td class="sticky col-seq">' + ((pg.page - 1) * pg.size + i + 1) + '</td>';
+    h += '<td class="sticky col-order-no">' + r._orderNo + '</td>';
+    h += '<td>' + r._plate + '</td>';
+    h += '<td>' + r._vin + '</td>';
+    h += '<td>' + r.code + '</td>';
+    h += '<td style="text-align:left">' + r.desc + '</td>';
+    h += '<td>' + r.acct + '</td>';
+    h += '<td>' + r.itemType + '</td>';
+    h += '<td>' + r.hours + '</td>';
+    h += '<td>' + r.price + '</td>';
+    h += '<td>' + r.amount + '</td>';
+    h += '</tr>';
+  });
+  if (!slice.length) h = '<tr><td colspan="11" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+  var tb = document.getElementById('ds-labor-tbody'); if (tb) tb.innerHTML = h;
+  dsRenderPager('labor', total, tp);
+}
+
+function dsRenderParts() {
+  var rows = dsGetRows('parts');
+  var key = 'parts', pg = dsPager[key];
+  var total = rows.length;
+  var tp = Math.max(1, Math.ceil(total / pg.size));
+  if (pg.page > tp) pg.page = tp;
+  var slice = rows.slice((pg.page - 1) * pg.size, pg.page * pg.size);
+  var h = '';
+  slice.forEach(function(r, i){
+    h += '<tr>';
+    h += '<td class="sticky col-seq">' + ((pg.page - 1) * pg.size + i + 1) + '</td>';
+    h += '<td class="sticky col-order-no">' + r._orderNo + '</td>';
+    h += '<td>' + r._plate + '</td>';
+    h += '<td>' + r._vin + '</td>';
+    h += '<td>' + r.code + '</td>';
+    h += '<td style="text-align:left">' + r.name + '</td>';
+    h += '<td>' + r.acct + '</td>';
+    h += '<td>' + r.itemType + '</td>';
+    h += '<td>' + r.qty + '</td>';
+    h += '<td>' + r.price + '</td>';
+    h += '<td>' + r.amount + '</td>';
+    h += '</tr>';
+  });
+  if (!slice.length) h = '<tr><td colspan="11" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+  var tb = document.getElementById('ds-parts-tbody'); if (tb) tb.innerHTML = h;
+  dsRenderPager('parts', total, tp);
+}
+
+function dsRenderOthers() {
+  var rows = dsGetRows('others');
+  var key = 'others', pg = dsPager[key];
+  var total = rows.length;
+  var tp = Math.max(1, Math.ceil(total / pg.size));
+  if (pg.page > tp) pg.page = tp;
+  var slice = rows.slice((pg.page - 1) * pg.size, pg.page * pg.size);
+  var h = '';
+  slice.forEach(function(r, i){
+    h += '<tr>';
+    h += '<td class="sticky col-seq">' + ((pg.page - 1) * pg.size + i + 1) + '</td>';
+    h += '<td class="sticky col-order-no">' + r._orderNo + '</td>';
+    h += '<td>' + r._plate + '</td>';
+    h += '<td>' + r._vin + '</td>';
+    h += '<td style="text-align:left">' + r.type + '</td>';
+    h += '<td>' + r.acct + '</td>';
+    h += '<td>' + r.itemType + '</td>';
+    h += '<td>' + r.amount + '</td>';
+    h += '<td style="text-align:left">' + r.remark + '</td>';
+    h += '</tr>';
+  });
+  if (!slice.length) h = '<tr><td colspan="9" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>';
+  var tb = document.getElementById('ds-others-tbody'); if (tb) tb.innerHTML = h;
+  dsRenderPager('others', total, tp);
+}
+
+function dsRenderTable(key) {
+  if (key === 'orders') dsRenderOrders();
+  else if (key === 'labor') dsRenderLabor();
+  else if (key === 'parts') dsRenderParts();
+  else if (key === 'others') dsRenderOthers();
+}
+
+function dsChangePage(key, dir) {
+  var pg = dsPager[key];
+  pg.page = Math.max(1, pg.page + dir);
+  dsRenderTable(key);
+}
+
+function dsChangePageSize(key, size) {
+  dsPager[key].size = parseInt(size) || 10;
+  dsPager[key].page = 1;
+  dsRenderTable(key);
+}
+
+function dsGotoPage(key, p) {
+  p = parseInt(p); if (isNaN(p) || p < 1) p = 1;
+  dsPager[key].page = p;
+  dsRenderTable(key);
+}
+
+function dsExportData() {
+  alert('导出功能待接入（当前为占位）。将导出当前筛选范围下的维修工单 / 工时 / 配件 / 其他费用四表数据。');
+}
+
+function dsShowDesc() { var m = document.getElementById('ds-descModal'); if (m) m.classList.add('show'); }
+function dsCloseDesc() { var m = document.getElementById('ds-descModal'); if (m) m.classList.remove('show'); }
+
+function initStoreOperation() {
+  var now = new Date();
+  var y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+  var endStr = y + '-' + String(m).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+  var start = new Date(now); start.setMonth(start.getMonth() - 1);
+  var sy = start.getFullYear(), sm = start.getMonth() + 1, sd = start.getDate();
+  var startStr = sy + '-' + String(sm).padStart(2,'0') + '-' + String(sd).padStart(2,'0');
+
+  var dsS = document.getElementById('ds-date-start'); if (dsS) dsS.value = startStr;
+  var dsE = document.getElementById('ds-date-end'); if (dsE) dsE.value = endStr;
+  var ssS = document.getElementById('ds-settle-start'); if (ssS) ssS.value = startStr;
+  var ssE = document.getElementById('ds-settle-end'); if (ssE) ssE.value = endStr;
+  if (dsS) updateDateRangeDisplay(dsS);
+  if (ssS) updateDateRangeDisplay(ssS);
+
+  dsApplyFilter();
+  initFilterGrid('ds-filterGrid', DS_SHOW_COUNT);
+}
+
+// 页面加载后按默认角色(门店)应用左侧菜单显隐
+applyMenuByRole(gUserRole);
+
+// ===== 维修统计查询（原：综合查询维修情况） =====
+var RSQ_FIELDS = ['seq','storeName','storeCode','orderNo','vin','plate','cust','custTel','carSeries','carModel','engineNo','color','mileage','inDate','doneDate','settleDate','repairType','repairItem','faultDesc','repairContent','receiver','advisor','mainTech','qc','groupLeader','dispatcher','pjNormal','gsNormal','fjNormal','pjNormalTotal','pjWarranty','gsWarranty','fjWarranty','pjWarrantyTotal','pjFree','gsFree','fjFree','pjFreeTotal','pjIns','gsIns','fjIns','pjInsTotal','pjAgree','gsAgree','fjAgree','pjAgreeTotal','pjInner','gsInner','fjInner','pjInnerTotal','pjPackage','gsPackage','othPackage','pjPackageTotal','pjYsTotal','gsYsTotal','fjYsTotal','ysTotal','jszTotal','ssTotal','gdRate','orderTotal','isSettle','isPdi','createTime','updateTime'];
+var RSQ_SUM_ORDER = ['pjNormal','gsNormal','fjNormal','pjNormalTotal','pjWarranty','gsWarranty','fjWarranty','pjWarrantyTotal','pjFree','gsFree','fjFree','pjFreeTotal','pjIns','gsIns','fjIns','pjInsTotal','pjAgree','gsAgree','fjAgree','pjAgreeTotal','pjInner','gsInner','fjInner','pjInnerTotal','pjPackage','gsPackage','othPackage','pjPackageTotal','pjYsTotal','gsYsTotal','fjYsTotal','ysTotal','jszTotal','ssTotal','gdRate','orderTotal'];
+var RSQ_STORES = [['上海奕境汽车服务','SH001'],['北京奕境汽车服务','BJ001'],['广州奕境汽车服务','GZ001'],['成都奕境汽车服务','CD001']];
+var RSQ_TYPES = ['普通维修','定保','保险','保养','专案','召回','服务活动','免费保养','PDI'];
+var rsqAllData = [];
+var rsqCurrentPage = 1;
+var rsqPageSize = 20;
+var rsqFilterExpanded = false; // 默认收起（与 initFilterGrid 对齐）
+var rsqInitialized = false;
+var RSQ_SHOW_COUNT = 8; // 默认显示前2行(8个查询项)，其余折叠（规范354：>7项默认收起）
+
+function rsqRand(max){ return Math.round(Math.random()*max*100)/100; }
+function rsqGenData(){
+  rsqAllData = [];
+  for (var i=0;i<45;i++){
+    var st = RSQ_STORES[i % RSQ_STORES.length];
+    var gN=[rsqRand(800),rsqRand(600),rsqRand(200)], gW=[rsqRand(800),rsqRand(600),rsqRand(200)], gF=[rsqRand(800),rsqRand(600),rsqRand(200)], gI=[rsqRand(800),rsqRand(600),rsqRand(200)], gA=[rsqRand(800),rsqRand(600),rsqRand(200)], gIn=[rsqRand(800),rsqRand(600),rsqRand(200)], gP=[rsqRand(800),rsqRand(600),rsqRand(200)];
+    var gNt=gN[0]+gN[1]+gN[2], gWt=gW[0]+gW[1]+gW[2], gFt=gF[0]+gF[1]+gF[2], gIt=gI[0]+gI[1]+gI[2], gAt=gA[0]+gA[1]+gA[2], gInt=gIn[0]+gIn[1]+gIn[2], gPt=gP[0]+gP[1]+gP[2];
+    var pjYs=gN[0]+gW[0]+gF[0]+gI[0]+gA[0]+gIn[0]+gP[0];
+    var gsYs=gN[1]+gW[1]+gF[1]+gI[1]+gA[1]+gIn[1]+gP[1];
+    var fjYs=gN[2]+gW[2]+gF[2]+gI[2]+gA[2]+gIn[2]+gP[2];
+    var ysTotal=pjYs+gsYs+fjYs;
+    rsqAllData.push({
+      seq:i+1, storeName:st[0], storeCode:st[1],
+      orderNo:'HUB02510'+(150000+i),
+      vin:'LV***'+(String.fromCharCode(65+i%26))+'D',
+      plate:['鄂A','沪B','京C','粤D'][i%4]+'***'+(10+i%89),
+      cust:'李*云', custTel:'158****'+(1000+i),
+      carSeries:'车系'+(i%5+1), carModel:'公营车型'+(i%4+1),
+      engineNo:'EN***'+(10+i%89), color:['白色','黑色','银色','灰色'][i%4],
+      mileage:(i+1)*1000, inDate:'2026-05-'+String(10+i%18), doneDate:'2026-05-'+String(12+i%18), settleDate:'2026-05-'+String(13+i%18),
+      repairType:RSQ_TYPES[i%RSQ_TYPES.length], repairItem:'保养', faultDesc:'异响', repairContent:'更换皮带',
+      receiver:'王*强', advisor:'赵*敏', mainTech:'孙*伟', qc:'周*芳', groupLeader:'吴*军', dispatcher:'郑*丽',
+      pjNormal:gN[0],gsNormal:gN[1],fjNormal:gN[2],pjNormalTotal:gNt,
+      pjWarranty:gW[0],gsWarranty:gW[1],fjWarranty:gW[2],pjWarrantyTotal:gWt,
+      pjFree:gF[0],gsFree:gF[1],fjFree:gF[2],pjFreeTotal:gFt,
+      pjIns:gI[0],gsIns:gI[1],fjIns:gI[2],pjInsTotal:gIt,
+      pjAgree:gA[0],gsAgree:gA[1],fjAgree:gA[2],pjAgreeTotal:gAt,
+      pjInner:gIn[0],gsInner:gIn[1],fjInner:gIn[2],pjInnerTotal:gInt,
+      pjPackage:gP[0],gsPackage:gP[1],othPackage:gP[2],pjPackageTotal:gPt,
+      pjYsTotal:pjYs,gsYsTotal:gsYs,fjYsTotal:fjYs,ysTotal:ysTotal,
+      jszTotal:ysTotal,ssTotal:ysTotal,gdRate:'0%',orderTotal:0,
+      isSettle:'是',isPdi:(i%9===0?'是':'否'),
+      createTime:'2026-05-'+String(10+i%18)+' 09:12', updateTime:'2026-05-'+String(13+i%18)+' 16:40'
+    });
+  }
+}
+function rsqRender(){
+  var tbody=document.getElementById('rsq-tbody'); if(!tbody) return;
+  var start=(rsqCurrentPage-1)*rsqPageSize;
+  var pageData=rsqAllData.slice(start,start+rsqPageSize);
+  var h='';
+  for(var r=0;r<pageData.length;r++){
+    var d=pageData[r]; var row='<tr>';
+    for(var c=0;c<RSQ_FIELDS.length;c++){
+      var f=RSQ_FIELDS[c]; var v=d[f]; if(v===undefined||v===null) v='';
+      var cls='';
+      if(f==='seq') cls=' class="sticky col-seq"';
+      else if(f==='storeName') cls=' class="sticky col-store-name"';
+      else if(f==='storeCode') cls=' class="sticky col-store-code"';
+      else if(f.indexOf('Total')>=0||f==='gdRate') cls=' class="sum"';
+      row+='<td'+cls+'>'+v+'</td>';
+    }
+    row+='</tr>'; h+=row;
+  }
+  tbody.innerHTML=h;
+  rsqRenderSummary();
+  rsqRenderPager();
+}
+function rsqRenderSummary(){
+  var acc={}; for(var i=0;i<34;i++){ acc[RSQ_SUM_ORDER[i]]=0; }
+  for(var d=0;d<rsqAllData.length;d++){
+    var row=rsqAllData[d];
+    for(var i=0;i<34;i++){ var k=RSQ_SUM_ORDER[i]; if(typeof row[k]==='number') acc[k]+=row[k]; }
+  }
+  var cells=document.querySelectorAll('#rsq-summary .sv');
+  for(var i=0;i<cells.length;i++){
+    var k=RSQ_SUM_ORDER[i];
+    var v;
+    if(k==='gdRate') v='0%';
+    else if(k==='orderTotal') v=rsqAllData.length;
+    else v=acc[k];
+    cells[i].textContent=(typeof v==='number')? v.toFixed(2): String(v);
+  }
+}
+function rsqRenderPager(){
+  var pager=document.getElementById('rsq-pager'); if(!pager) return;
+  var total=rsqAllData.length;
+  var pages=Math.max(1,Math.ceil(total/rsqPageSize));
+  var h='<span>共 '+total+' 条</span><span>'+rsqPageSize+' 条/页</span>';
+  for(var p=1;p<=pages;p++){
+    h+='<button class="pg'+(p===rsqCurrentPage?' cur':'')+'" onclick="rsqGoPage('+p+')">'+p+'</button>';
+  }
+  h+='<span>跳转至 <input type="text" id="rsq-jump" style="width:36px;height:22px;border:1px solid #ddd;border-radius:4px;text-align:center" onkeydown="if(event.key===\'Enter\')rsqJump()"> 页</span>';
+  pager.innerHTML=h;
+}
+function rsqGoPage(p){ rsqCurrentPage=p; rsqRender(); }
+function rsqJump(){ var el=document.getElementById('rsq-jump'); if(!el) return; var v=parseInt(el.value); if(!isNaN(v)){ var pages=Math.ceil(rsqAllData.length/rsqPageSize); if(v>=1&&v<=pages){ rsqCurrentPage=v; rsqRender(); } } }
+function rsqQuery(){ rsqCurrentPage=1; rsqRender(); }
+function rsqReset(){
+  var grid=document.getElementById('rsq-filterGrid');
+  if(grid){ var inputs=grid.querySelectorAll('input,select'); for(var i=0;i<inputs.length;i++){ if(inputs[i].type==='checkbox') inputs[i].checked=false; else inputs[i].value=''; } }
+  rsqCurrentPage=1; rsqRender();
+}
+function rsqToggleFilter(){ rsqFilterExpanded=!rsqFilterExpanded; toggleFilterGrid('rsq-filterGrid', rsqFilterExpanded, RSQ_SHOW_COUNT); }
+function rsqExport(type){ alert((type==='byAccount'?'按账类':'')+'离线导出功能开发中'); }
+function rsqPrint(){ alert('打印功能开发中'); }
+function initRepairStatsQuery(){
+  if(!rsqInitialized){ rsqGenData(); rsqInitialized=true; }
+  rsqCurrentPage=1;
+  rsqFilterExpanded=false; // 每次进入恢复默认收起态
+  initFilterGrid('rsq-filterGrid', RSQ_SHOW_COUNT);
+  rsqRender();
+}
+
+// ======= 维修工时查询 =======
+var RLH_STORES = [['BJ001','北京朝阳店'],['SH001','上海浦东店'],['GZ001','广州天河店'],['WH001','武汉洪山店'],['SZ001','深圳南山店'],['HZ001','杭州西湖店']];
+var RLH_TEAMS = [['机修一组','机电'],['机修二组','机电'],['钣喷组','钣喷'],['机电组','机电'],['保养组','保养'],['诊断组','机电']];
+var RLH_ENGINEERS = [['E001','张伟'],['E002','李娜'],['E003','王芳'],['E004','刘强'],['E005','陈静'],['E006','赵磊']];
+var RLH_ITEMS = ['常规保养','刹车片更换','钣金修复','发动机检修','空调保养','四轮定位','变速箱油更换','雨刮更换'];
+var RLH_TEAM_DATA = [];
+var RLH_ENG_DATA = [];
+var RLH_WO_DATA = [];
+var rlhInited = false;
+var rlhTab = 'team';
+var rlhFilter = { store:'', team:'', tech:'' };
+var rlhPages = { teamLeft:1, teamRight:1, staffLeft:1, staffRight:1 };
+var rlhPageSize = 20;
+function rlhRnd(a,b,d){ var v=a+Math.random()*(b-a); var p=Math.pow(10,d||0); return (Math.round(v*p)/p).toFixed(d||0); }
+function rlhPad(n,w){ n=String(n); while(n.length<w) n='0'+n; return n; }
+function rlhGenData(){
+  RLH_TEAM_DATA=[]; RLH_ENG_DATA=[]; RLH_WO_DATA=[];
+  for(var s=0;s<RLH_STORES.length;s++){
+    for(var t=0;t<RLH_TEAMS.length;t++){
+      RLH_TEAM_DATA.push({ storeName:RLH_STORES[s][1], storeCode:RLH_STORES[s][0], teamName:RLH_TEAMS[t][0], teamCat:RLH_TEAMS[t][1], saleHours:rlhRnd(5,15,1), dispatchHours:rlhRnd(4,14,1) });
+    }
+    for(var e=0;e<RLH_ENGINEERS.length;e++){
+      RLH_ENG_DATA.push({ storeName:RLH_STORES[s][1], storeCode:RLH_STORES[s][0], engCode:RLH_ENGINEERS[e][0], engName:RLH_ENGINEERS[e][1], saleHours:rlhRnd(5,15,1), dispatchHours:rlhRnd(4,14,1) });
+    }
+  }
+  for(var i=0;i<30;i++){
+    var st=RLH_STORES[i%RLH_STORES.length];
+    var day=rlhPad(10+(i%18),2);
+    var hh=8+(i%10);
+    var mm=rlhPad((i*7)%60,2);
+    RLH_WO_DATA.push({ storeName:st[1], storeCode:st[0], woNo:'WO2026'+rlhPad(600001+i,6), laborCode:'LB'+rlhPad(101+i,4), item:RLH_ITEMS[i%RLH_ITEMS.length], time:'2026-06-'+day+' '+hh+':'+mm, saleHours:rlhRnd(1,6,1), dispatchHours:rlhRnd(1,5,1) });
+  }
+}
+var RLH_COLS = {
+  teamLeft:['seq','storeName','storeCode','teamName','teamCat','saleHours','dispatchHours'],
+  teamRight:['seq','storeName','storeCode','engCode','engName','saleHours','dispatchHours'],
+  staffLeft:['seq','storeName','storeCode','engCode','engName','saleHours','dispatchHours'],
+  staffRight:['seq','storeName','storeCode','woNo','laborCode','item','time','saleHours','dispatchHours']
+};
+function rlhColCls(f){
+  var m={storeName:'col-store-name',storeCode:'col-store-code',teamName:'col-team-name',teamCat:'col-team-cat',engCode:'col-eng-code',engName:'col-eng-name',saleHours:'col-sale-hours',dispatchHours:'col-dispatch-hours',woNo:'col-wo-no',laborCode:'col-labor-code',item:'col-item',time:'col-time'};
+  return m[f]||'';
+}
+function rlhEsc(v){ if(v===undefined||v===null) return ''; return String(v).replace(/[&<>]/g,function(x){return x==='&'?'&amp;':x==='<'?'&lt;':'&gt;';}); }
+function rlhDataSource(key){ return key==='teamLeft'?RLH_TEAM_DATA : (key==='teamRight'||key==='staffLeft')?RLH_ENG_DATA : RLH_WO_DATA; }
+function rlhFilterData(key,all){
+  return all.filter(function(r){
+    if(rlhFilter.store && (r.storeName||'').indexOf(rlhFilter.store)<0) return false;
+    if(key==='teamLeft' && rlhFilter.team && r.teamName!==rlhFilter.team) return false;
+    if((key==='teamRight'||key==='staffLeft') && rlhFilter.tech && r.engName!==rlhFilter.tech) return false;
+    return true;
+  });
+}
+function rlhRenderTable(key){
+  var data=rlhFilterData(key, rlhDataSource(key));
+  var cols=RLH_COLS[key];
+  var total=data.length;
+  var pages=Math.max(1, Math.ceil(total/rlhPageSize));
+  var page=Math.min(pages, Math.max(1, rlhPages[key]||1));
+  rlhPages[key]=page;
+  var start=(page-1)*rlhPageSize;
+  var slice=data.slice(start, start+rlhPageSize);
+  var html='';
+  for(var i=0;i<slice.length;i++){
+    var r=slice[i];
+    var tr='<tr onclick="rlhPickRow(this)">';
+    tr+='<td class="col-seq">'+(start+i+1)+'</td>';
+    for(var c=1;c<cols.length;c++){ var f=cols[c]; tr+='<td class="'+rlhColCls(f)+'">'+rlhEsc(r[f])+'</td>'; }
+    tr+='</tr>';
+    html+=tr;
+  }
+  var tbody=document.querySelector('#page-repair-labor-hours #rlh-'+key);
+  if(tbody) tbody.innerHTML=html;
+  var panel=tbody ? tbody.closest('.rlh-panel') : null;
+  var pager=panel ? panel.querySelector('.lt-pager') : null;
+  if(pager){
+    var t=pager.querySelector('.pager-total'); if(t) t.textContent='共 '+total+' 条';
+    var prev=pager.querySelector('.pg-prev'); if(prev) prev.disabled=(page<=1);
+    var next=pager.querySelector('.pg-next'); if(next) next.disabled=(page>=pages);
+    var ps=pager.querySelector('.pg-pages'); if(ps){ var s=''; for(var p=1;p<=pages;p++){ s+='<button class="'+(p===page?'active':'')+'" onclick="rlhGo(\''+key+'\','+p+')">'+p+'</button>'; } ps.innerHTML=s; }
+  }
+}
+function rlhRenderAll(){ ['teamLeft','teamRight','staffLeft','staffRight'].forEach(rlhRenderTable); }
+function rlhGo(key,delta){
+  var total=rlhDataSource(key).length;
+  var pages=Math.max(1, Math.ceil(total/rlhPageSize));
+  if(delta===-1||delta===1){ rlhPages[key]=Math.min(pages, Math.max(1,(rlhPages[key]||1)+delta)); }
+  else { rlhPages[key]=Math.min(pages, Math.max(1,delta)); }
+  rlhRenderTable(key);
+}
+function rlhGoto(key,v){ var n=parseInt(v); if(!isNaN(n)) rlhGo(key,n); }
+function rlhSize(key,v){ rlhPageSize=parseInt(v)||20; rlhPages[key]=1; rlhRenderTable(key); }
+function rlhSwitchTab(t){
+  rlhTab=t;
+  var tabs=document.querySelectorAll('#page-repair-labor-hours .rlh-tab');
+  for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-t')===t); }
+  var tv=document.getElementById('rlh-view-team'); var sv=document.getElementById('rlh-view-staff');
+  if(tv) tv.style.display = t==='team'?'flex':'none';
+  if(sv) sv.style.display = t==='staff'?'flex':'none';
+}
+function rlhPickRow(el){ var tb=el.parentNode; var rows=tb.querySelectorAll('tr'); for(var i=0;i<rows.length;i++) rows[i].classList.remove('rlh-sel'); el.classList.add('rlh-sel'); }
+function rlhQuery(){
+  var g=document.getElementById('rlh-filterGrid');
+  if(g){
+    rlhFilter.store=((g.querySelector('[data-f="store"]')||{}).value)||'';
+    rlhFilter.team=((g.querySelector('[data-f="team"]')||{}).value)||'';
+    rlhFilter.tech=((g.querySelector('[data-f="tech"]')||{}).value)||'';
+  }
+  rlhRenderAll();
+}
+function rlhReset(){
+  var g=document.getElementById('rlh-filterGrid');
+  if(g){ var ins=g.querySelectorAll('input,select'); for(var i=0;i<ins.length;i++) ins[i].value=''; }
+  rlhFilter={store:'',team:'',tech:''};
+  rlhRenderAll();
+}
+function rlhToggleCollapse(){
+  var g=document.getElementById('rlh-filterGrid'); var link=document.getElementById('rlh-toggle');
+  if(!g) return;
+  var hidden=g.style.display==='none';
+  g.style.display=hidden?'grid':'none';
+  if(link) link.textContent=hidden?'︿ 收起':'﹀ 展开';
+}
+function rlhInit(){
+  if(!rlhInited){ rlhInited=true; rlhGenData(); rlhTab='team'; rlhSwitchTab('team'); }
+  rlhRenderAll();
+}

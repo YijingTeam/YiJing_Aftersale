@@ -34,11 +34,11 @@
         <div class="submenu">
           <div class="submenu-item">技术支持&质量报告</div>
           <div class="submenu submenu-nested">
-            <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support')" data-module="tech-support">技术支持</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support-hq')" data-module="tech-support-hq">总部技术支持处理</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report')" data-module="quality-report">质量报告</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report-hq')" data-module="quality-report-hq">总部质量报告处理</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report-template')" data-module="quality-report-template">质量报告模板</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support')" data-module="tech-support" data-roles="门店 超级管理员">技术支持</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support-hq')" data-module="tech-support-hq" data-roles="总部 超级管理员">总部技术支持处理</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report')" data-module="quality-report" data-roles="门店 超级管理员">质量报告</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report-hq')" data-module="quality-report-hq" data-roles="总部 超级管理员">总部质量报告处理</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report-template')" data-module="quality-report-template" data-roles="总部 超级管理员">质量报告模板</div>
           </div>
         </div>
       </div>
@@ -77,12 +77,15 @@
         <div class="submenu open">
           <div class="submenu-item" onclick="showContent('service-report')" data-module="service-report">服务报表</div>
           <div class="submenu submenu-nested open">
-            <div class="submenu-item submenu-item-nested current" onclick="showContent('repair-daily-report')" data-module="repair-daily-report">维修营业日报</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('lead-tracking')" data-module="lead-tracking">用户线索跟踪情况</div>
+            <div class="submenu-item submenu-item-nested current" onclick="showContent('repair-daily-report')" data-module="repair-daily-report" data-roles="超级管理员">维修营业日报</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('lead-tracking')" data-module="lead-tracking" data-roles="超级管理员">用户线索跟踪情况</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('store-operation')" data-module="store-operation" data-roles="门店 总部 超级管理员">门店经营情况</div>
           </div>
           <div class="submenu-item" onclick="showContent('manage-report')" data-module="manage-report">管理报表</div>
           <div class="submenu submenu-nested open">
-            <div class="submenu-item submenu-item-nested" onclick="showContent('user-service-satisfaction')" data-module="user-service-satisfaction">用户服务满意度</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('user-service-satisfaction')" data-module="user-service-satisfaction" data-roles="超级管理员">用户服务满意度</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('repair-stats-query')" data-module="repair-stats-query">维修统计查询</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('repair-labor-hours')" data-module="repair-labor-hours">维修工时查询</div>
           </div>
           <div class="submenu-item" onclick="showContent('parts-report')" data-module="parts-report">配件报表</div>
           <div class="submenu submenu-nested open">
@@ -151,7 +154,15 @@
       </div>
       <button class="lt-btn lt-btn-default">下载记录</button>
       <button class="lt-btn lt-btn-primary">学习平台</button>
-      <div class="lt-user">总部/门店</div>
+      <div class="lt-user" id="lt-user" onclick="toggleRoleMenu(event)">
+        <span class="lt-user-label" id="lt-user-label">门店</span>
+        <span class="lt-user-caret">▾</span>
+        <div class="lt-user-menu" id="lt-user-menu">
+          <div class="lt-user-menu-item active" data-role="门店" onclick="setGlobalRole('门店',event)">门店</div>
+          <div class="lt-user-menu-item" data-role="总部" onclick="setGlobalRole('总部',event)">总部</div>
+          <div class="lt-user-menu-item" data-role="超级管理员" onclick="setGlobalRole('超级管理员',event)">超级管理员</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -234,7 +245,7 @@
 
         <div class="row3">
           <div class="card">
-            <div class="card-title">技师工单完成排行</div>
+            <div class="card-title">工程师工单完成排行</div>
             <div id="techList" class="tech-scroll"></div>
           </div>
           <div class="card">
@@ -490,6 +501,259 @@
       <div style="padding:40px;text-align:center;color:#666;">管理报表页面开发中...</div>
     </div>
 
+    <!-- 维修工时查询 -->
+    <div id="page-repair-labor-hours" class="page-content">
+      <div class="lt-wrap">
+        <!-- 筛选区 -->
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="rlh-filterGrid">
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">提交结算日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">收款日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">大区</span>
+                <input type="text" placeholder="请选择或输入"><span class="cb-arrow">▼</span>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">小区</span>
+                <input type="text" placeholder="请选择或输入"><span class="cb-arrow">▼</span>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
+                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <input type="text" data-f="store" placeholder="请输入">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">班组</span>
+                <select data-f="team"><option value="">全部</option><option>机修一组</option><option>机修二组</option><option>钣喷组</option><option>机电组</option><option>保养组</option><option>诊断组</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">工程师</span>
+                <select data-f="tech"><option value="">全部</option><option>张伟</option><option>李娜</option><option>王芳</option><option>刘强</option><option>陈静</option><option>赵磊</option></select>
+              </div>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn-filter primary" onclick="rlhQuery()">查询</button>
+              <button class="lt-btn-filter default" onclick="rlhReset()">重置</button>
+              <a href="javascript:void(0)" class="rlh-filter-toggle" id="rlh-toggle" onclick="rlhToggleCollapse()">︿ 收起</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 切换 -->
+        <div class="rlh-tabs">
+          <div class="rlh-tab active" data-t="team" onclick="rlhSwitchTab('team')">班组</div>
+          <div class="rlh-tab" data-t="staff" onclick="rlhSwitchTab('staff')">人员</div>
+        </div>
+
+        <!-- 班组视图：左=班组维度 右=工程师维度 -->
+        <div id="rlh-view-team" class="rlh-dual">
+          <div class="rlh-panel">
+            <div class="lt-table-wrap">
+              <table class="lt-table"><thead><tr>
+                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>班组名称</th><th>班组类别</th><th>销售工时</th><th>派工工时</th>
+              </tr></thead><tbody id="rlh-teamLeft"></tbody></table>
+            </div>
+            <div class="lt-pager">
+              <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
+              <div class="lt-pager-right">
+                <button class="pg-prev" onclick="rlhGo('teamLeft',-1)">上一页</button>
+                <span class="pg-pages"></span>
+                <button class="pg-next" onclick="rlhGo('teamLeft',1)">下一页</button>
+                <span class="pager-goto">前往 <input onchange="rlhGoto('teamLeft',this.value)"> 页</span>
+                <select class="pager-size" onchange="rlhSize('teamLeft',this.value)"><option>10条/页</option><option selected>20条/页</option><option>50条/页</option><option>100条/页</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="rlh-panel">
+            <div class="lt-table-wrap">
+              <table class="lt-table"><thead><tr>
+                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>工程师编码</th><th>工程师名称</th><th>销售工时</th><th>派工工时</th>
+              </tr></thead><tbody id="rlh-teamRight"></tbody></table>
+            </div>
+            <div class="lt-pager">
+              <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
+              <div class="lt-pager-right">
+                <button class="pg-prev" onclick="rlhGo('teamRight',-1)">上一页</button>
+                <span class="pg-pages"></span>
+                <button class="pg-next" onclick="rlhGo('teamRight',1)">下一页</button>
+                <span class="pager-goto">前往 <input onchange="rlhGoto('teamRight',this.value)"> 页</span>
+                <select class="pager-size" onchange="rlhSize('teamRight',this.value)"><option>10条/页</option><option selected>20条/页</option><option>50条/页</option><option>100条/页</option></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 人员视图：左=工程师维度 右=工单维度 -->
+        <div id="rlh-view-staff" class="rlh-dual" style="display:none;">
+          <div class="rlh-panel">
+            <div class="lt-table-wrap">
+              <table class="lt-table"><thead><tr>
+                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>工程师编码</th><th>工程师名称</th><th>销售工时</th><th>派工工时</th>
+              </tr></thead><tbody id="rlh-staffLeft"></tbody></table>
+            </div>
+            <div class="lt-pager">
+              <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
+              <div class="lt-pager-right">
+                <button class="pg-prev" onclick="rlhGo('staffLeft',-1)">上一页</button>
+                <span class="pg-pages"></span>
+                <button class="pg-next" onclick="rlhGo('staffLeft',1)">下一页</button>
+                <span class="pager-goto">前往 <input onchange="rlhGoto('staffLeft',this.value)"> 页</span>
+                <select class="pager-size" onchange="rlhSize('staffLeft',this.value)"><option>10条/页</option><option selected>20条/页</option><option>50条/页</option><option>100条/页</option></select>
+              </div>
+            </div>
+          </div>
+          <div class="rlh-panel">
+            <div class="lt-table-wrap">
+              <table class="lt-table"><thead><tr>
+                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>派工单号</th><th>工时编码</th><th>维修项目</th><th>维修时间</th><th>销售工时</th><th>派工工时</th>
+              </tr></thead><tbody id="rlh-staffRight"></tbody></table>
+            </div>
+            <div class="lt-pager">
+              <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
+              <div class="lt-pager-right">
+                <button class="pg-prev" onclick="rlhGo('staffRight',-1)">上一页</button>
+                <span class="pg-pages"></span>
+                <button class="pg-next" onclick="rlhGo('staffRight',1)">下一页</button>
+                <span class="pager-goto">前往 <input onchange="rlhGoto('staffRight',this.value)"> 页</span>
+                <select class="pager-size" onchange="rlhSize('staffRight',this.value)"><option>10条/页</option><option selected>20条/页</option><option>50条/页</option><option>100条/页</option></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 维修统计查询（原名：综合查询维修情况） -->
+    <div id="page-repair-stats-query" class="page-content">
+      <div class="lt-wrap">
+        <!-- 筛选区 -->
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="rsq-filterGrid">
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">接车日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span><input type="text" placeholder="请输入"><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">维修状态</span><select><option>请选择</option></select></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">维修项目类型</span><select><option>请选择</option></select></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">结算状态</span><select><option>请选择</option></select></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">结算日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">大区</span><input type="text" placeholder="请选择(下拉模糊搜索)"><span class="cb-arrow">▾</span></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">小区</span><input type="text" placeholder="请选择(下拉模糊搜索)"><span class="cb-arrow">▾</span></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">VIN</span><input type="text" placeholder="请输入"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">车型号码</span><input type="text" placeholder="请输入"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">客户</span><input type="text" placeholder="请输入"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">报修人电话</span><input type="text" placeholder="请输入"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修工单号</span><input type="text" placeholder="请输入"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">车系</span><input type="text" placeholder="请选择(下拉模糊搜索)"><span class="cb-arrow">▾</span></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">公营车型</span><input type="text" placeholder="请选择(下拉模糊搜索)"><span class="cb-arrow">▾</span></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">事故车</span><select><option>请选择</option></select></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">类别</span><select><option>请选择</option></select></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">维修类别</span><select><option>请选择</option></select></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修内容</span><input type="text" placeholder="请输入"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件编码</span><input type="text" placeholder="请输入"></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">创建日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">应结算日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交结算日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">收客单号</span><input type="text" placeholder="请输入"></div></div>
+            <div class="rs-checks">
+              <label><input type="checkbox"> 作废单</label>
+              <label><input type="checkbox"> 是否包含PDI单</label>
+              <label><input type="checkbox"> 是否追加</label>
+              <label><input type="checkbox"> 反馈算过的单据</label>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn-filter default" onclick="rsqReset()">重置</button>
+              <button class="lt-btn-filter primary" onclick="rsqQuery()">查询</button>
+              <a href="javascript:void(0)" class="lt-filter-toggle" onclick="rsqToggleFilter()">﹀ 展开</a>
+            </div>
+          </div>
+        </div>
+        <!-- 工具条 -->
+        <div class="lt-toolbar">
+          <div class="lt-toolbar-right">
+            <button class="lt-btn-filter default" onclick="rsqExport('normal')">离线导出</button>
+            <button class="lt-btn-filter default" onclick="rsqPrint()">打印</button>
+            <button class="lt-btn-filter default" onclick="rsqExport('byAccount')">按账类离线导出</button>
+          </div>
+        </div>
+        <!-- 数据列表 -->
+        <div class="lt-table-wrap">
+          <table class="lt-table" id="rsq-table">
+            <thead><tr>
+              <th class="col-seq sticky">序号</th><th class="col-store-name sticky">门店名称</th><th class="col-store-code sticky">门店编码</th>
+              <th>维修工单号</th><th>VIN</th><th>车牌号</th><th>客户</th><th>客户电话</th><th>车系</th><th>公营车型</th><th>发动机号</th><th>颜色</th><th>行驶里程</th><th>进厂日期</th><th>完工时间</th><th>结算时间</th><th>维修类型</th><th>维修项目</th><th>故障描述</th><th>维修内容</th><th>接待人</th><th>服务顾问</th><th>主修人</th><th>质检人</th><th>班组长</th><th>调度员</th>
+              <th>普通配件费用</th><th>普通工时费用</th><th>普通附加费用</th><th class="sum">普通费用合计</th>
+              <th>保修配件费用</th><th>保修工时费用</th><th>保修附加费用</th><th class="sum">保修费用合计</th>
+              <th>免保配件费用</th><th>免保工时费用</th><th>免保附加费用</th><th class="sum">免保费用合计</th>
+              <th>保险配件费用</th><th>保险工时费用</th><th>保险附加费用</th><th class="sum">保险费用合计</th>
+              <th>协议配件费用</th><th>协议工时费用</th><th>协议附加费用</th><th class="sum">协议费用合计</th>
+              <th>内部配件费用</th><th>内部工时费用</th><th>内部附加费用</th><th class="sum">内部费用合计</th>
+              <th>保养套餐配件费用</th><th>保养套餐工时费用</th><th>保养套餐其他费用</th><th class="sum">保养套餐费用合计</th>
+              <th>配件费用应收总计</th><th>工时费用应收总计</th><th>附加费用应收总计</th><th class="sum">应收总计</th>
+              <th>结算折算费用总计</th><th>实收费总计</th><th>挂单率总统计</th><th class="sum">维修工单总数</th>
+              <th>是否已结清</th><th>是否PDI单</th><th>创建时间</th><th>更新时间</th>
+            </tr></thead>
+            <tbody id="rsq-tbody"></tbody>
+          </table>
+        </div>
+        <!-- 费用汇总 -->
+        <div class="rs-summary">
+          <h4>费用汇总</h4>
+          <div class="sum-grid" id="rsq-summary">
+            <div class="sum-cell"><span class="sl">普通配件费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">普通工时费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">普通附加费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">普通费用合计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保修配件费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保修工时费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保修附加费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保修费用合计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">免保配件费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">免保工时费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">免保附加费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">免保费用合计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保险配件费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保险工时费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保险附加费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保险费用合计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">协议配件费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">协议工时费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">协议附加费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">协议费用合计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">内部配件费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">内部工时费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">内部附加费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">内部费用合计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保养套餐配件费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保养套餐工时费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保养套餐其他费用</span><span class="sv">0.00</span></div>
+            <div class="sum-cell"><span class="sl">保养套餐费用合计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">配件费用应收总计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">工时费用应收总计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">附加费用应收总计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">应收总计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">结算折算费用总计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">实收费总计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">挂单率总统计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">维修工单总数</span><span class="sv sum-total">0.00</span></div>
+          </div>
+          <p class="rs-note">备注：<br>1. 应收总计=实收费总计+挂账费总计+结算折扣费用+内部费用合计+保养套餐费用合计（如果查询数据中包含未收款工单，则应收总计不等于实收费总计+挂账费总计+结算折扣费用+内部费用合计+保养套餐费用合计）<br>2. 可识别明细应收总计=应收总计-内部费用合计-保养套餐费用合计</p>
+        </div>
+        <!-- 分页 -->
+        <div class="rs-pager" id="rsq-pager"></div>
+      </div>
+    </div>
+
     <!-- 用户服务满意度 -->
     <div id="page-user-service-satisfaction" class="page-content">
       <div class="lt-wrap">
@@ -657,6 +921,286 @@
         </div>
       </div>
     </div><!-- /#page-user-service-satisfaction -->
+
+    <!-- 门店经营情况（派工结算明细） -->
+    <div id="page-store-operation" class="page-content">
+      <div class="lt-wrap">
+        <!-- 筛选区 -->
+        <div class="lt-filter">
+          <div class="lt-filter-grid" id="ds-filterGrid">
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修工单</span>
+                <input type="text" id="ds-flt-order" placeholder="请输入" oninput="dsApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">VIN</span>
+                <input type="text" id="ds-flt-vin" placeholder="请输入" oninput="dsApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">车牌号</span>
+                <input type="text" id="ds-flt-plate" placeholder="请输入" oninput="dsApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">接车日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)">
+                <div class="lt-date-range-drop">
+                  <input type="date" id="ds-date-start" onchange="updateDateRangeDisplay(this);dsApplyFilter()">
+                  <span>—</span>
+                  <input type="date" id="ds-date-end" onchange="updateDateRangeDisplay(this);dsApplyFilter()">
+                </div>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-date-range"><span class="lt-filter-prefix">结算申请日期</span>
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)">
+                <div class="lt-date-range-drop">
+                  <input type="date" id="ds-settle-start" onchange="updateDateRangeDisplay(this);dsApplyFilter()">
+                  <span>—</span>
+                  <input type="date" id="ds-settle-end" onchange="updateDateRangeDisplay(this);dsApplyFilter()">
+                </div>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修项目类型</span>
+                <select id="ds-flt-itemtype" onchange="dsApplyFilter()">
+                  <option value="">全部</option>
+                  <option>常规</option>
+                  <option>索赔</option>
+                  <option>召回</option>
+                  <option>增值</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修类别</span>
+                <select id="ds-flt-category" onchange="dsApplyFilter()">
+                  <option value="">全部</option>
+                  <option>机电</option>
+                  <option>钣喷</option>
+                  <option>养护</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">结算状态</span>
+                <select id="ds-flt-status" onchange="dsApplyFilter()">
+                  <option value="">全部</option>
+                  <option>已结算</option>
+                  <option>未结算</option>
+                  <option>结算中</option>
+                </select>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">服务顾问</span>
+                <input type="text" id="ds-flt-advisor" placeholder="请输入" oninput="dsApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="ds-flt-store" placeholder="请输入" oninput="dsApplyFilter()">
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <label class="lt-input-wrap plain" style="gap:6px;cursor:pointer;align-items:center;">
+                <span class="lt-filter-prefix">仅追加项</span>
+                <input type="checkbox" id="ds-flt-append" onchange="dsApplyFilter()">
+              </label>
+            </div>
+            <div class="lt-filter-footer">
+              <button class="lt-btn-filter primary" onclick="dsApplyFilter()">查询</button>
+              <button class="lt-btn-filter default" onclick="dsResetFilter()">重置</button>
+              <a href="javascript:void(0)" class="lt-filter-toggle" onclick="dsToggleFilter()">﹀ 展开</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表区 -->
+        <div class="lt-list-area">
+          <div class="lt-toolbar">
+            <div class="lt-toolbar-left">
+              <button class="lt-btn-filter default" onclick="dsExportData()">导出</button>
+            </div>
+            <div class="lt-toolbar-right">
+              <button class="lt-btn-filter link" onclick="dsShowDesc()">报表说明</button>
+            </div>
+          </div>
+          <div class="ds-body">
+            <!-- 左树 -->
+            <div class="ds-tree" id="ds-tree"></div>
+            <!-- 右内容 -->
+            <div class="ds-main">
+              <!-- 维修工单 -->
+              <div class="ds-section">
+                <div class="ds-title">维修工单</div>
+                <div class="lt-table-wrap">
+                  <table class="lt-table">
+                    <thead><tr>
+                      <th class="sticky col-seq">序号</th>
+                      <th class="sticky col-order-no">维修工单号</th>
+                      <th>车牌号</th>
+                      <th>VIN</th>
+                      <th>工单类型</th>
+                      <th>服务顾问</th>
+                      <th>报修人</th>
+                      <th>报修电话</th>
+                      <th>公告车型</th>
+                      <th>总里程</th>
+                      <th>接车日期</th>
+                      <th>维修项目类型</th>
+                      <th>维修类别</th>
+                      <th>结算状态</th>
+                    </tr></thead>
+                    <tbody id="ds-orders-tbody"></tbody>
+                  </table>
+                </div>
+                <div class="lt-pager" id="ds-orders-pager">
+                  <div class="lt-pager-left"><span class="pager-total" id="ds-orders-pg-total">共 0 条</span></div>
+                  <div class="lt-pager-right">
+                    <button onclick="dsChangePage('orders',-1)" id="ds-orders-pg-prev">上一页</button>
+                    <span id="ds-orders-pg-pages" class="pg-pages"></span>
+                    <button onclick="dsChangePage('orders',1)" id="ds-orders-pg-next">下一页</button>
+                    <span class="pager-goto">前往 <input type="text" id="ds-orders-pg-goto" onkeydown="if(event.key==='Enter')dsGotoPage('orders',this.value)"> 页</span>
+                    <select class="pager-size" id="ds-orders-pg-size" onchange="dsChangePageSize('orders',this.value)">
+                      <option value="10" selected>10条/页</option>
+                      <option value="20">20条/页</option>
+                      <option value="50">50条/页</option>
+                      <option value="100">100条/页</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <!-- 维修工时 -->
+              <div class="ds-section">
+                <div class="ds-title">维修工时</div>
+                <div class="lt-table-wrap">
+                  <table class="lt-table">
+                    <thead><tr>
+                      <th class="sticky col-seq">序号</th>
+                      <th class="sticky col-order-no">维修工单号</th>
+                      <th>车牌号</th>
+                      <th>VIN</th>
+                      <th>工时编码</th>
+                      <th>工时描述</th>
+                      <th>账类</th>
+                      <th>维修项目类型</th>
+                      <th>工时数</th>
+                      <th>工时单价</th>
+                      <th>工时金额</th>
+                    </tr></thead>
+                    <tbody id="ds-labor-tbody"></tbody>
+                  </table>
+                </div>
+                <div class="lt-pager" id="ds-labor-pager">
+                  <div class="lt-pager-left"><span class="pager-total" id="ds-labor-pg-total">共 0 条</span></div>
+                  <div class="lt-pager-right">
+                    <button onclick="dsChangePage('labor',-1)" id="ds-labor-pg-prev">上一页</button>
+                    <span id="ds-labor-pg-pages" class="pg-pages"></span>
+                    <button onclick="dsChangePage('labor',1)" id="ds-labor-pg-next">下一页</button>
+                    <span class="pager-goto">前往 <input type="text" id="ds-labor-pg-goto" onkeydown="if(event.key==='Enter')dsGotoPage('labor',this.value)"> 页</span>
+                    <select class="pager-size" id="ds-labor-pg-size" onchange="dsChangePageSize('labor',this.value)">
+                      <option value="10" selected>10条/页</option>
+                      <option value="20">20条/页</option>
+                      <option value="50">50条/页</option>
+                      <option value="100">100条/页</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <!-- 维修配件 -->
+              <div class="ds-section">
+                <div class="ds-title">维修配件</div>
+                <div class="lt-table-wrap">
+                  <table class="lt-table">
+                    <thead><tr>
+                      <th class="sticky col-seq">序号</th>
+                      <th class="sticky col-order-no">维修工单号</th>
+                      <th>车牌号</th>
+                      <th>VIN</th>
+                      <th>配件编码</th>
+                      <th>配件名称</th>
+                      <th>账类</th>
+                      <th>维修项目类型</th>
+                      <th>数量</th>
+                      <th>单价</th>
+                      <th>金额</th>
+                    </tr></thead>
+                    <tbody id="ds-parts-tbody"></tbody>
+                  </table>
+                </div>
+                <div class="lt-pager" id="ds-parts-pager">
+                  <div class="lt-pager-left"><span class="pager-total" id="ds-parts-pg-total">共 0 条</span></div>
+                  <div class="lt-pager-right">
+                    <button onclick="dsChangePage('parts',-1)" id="ds-parts-pg-prev">上一页</button>
+                    <span id="ds-parts-pg-pages" class="pg-pages"></span>
+                    <button onclick="dsChangePage('parts',1)" id="ds-parts-pg-next">下一页</button>
+                    <span class="pager-goto">前往 <input type="text" id="ds-parts-pg-goto" onkeydown="if(event.key==='Enter')dsGotoPage('parts',this.value)"> 页</span>
+                    <select class="pager-size" id="ds-parts-pg-size" onchange="dsChangePageSize('parts',this.value)">
+                      <option value="10" selected>10条/页</option>
+                      <option value="20">20条/页</option>
+                      <option value="50">50条/页</option>
+                      <option value="100">100条/页</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <!-- 其他费用明细 -->
+              <div class="ds-section">
+                <div class="ds-title">其他费用明细</div>
+                <div class="lt-table-wrap">
+                  <table class="lt-table">
+                    <thead><tr>
+                      <th class="sticky col-seq">序号</th>
+                      <th class="sticky col-order-no">维修工单号</th>
+                      <th>车牌号</th>
+                      <th>VIN</th>
+                      <th>其他费用类别</th>
+                      <th>账类</th>
+                      <th>维修项目类型</th>
+                      <th>其他费用(元)</th>
+                      <th>备注</th>
+                    </tr></thead>
+                    <tbody id="ds-others-tbody"></tbody>
+                  </table>
+                </div>
+                <div class="lt-pager" id="ds-others-pager">
+                  <div class="lt-pager-left"><span class="pager-total" id="ds-others-pg-total">共 0 条</span></div>
+                  <div class="lt-pager-right">
+                    <button onclick="dsChangePage('others',-1)" id="ds-others-pg-prev">上一页</button>
+                    <span id="ds-others-pg-pages" class="pg-pages"></span>
+                    <button onclick="dsChangePage('others',1)" id="ds-others-pg-next">下一页</button>
+                    <span class="pager-goto">前往 <input type="text" id="ds-others-pg-goto" onkeydown="if(event.key==='Enter')dsGotoPage('others',this.value)"> 页</span>
+                    <select class="pager-size" id="ds-others-pg-size" onchange="dsChangePageSize('others',this.value)">
+                      <option value="10" selected>10条/页</option>
+                      <option value="20">20条/页</option>
+                      <option value="50">50条/页</option>
+                      <option value="100">100条/页</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 报表说明弹框 -->
+      <div class="modal-overlay" id="ds-descModal">
+        <div class="modal-box" style="max-width:560px;">
+          <div class="modal-header"><span>报表说明 · 门店经营情况（派工结算明细）</span><button class="modal-close" onclick="dsCloseDesc()">×</button></div>
+          <div class="modal-body">
+            <table class="desc-tbl">
+              <tr><th>报表名称</th><td>门店经营情况（原名：派工结算明细）</td></tr>
+              <tr><th>数据范围</th><td>门店级维修派工明细，含工时费用、配件费用及结算状态</td></tr>
+              <tr><th>钻取说明</th><td>点击左侧「接车日期」查看当天全部工单；点击「车牌号」查看该车当天工单；点击工单行查看该工单的工时 / 配件 / 其他费用明细</td></tr>
+              <tr><th>冻结列</th><td>各表「序号」「维修工单号」横向滚动时固定</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#page-store-operation -->
 
     <div id="page-parts-report" class="page-content">
       <div style="padding:40px;text-align:center;color:#666;">配件报表页面开发中...</div>
@@ -2263,7 +2807,7 @@
           </div>
         </div>
         <div class="lt-list-area">
-          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-primary" onclick="ppOpenAdd()">新增</button><button class="lt-btn lt-btn-default" onclick="ppExportData()">导出</button></div><div class="lt-toolbar-right"><div class="pp-role-tabs"><span class="pp-role-tab active" id="pp-role-门店" onclick="ppSetRole('门店')">门店</span><span class="pp-role-tab" id="pp-role-总部" onclick="ppSetRole('总部')">总部</span></div></div></div>
+          <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-primary" onclick="ppOpenAdd()">新增</button><button class="lt-btn lt-btn-default" onclick="ppExportData()">导出</button></div></div>
           <div class="lt-table-wrap">
             <table class="lt-table">
               <thead><tr>

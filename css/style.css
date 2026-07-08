@@ -355,6 +355,15 @@
     .lt-btn-primary:hover { background: #6d1526; }
     .lt-user { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
     .lt-user:hover { background: #f5f5f5; }
+    .lt-user { position: relative; }
+    .lt-user-caret { font-size: 10px; color: #999; line-height: 1; }
+    .lt-user-label { font-weight: 500; }
+    .lt-user-menu { display: none; position: absolute; top: 100%; right: 0; margin-top: 6px; background: #fff; border: 1px solid #e4e7ed; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 116px; z-index: 1000; padding: 4px 0; }
+    .lt-user-menu.open { display: block; }
+    .lt-user-menu-item { padding: 8px 16px; font-size: 13px; color: #333; cursor: pointer; white-space: nowrap; }
+    .lt-user-menu-item:hover { background: #f5f7fa; }
+    .lt-user-menu-item.active { color: #185FA5; background: #ecf2fb; font-weight: 600; }
+    .role-hidden { display: none !important; }
 
     /* ===== 菜单快速搜索框 ===== */
     .menu-search-wrap {
@@ -1282,6 +1291,23 @@
     .col-fault-date { min-width:110px; } .col-fault-system { min-width:110px; } .col-fault-nature { min-width:80px; }
     .col-prod-date { min-width:110px; } .col-template-name { min-width:160px; }
 
+    /* ===== 维修工时查询 ===== */
+    #page-repair-labor-hours .rlh-tabs{ display:flex; border-bottom:1px solid #e0e0e0; margin-bottom:12px; flex-shrink:0; }
+    #page-repair-labor-hours .rlh-tab{ padding:8px 18px; font-size:13px; color:#666; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+    #page-repair-labor-hours .rlh-tab.active{ color:#861B2F; font-weight:600; border-bottom-color:#861B2F; }
+    #page-repair-labor-hours .rlh-dual{ display:flex; gap:12px; flex:1; min-height:0; }
+    #page-repair-labor-hours .rlh-panel{ flex:1; min-width:0; background:#fff; border:1px solid #eee; border-radius:8px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    #page-repair-labor-hours .rlh-panel .lt-table-wrap{ flex:1; min-height:0; overflow:auto; }
+    #page-repair-labor-hours .rlh-panel .lt-pager{ border-top:1px solid #eee; flex-shrink:0; }
+    #page-repair-labor-hours .lt-table tbody tr.rlh-sel td{ background:#fbe9ec; }
+    #page-repair-labor-hours .lt-table tbody tr.rlh-sel td.col-seq{ background:#fbe9ec; }
+    #page-repair-labor-hours .lt-table th.col-seq, #page-repair-labor-hours .lt-table td.col-seq{ position:sticky; left:0; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
+    #page-repair-labor-hours .lt-table th.col-seq{ z-index:3; background:#f0f0f0; }
+    #page-repair-labor-hours .lt-table td.col-seq{ background:#fff; z-index:2; }
+    #page-repair-labor-hours .lt-table tbody tr:nth-child(even) td.col-seq{ background:#fafafa; }
+    #page-repair-labor-hours .lt-table tbody tr:hover td.col-seq{ background:#fdf5f6; }
+    #page-repair-labor-hours .rlh-filter-toggle{ color:#861B2F; font-size:12px; cursor:pointer; text-decoration:none; }
+
     /* 模板侧滑面板 */
     .qrt-modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:210; display:none; }
     .qrt-modal-overlay.show { display:block; }
@@ -1679,9 +1705,6 @@
     #page-parts-procurement .lt-table th.col-po-no, #page-parts-procurement .lt-table td.col-po-no { position:sticky; left:40px; z-index:2; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
     #page-parts-procurement .lt-table thead th.col-po-no { z-index:4; }
     #page-parts-procurement .lt-table th.col-order-source, #page-parts-procurement .lt-table td.col-order-source { width:110px; min-width:110px; max-width:110px; }
-    #page-parts-procurement .pp-role-tabs { display:flex; gap:8px; margin:0; }
-    #page-parts-procurement .pp-role-tab { padding:5px 18px; border:1px solid #dcdfe6; border-radius:4px; cursor:pointer; font-size:13px; background:#fff; color:#333; user-select:none; }
-    #page-parts-procurement .pp-role-tab.active { background:#185FA5; border-color:#185FA5; color:#fff; }
     #page-parts-procurement .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#fff; }
     #page-parts-procurement .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#f0f0f0; }
     #page-parts-procurement .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
@@ -1762,4 +1785,57 @@
     .cascader-col li:hover { background:#f5f5f5; }
     .cascader-col li.selected { background:#E8F0FE; color:#185FA5; }
     .cascader-col li.placeholder { color:#999; cursor:default; }
+
+    /* ========= 门店经营情况（派工结算明细） ========= */
+    #page-store-operation .ds-body { display:flex; gap:12px; align-items:stretch; flex:1; min-height:0; }
+    #page-store-operation .ds-tree { flex:0 0 200px; width:200px; border:1px solid #e8e8e8; border-radius:6px; background:#fff; padding:8px; max-height:calc(100vh - 230px); overflow:auto; }
+    #page-store-operation .ds-tree-root { font-weight:600; color:#333; padding:6px 8px; cursor:pointer; border-left:3px solid #861B2F; margin-bottom:6px; }
+    #page-store-operation .ds-tree-date { padding:5px 8px 5px 18px; cursor:pointer; color:#444; border-radius:4px; position:relative; }
+    #page-store-operation .ds-tree-date:hover { background:#fdf5f6; }
+    #page-store-operation .ds-tree-date.active { background:#fdeaea; color:#861B2F; font-weight:600; }
+    #page-store-operation .ds-tree-leaf { padding:4px 8px 4px 34px; cursor:pointer; color:#666; font-size:13px; border-radius:4px; }
+    #page-store-operation .ds-tree-leaf:hover { background:#fdf5f6; }
+    #page-store-operation .ds-tree-leaf.active { background:#fdeaea; color:#861B2F; font-weight:600; }
+    #page-store-operation .ds-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:16px; min-height:0; overflow-y:auto; }
+    #page-store-operation .ds-section { background:#fff; border:1px solid #e8e8e8; border-radius:6px; overflow:hidden; flex-shrink:0; }
+    #page-store-operation .ds-title { padding:10px 14px; font-weight:600; color:#861B2F; border-left:3px solid #861B2F; background:#fafafa; font-size:14px; }
+    #page-store-operation .ds-order-row { cursor:pointer; }
+    #page-store-operation .ds-order-row:hover { background:#fdf5f6; }
+    #page-store-operation .ds-order-row.ds-row-active { background:#fdeaea; }
+    #page-store-operation .lt-table th.col-seq, #page-store-operation .lt-table td.col-seq { left:0; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
+    #page-store-operation .lt-table th.col-order-no, #page-store-operation .lt-table td.col-order-no { left:40px; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
+    #page-store-operation .lt-table thead th.col-seq, #page-store-operation .lt-table thead th.col-order-no { background:#f0f0f0; }
+    #page-store-operation .lt-table td.col-seq, #page-store-operation .lt-table td.col-order-no { background:#fff; }
+    #page-store-operation .lt-table tbody tr:nth-child(even) td.col-seq,
+    #page-store-operation .lt-table tbody tr:nth-child(even) td.col-order-no { background:#fafafa; }
+    #page-store-operation .lt-table tbody tr:hover td.col-seq,
+    #page-store-operation .lt-table tbody tr:hover td.col-order-no { background:#fdf5f6; }
+    #page-store-operation .lt-table tbody tr.ds-row-active td.col-seq,
+    #page-store-operation .lt-table tbody tr.ds-row-active td.col-order-no { background:#fdeaea; }
     .cascader-col li.placeholder:hover { background:transparent; }
+
+/* ===== 维修统计查询（原：综合查询维修情况） ===== */
+#page-repair-stats-query .lt-table th.col-seq, #page-repair-stats-query .lt-table td.col-seq,
+#page-repair-stats-query .lt-table th.col-store-name, #page-repair-stats-query .lt-table td.col-store-name,
+#page-repair-stats-query .lt-table th.col-store-code, #page-repair-stats-query .lt-table td.col-store-code { position:sticky; z-index:3; }
+#page-repair-stats-query .lt-table th.col-seq, #page-repair-stats-query .lt-table td.col-seq { left:0; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
+#page-repair-stats-query .lt-table th.col-store-name, #page-repair-stats-query .lt-table td.col-store-name { left:40px; width:160px; min-width:160px; max-width:160px; overflow:hidden; text-align:left; }
+#page-repair-stats-query .lt-table th.col-store-code, #page-repair-stats-query .lt-table td.col-store-code { left:200px; width:80px; min-width:80px; max-width:80px; overflow:hidden; }
+#page-repair-stats-query .lt-table thead th.col-seq, #page-repair-stats-query .lt-table thead th.col-store-name, #page-repair-stats-query .lt-table thead th.col-store-code { background:#f0f0f0; }
+#page-repair-stats-query .lt-table tbody tr td.col-seq, #page-repair-stats-query .lt-table tbody tr td.col-store-name, #page-repair-stats-query .lt-table tbody tr td.col-store-code { background:#fff; }
+#page-repair-stats-query .lt-table tbody tr:nth-child(even) td.col-seq, #page-repair-stats-query .lt-table tbody tr:nth-child(even) td.col-store-name, #page-repair-stats-query .lt-table tbody tr:nth-child(even) td.col-store-code { background:#fafafa; }
+#page-repair-stats-query .lt-table tbody tr:hover td.col-seq, #page-repair-stats-query .lt-table tbody tr:hover td.col-store-name, #page-repair-stats-query .lt-table tbody tr:hover td.col-store-code { background:#fdf5f6; }
+#page-repair-stats-query .lt-table .sum { font-weight:600; color:#861B2F; }
+#page-repair-stats-query .rs-checks { grid-column:1 / -1; display:flex; gap:20px; margin-top:6px; padding-left:2px; }
+#page-repair-stats-query .rs-checks label { display:flex; align-items:center; gap:4px; font-size:12px; color:#333; cursor:pointer; }
+#page-repair-stats-query .rs-summary { background:#fff; border-radius:8px; padding:14px 20px; margin-top:14px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+#page-repair-stats-query .rs-summary h4 { font-size:13px; margin:0 0 10px; color:#861B2F; font-weight:600; }
+#page-repair-stats-query .sum-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px 20px; }
+#page-repair-stats-query .sum-cell { display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding:4px 0; }
+#page-repair-stats-query .sum-cell .sl { color:#666; font-size:12px; }
+#page-repair-stats-query .sum-cell .sv { font-weight:600; font-size:12px; }
+#page-repair-stats-query .sum-cell .sv.sum-total { color:#861B2F; }
+#page-repair-stats-query .rs-note { font-size:11px; color:#888; line-height:1.7; margin:12px 2px 0; }
+#page-repair-stats-query .rs-pager { display:flex; align-items:center; gap:8px; padding:10px 2px; font-size:12px; color:#555; flex-wrap:wrap; }
+#page-repair-stats-query .rs-pager .pg { width:26px; height:24px; border:1px solid #ddd; border-radius:4px; background:#fff; cursor:pointer; font-size:12px; }
+#page-repair-stats-query .rs-pager .pg.cur { background:#861B2F; color:#fff; border-color:#861B2F; }
