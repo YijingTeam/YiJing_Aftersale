@@ -546,7 +546,7 @@
             <div class="lt-filter-footer">
               <button class="lt-btn-filter primary" onclick="rlhQuery()">查询</button>
               <button class="lt-btn-filter default" onclick="rlhReset()">重置</button>
-              <a href="javascript:void(0)" class="rlh-filter-toggle" id="rlh-toggle" onclick="rlhToggleCollapse()">︿ 收起</a>
+              <a href="javascript:void(0)" class="lt-filter-toggle" id="rlh-toggle" onclick="rlhToggleFilter()">﹀ 展开</a>
             </div>
           </div>
         </div>
@@ -565,8 +565,8 @@
           <div class="rlh-panel">
             <div class="lt-table-wrap">
               <table class="lt-table"><thead><tr>
-                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>班组名称</th><th>班组类别</th><th>销售工时</th><th>派工工时</th>
-              </tr></thead><tbody id="rlh-teamLeft"></tbody></table>
+                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>班组名称</th><th>班组类别</th><th>销售工时</th><th>派工工时</th><th>台次</th>
+              </tr></thead><tbody id="rlh-teamLeft"></tbody><tfoot id="rlh-teamLeft-foot"></tfoot></table>
             </div>
             <div class="lt-pager">
               <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
@@ -582,7 +582,7 @@
           <div class="rlh-panel">
             <div class="lt-table-wrap">
               <table class="lt-table"><thead><tr>
-                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>工程师编码</th><th>工程师名称</th><th>销售工时</th><th>派工工时</th>
+                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>工程师编码</th><th>工程师名称</th><th>销售工时</th><th>派工工时</th><th>台次</th>
               </tr></thead><tbody id="rlh-teamRight"></tbody></table>
             </div>
             <div class="lt-pager">
@@ -603,8 +603,8 @@
           <div class="rlh-panel">
             <div class="lt-table-wrap">
               <table class="lt-table"><thead><tr>
-                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>工程师编码</th><th>工程师名称</th><th>销售工时</th><th>派工工时</th>
-              </tr></thead><tbody id="rlh-staffLeft"></tbody></table>
+                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>工程师编码</th><th>工程师名称</th><th>销售工时</th><th>派工工时</th><th>台次</th>
+              </tr></thead><tbody id="rlh-staffLeft"></tbody><tfoot id="rlh-staffLeft-foot"></tfoot></table>
             </div>
             <div class="lt-pager">
               <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
@@ -620,7 +620,7 @@
           <div class="rlh-panel">
             <div class="lt-table-wrap">
               <table class="lt-table"><thead><tr>
-                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>派工单号</th><th>工时编码</th><th>维修项目</th><th>维修时间</th><th>销售工时</th><th>派工工时</th>
+                <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>派工单号</th><th>工时编码</th><th>维修项目</th><th>维修时间</th><th>销售工时</th><th>派工工时</th><th>台次</th>
               </tr></thead><tbody id="rlh-staffRight"></tbody></table>
             </div>
             <div class="lt-pager">
@@ -658,7 +658,7 @@
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">报修人电话</span><input type="text" placeholder="请输入"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修工单号</span><input type="text" placeholder="请输入"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">车系</span><input type="text" placeholder="请选择(下拉模糊搜索)"><span class="cb-arrow">▾</span></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">公营车型</span><input type="text" placeholder="请选择(下拉模糊搜索)"><span class="cb-arrow">▾</span></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">公告车型</span><input type="text" placeholder="请选择(下拉模糊搜索)"><span class="cb-arrow">▾</span></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">事故车</span><select><option>请选择</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">类别</span><select><option>请选择</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">维修类别</span><select><option>请选择</option></select></div></div>
@@ -668,11 +668,12 @@
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">应结算日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交结算日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">收客单号</span><input type="text" placeholder="请输入"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">内返单</span><select><option value="">请选择</option><option value="1">是</option><option value="0">否</option></select></div></div>
             <div class="rs-checks">
               <label><input type="checkbox"> 作废单</label>
               <label><input type="checkbox"> 是否包含PDI单</label>
               <label><input type="checkbox"> 是否追加</label>
-              <label><input type="checkbox"> 反馈算过的单据</label>
+              <label><input type="checkbox"> 反结算过的单据</label>
             </div>
             <div class="lt-filter-footer">
               <button class="lt-btn-filter default" onclick="rsqReset()">重置</button>
@@ -684,10 +685,12 @@
         <div class="lt-list-area">
         <!-- 工具条 -->
         <div class="lt-toolbar">
-          <div class="lt-toolbar-right">
-            <button class="lt-btn-filter default" onclick="rsqExport('normal')">离线导出</button>
+          <div class="lt-toolbar-left">
+            <button class="lt-btn-filter default" onclick="rsqExport()">离线导出</button>
             <button class="lt-btn-filter default" onclick="rsqPrint()">打印</button>
-            <button class="lt-btn-filter default" onclick="rsqExport('byAccount')">按账类离线导出</button>
+          </div>
+          <div class="lt-toolbar-right">
+            <button class="lt-btn-filter link" onclick="rsqShowDesc()">报表说明</button>
           </div>
         </div>
         <!-- 数据列表 -->
@@ -695,15 +698,15 @@
           <table class="lt-table" id="rsq-table">
             <thead><tr>
               <th class="col-seq sticky">序号</th><th class="col-store-name sticky">门店名称</th><th class="col-store-code sticky">门店编码</th>
-              <th>维修工单号</th><th>VIN</th><th>车牌号</th><th>客户</th><th>客户电话</th><th>车系</th><th>公营车型</th><th>发动机号</th><th>颜色</th><th>行驶里程</th><th>进厂日期</th><th>完工时间</th><th>结算时间</th><th>维修类型</th><th>维修项目</th><th>故障描述</th><th>维修内容</th><th>接待人</th><th>服务顾问</th><th>主修人</th><th>质检人</th><th>班组长</th><th>调度员</th>
-              <th>普通配件费用</th><th>普通工时费用</th><th>普通附加费用</th><th class="sum">普通费用合计</th>
-              <th>保修配件费用</th><th>保修工时费用</th><th>保修附加费用</th><th class="sum">保修费用合计</th>
-              <th>免保配件费用</th><th>免保工时费用</th><th>免保附加费用</th><th class="sum">免保费用合计</th>
-              <th>保险配件费用</th><th>保险工时费用</th><th>保险附加费用</th><th class="sum">保险费用合计</th>
-              <th>协议配件费用</th><th>协议工时费用</th><th>协议附加费用</th><th class="sum">协议费用合计</th>
-              <th>内部配件费用</th><th>内部工时费用</th><th>内部附加费用</th><th class="sum">内部费用合计</th>
-              <th>保养套餐配件费用</th><th>保养套餐工时费用</th><th>保养套餐其他费用</th><th class="sum">保养套餐费用合计</th>
-              <th>配件费用应收总计</th><th>工时费用应收总计</th><th>附加费用应收总计</th><th class="sum">应收总计</th>
+              <th class="col-order-no sticky">维修工单号</th><th>VIN</th><th>车牌号</th><th>客户</th><th>客户电话</th><th>车系</th><th>公告车型</th><th>发动机号</th><th>颜色</th><th>行驶里程</th><th>进厂日期</th><th>完工时间</th><th>结算时间</th><th>维修类型</th><th>维修项目</th><th>故障描述</th><th>维修内容</th><th>接待人</th><th>服务顾问</th><th>主修人</th><th>质检人</th><th>班组长</th><th>调度员</th>
+              <th>普通配件费用</th><th>普通工时费用</th><th>普通附加费用</th><th class="sum">普通费用合计</th><th class="sum">费用占比</th>
+              <th>保修配件费用</th><th>保修工时费用</th><th>保修附加费用</th><th class="sum">保修费用合计</th><th class="sum">费用占比</th>
+              <th>免保配件费用</th><th>免保工时费用</th><th>免保附加费用</th><th class="sum">免保费用合计</th><th class="sum">费用占比</th>
+              <th>保险配件费用</th><th>保险工时费用</th><th>保险附加费用</th><th class="sum">保险费用合计</th><th class="sum">费用占比</th>
+              <th>协议配件费用</th><th>协议工时费用</th><th>协议附加费用</th><th class="sum">协议费用合计</th><th class="sum">费用占比</th>
+              <th>内部配件费用</th><th>内部工时费用</th><th>内部附加费用</th><th class="sum">内部费用合计</th><th class="sum">费用占比</th>
+              <th>保养套餐配件费用</th><th>保养套餐工时费用</th><th>保养套餐其他费用</th><th class="sum">保养套餐费用合计</th><th class="sum">费用占比</th>
+              <th>配件费用应收总计</th><th>工时费用应收总计</th><th>附加费用应收总计</th><th class="sum">应收总计</th><th class="sum">毛利率</th>
               <th>结算折算费用总计</th><th>实收费总计</th><th>挂单率总统计</th><th class="sum">维修工单总数</th>
               <th>是否已结清</th><th>是否PDI单</th><th>创建时间</th><th>更新时间</th>
             </tr></thead>
@@ -748,13 +751,123 @@
             <div class="sum-cell"><span class="sl">工时费用应收总计</span><span class="sv sum-total">0.00</span></div>
             <div class="sum-cell"><span class="sl">附加费用应收总计</span><span class="sv sum-total">0.00</span></div>
             <div class="sum-cell"><span class="sl">应收总计</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">配件费用占比</span><span class="sv">0%</span></div>
+            <div class="sum-cell"><span class="sl">工时费用占比</span><span class="sv">0%</span></div>
+            <div class="sum-cell"><span class="sl">附加费用占比</span><span class="sv">0%</span></div>
             <div class="sum-cell"><span class="sl">结算折算费用总计</span><span class="sv sum-total">0.00</span></div>
             <div class="sum-cell"><span class="sl">实收费总计</span><span class="sv sum-total">0.00</span></div>
             <div class="sum-cell"><span class="sl">挂单率总统计</span><span class="sv sum-total">0.00</span></div>
             <div class="sum-cell"><span class="sl">维修工单总数</span><span class="sv sum-total">0.00</span></div>
+            <div class="sum-cell"><span class="sl">毛利率</span><span class="sv sum-total">0%</span></div>
           </div>
-          <p class="rs-note">备注：<br>1. 应收总计=实收费总计+挂账费总计+结算折扣费用+内部费用合计+保养套餐费用合计（如果查询数据中包含未收款工单，则应收总计不等于实收费总计+挂账费总计+结算折扣费用+内部费用合计+保养套餐费用合计）<br>2. 可识别明细应收总计=应收总计-内部费用合计-保养套餐费用合计</p>
+            <p class="rs-note">备注：<br>1. 应收总计=实收费总计+挂账费总计+结算折扣费用+内部费用合计+保养套餐费用合计（如果查询数据中包含未收款工单，则应收总计不等于实收费总计+挂账费总计+结算折扣费用+内部费用合计+保养套餐费用合计）<br>2. 可识别明细应收总计=应收总计-内部费用合计-保养套餐费用合计</p>
         </div>
+        </div>
+      </div>
+      <!-- 报表说明弹框 -->
+      <div class="modal-overlay" id="rsq-descModal" onclick="rsqCloseDescOnBg(event)">
+        <div class="modal-box">
+          <div class="modal-header"><h3>报表说明</h3><button class="modal-close" onclick="rsqCloseDesc()">&times;</button></div>
+          <div class="modal-body">
+
+            <!-- 表 1：基本信息 -->
+            <table class="desc-tbl">
+              <tbody>
+                <tr><th>报表名称</th><td>维修统计查询（原名：综合查询维修情况）</td></tr>
+                <tr><th>数据范围</th><td>门店级维修费用明细，含各账类配件 / 工时 / 附加 / 其他费用及汇总</td></tr>
+                <tr><th>冻结列</th><td>「序号」「门店名称」「门店编码」「维修工单号」横向滚动时固定</td></tr>
+              </tbody>
+            </table>
+
+<!-- 表 2：字段说明（46 行，9 组） -->
+            <table class="desc-tbl">
+              <tbody>
+                <tr>
+                  <th rowspan="5">普通账类</th>
+                  <td><span class="desc-sub-label">普通配件费用</span>该账类应收配件费用</td>
+                </tr>
+                <tr><td><span class="desc-sub-label">普通工时费用</span>该账类应收工时费用</td></tr>
+                <tr><td><span class="desc-sub-label">普通附加费用</span>该账类应收附加费用</td></tr>
+                <tr><td><span class="desc-sub-label">普通费用合计</span><span class="desc-formula">配件费用 + 工时费用 + 附加费用</span></td></tr>
+                <tr><td><span class="desc-sub-label">费用占比</span><span class="desc-formula">普通费用合计 / 应收总计 × 100%</span></td></tr>
+
+                <tr>
+                  <th rowspan="5">保修账类</th>
+                  <td><span class="desc-sub-label">保修配件费用</span>该账类应收配件费用</td>
+                </tr>
+                <tr><td><span class="desc-sub-label">保修工时费用</span>该账类应收工时费用</td></tr>
+                <tr><td><span class="desc-sub-label">保修附加费用</span>该账类应收附加费用</td></tr>
+                <tr><td><span class="desc-sub-label">保修费用合计</span><span class="desc-formula">配件费用 + 工时费用 + 附加费用</span></td></tr>
+                <tr><td><span class="desc-sub-label">费用占比</span><span class="desc-formula">保修费用合计 / 应收总计 × 100%</span></td></tr>
+
+                <tr>
+                  <th rowspan="5">免保账类</th>
+                  <td><span class="desc-sub-label">免保配件费用</span>该账类应收配件费用</td>
+                </tr>
+                <tr><td><span class="desc-sub-label">免保工时费用</span>该账类应收工时费用</td></tr>
+                <tr><td><span class="desc-sub-label">免保附加费用</span>该账类应收附加费用</td></tr>
+                <tr><td><span class="desc-sub-label">免保费用合计</span><span class="desc-formula">配件费用 + 工时费用 + 附加费用</span></td></tr>
+                <tr><td><span class="desc-sub-label">费用占比</span><span class="desc-formula">免保费用合计 / 应收总计 × 100%</span></td></tr>
+
+                <tr>
+                  <th rowspan="5">保险账类</th>
+                  <td><span class="desc-sub-label">保险配件费用</span>该账类应收配件费用</td>
+                </tr>
+                <tr><td><span class="desc-sub-label">保险工时费用</span>该账类应收工时费用</td></tr>
+                <tr><td><span class="desc-sub-label">保险附加费用</span>该账类应收附加费用</td></tr>
+                <tr><td><span class="desc-sub-label">保险费用合计</span><span class="desc-formula">配件费用 + 工时费用 + 附加费用</span></td></tr>
+                <tr><td><span class="desc-sub-label">费用占比</span><span class="desc-formula">保险费用合计 / 应收总计 × 100%</span></td></tr>
+
+                <tr>
+                  <th rowspan="5">协议账类</th>
+                  <td><span class="desc-sub-label">协议配件费用</span>该账类应收配件费用</td>
+                </tr>
+                <tr><td><span class="desc-sub-label">协议工时费用</span>该账类应收工时费用</td></tr>
+                <tr><td><span class="desc-sub-label">协议附加费用</span>该账类应收附加费用</td></tr>
+                <tr><td><span class="desc-sub-label">协议费用合计</span><span class="desc-formula">配件费用 + 工时费用 + 附加费用</span></td></tr>
+                <tr><td><span class="desc-sub-label">费用占比</span><span class="desc-formula">协议费用合计 / 应收总计 × 100%</span></td></tr>
+
+                <tr>
+                  <th rowspan="5">内部账类</th>
+                  <td><span class="desc-sub-label">内部配件费用</span>该账类应收配件费用</td>
+                </tr>
+                <tr><td><span class="desc-sub-label">内部工时费用</span>该账类应收工时费用</td></tr>
+                <tr><td><span class="desc-sub-label">内部附加费用</span>该账类应收附加费用</td></tr>
+                <tr><td><span class="desc-sub-label">内部费用合计</span><span class="desc-formula">配件费用 + 工时费用 + 附加费用</span></td></tr>
+                <tr><td><span class="desc-sub-label">费用占比</span><span class="desc-formula">内部费用合计 / 应收总计 × 100%</span></td></tr>
+
+                <tr>
+                  <th rowspan="5">保养套餐账类</th>
+                  <td><span class="desc-sub-label">保养套餐配件费用</span>该账类应收配件费用</td>
+                </tr>
+                <tr><td><span class="desc-sub-label">保养套餐工时费用</span>该账类应收工时费用</td></tr>
+                <tr><td><span class="desc-sub-label">保养套餐其他费用</span>该账类应收其他费用（非附加费用）</td></tr>
+                <tr><td><span class="desc-sub-label">保养套餐费用合计</span><span class="desc-formula">配件费用 + 工时费用 + 其他费用</span></td></tr>
+                <tr><td><span class="desc-sub-label">费用占比</span><span class="desc-formula">保养套餐费用合计 / 应收总计 × 100%</span></td></tr>
+
+                <tr>
+                  <th rowspan="7">应收及结算</th>
+                  <td><span class="desc-sub-label">配件费用应收总计</span>各账类配件费用之和</td>
+                </tr>
+                <tr><td><span class="desc-sub-label">工时费用应收总计</span>各账类工时费用之和</td></tr>
+                <tr><td><span class="desc-sub-label">附加费用应收总计</span>各账类附加 / 其他费用之和</td></tr>
+                <tr><td><span class="desc-sub-label">应收总计</span><span class="desc-formula">配件费用应收总计 + 工时费用应收总计 + 附加费用应收总计</span></td></tr>
+                <tr><td><span class="desc-sub-label">毛利率</span><span class="desc-formula">(结算折算费用总计 - 配件费用应收总计 × 0.6) / 实收费总计 × 100%</span></td></tr>
+                <tr><td><span class="desc-sub-label">结算折算费用总计</span>折算后结算费用合计</td></tr>
+                <tr><td><span class="desc-sub-label">实收费总计</span>实际收取费用合计</td></tr>
+
+                <tr>
+                  <th rowspan="4">费用汇总</th>
+                  <td><span class="desc-sub-label">配件费用占比</span><span class="desc-formula">配件费用应收总计 / 应收总计 × 100%</span></td>
+                </tr>
+                <tr><td><span class="desc-sub-label">工时费用占比</span><span class="desc-formula">工时费用应收总计 / 应收总计 × 100%</span></td></tr>
+                <tr><td><span class="desc-sub-label">附加费用占比</span><span class="desc-formula">附加费用应收总计 / 应收总计 × 100%</span></td></tr>
+                <tr><td><span class="desc-sub-label">毛利率</span><span class="desc-formula">(结算折算费用总计 - 配件费用应收总计 × 0.6) / 实收费总计 × 100%</span></td></tr>
+              </tbody>
+            </table>
+
+            <p class="rs-note">备注：<br>1. 应收总计 = 实收费总计 + 挂账费总计 + 结算折扣费用 + 内部费用合计 + 保养套餐费用合计（若结果集中包含未收款工单，则等式不成立）<br>2. 可识别明细应收总计 = 应收总计 - 内部费用合计 - 保养套餐费用合计</p>
+          </div>
         </div>
       </div>
     </div>
@@ -1131,6 +1244,7 @@
                       <th>数量</th>
                       <th>单价</th>
                       <th>金额</th>
+                      <th>成本金额</th>
                     </tr></thead>
                     <tbody id="ds-parts-tbody"></tbody>
                   </table>
@@ -1192,14 +1306,65 @@
       </div>
       <!-- 报表说明弹框 -->
       <div class="modal-overlay" id="ds-descModal">
-        <div class="modal-box" style="max-width:560px;">
-          <div class="modal-header"><span>报表说明 · 门店经营情况（派工结算明细）</span><button class="modal-close" onclick="dsCloseDesc()">×</button></div>
+        <div class="modal-box">
+          <div class="modal-header"><h3>报表说明</h3><button class="modal-close" onclick="dsCloseDesc()">×</button></div>
           <div class="modal-body">
             <table class="desc-tbl">
-              <tr><th>报表名称</th><td>门店经营情况（原名：派工结算明细）</td></tr>
-              <tr><th>数据范围</th><td>门店级维修派工明细，含工时费用、配件费用及结算状态</td></tr>
               <tr><th>钻取说明</th><td>点击左侧「接车日期」查看当天全部工单；点击「车牌号」查看该车当天工单；点击工单行查看该工单的工时 / 配件 / 其他费用明细</td></tr>
               <tr><th>冻结列</th><td>各表「序号」「维修工单号」横向滚动时固定</td></tr>
+            </table>
+            <table class="desc-tbl">
+              <tbody>
+                <tr><th rowspan="14">维修工单</th><td><span class="desc-sub-label">序号</span>列表行序号，仅用于展示排序</td></tr>
+                <tr><td><span class="desc-sub-label">维修工单号</span>维修委托单唯一编号</td></tr>
+                <tr><td><span class="desc-sub-label">车牌号</span>车辆牌照号码</td></tr>
+                <tr><td><span class="desc-sub-label">VIN</span>车辆识别代号（车架号）</td></tr>
+                <tr><td><span class="desc-sub-label">工单类型</span>工单业务类型（如维修 / 保养 / 索赔等）</td></tr>
+                <tr><td><span class="desc-sub-label">服务顾问</span>接车并跟进该工单的服务顾问</td></tr>
+                <tr><td><span class="desc-sub-label">报修人</span>提出维修需求的人员</td></tr>
+                <tr><td><span class="desc-sub-label">报修电话</span>报修人联系电话</td></tr>
+                <tr><td><span class="desc-sub-label">公告车型</span>车辆公告备案车型名称</td></tr>
+                <tr><td><span class="desc-sub-label">总里程</span>车辆当前总行驶里程（公里）</td></tr>
+                <tr><td><span class="desc-sub-label">接车日期</span>车辆进厂接车日期</td></tr>
+                <tr><td><span class="desc-sub-label">维修项目类型</span>维修项目所属类别</td></tr>
+                <tr><td><span class="desc-sub-label">维修类别</span>维修业务大类</td></tr>
+                <tr><td><span class="desc-sub-label">结算状态</span>工单结算完成情况（已结算 / 未结算等）</td></tr>
+
+                <tr><th rowspan="11">维修工时</th><td><span class="desc-sub-label">序号</span>列表行序号</td></tr>
+                <tr><td><span class="desc-sub-label">维修工单号</span>对应维修工单编号</td></tr>
+                <tr><td><span class="desc-sub-label">车牌号</span>车辆牌照号码</td></tr>
+                <tr><td><span class="desc-sub-label">VIN</span>车辆识别代号（车架号）</td></tr>
+                <tr><td><span class="desc-sub-label">工时编码</span>工时项目标准编码</td></tr>
+                <tr><td><span class="desc-sub-label">工时描述</span>工时项目内容说明</td></tr>
+                <tr><td><span class="desc-sub-label">账类</span>工时费用入账类别（如索赔 / 自费 / 首保等）</td></tr>
+                <tr><td><span class="desc-sub-label">维修项目类型</span>工时所属维修项目类别</td></tr>
+                <tr><td><span class="desc-sub-label">工时数</span>该项目耗用工时数量</td></tr>
+                <tr><td><span class="desc-sub-label">工时单价</span>单位工时价格</td></tr>
+                <tr><td><span class="desc-sub-label">工时金额</span>工时数 × 工时单价</td></tr>
+
+                <tr><th rowspan="12">维修配件</th><td><span class="desc-sub-label">序号</span>列表行序号</td></tr>
+                <tr><td><span class="desc-sub-label">维修工单号</span>对应维修工单编号</td></tr>
+                <tr><td><span class="desc-sub-label">车牌号</span>车辆牌照号码</td></tr>
+                <tr><td><span class="desc-sub-label">VIN</span>车辆识别代号（车架号）</td></tr>
+                <tr><td><span class="desc-sub-label">配件编码</span>配件标准编码</td></tr>
+                <tr><td><span class="desc-sub-label">配件名称</span>配件名称</td></tr>
+                <tr><td><span class="desc-sub-label">账类</span>配件费用入账类别</td></tr>
+                <tr><td><span class="desc-sub-label">维修项目类型</span>配件所属维修项目类别</td></tr>
+                <tr><td><span class="desc-sub-label">数量</span>配件出库数量</td></tr>
+                <tr><td><span class="desc-sub-label">单价</span>配件单价</td></tr>
+                <tr><td><span class="desc-sub-label">金额</span>数量 × 单价（含税金额）</td></tr>
+                <tr><td><span class="desc-sub-label">成本金额</span>该配件成本金额</td></tr>
+
+                <tr><th rowspan="9">其他费用明细</th><td><span class="desc-sub-label">序号</span>列表行序号</td></tr>
+                <tr><td><span class="desc-sub-label">维修工单号</span>对应维修工单编号</td></tr>
+                <tr><td><span class="desc-sub-label">车牌号</span>车辆牌照号码</td></tr>
+                <tr><td><span class="desc-sub-label">VIN</span>车辆识别代号（车架号）</td></tr>
+                <tr><td><span class="desc-sub-label">其他费用类别</span>其他费用项目类别（如拖车 / 洗车等）</td></tr>
+                <tr><td><span class="desc-sub-label">账类</span>费用入账类别</td></tr>
+                <tr><td><span class="desc-sub-label">维修项目类型</span>所属维修项目类别</td></tr>
+                <tr><td><span class="desc-sub-label">其他费用(元)</span>该项费用金额</td></tr>
+                <tr><td><span class="desc-sub-label">备注</span>费用补充说明</td></tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -3528,12 +3693,194 @@
           </tbody>
         </table>
       </div>
+      <!-- 门店经营情况页面说明（动态显示） -->
+      <div id="page-desc-store-operation" style="display:none;padding:16px;font-size:13px;line-height:2.0">
+        <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:0 0 12px 0">门店经营情况（派工结算明细）</h4>
+        <p style="margin:4px 0">门店经营情况（复用）：原来的名字叫"派工结算明细"</p>
+        <p style="margin:4px 0">1，维修配件，加了：成本金额</p>
+        <p style="margin:4px 0">2，导出：现在是多张表，改为了：1张表多个Sheet</p>
+      </div>
       <!-- 外采供应商管理页面说明（动态显示） -->
       <div id="page-desc-supplier-manage" style="display:none;padding:16px;font-size:13px;line-height:2.0">
         <h4 style="color:#185FA5;border-left:3px solid #185FA5;padding-left:8px;margin:0 0 12px 0">外采供应商管理变更说明（0725）</h4>
         <p style="margin:4px 0"><b>改动点：</b></p>
         <p style="margin:2px 0 2px 16px">1，增加字段：统一社会信用代码，必填项，18位</p>
         <p style="margin:2px 0 2px 16px">2，增加一个默认的外采供应商：联友科技武汉分公司，用于直营店外采</p>
+      </div>
+      <!-- 维修统计查询页面说明（动态显示） -->
+      <div id="page-desc-repair-stats-query" style="display:none;padding:16px;font-size:13px;line-height:2.0">
+        <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:0 0 12px 0">维修统计查询（原名：综合查询维修情况）</h4>
+        <p style="margin:4px 0">维修统计查询页面说明，含查询项、列表项、汇总项。</p>
+        <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:16px 0 6px 0">查询项（25 项 + 4 复选框 = 29 项）</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px">
+          <thead><tr style="background:#f5f5f5"><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa;width:36px">序号</th><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">查询项</th><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa;width:120px">控件类型</th></tr></thead>
+          <tbody>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">接车日期</td><td style="border:1px solid #e8e8e8;padding:4px 6px">日期范围</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">门店</td><td style="border:1px solid #e8e8e8;padding:4px 6px">搜索输入</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">维修状态</td><td style="border:1px solid #e8e8e8;padding:4px 6px">下拉</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">维修项目类型</td><td style="border:1px solid #e8e8e8;padding:4px 6px">下拉</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">5</td><td style="border:1px solid #e8e8e8;padding:4px 6px">结算状态</td><td style="border:1px solid #e8e8e8;padding:4px 6px">下拉</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">6</td><td style="border:1px solid #e8e8e8;padding:4px 6px">结算日期</td><td style="border:1px solid #e8e8e8;padding:4px 6px">日期范围</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">7</td><td style="border:1px solid #e8e8e8;padding:4px 6px">大区</td><td style="border:1px solid #e8e8e8;padding:4px 6px">模糊下拉</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">8</td><td style="border:1px solid #e8e8e8;padding:4px 6px">小区</td><td style="border:1px solid #e8e8e8;padding:4px 6px">模糊下拉</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">9</td><td style="border:1px solid #e8e8e8;padding:4px 6px">VIN</td><td style="border:1px solid #e8e8e8;padding:4px 6px">文本</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">10</td><td style="border:1px solid #e8e8e8;padding:4px 6px">车型号码</td><td style="border:1px solid #e8e8e8;padding:4px 6px">文本</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">11</td><td style="border:1px solid #e8e8e8;padding:4px 6px">客户</td><td style="border:1px solid #e8e8e8;padding:4px 6px">文本</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">12</td><td style="border:1px solid #e8e8e8;padding:4px 6px">报修人电话</td><td style="border:1px solid #e8e8e8;padding:4px 6px">文本</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">13</td><td style="border:1px solid #e8e8e8;padding:4px 6px">维修工单号</td><td style="border:1px solid #e8e8e8;padding:4px 6px">文本</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">14</td><td style="border:1px solid #e8e8e8;padding:4px 6px">车系</td><td style="border:1px solid #e8e8e8;padding:4px 6px">模糊下拉</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">15</td><td style="border:1px solid #e8e8e8;padding:4px 6px">公告车型</td><td style="border:1px solid #e8e8e8;padding:4px 6px">模糊下拉</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">16</td><td style="border:1px solid #e8e8e8;padding:4px 6px">事故车</td><td style="border:1px solid #e8e8e8;padding:4px 6px">下拉(请选择/是/否)</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">17</td><td style="border:1px solid #e8e8e8;padding:4px 6px">类别</td><td style="border:1px solid #e8e8e8;padding:4px 6px">下拉</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">18</td><td style="border:1px solid #e8e8e8;padding:4px 6px">维修类别</td><td style="border:1px solid #e8e8e8;padding:4px 6px">下拉</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">19</td><td style="border:1px solid #e8e8e8;padding:4px 6px">维修内容</td><td style="border:1px solid #e8e8e8;padding:4px 6px">文本</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">20</td><td style="border:1px solid #e8e8e8;padding:4px 6px">配件编码</td><td style="border:1px solid #e8e8e8;padding:4px 6px">文本</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">21</td><td style="border:1px solid #e8e8e8;padding:4px 6px">创建日期</td><td style="border:1px solid #e8e8e8;padding:4px 6px">日期范围</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">22</td><td style="border:1px solid #e8e8e8;padding:4px 6px">应结算日期</td><td style="border:1px solid #e8e8e8;padding:4px 6px">日期范围</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">23</td><td style="border:1px solid #e8e8e8;padding:4px 6px">提交结算日期</td><td style="border:1px solid #e8e8e8;padding:4px 6px">日期范围</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">24</td><td style="border:1px solid #e8e8e8;padding:4px 6px">收客单号</td><td style="border:1px solid #e8e8e8;padding:4px 6px">文本</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">25</td><td style="border:1px solid #e8e8e8;padding:4px 6px;background:#FFF59D">内返单</td><td style="border:1px solid #e8e8e8;padding:4px 6px;background:#FFF59D">下拉(请选择/是/否)</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">26</td><td style="border:1px solid #e8e8e8;padding:4px 6px">作废单</td><td style="border:1px solid #e8e8e8;padding:4px 6px">复选框</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">27</td><td style="border:1px solid #e8e8e8;padding:4px 6px">是否包含PDI单</td><td style="border:1px solid #e8e8e8;padding:4px 6px">复选框</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">28</td><td style="border:1px solid #e8e8e8;padding:4px 6px">是否追加</td><td style="border:1px solid #e8e8e8;padding:4px 6px">复选框</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">29</td><td style="border:1px solid #e8e8e8;padding:4px 6px">反结算过的单据</td><td style="border:1px solid #e8e8e8;padding:4px 6px">复选框</td></tr>
+          </tbody>
+        </table>
+        <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:16px 0 6px 0">列表项（66 &rarr; 74 列，新增 8 列标红）</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px">
+          <thead><tr style="background:#f5f5f5"><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa;width:90px">分组</th><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">列名</th><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa;width:50px">状态</th></tr></thead>
+          <tbody>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">冻结列</th><td style="border:1px solid #e8e8e8;padding:4px 6px">1. 序号</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">2. 门店名称</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">3. 门店编码</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">4. 维修工单号</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="22" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">基本信息</th><td style="border:1px solid #e8e8e8;padding:4px 6px">5. VIN</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">6. 车牌号</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">7. 客户</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">8. 客户电话</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">9. 车系</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">10. 公告车型</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">11. 发动机号</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">12. 颜色</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">13. 行驶里程</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">14. 进厂日期</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">15. 完工时间</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">16. 结算时间</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">17. 维修类型</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">18. 维修项目</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">19. 故障描述</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">20. 维修内容</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">21. 接待人</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">22. 服务顾问</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">23. 主修人</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">24. 质检人</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">25. 班组长</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">26. 调度员</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="5" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">普通（账类）</th><td style="border:1px solid #e8e8e8;padding:4px 6px">27. 普通配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">28. 普通工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">29. 普通附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">30. 普通费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">31. 费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><th rowspan="5" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">保修（账类）</th><td style="border:1px solid #e8e8e8;padding:4px 6px">32. 保修配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">33. 保修工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">34. 保修附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">35. 保修费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">36. 费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><th rowspan="5" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">免保（账类）</th><td style="border:1px solid #e8e8e8;padding:4px 6px">37. 免保配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">38. 免保工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">39. 免保附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">40. 免保费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">41. 费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><th rowspan="5" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">保险（账类）</th><td style="border:1px solid #e8e8e8;padding:4px 6px">42. 保险配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">43. 保险工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">44. 保险附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">45. 保险费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">46. 费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><th rowspan="5" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">协议（账类）</th><td style="border:1px solid #e8e8e8;padding:4px 6px">47. 协议配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">48. 协议工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">49. 协议附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">50. 协议费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">51. 费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><th rowspan="5" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">内部（账类）</th><td style="border:1px solid #e8e8e8;padding:4px 6px">52. 内部配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">53. 内部工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">54. 内部附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">55. 内部费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">56. 费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><th rowspan="5" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">保养套餐（账类）</th><td style="border:1px solid #e8e8e8;padding:4px 6px">57. 保养套餐配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">58. 保养套餐工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">59. 保养套餐其他费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">60. 保养套餐费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">61. 费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><th rowspan="5" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">汇总</th><td style="border:1px solid #e8e8e8;padding:4px 6px">62. 配件费用应收总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">63. 工时费用应收总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">64. 附加费用应收总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">65. 应收总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">66. 毛利率</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><th rowspan="8" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">尾部</th><td style="border:1px solid #e8e8e8;padding:4px 6px">67. 结算折算费用总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">68. 实收费总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">69. 挂单率总统计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">70. 维修工单总数</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">71. 是否已结清</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">72. 是否PDI单</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">73. 创建时间</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px">74. 更新时间</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+          </tbody>
+        </table>
+        <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:16px 0 6px 0">汇总项（36 &rarr; 40 格，新增 4 格标红）</h4>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px">
+          <thead><tr style="background:#f5f5f5"><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa;width:44px">行</th><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa;width:50px">格位</th><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">字段名</th><th style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa;width:50px">状态</th></tr></thead>
+          <tbody>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 1</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">普通配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">普通工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">普通附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">普通费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 2</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保修配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保修工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保修附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保修费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 3</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">免保配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">免保工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">免保附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">免保费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 4</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保险配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保险工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保险附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保险费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 5</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">协议配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">协议工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">协议附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">协议费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 6</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">内部配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">内部工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">内部附加费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">内部费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 7</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保养套餐配件费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保养套餐工时费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保养套餐其他费用</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">保养套餐费用合计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 8</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">配件费用应收总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">工时费用应收总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">附加费用应收总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">应收总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 9</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">配件费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">工时费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">附加费用占比</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px">结算折算费用总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><th rowspan="4" style="border:1px solid #e8e8e8;padding:4px 6px;background:#fafafa">行 10</th><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">1</td><td style="border:1px solid #e8e8e8;padding:4px 6px">实收费总计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">2</td><td style="border:1px solid #e8e8e8;padding:4px 6px">挂单率总统计</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">3</td><td style="border:1px solid #e8e8e8;padding:4px 6px">维修工单总数</td><td style="border:1px solid #e8e8e8;padding:4px 6px"></td></tr>
+            <tr><td style="border:1px solid #e8e8e8;padding:4px 6px;text-align:center">4</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700">毛利率</td><td style="border:1px solid #e8e8e8;padding:4px 6px;color:#861B2F;font-weight:700;text-align:center">新增</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- 维修工时查询页面说明（动态显示） -->
+      <div id="page-desc-repair-labor-hours" style="display:none;padding:16px;font-size:13px;line-height:2.0">
+        <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:0 0 12px 0">维修工时查询（派工结算明细）</h4>
+        <p style="margin:4px 0">本页为派工结算明细查询，分"班组维度"与"人员维度"两个视图；每个视图左侧（班组/人员列表）与右侧（工程师/工单列表）并排展示。</p>
+        <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:16px 0 6px 0">本次页面说明更新内容</h4>
+        <p style="margin:4px 0">1，左侧（班组维度、人员维度）表格底部增加汇总行：销售工时合计、派工工时合计、台次合计</p>
+        <p style="margin:4px 0">2，左侧和右侧四张表（班组维度/人员维度/工程师维度/工单维度）均新增"台次"列</p>
+        <p style="margin:4px 0">3，导出（班组维度 CSV、人员维度 CSV）增加"台次"列</p>
       </div>
     </div>
     <!-- 底部固定联系信息 -->
@@ -4189,6 +4536,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
