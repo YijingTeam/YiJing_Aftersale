@@ -551,10 +551,13 @@
           </div>
         </div>
 
-        <!-- Tab 切换 -->
-        <div class="rlh-tabs">
-          <div class="rlh-tab active" data-t="team" onclick="rlhSwitchTab('team')">班组</div>
-          <div class="rlh-tab" data-t="staff" onclick="rlhSwitchTab('staff')">人员</div>
+        <!-- Tab 切换 + 导出 -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-shrink:0;">
+          <div class="rlh-tabs">
+            <div class="rlh-tab active" data-t="team" onclick="rlhSwitchTab('team')">班组</div>
+            <div class="rlh-tab" data-t="staff" onclick="rlhSwitchTab('staff')">人员</div>
+          </div>
+          <button class="lt-btn lt-btn-default" onclick="rlhExport()">导出</button>
         </div>
 
         <!-- 班组视图：左=班组维度 右=工程师维度 -->

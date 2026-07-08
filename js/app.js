@@ -7924,3 +7924,41 @@ function rlhInit(){
   if(!rlhInited){ rlhInited=true; rlhGenData(); rlhTab='team'; rlhSwitchTab('team'); }
   rlhRenderAll();
 }
+function rlhExport(){
+  // 根据当前Tab确定导出列与数据源
+  var isTeam = (rlhTab === 'team');
+  var headers, fields, data;
+  if(isTeam){
+    headers = ['门店名称','班组名称','班组类别','销售工时','派工工时'];
+    fields  = ['storeName','teamName','teamCat','saleHours','dispatchHours'];
+    data    = rlhFilterData('teamLeft', RLH_TEAM_DATA);
+  }else{
+    headers = ['门店名称','工程师编码','工程师名称','销售工时','派工工时'];
+    fields  = ['storeName','engCode','engName','saleHours','dispatchHours'];
+    data    = rlhFilterData('staffLeft', RLH_ENG_DATA);
+  }
+  // BOM + CSV 内容
+  var csv = '\uFEFF'; // UTF-8 BOM for Excel
+  csv += headers.join(',') + '\n';
+  for(var i=0;i<data.length;i++){
+    var row=data[i], cells=[];
+    for(var j=0;j<fields.length;j++){
+      var v=row[fields[j]];
+      // 包含逗号/换行/双引号时用双引号包裹
+      if(String(v).indexOf(',')>=0 || String(v).indexOf('\n')>=0 || String(v).indexOf('"')>=0){
+        cells.push('"'+String(v).replace(/"/g,'""')+'"');
+      }else{
+        cells.push(v);
+      }
+    }
+    csv += cells.join(',') + '\n';
+  }
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (isTeam ? '维修工时_班组维度' : '维修工时_人员维度') + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+}
