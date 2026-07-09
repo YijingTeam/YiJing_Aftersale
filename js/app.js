@@ -2462,7 +2462,7 @@
       var cities = ['深圳','广州','上海','北京','成都','武汉','杭州','南京'];
       var carSeries = ['秦PLUS','宋Pro','汉EV','唐DM-i','海豹','元PLUS','驱逐舰05','海豚'];
       var carModels = ['2024款 DM-i','2025款 EV','2024款 四驱','2025款 尊贵型'];
-      var faultSystems = ['发动机系统','变速箱系统','制动系统','转向系统','电气系统','空调系统','底盘系统'];
+      var faultSystems = ['安全系统','车身系统','电子电气系统','底盘系统','动力集成系统','高压动力系统','内饰系统','外饰系统','智能驾驶系统','其他'];
       var faultNatures = ['产品质量','使用问题','维修导致'];
       var archiveCategories = ['发动机','变速箱','电气','底盘','车身'];
       var subjects = ['发动机异响严重','变速箱换挡顿挫','刹车时有尖锐异响','方向盘转向发沉','中控屏幕黑屏','空调制冷效果差','底盘有异响','高速行驶车身抖动'];
@@ -3353,7 +3353,7 @@
       var cities = ['深圳','广州','上海','北京','成都','武汉','杭州','南京'];
       var carSeries = ['秦PLUS','宋Pro','汉EV','唐DM-i','海豹','元PLUS','驱逐舰05','海豚'];
       var carModels = ['2024款 DM-i','2025款 EV','2024款 四驱','2025款 尊贵型'];
-      var faultSystems = ['发动机系统','变速箱系统','制动系统','转向系统','电气系统','空调系统','底盘系统'];
+      var faultSystems = ['安全系统','车身系统','电子电气系统','底盘系统','动力集成系统','高压动力系统','内饰系统','外饰系统','智能驾驶系统','其他'];
       var faultNatures = ['产品质量','使用问题','维修导致'];
       var archiveCategories = ['发动机','变速箱','电气','底盘','车身'];
       var subjects = ['发动机异响严重','变速箱换挡顿挫','刹车时有尖锐异响','方向盘转向发沉','中控屏幕黑屏','空调制冷效果差','底盘有异响','高速行驶车身抖动'];
@@ -3471,7 +3471,7 @@
         if (r.status === '待提交') ops = '<a href="javascript:void(0)" onclick="qrOpenEdit('+r.id+')">修改</a><span class="sep">|</span><a href="javascript:void(0)" onclick="qrCancelOrder('+r.id+')">作废</a><span class="sep">|</span><a href="javascript:void(0)" onclick="qrOpenDetail('+r.id+')">详情</a>';
         else if (r.status === '已退回') ops = '<a href="javascript:void(0)" onclick="qrOpenEdit('+r.id+')">修改</a><span class="sep">|</span><a href="javascript:void(0)" onclick="qrCancelOrder('+r.id+')">作废</a><span class="sep">|</span><a href="javascript:void(0)" onclick="qrOpenDetail('+r.id+')">详情</a>';
         else ops = '<a href="javascript:void(0)" onclick="qrOpenDetail('+r.id+')">详情</a>';
-        h += '<tr><td class="sticky col-seq">'+idx+'</td><td class="sticky col-order-no">'+(r.orderNo||'')+'</td><td class="sticky col-status">'+(r.status||'')+'</td><td class="col-province">'+(r.province||'')+'</td><td class="col-city">'+(r.city||'')+'</td><td class="col-store-name">'+(r.storeName||'')+'</td><td class="col-store-code">'+(r.storeCode||'')+'</td><td class="col-submit-date">'+(r.submitDate||'')+'</td><td class="col-car-series">'+(r.carSeries||'')+'</td><td class="col-subject">'+(r.subject||'')+'</td><td class="col-importance">'+(r.importance||'')+'</td><td class="col-repair-order">'+(r.repairOrder||'')+'</td><td class="col-complaint-order">'+(r.complaintOrder||'')+'</td><td class="col-pdi-order">'+(r.pdiOrder||'')+'</td><td class="col-alarm-order">'+(r.alarmOrder||'')+'</td><td class="col-archive-category">'+(r.archiveCategory||'')+'</td><td class="col-vin">'+(r.vin||'')+'</td><td class="col-fault-date">'+(r.faultDate||'')+'</td><td class="col-fault-system">'+(r.faultSystem||'')+'</td><td class="col-fault-nature">'+(r.faultNature||'')+'</td><td class="col-prod-date">'+(r.prodDate||'')+'</td><td class="sticky col-actions"><div class="op-links">'+ops+'</div></td></tr>';
+        h += '<tr><td class="sticky col-seq">'+idx+'</td><td class="sticky col-order-no">'+(r.orderNo||'')+'</td><td class="sticky col-status">'+(r.status||'')+'</td><td class="col-province">'+(r.province||'')+'</td><td class="col-city">'+(r.city||'')+'</td><td class="col-store-name">'+(r.storeName||'')+'</td><td class="col-store-code">'+(r.storeCode||'')+'</td><td class="col-submit-date">'+(r.submitDate||'')+'</td><td class="col-car-series">'+(r.carSeries||'')+'</td><td class="col-subject">'+(r.subject||'')+'</td><td class="col-importance">'+(r.importance||'')+'</td><td class="col-repair-order">'+(r.repairOrder||'')+'</td><td class="col-complaint-order">'+(r.complaintOrder||'')+'</td><td class="col-pdi-order">'+(r.pdiOrder||'')+'</td><td class="col-alarm-order">'+(r.alarmOrder||'')+'</td><td class="col-vin">'+(r.vin||'')+'</td><td class="col-fault-date">'+(r.faultDate||'')+'</td><td class="col-fault-system">'+(r.faultSystem||'')+'</td><td class="col-fault-nature">'+(r.faultNature||'')+'</td><td class="col-prod-date">'+(r.prodDate||'')+'</td><td class="sticky col-actions"><div class="op-links">'+ops+'</div></td></tr>';
       }
       tbody.innerHTML = h;
       qrRenderPager();
@@ -4392,7 +4392,7 @@
       var provinces = ['广东','广东','上海','北京','四川'];
       var cities = ['深圳','广州','上海','北京','成都'];
       var carSeries = ['秦PLUS','宋Pro','汉EV','唐DM-i','海豹'];
-      var faultSystems = ['发动机系统','变速箱系统','制动系统','电气系统','空调系统'];
+      var faultSystems = ['安全系统','车身系统','电子电气系统','底盘系统','动力集成系统','高压动力系统','内饰系统','外饰系统','智能驾驶系统','其他'];
       var faultNatures = ['产品质量','使用问题','维修导致'];
       var archiveCategories = ['发动机','变速箱','电气','底盘','车身'];
       var subjects = ['质量缺陷分析报告','零部件可靠性评估','焊接工艺异常','漆面质量问题','装配精度偏差','材料批次不合格'];
@@ -4431,7 +4431,7 @@
           province:provinces[idx], city:cities[idx], storeName:stores[idx], storeCode:storeCodes[idx],
           submitDate:ds, carSeries:carSeries[idx], subject:subjects[i%6],
           archiveCategory:archiveCategories[i%5], vin:vins[idx],
-          faultDate:ds, faultSystem:faultSystems[i%5], faultNature:faultNatures[i%3],
+          faultDate:ds, faultSystem:faultSystems[i%10], faultNature:faultNatures[i%3],
           prodDate:'2024-0'+(i%9+1)+'-'+String((i%28)+1).padStart(2,'0'),
           carModel:'2024款', applyType:'故障诊断',
           importance:importances[idx],
@@ -4549,51 +4549,57 @@
     var qrtEditId = null;
 
     (function initQrtMockData() {
-      var names = ['发动机异响诊断模板','变速箱换挡顿挫诊断','刹车异响检测流程','转向系统检测模板','电气系统综合诊断','空调制冷故障检测','底盘异响排查模板','车身共振检测流程'];
-      var statuses = ['启用','启用','启用','启用','启用','停用','启用','停用'];
-      var faultSystems = ['发动机系统','变速箱系统','制动系统','转向系统','电气系统','空调系统','底盘系统','车身系统'];
-      var importances = ['A','B','A','C','B','D','B','C'];
-      var partCodes = ['EP-1001','GB-2002','BR-3003','ST-4004','EL-5005','AC-6006','CH-7007','BD-8008'];
-      var partNames = ['发动机总成','变速箱总成','制动卡钳','转向器总成','电控模块','压缩机总成','悬挂弹簧','车身冲压件'];
-      var updaters = ['张三','李四','王五','赵六','陈七','刘八','周九','吴十'];
+      var names = ['动力总成异响诊断模板','高压电池热管理诊断模板','车机黑屏诊断模板','底盘异响排查模板','车身钣金共振检测模板','智能驾驶感知故障诊断模板','内饰异响诊断模板','外饰件装配检测模板','主被动安全系统诊断模板','综合疑难故障诊断模板'];
+      var statuses = ['启用','启用','启用','启用','启用','停用','启用','停用','启用','停用'];
+      var faultSystems = ['动力集成系统','高压动力系统','电子电气系统','底盘系统','车身系统','智能驾驶系统','内饰系统','外饰系统','安全系统','其他'];
+      var importances = ['A','B','A','C','B','D','B','C','A','C'];
+      var partCodes = ['EP-1001','HV-2002','EE-3003','CH-4004','BD-5005','AD-6006','IN-7007','EX-8008','SF-9009','OT-0010'];
+      var partNames = ['发动机总成','动力电池包','车机主控单元','悬挂弹簧','车身冲压件','智驾域控制器','座椅总成','前保险杠总成','安全气囊控制模块','通用诊断套件'];
+      var updaters = ['张三','李四','王五','赵六','陈七','刘八','周九','吴十','郑十一','王十二'];
       var customerComplaints = [
-        '客户反馈车辆在冷启动时发动机有明显异响，怠速时更明显，热车后异响减弱但仍存在，影响驾驶感受。',
-        '客户在2挡升3挡时出现明显顿挫，伴随轻微抖动，已经过4S店常规检查未解决。',
-        '客户反馈轻踩刹车时有"吱吱"异响，速度越快异响越明显，紧急制动时正常。',
-        '客户反映低速打方向时方向盘有明显卡顿，高速行驶时方向稳定，担心存在安全隐患。',
-        '客户反馈大屏偶发黑屏、倒车影像不显示，已经影响正常用车，希望尽快维修。',
-        '客户开空调10分钟后出风口温度仍偏高，制冷效果差，4S店已加氟但未解决。',
+        '客户反馈车辆冷启动时发动机舱有明显异响，怠速时更明显，热车后减弱但仍存在，影响驾驶感受。',
+        '客户反馈快充后仪表提示电池温度偏高，偶有续航跳变，4S店检测未定位具体原因。',
+        '客户反馈大屏偶发黑屏、倒车影像不显示，已影响正常用车，希望尽快维修。',
         '客户在过减速带时底盘出现"咚咚"异响，怀疑悬挂或稳定杆问题。',
-        '客户反馈高速行驶时车身有共振现象，后视镜有明显抖动，已经做了四轮定位未解决。'
+        '客户反馈高速行驶时车身局部有共振现象，后视镜明显抖动，已做四轮定位未解决。',
+        '客户反馈辅助驾驶偶发退出，高速巡航时前向碰撞预警误报，存在安全隐患。',
+        '客户反馈过颠簸路面时中控台及座椅处有"咯吱"异响，影响乘坐舒适性。',
+        '客户反馈前保险杠与翼子板间缝隙不均，洗车后发现外饰卡扣松动，存在异响。',
+        '客户反馈发生碰撞时安全气囊未正常弹出，且ESP报警灯常亮，担心主动安全失效。',
+        '客户反馈车辆出现间歇性故障，涉及多个系统，4S店多次检修未能复现并定位根因。'
       ];
       var faultConditions = [
         '冷启动后2分钟内、怠速状态下发动机前端出现"嗒嗒"金属敲击声，热车10分钟后减弱。',
-        '车速30-50km/h、2挡升3挡瞬间出现明显冲击感，伴随转速表轻微波动。',
-        '低速5-20km/h、轻踩刹车时前轮位置出现尖锐"吱吱"声，连续制动后消失。',
-        '车速0-15km/h、原地打方向时方向盘有明显阻滞感，超过20km/h后方向恢复正常。',
+        '快充峰值功率下电池包温度上升过快，单体电压一致性差，BMS偶发限功率。',
         '车辆启动后5-15分钟内大屏偶发黑屏1-3秒，倒车时影像偶发不显示。',
-        '环境温度30℃以上、车辆暴晒后开空调，10分钟内出风口温度仍偏高。',
         '车速10km/h以下、过减速带或坑洼时底盘出现"咚咚"低频声，平路行驶无异响。',
-        '车速80-120km/h、匀速行驶时车身出现低频共振，后视镜明显抖动。'
+        '车速80-120km/h、匀速行驶时车身出现低频共振，后视镜明显抖动。',
+        '车速60-120km/h、开启智驾时前向毫米波雷达偶发丢目标，域控记录故障码。',
+        '车速20-40km/h、过连续颠簸时中控台饰板与座椅骨架出现"咯吱"摩擦声。',
+        '车辆低速通过不平整路面时前保与翼子板连接处出现"哒哒"松动异响。',
+        '车辆以40km/h以上速度发生碰撞时气囊未起爆，同时ESP模块报永久故障码。',
+        '车辆在不同工况下偶发多系统报警，故障码随机出现且静置后自动清除，难以复现。'
       ];
       var repairSolutions = [
         '1. 使用听诊器定位异响源；2. 检查正时链条张紧度；3. 必要时更换张紧器或链条。',
-        '1. 用诊断仪读取变速箱数据流；2. 检查变速箱油液位及品质；3. 必要时升级TCU程序。',
-        '1. 举升车辆检查刹车片厚度；2. 检查刹车盘表面平整度；3. 必要时更换刹车片。',
-        '1. 检查转向助力油液位；2. 用诊断仪读取EPS数据流；3. 必要时更换转向器。',
+        '1. 用诊断仪读取BMS数据流；2. 检查冷却回路及水泵；3. 必要时更换电池模组。',
         '1. 检查大屏电源及CAN线连接；2. 升级车机系统至最新版本；3. 必要时更换大屏总成。',
-        '1. 检查冷凝器散热情况；2. 检漏并补充制冷剂；3. 检查压缩机工作状态。',
         '1. 举升车辆目视检查悬挂件；2. 逐一拆检稳定杆胶套、平衡杆；3. 必要时更换。',
-        '1. 高速试车确认共振点；2. 检查发动机舱及底盘隔振垫；3. 必要时追加隔振措施。'
+        '1. 高速试车确认共振点；2. 检查发动机舱及底盘隔振垫；3. 必要时追加隔振措施。',
+        '1. 用诊断仪读取智驾域控故障码；2. 校准雷达与摄像头；3. 必要时更换感知元件。',
+        '1. 拆检中控台饰板卡扣；2. 检查座椅骨架固定；3. 必要时加装阻尼垫。',
+        '1. 检查前保与翼子板装配间隙；2. 紧固外饰卡扣；3. 必要时调整或更换卡扣。',
+        '1. 用诊断仪读取气囊及ESP模块故障码；2. 检查碰撞传感器线路；3. 必要时更换模块。',
+        '1. 采集各系统故障码及冻结帧；2. 排查搭铁与供电线路；3. 必要时分段替换验证。'
       ];
-      for (var i = 0; i < 16; i++) {
-        var idx = i % 8;
+      for (var i = 0; i < 20; i++) {
+        var idx = i % 10;
         var d = new Date();
         d.setDate(d.getDate() - i * 5);
         var ds = d.toISOString().split('T')[0];
         var timeStr = ' ' + String(Math.floor(Math.random()*24)).padStart(2,'0') + ':' + String(Math.floor(Math.random()*60)).padStart(2,'0');
         qrtAllData.push({
-          id:i+1, name:names[idx]+(i>7?'（副本）':''), status:statuses[idx],
+          id:i+1, name:names[idx]+(i>9?'（副本）':''), status:statuses[idx],
           updateTime:ds+timeStr, updater:updaters[idx],
           faultPartCode:partCodes[idx], faultPartName:partNames[idx],
           importance:importances[idx], faultSystem:faultSystems[idx],
