@@ -7365,11 +7365,11 @@ var dsFilteredOrders = [];
 
 function dsBuildData() {
   var seeds = [
-    { d:'2026-06-26', p:'沪A·8F2K6', v:'LVGAE21G3NG123001', t:'一般维修', a:'张伟', r:'李娜', ph:'13800001111', m:'奕境 Pro 2024款', mi:32560, it:'常规', c:'机电', s:'已结算', st:'上海浦东店', sc:'SH001', ap:false },
-    { d:'2026-06-26', p:'沪B·3K9M2', v:'LVGAE21G3NG123002', t:'保养', a:'王芳', r:'赵强', ph:'13800002222', m:'奕境 Max 2023款', mi:18230, it:'常规', c:'养护', s:'已结算', st:'上海浦东店', sc:'SH001', ap:false },
-    { d:'2026-06-26', p:'沪C·7H4T8', v:'LVGAE21G3NG123003', t:'钣喷', a:'刘洋', r:'孙丽', ph:'13800003333', m:'奕境 Air 2025款', mi:56210, it:'增值', c:'钣喷', s:'结算中', st:'北京朝阳店', sc:'BJ001', ap:true },
-    { d:'2026-06-27', p:'沪D·5R2W1', v:'LVGAE21G3NG123004', t:'一般维修', a:'陈静', r:'周涛', ph:'13800004444', m:'奕境 Pro 2024款', mi:41200, it:'常规', c:'机电', s:'已结算', st:'广州天河店', sc:'GZ001', ap:false },
-    { d:'2026-06-27', p:'沪E·9X6P3', v:'LVGAE21G3NG123005', t:'索赔', a:'李雷', r:'韩梅', ph:'13800005555', m:'奕境 Max 2023款', mi:8900, it:'索赔', c:'机电', s:'未结算', st:'深圳南山店', sc:'SZ001', ap:false }
+    { d:'2026-06-26', p:'沪A·8F2K6', v:'LVGAE21G3NG123001', t:'一般维修', a:'张伟', r:'李娜', ph:'13800001111', m:'奕境 Pro 2024款', mi:32560, it:'常规', c:'机电', s:'已结算', st:'上海浦东店', sc:'SH001', rg:'华东', dt:'上海', ap:false },
+    { d:'2026-06-26', p:'沪B·3K9M2', v:'LVGAE21G3NG123002', t:'保养', a:'王芳', r:'赵强', ph:'13800002222', m:'奕境 Max 2023款', mi:18230, it:'常规', c:'养护', s:'已结算', st:'上海浦东店', sc:'SH001', rg:'华东', dt:'上海', ap:false },
+    { d:'2026-06-26', p:'沪C·7H4T8', v:'LVGAE21G3NG123003', t:'钣喷', a:'刘洋', r:'孙丽', ph:'13800003333', m:'奕境 Air 2025款', mi:56210, it:'增值', c:'钣喷', s:'结算中', st:'北京朝阳店', sc:'BJ001', rg:'华北', dt:'北京', ap:true },
+    { d:'2026-06-27', p:'沪D·5R2W1', v:'LVGAE21G3NG123004', t:'一般维修', a:'陈静', r:'周涛', ph:'13800004444', m:'奕境 Pro 2024款', mi:41200, it:'常规', c:'机电', s:'已结算', st:'广州天河店', sc:'GZ001', rg:'华南', dt:'广州', ap:false },
+    { d:'2026-06-27', p:'沪E·9X6P3', v:'LVGAE21G3NG123005', t:'索赔', a:'李雷', r:'韩梅', ph:'13800005555', m:'奕境 Max 2023款', mi:8900, it:'索赔', c:'机电', s:'未结算', st:'深圳南山店', sc:'SZ001', rg:'华南', dt:'深圳', ap:false }
   ];
   var orders = [];
   seeds.forEach(function(s, i){
@@ -7377,7 +7377,7 @@ function dsBuildData() {
     var o = {
       orderNo: orderNo, plate: s.p, vin: s.v, type: s.t, advisor: s.a, reporter: s.r, phone: s.ph,
       carModel: s.m, mileage: s.mi, dateIn: s.d, settleDate: s.d, itemType: s.it, category: s.c,
-      status: s.s, store: s.st, storeCode: s.sc, append: s.ap, labor: [], parts: [], others: []
+      status: s.s, store: s.st, storeCode: s.sc, region: s.rg, district: s.dt, append: s.ap, labor: [], parts: [], others: []
     };
     var labDesc = s.t==='保养' ? '常规保养' : (s.t==='钣喷' ? '钣金修复' : (s.t==='索赔' ? '索赔维修' : '常规维修'));
     o.labor.push({ code:'LB'+String(i+1).padStart(3,'0'), desc: labDesc, acct: s.s==='已结算'?'自费':'保修', itemType: s.it, hours: s.c==='养护'?1.5:2.0, price: s.c==='养护'?80:120, amount:0 });
@@ -7408,6 +7408,8 @@ function dsApplyFilter() {
   var fCategory = dsVal('ds-flt-category');
   var fStatus = dsVal('ds-flt-status');
   var fAdvisor = dsVal('ds-flt-advisor');
+  var fRegion = dsVal('ds-flt-region');
+  var fDistrict = dsVal('ds-flt-district');
   var fStore = dsVal('ds-flt-store').toLowerCase();
   var dss = dsValDate('ds-date-start');
   var dse = dsValDate('ds-date-end');
@@ -7424,6 +7426,8 @@ function dsApplyFilter() {
     if (fCategory && o.category !== fCategory) return false;
     if (fStatus && o.status !== fStatus) return false;
     if (fAdvisor && o.advisor.indexOf(fAdvisor) === -1) return false;
+    if (fRegion && o.region !== fRegion) return false;
+    if (fDistrict && o.district !== fDistrict) return false;
     if (fStore && o.store.toLowerCase().indexOf(fStore) === -1 && o.storeCode.toLowerCase().indexOf(fStore) === -1) return false;
     if (dss && o.dateIn < dss) return false;
     if (dse && o.dateIn > dse) return false;
@@ -7439,7 +7443,7 @@ function dsApplyFilter() {
 }
 
 function dsResetFilter() {
-  ['ds-flt-order','ds-flt-vin','ds-flt-plate','ds-flt-itemtype','ds-flt-category','ds-flt-status','ds-flt-advisor','ds-flt-store','ds-date-start','ds-date-end','ds-settle-start','ds-settle-end'].forEach(function(id){
+  ['ds-flt-order','ds-flt-vin','ds-flt-plate','ds-flt-itemtype','ds-flt-category','ds-flt-status','ds-flt-advisor','ds-flt-region','ds-flt-district','ds-flt-store','ds-date-start','ds-date-end','ds-settle-start','ds-settle-end'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
   var cb = document.getElementById('ds-flt-append'); if (cb) cb.checked = false;
@@ -7451,6 +7455,34 @@ function dsToggleFilter() {
   dsFilterExpanded = !dsFilterExpanded;
   toggleFilterGrid('ds-filterGrid', dsFilterExpanded, DS_SHOW_COUNT);
 }
+
+// 大区/小区 下拉（复用 pds combobox 范式，作用域 #page-store-operation）
+function dsFilterCombobox(input) {
+  var wrap = input.closest('.lt-input-wrap.combobox');
+  if (!wrap) return;
+  var list = wrap.querySelector('.lt-datalist');
+  if (!list) return;
+  var val = input.value.toLowerCase();
+  list.querySelectorAll('li').forEach(function(li) { li.classList.toggle('hidden', val && li.textContent.toLowerCase().indexOf(val) === -1); });
+}
+function dsShowCombobox(input) { var list = input.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist'); if (list) list.classList.add('show'); }
+function dsToggleCombobox(arrow) {
+  var list = arrow.closest('.lt-input-wrap.combobox').querySelector('.lt-datalist');
+  if (!list) return;
+  list.classList.toggle('show');
+  if (list.classList.contains('show')) { var inp = arrow.closest('.lt-input-wrap.combobox').querySelector('input'); if (inp) inp.focus(); }
+}
+function dsSelectCombobox(li) {
+  var wrap = li.closest('.lt-input-wrap.combobox');
+  wrap.querySelector('input').value = li.textContent;
+  wrap.querySelector('.lt-datalist').classList.remove('show');
+  dsApplyFilter();
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#page-store-operation .lt-input-wrap.combobox')) {
+    document.querySelectorAll('#page-store-operation .lt-datalist.show').forEach(function(l) { l.classList.remove('show'); });
+  }
+});
 
 function dsBuildTree() {
   var byDate = {};

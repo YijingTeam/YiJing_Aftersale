@@ -1118,6 +1118,16 @@
               </div>
             </div>
             <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="ds-flt-region" placeholder="请选择" oninput="dsFilterCombobox(this)" onfocus="dsShowCombobox(this)"><span class="cb-arrow" onclick="dsToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ds-region-list"><li onclick="dsSelectCombobox(this)">华东</li><li onclick="dsSelectCombobox(this)">华南</li><li onclick="dsSelectCombobox(this)">华北</li><li onclick="dsSelectCombobox(this)">西南</li><li onclick="dsSelectCombobox(this)">东北</li><li onclick="dsSelectCombobox(this)">华中</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="ds-flt-district" placeholder="请选择" oninput="dsFilterCombobox(this)" onfocus="dsShowCombobox(this)"><span class="cb-arrow" onclick="dsToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ds-district-list"><li onclick="dsSelectCombobox(this)">上海</li><li onclick="dsSelectCombobox(this)">广州</li><li onclick="dsSelectCombobox(this)">北京</li><li onclick="dsSelectCombobox(this)">深圳</li><li onclick="dsSelectCombobox(this)">成都</li><li onclick="dsSelectCombobox(this)">沈阳</li><li onclick="dsSelectCombobox(this)">杭州</li></ul>
+              </div>
+            </div>
+            <div class="lt-filter-item">
               <div class="lt-input-wrap plain"><span class="lt-filter-prefix">门店</span>
                 <input type="text" id="ds-flt-store" placeholder="请输入" oninput="dsApplyFilter()">
               </div>
@@ -3874,8 +3884,8 @@
       </div>
       <!-- 维修工时查询页面说明（动态显示） -->
       <div id="page-desc-repair-labor-hours" style="display:none;padding:16px;font-size:13px;line-height:2.0">
-        <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:0 0 12px 0">维修工时查询（派工结算明细）</h4>
-        <p style="margin:4px 0">本页为派工结算明细查询，分"班组维度"与"人员维度"两个视图；每个视图左侧（班组/人员列表）与右侧（工程师/工单列表）并排展示。</p>
+        <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:0 0 12px 0">维修工时查询</h4>
+        <p style="margin:4px 0">维修工时查询，原来的名字叫：工作效率统计-班组技师<br>分"班组维度"与"人员维度"两个视图；每个视图左侧（班组/人员列表）与右侧（工程师/工单列表）并排展示。</p>
         <h4 style="color:#861B2F;border-left:3px solid #861B2F;padding-left:8px;margin:16px 0 6px 0">本次页面说明更新内容</h4>
         <p style="margin:4px 0">1，左侧（班组维度、人员维度）表格底部增加汇总行：销售工时合计、派工工时合计、台次合计</p>
         <p style="margin:4px 0">2，左侧和右侧四张表（班组维度/人员维度/工程师维度/工单维度）均新增"台次"列</p>
