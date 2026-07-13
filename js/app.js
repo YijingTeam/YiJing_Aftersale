@@ -7793,6 +7793,7 @@ var RSQ_SUM_ORDER = ['pjNormal','gsNormal','fjNormal','pjNormalTotal','pjWarrant
 var RSQ_STORES = [['上海奕境汽车服务','SH001'],['北京奕境汽车服务','BJ001'],['广州奕境汽车服务','GZ001'],['成都奕境汽车服务','CD001']];
 var RSQ_TYPES = ['普通维修','定保','保险','保养','专案','召回','服务活动','免费保养','PDI'];
 var rsqAllData = [];
+var rsqView = []; // 过滤后的展示数据（基准为 rsqAllData）
 var rsqCurrentPage = 1;
 var rsqPageSize = 20;
 var rsqFilterExpanded = false; // 默认收起（与 initFilterGrid 对齐）
@@ -7839,15 +7840,16 @@ function rsqGenData(){
       pjYsTotal:pjYs,gsYsTotal:gsYs,fjYsTotal:fjYs,ysTotal:ysTotal,
       grossRate:(Math.random()*30+10).toFixed(2)+'%',
       jszTotal:ysTotal,ssTotal:ysTotal,gdRate:'0%',orderTotal:0,
-      isSettle:'是',isPdi:(i%9===0?'是':'否'),
+      isSettle:'是',      isPdi:(i%9===0?'是':'否'),
       createTime:'2026-05-'+String(10+i%18)+' 09:12', updateTime:'2026-05-'+String(13+i%18)+' 16:40'
     });
   }
+  rsqView = rsqAllData;
 }
 function rsqRender(){
   var tbody=document.getElementById('rsq-tbody'); if(!tbody) return;
   var start=(rsqCurrentPage-1)*rsqPageSize;
-  var pageData=rsqAllData.slice(start,start+rsqPageSize);
+  var pageData=rsqView.slice(start,start+rsqPageSize);
   var h='';
   for(var r=0;r<pageData.length;r++){
     var d=pageData[r]; var row='<tr>';
@@ -7870,8 +7872,8 @@ function rsqRender(){
 }
 function rsqRenderSummary(){
   var acc={}; for(var i=0;i<RSQ_SUM_ORDER.length;i++){ acc[RSQ_SUM_ORDER[i]]=0; }
-  for(var d=0;d<rsqAllData.length;d++){
-    var row=rsqAllData[d];
+  for(var d=0;d<rsqView.length;d++){
+    var row=rsqView[d];
     for(var i=0;i<RSQ_SUM_ORDER.length;i++){ var k=RSQ_SUM_ORDER[i]; if(typeof row[k]==='number') acc[k]+=row[k]; }
   }
   var cells=document.querySelectorAll('#rsq-summary .sv');
@@ -7882,14 +7884,14 @@ function rsqRenderSummary(){
     else if(k==='gsYsRate') v = acc.ysTotal>0 ? (acc.gsYsTotal/acc.ysTotal*100).toFixed(2)+'%' : '0%';
     else if(k==='fjYsRate') v = acc.ysTotal>0 ? (acc.fjYsTotal/acc.ysTotal*100).toFixed(2)+'%' : '0%';
     else if(k==='grossRate') { var partsCost=acc.pjYsTotal*0.6; v = acc.ssTotal>0 ? ((acc.jszTotal-partsCost)/acc.ssTotal*100).toFixed(2)+'%' : '0%'; }
-    else if(k==='orderTotal') v=rsqAllData.length;
+    else if(k==='orderTotal') v=rsqView.length;
     else v=acc[k];
     cells[i].textContent=(typeof v==='number')? v.toFixed(2): String(v);
   }
 }
 function rsqRenderPager(){
   var pager=document.getElementById('rsq-pager'); if(!pager) return;
-  var total=rsqAllData.length;
+  var total=rsqView.length;
   var pages=Math.max(1,Math.ceil(total/rsqPageSize));
   var h='<span>共 '+total+' 条</span><span>'+rsqPageSize+' 条/页</span>';
   for(var p=1;p<=pages;p++){
@@ -7899,12 +7901,22 @@ function rsqRenderPager(){
   pager.innerHTML=h;
 }
 function rsqGoPage(p){ rsqCurrentPage=p; rsqRender(); }
-function rsqJump(){ var el=document.getElementById('rsq-jump'); if(!el) return; var v=parseInt(el.value); if(!isNaN(v)){ var pages=Math.ceil(rsqAllData.length/rsqPageSize); if(v>=1&&v<=pages){ rsqCurrentPage=v; rsqRender(); } } }
-function rsqQuery(){ rsqCurrentPage=1; rsqRender(); }
+function rsqJump(){ var el=document.getElementById('rsq-jump'); if(!el) return; var v=parseInt(el.value); if(!isNaN(v)){ var pages=Math.ceil(rsqView.length/rsqPageSize); if(v>=1&&v<=pages){ rsqCurrentPage=v; rsqRender(); } } }
+function rsqApplyFilter(){
+  var el=document.getElementById('rsq-flt-advisor');
+  var fAdvisor=el?(el.value||'').trim():'';
+  rsqView=rsqAllData.filter(function(d){
+    if(fAdvisor && d.advisor.indexOf(fAdvisor)===-1) return false;
+    return true;
+  });
+  rsqCurrentPage=1;
+  rsqRender();
+}
+function rsqQuery(){ rsqApplyFilter(); }
 function rsqReset(){
   var grid=document.getElementById('rsq-filterGrid');
   if(grid){ var inputs=grid.querySelectorAll('input,select'); for(var i=0;i<inputs.length;i++){ if(inputs[i].type==='checkbox') inputs[i].checked=false; else inputs[i].value=''; } }
-  rsqCurrentPage=1; rsqRender();
+  rsqApplyFilter();
 }
 function rsqToggleFilter(){ rsqFilterExpanded=!rsqFilterExpanded; toggleFilterGrid('rsq-filterGrid', rsqFilterExpanded, RSQ_SHOW_COUNT); var chk=document.querySelector('#rsq-filterGrid .rs-checks'); if(chk) chk.style.display=rsqFilterExpanded?'':'none'; }
 function rsqExport(){ alert('离线导出功能开发中'); }
