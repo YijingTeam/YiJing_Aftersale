@@ -148,7 +148,8 @@
     }
 
     .submenu.open {
-      max-height: 500px;
+      max-height: 2000px;
+      overflow-y: auto;
     }
 
     .submenu-item {
@@ -174,7 +175,8 @@
       transition: max-height 0.3s ease;
     }
     .submenu-nested.open {
-      max-height: 250px;
+      max-height: 600px;
+      overflow-y: auto;
     }
     .submenu-item-nested {
       padding: 10px 15px 10px 68px;

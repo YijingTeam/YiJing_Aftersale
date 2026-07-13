@@ -91,10 +91,10 @@
           <div class="submenu submenu-nested open">
             <div class="submenu-item submenu-item-nested" onclick="showContent('parts-inventory-ledger')" data-module="parts-inventory-ledger">配件库存台账</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('repair-requisition-detail')" data-module="repair-requisition-detail">维修领用明细</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('parts-sales-detail')" data-module="parts-sales-detail">配件销售明细</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('purchase-return-detail')" data-module="purchase-return-detail">采购退货明细</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('internal-usage-detail')" data-module="internal-usage-detail">内部领用明细</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('inventory-check-detail')" data-module="inventory-check-detail">盘盈盘亏明细</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('parts-sales-detail')" data-module="parts-sales-detail" data-roles="超级管理员">配件销售明细(备用)</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('purchase-return-detail')" data-module="purchase-return-detail" data-roles="超级管理员">采购退货明细(备用)</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('internal-usage-detail')" data-module="internal-usage-detail" data-roles="超级管理员">内部领用明细(备用)</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('inventory-check-detail')" data-module="inventory-check-detail" data-roles="超级管理员">盘盈盘亏明细(备用)</div>
           </div>
         </div>
       </div>
@@ -773,7 +773,6 @@
             <!-- 表 1：基本信息 -->
             <table class="desc-tbl">
               <tbody>
-                <tr><th>报表名称</th><td>维修统计查询（原名：综合查询维修情况）</td></tr>
                 <tr><th>数据范围</th><td>门店级维修费用明细，含各账类配件 / 工时 / 附加 / 其他费用及汇总</td></tr>
                 <tr><th>冻结列</th><td>「序号」「门店名称」「门店编码」「维修工单号」横向滚动时固定</td></tr>
               </tbody>
