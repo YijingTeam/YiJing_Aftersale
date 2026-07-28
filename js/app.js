@@ -42,12 +42,28 @@
     document.querySelectorAll('.submenu-item').forEach(item => {
       // 检查是否有嵌套子菜单
       if (item.nextElementSibling && item.nextElementSibling.classList.contains('submenu-nested')) {
+        // 标记有子菜单（触发 flex 布局）
+        item.classList.add('has-submenu');
+        // 动态注入展开/收起箭头
+        var subArrow = document.createElement('span');
+        subArrow.className = 'nav-arrow';
+        item.appendChild(subArrow);
+        // 初始箭头状态：子菜单已展开则箭头朝上
+        if (item.nextElementSibling.classList.contains('open')) {
+          subArrow.style.transform = 'rotate(180deg)';
+        }
         // 给有嵌套子菜单的项添加展开/收起功能
         item.addEventListener('click', function(e) {
           e.stopPropagation();
           const nestedSubmenu = this.nextElementSibling;
           if (nestedSubmenu && nestedSubmenu.classList.contains('submenu-nested')) {
             nestedSubmenu.classList.toggle('open');
+            // 旋转箭头
+            var itemArrow = this.querySelector('.nav-arrow');
+            if (itemArrow) {
+              itemArrow.style.transform = nestedSubmenu.classList.contains('open')
+                ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
           }
         });
       }
@@ -96,6 +112,14 @@
         if (module === 'parts-inventory-ledger') {
           initPin();
         }
+        // 如果是出入库配件查询，初始化
+        if (module === 'parts-io-query') {
+          initPio();
+        }
+        // 如果是出入库单据查询，初始化
+        if (module === 'parts-io-doc-query') {
+          initPiod();
+        }
         // 如果是维修领用明细，初始化
         if (module === 'repair-requisition-detail') {
           initRrd();
@@ -143,6 +167,14 @@
         if (module === 'quality-report-template') {
           initQrt();
         }
+        // 归档分类配置（总部）
+        if (module === 'archive-category') {
+          initArchiveCategory();
+        }
+        // 归档分类配置2（总部，仿故障树三列联列）
+        if (module === 'archive-category2') {
+          initArchiveCategory2();
+        }
         // 质量报告
         if (module === 'quality-report') {
           initQr();
@@ -150,6 +182,14 @@
         // 配件采购
         if (module === 'parts-procurement') {
           initPp();
+        }
+        // 常用件建储维护
+        if (module === 'common-stock-maintain') {
+          initCommonStockMaintain();
+        }
+        // 常用件建储情况（6.2）
+        if (module === 'common-stock') {
+          initCommonStock();
         }
         // 配件采购明细
         if (module === 'parts-procurement-detail') {
@@ -171,6 +211,17 @@
         if (module === 'repair-stats-query') {
           initRepairStatsQuery();
         }
+        // ===== 新增 10 个配件管理菜单（奕境0725） =====
+        if (module === 'external-part-name') { initExternalPartName(); }
+        if (module === 'part-combo') { initPartCombo(); }
+        if (module === 'stock-limit') { initStockLimit(); }
+        if (module === 'min-order-amount') { initMinOrderAmount(); }
+        if (module === 'order-calendar') { initOrderCalendar(); }
+        if (module === 'parts-return') { initPartsReturn(); }
+        if (module === 'account-balance') { initAccountBalance(); }
+        if (module === 'shortage-order') { initShortageOrder(); }
+        if (module === 'shortage-allocation') { initShortageAllocation(); }
+        if (module === 'shortage-allocation-history') { initShortageAllocationHistory(); }
       }
     }
 
@@ -805,6 +856,8 @@
     // ⚠ 修改此处即可统一控制所有模块的默认显示数量
     var TS_SHOW_COUNT  = 7; // 技术支持
     var PIN_SHOW_COUNT = 7; // 维修领用明细
+    var PIO_SHOW_COUNT = 7; // 出入库配件查询（共10个筛选项，>7默认收起，显示前7个，余下门店/大区/小区展开可见）
+    var PIOD_SHOW_COUNT = 7; // 出入库单据查询（共8个筛选项，>7默认收起，显示前7个，余下门店展开可见）
     var RRD_SHOW_COUNT = 7; // 配件销售明细
     var PSD_SHOW_COUNT  = 7; // 采购建议单
     var PRD_SHOW_COUNT = 7; // 采购入库单
@@ -960,14 +1013,14 @@
       {id:2, code:'P001002', name:'空气滤清器', unit:'个', series:'奕境S', model:'奕境S 2024款', category:'消耗件', storeName:'北京朝阳店', storeCode:'BJ001', price:45.00, stock:85, inCount:150, outCount:65, warehouse:'中心仓', region:'华北区', district:'北京区'},
       {id:3, code:'P001003', name:'刹车片', unit:'副', series:'奕境S', model:'奕境S 2024款', category:'易损件', storeName:'上海浦东店', storeCode:'SH001', price:128.00, stock:60, inCount:100, outCount:40, warehouse:'上海仓', region:'华东区', district:'上海区'},
       {id:4, code:'P001004', name:'火花塞', unit:'支', series:'奕境S', model:'奕境S 2024款', category:'易损件', storeName:'上海浦东店', storeCode:'SH001', price:25.00, stock:200, inCount:300, outCount:100, warehouse:'上海仓', region:'华东区', district:'上海区'},
-      {id:5, code:'P001005', name:'雨刮器', unit:'副', series:'奕境S', model:'奕境S 2024款', category:'易损件', storeName:'广州天河店', storeCode:'GZ001', price:68.00, stock:45, inCount:80, outCount:35, warehouse:'广州仓', region:'华南区', district:'广州区'},
+      {id:5, code:'P001005', name:'雨刮器', unit:'副', series:'奕境S', model:'奕境S 2024款', category:'易损件', storeName:'广州天河店', storeCode:'GZ001', price:68.00, stock:45, inCount:80, outCount:0, warehouse:'广州仓', region:'华南区', district:'广州区'},
       {id:6, code:'P001006', name:'机油', unit:'升', series:'奕境S', model:'奕境S 2024款', category:'保养件', storeName:'广州天河店', storeCode:'GZ001', price:85.00, stock:300, inCount:500, outCount:200, warehouse:'广州仓', region:'华南区', district:'广州区'},
       {id:7, code:'P001007', name:'变速箱油', unit:'升', series:'奕境S', model:'奕境S 2024款', category:'保养件', storeName:'北京朝阳店', storeCode:'BJ001', price:120.00, stock:50, inCount:80, outCount:30, warehouse:'中心仓', region:'华北区', district:'北京区'},
-      {id:8, code:'P001008', name:'减震器', unit:'支', series:'奕境S', model:'奕境S 2024款', category:'维修件', storeName:'上海浦东店', storeCode:'SH001', price:280.00, stock:30, inCount:50, outCount:20, warehouse:'上海仓', region:'华东区', district:'上海区'},
+      {id:8, code:'P001008', name:'减震器', unit:'支', series:'奕境S', model:'奕境S 2024款', category:'维修件', storeName:'上海浦东店', storeCode:'SH001', price:280.00, stock:30, inCount:0, outCount:20, warehouse:'上海仓', region:'华东区', district:'上海区'},
       {id:9, code:'P001009', name:'轮胎', unit:'条', series:'奕境S', model:'奕境S 2024款', category:'易损件', storeName:'广州天河店', storeCode:'GZ001', price:450.00, stock:40, inCount:60, outCount:20, warehouse:'广州仓', region:'华南区', district:'广州区'},
       {id:10, code:'P001010', name:'电瓶', unit:'个', series:'奕境S', model:'奕境S 2024款', category:'维修件', storeName:'北京朝阳店', storeCode:'BJ001', price:580.00, stock:25, inCount:40, outCount:15, warehouse:'中心仓', region:'华北区', district:'北京区'},
       {id:11, code:'P001011', name:'空调滤芯', unit:'个', series:'奕境S', model:'奕境S 2024款', category:'消耗件', storeName:'上海浦东店', storeCode:'SH001', price:55.00, stock:90, inCount:120, outCount:30, warehouse:'上海仓', region:'华东区', district:'上海区'},
-      {id:12, code:'P001012', name:'刹车盘', unit:'片', series:'奕境S', model:'奕境S 2024款', category:'易损件', storeName:'广州天河店', storeCode:'GZ001', price:180.00, stock:35, inCount:50, outCount:15, warehouse:'广州仓', region:'华南区', district:'广州区'},
+      {id:12, code:'P001012', name:'刹车盘', unit:'片', series:'奕境S', model:'奕境S 2024款', category:'易损件', storeName:'广州天河店', storeCode:'GZ001', price:180.00, stock:35, inCount:0, outCount:0, warehouse:'广州仓', region:'华南区', district:'广州区'},
       {id:13, code:'P001013', name:'转向助力油', unit:'升', series:'奕境S', model:'奕境S 2024款', category:'保养件', storeName:'北京朝阳店', storeCode:'BJ001', price:65.00, stock:70, inCount:100, outCount:30, warehouse:'中心仓', region:'华北区', district:'北京区'},
       {id:14, code:'P001014', name:'离合器片', unit:'片', series:'奕境S', model:'奕境S 2024款', category:'维修件', storeName:'上海浦东店', storeCode:'SH001', price:320.00, stock:20, inCount:30, outCount:10, warehouse:'上海仓', region:'华东区', district:'上海区'},
       {id:15, code:'P001015', name:'防冻液', unit:'升', series:'奕境S', model:'奕境S 2024款', category:'保养件', storeName:'广州天河店', storeCode:'GZ001', price:48.00, stock:150, inCount:200, outCount:50, warehouse:'广州仓', region:'华南区', district:'广州区'},
@@ -1054,7 +1107,11 @@
         if (series && !row.series.toLowerCase().includes(series)) return false;
         if (model && !row.model.toLowerCase().includes(model)) return false;
         if (warehouse && row.warehouse !== warehouse) return false;
-        if (record && row.record !== record) return false;
+        if (record) {
+          if (record === 'inout' && !(row.inCount > 0 || row.outCount > 0)) return false; // 有出入库记录
+          if (record === 'out' && !(row.outCount > 0)) return false;                      // 有出库记录
+          if (record === 'in' && !(row.inCount > 0)) return false;                        // 有入库记录
+        }
         if (region && !row.region.toLowerCase().includes(region)) return false;
         if (district && !row.district.toLowerCase().includes(district)) return false;
         if (store && !row.storeName.toLowerCase().includes(store)) return false;
@@ -1154,6 +1211,424 @@
       pinFilteredData = [...pinAllData];
       pinRenderTable();
       initFilterGrid('pin-filterGrid', PIN_SHOW_COUNT);
+    }
+
+    // ===== 出入库配件查询 JS =====
+    var pioAllData = [
+      {code:'P001001', name:'机油滤清器', orderNo:'IO2024010001', ioType:'主机厂采购入库', sourceNo:'PO2024010001', plate:'', unit:'奕境', variety:3, qty:200, amount:1050.00, person:'张三', time:'2024-01-15 09:30:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:5.25, uom:'EA'},
+      {code:'P001002', name:'空气滤清器', orderNo:'IO2024010002', ioType:'主机厂采购退货', sourceNo:'PO2023120088', plate:'', unit:'北京朝阳店', variety:2, qty:50, amount:225.00, person:'张三', time:'2024-01-16 14:10:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:4.50, uom:'EA'},
+      {code:'P001003', name:'刹车片', orderNo:'IO2024010003', ioType:'外采入库', sourceNo:'EP2024010031', plate:'', unit:'外采供应商', variety:5, qty:120, amount:15360.00, person:'李四', time:'2024-01-17 10:05:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:128.00, uom:'EA'},
+      {code:'P001004', name:'火花塞', orderNo:'IO2024010004', ioType:'外采退货', sourceNo:'EP2024010031', plate:'', unit:'上海浦东店', variety:1, qty:20, amount:500.00, person:'李四', time:'2024-01-18 16:20:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:25.00, uom:'EA'},
+      {code:'P001005', name:'雨刮器', orderNo:'IO2024010005', ioType:'维修出库', sourceNo:'RO2024010201', plate:'京A12345', unit:'客户', variety:1, qty:2, amount:136.00, person:'王五', time:'2024-01-19 11:40:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:68.00, uom:'EA'},
+      {code:'P001006', name:'机油', orderNo:'IO2024010006', ioType:'维修退料', sourceNo:'RO2024010201', plate:'京A12345', unit:'北京朝阳店', variety:1, qty:1, amount:85.00, person:'王五', time:'2024-01-19 15:00:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:85.00, uom:'L'},
+      {code:'P001007', name:'变速箱油', orderNo:'IO2024010007', ioType:'个销出库', sourceNo:'SO2024010101', plate:'沪B88888', unit:'客户', variety:2, qty:4, amount:480.00, person:'赵六', time:'2024-01-20 09:15:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:120.00, uom:'L'},
+      {code:'P001008', name:'减震器', orderNo:'IO2024010008', ioType:'个销退货', sourceNo:'SO2024010101', plate:'沪B88888', unit:'上海浦东店', variety:1, qty:2, amount:560.00, person:'赵六', time:'2024-01-20 13:30:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:280.00, uom:'EA'},
+      {code:'P001009', name:'轮胎', orderNo:'IO2024010009', ioType:'店销出库', sourceNo:'DS2024010501', plate:'粤C66666', unit:'上海浦东店', variety:4, qty:4, amount:1800.00, person:'孙七', time:'2024-01-21 10:50:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:450.00, uom:'EA'},
+      {code:'P001010', name:'电瓶', orderNo:'IO2024010010', ioType:'店销入库', sourceNo:'DS2024010501', plate:'', unit:'广州天河店', variety:3, qty:3, amount:1740.00, person:'孙七', time:'2024-01-21 14:25:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:580.00, uom:'EA'},
+      {code:'P001011', name:'空调滤芯', orderNo:'IO2024010011', ioType:'店销退货出库', sourceNo:'DS2024010502', plate:'粤C66666', unit:'广州天河店', variety:2, qty:2, amount:110.00, person:'周八', time:'2024-01-22 09:05:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:55.00, uom:'EA'},
+      {code:'P001012', name:'刹车盘', orderNo:'IO2024010012', ioType:'店销退货入库', sourceNo:'DS2024010502', plate:'', unit:'上海浦东店', variety:1, qty:1, amount:180.00, person:'周八', time:'2024-01-22 11:40:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:180.00, uom:'EA'},
+      {code:'P001013', name:'转向助力油', orderNo:'IO2024010013', ioType:'内部领用出库', sourceNo:'IL2024010001', plate:'', unit:'门店申请人', variety:1, qty:3, amount:195.00, person:'吴九', time:'2024-01-23 15:55:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:65.00, uom:'L'},
+      {code:'P001014', name:'离合器片', orderNo:'IO2024010014', ioType:'内部领用退还', sourceNo:'IL2024010001', plate:'', unit:'北京朝阳店', variety:1, qty:1, amount:320.00, person:'吴九', time:'2024-01-23 17:10:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:320.00, uom:'EA'},
+      {code:'P001015', name:'防冻液', orderNo:'IO2024010015', ioType:'报废出库', sourceNo:'SC2024010001', plate:'', unit:'门店申请人', variety:2, qty:5, amount:240.00, person:'郑十', time:'2024-01-24 08:30:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:48.00, uom:'L'},
+      {code:'P001016', name:'传动皮带', orderNo:'IO2024010016', ioType:'盘盈入库', sourceNo:'PY2024010001', plate:'', unit:'北京朝阳店', variety:1, qty:6, amount:570.00, person:'张三', time:'2024-01-25 10:00:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:95.00, uom:'EA'},
+      {code:'P001017', name:'燃油滤清器', orderNo:'IO2024010017', ioType:'盘亏出库', sourceNo:'PK2024010001', plate:'', unit:'北京朝阳店', variety:1, qty:2, amount:76.00, person:'张三', time:'2024-01-25 11:20:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:38.00, uom:'EA'},
+      {code:'P001018', name:'氧传感器', orderNo:'IO2024020001', ioType:'主机厂采购入库', sourceNo:'PO2024020001', plate:'', unit:'奕境', variety:2, qty:60, amount:13200.00, person:'李四', time:'2024-02-01 09:45:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:220.00, uom:'EA'},
+      {code:'P001019', name:'正时皮带', orderNo:'IO2024020002', ioType:'维修出库', sourceNo:'RO2024020102', plate:'沪D22222', unit:'客户', variety:1, qty:1, amount:180.00, person:'王五', time:'2024-02-02 14:30:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:180.00, uom:'EA'},
+      {code:'P001020', name:'玻璃水', orderNo:'IO2024020003', ioType:'个销出库', sourceNo:'SO2024020102', plate:'粤E33333', unit:'客户', variety:3, qty:10, amount:150.00, person:'赵六', time:'2024-02-03 10:10:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:15.00, uom:'L'},
+      {code:'P001021', name:'灯泡', orderNo:'IO2024020004', ioType:'店销出库', sourceNo:'DS2024020503', plate:'粤F44444', unit:'深圳南山店', variety:2, qty:5, amount:140.00, person:'孙七', time:'2024-02-04 09:20:00', region:'西南区', district:'深圳区', storeName:'深圳南山店', storeCode:'SZ-NS-001', unitPrice:28.00, uom:'EA'},
+      {code:'P001022', name:'刹车油', orderNo:'IO2024020005', ioType:'外采入库', sourceNo:'EP2024020032', plate:'', unit:'外采供应商', variety:4, qty:80, amount:6000.00, person:'李四', time:'2024-02-05 15:40:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:75.00, uom:'L'},
+      {code:'P001023', name:'轮毂轴承', orderNo:'IO2024020006', ioType:'维修出库', sourceNo:'RO2024020103', plate:'京G55555', unit:'客户', variety:1, qty:2, amount:300.00, person:'王五', time:'2024-02-06 11:05:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:150.00, uom:'EA'},
+      {code:'P001024', name:'密封垫', orderNo:'IO2024020007', ioType:'店销入库', sourceNo:'DS2024020504', plate:'', unit:'北京朝阳店', variety:3, qty:9, amount:108.00, person:'周八', time:'2024-02-07 13:55:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:12.00, uom:'EA'},
+      {code:'P001025', name:'冷却液', orderNo:'IO2024020008', ioType:'盘亏出库', sourceNo:'PK2024020002', plate:'', unit:'上海浦东店', variety:1, qty:3, amount:165.00, person:'张三', time:'2024-02-08 16:15:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:55.00, uom:'L'}
+    ];
+    var pioFilteredData = [];
+    var pioCurrentPage = 1;
+    var pioPageSize = 20;
+    var pioFilterExpanded = false;
+    var pioInitialized = false;
+
+    function pioRenderTable() {
+      var start = (pioCurrentPage - 1) * pioPageSize;
+      var pageData = pioFilteredData.slice(start, start + pioPageSize);
+      var tbody = document.getElementById('pio-tbody');
+      tbody.innerHTML = pageData.map(function(row, idx) {
+        var plate = row.plate ? (row.plate.slice(0, 2) + '****' + row.plate.slice(-1)) : '';
+        var unitDisp = row.unit === '客户' ? '客*' : row.unit;
+        var seq = (pioCurrentPage - 1) * pioPageSize + idx + 1;
+        return '<tr>' +
+          '<td class="sticky col-sn">' + seq + '</td>' +
+          '<td class="sticky col-code">' + row.code + '</td>' +
+          '<td class="sticky col-name">' + row.name + '</td>' +
+          '<td class="col-storename">' + row.storeName + '</td>' +
+          '<td class="col-storecode">' + row.storeCode + '</td>' +
+          '<td class="col-orderno">' + row.orderNo + '</td>' +
+          '<td class="col-type">' + row.ioType + '</td>' +
+          '<td class="col-sourceno">' + row.sourceNo + '</td>' +
+          '<td class="col-plate">' + plate + '</td>' +
+          '<td class="col-unit">' + unitDisp + '</td>' +
+          '<td class="col-unit-price">' + row.unitPrice.toFixed(2) + '</td>' +
+          '<td class="col-qty">' + row.qty + '</td>' +
+          '<td class="col-uom">' + row.uom + '</td>' +
+          '<td class="col-amount">' + row.amount.toFixed(2) + '</td>' +
+          '<td class="col-person">' + row.person + '</td>' +
+          '<td class="col-time">' + row.time + '</td>' +
+          '</tr>';
+      }).join('');
+      var total = pioFilteredData.length;
+      document.getElementById('pio-pg-total').textContent = '共 ' + total + ' 条';
+      pioRenderPages();
+    }
+
+    function pioRenderPages() {
+      var totalPages = Math.ceil(pioFilteredData.length / pioPageSize) || 1;
+      var pages = document.getElementById('pio-pg-pages');
+      var html = '';
+      for (var i = 1; i <= totalPages; i++) {
+        html += i === pioCurrentPage
+          ? '<button class="active" onclick="pioGoPage(' + i + ')">' + i + '</button>'
+          : '<button onclick="pioGoPage(' + i + ')">' + i + '</button>';
+      }
+      pages.innerHTML = html;
+      document.getElementById('pio-pg-prev').disabled = pioCurrentPage === 1;
+      document.getElementById('pio-pg-next').disabled = pioCurrentPage >= totalPages;
+    }
+
+    function pioGoPage(p) { pioCurrentPage = p; pioRenderTable(); }
+    function pioChangePage(delta) { pioGoPage(Math.max(1, Math.min(pioCurrentPage + delta, Math.ceil(pioFilteredData.length / pioPageSize) || 1))); }
+    function pioChangePageSize(size) { pioPageSize = parseInt(size); pioCurrentPage = 1; pioRenderTable(); }
+    function pioGotoPage(v) { var p = parseInt(v); if (p) pioGoPage(p); }
+
+    function pioApplyFilter() {
+      var region = (document.getElementById('pio-flt-region').value || '').trim().toLowerCase();
+      var district = (document.getElementById('pio-flt-district').value || '').trim().toLowerCase();
+      var store = (document.getElementById('pio-flt-store').value || '').trim().toLowerCase();
+      var code = (document.getElementById('pio-flt-code').value || '').trim().toLowerCase();
+      var name = (document.getElementById('pio-flt-name').value || '').trim().toLowerCase();
+      var orderNo = (document.getElementById('pio-flt-orderno').value || '').trim().toLowerCase();
+      var type = (document.getElementById('pio-flt-type').value || '').trim().toLowerCase();
+      var sourceNo = (document.getElementById('pio-flt-sourceno').value || '').trim().toLowerCase();
+      var dateStart = document.getElementById('pio-flt-datestart').value;
+      var dateEnd = document.getElementById('pio-flt-dateend').value;
+      var unit = (document.getElementById('pio-flt-unit').value || '').trim().toLowerCase();
+
+      pioFilteredData = pioAllData.filter(function(row) {
+        if (region && !row.region.toLowerCase().includes(region)) return false;
+        if (district && !row.district.toLowerCase().includes(district)) return false;
+        if (store && !row.storeName.toLowerCase().includes(store)) return false;
+        if (code && !row.code.toLowerCase().includes(code)) return false;
+        if (name && !row.name.toLowerCase().includes(name)) return false;
+        if (orderNo && !row.orderNo.toLowerCase().includes(orderNo)) return false;
+        if (type && !row.ioType.toLowerCase().includes(type)) return false;
+        if (sourceNo && !row.sourceNo.toLowerCase().includes(sourceNo)) return false;
+        if (unit && !row.unit.toLowerCase().includes(unit)) return false;
+        if (dateStart && row.time.slice(0, 10) < dateStart) return false;
+        if (dateEnd && row.time.slice(0, 10) > dateEnd) return false;
+        return true;
+      });
+      pioCurrentPage = 1;
+      pioRenderTable();
+    }
+
+    function pioResetFilter() {
+      document.getElementById('pio-flt-region').value = '';
+      document.getElementById('pio-flt-district').value = '';
+      document.getElementById('pio-flt-store').value = '';
+      document.getElementById('pio-flt-code').value = '';
+      document.getElementById('pio-flt-name').value = '';
+      document.getElementById('pio-flt-orderno').value = '';
+      document.getElementById('pio-flt-type').value = '';
+      document.getElementById('pio-flt-sourceno').value = '';
+      document.getElementById('pio-flt-datestart').value = '';
+      document.getElementById('pio-flt-dateend').value = '';
+      document.getElementById('pio-flt-unit').value = '';
+      var textEl = document.querySelector('#page-parts-io-query .lt-date-range-text');
+      if (textEl) textEl.value = '';
+      pioFilteredData = [...pioAllData];
+      pioCurrentPage = 1;
+      pioRenderTable();
+    }
+
+    function pioExportData() { alert('导出功能 - 将导出当前查询结果的 ' + pioFilteredData.length + ' 条数据'); }
+
+    function pioToggleFilter() { pioFilterExpanded = !pioFilterExpanded; toggleFilterGrid('pio-filterGrid', pioFilterExpanded, PIO_SHOW_COUNT); }
+
+    // Combobox 通用辅助函数
+    function pioFilterCombobox(input) {
+      var wrap = input.closest('.lt-input-wrap.combobox');
+      if (!wrap) return;
+      var list = wrap.querySelector('.lt-datalist');
+      if (!list) return;
+      var val = input.value.toLowerCase();
+      var items = list.querySelectorAll('li');
+      items.forEach(function(item) {
+        var match = item.textContent.toLowerCase().includes(val);
+        item.classList.toggle('hidden', !match);
+      });
+    }
+    function pioShowCombobox(input) {
+      var wrap = input.closest('.lt-input-wrap.combobox');
+      if (!wrap) return;
+      var list = wrap.querySelector('.lt-datalist');
+      if (list) list.classList.add('show');
+    }
+    function pioToggleCombobox(arrow) {
+      var wrap = arrow.closest('.lt-input-wrap.combobox');
+      if (!wrap) return;
+      var list = wrap.querySelector('.lt-datalist');
+      if (!list) return;
+      list.classList.toggle('show');
+      if (list.classList.contains('show')) {
+        var input = wrap.querySelector('input');
+        if (input) input.focus();
+      }
+    }
+    function pioSelectCombobox(li) {
+      var wrap = li.closest('.lt-input-wrap.combobox');
+      if (!wrap) return;
+      var input = wrap.querySelector('input');
+      var list = wrap.querySelector('.lt-datalist');
+      if (input) input.value = li.textContent;
+      if (list) list.classList.remove('show');
+      pioApplyFilter();
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.lt-input-wrap.combobox')) {
+        document.querySelectorAll('#page-parts-io-query .lt-datalist.show').forEach(function(l) { l.classList.remove('show'); });
+      }
+    });
+
+    // 初始化函数
+    function initPio() {
+      if (!pioInitialized) {
+        pioInitialized = true;
+        var now = new Date();
+        var startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        if (startDate.getMonth() !== ((now.getMonth() - 1 + 12) % 12)) {
+          startDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        }
+        var ds = startDate.toISOString().split('T')[0];
+        var de = now.toISOString().split('T')[0];
+        var startEl = document.getElementById('pio-flt-datestart');
+        var endEl = document.getElementById('pio-flt-dateend');
+        if (startEl) startEl.value = ds;
+        if (endEl) endEl.value = de;
+        var textEl = document.querySelector('#page-parts-io-query .lt-date-range-text');
+        if (textEl) textEl.value = ds + '-' + de;
+      }
+        pioFilteredData = [...pioAllData];
+      pioRenderTable();
+      initFilterGrid('pio-filterGrid', PIO_SHOW_COUNT);
+    }
+
+    // ===== 出入库单据查询 JS =====
+    var piodAllData = [
+      {orderNo:'IO2024010001', ioType:'主机厂采购入库', sourceNo:'PO2024010001', unit:'奕境', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:3, qty:200, amount:1050.00, person:'张三', time:'2024-01-15 09:30:00'},
+      {orderNo:'IO2024010002', ioType:'主机厂采购退货', sourceNo:'PO2023120088', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:2, qty:50, amount:225.00, person:'张三', time:'2024-01-16 14:10:00'},
+      {orderNo:'IO2024010003', ioType:'外采入库', sourceNo:'EP2024010031', unit:'外采供应商', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:5, qty:120, amount:15360.00, person:'李四', time:'2024-01-17 10:05:00'},
+      {orderNo:'IO2024010004', ioType:'外采退货', sourceNo:'EP2024010031', unit:'上海浦东店', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:1, qty:20, amount:500.00, person:'李四', time:'2024-01-18 16:20:00'},
+      {orderNo:'IO2024010005', ioType:'维修出库', sourceNo:'RO2024010201', unit:'客户', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:2, amount:136.00, person:'王五', time:'2024-01-19 11:40:00'},
+      {orderNo:'IO2024010006', ioType:'维修退料', sourceNo:'RO2024010201', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:1, amount:85.00, person:'王五', time:'2024-01-19 15:00:00'},
+      {orderNo:'IO2024010007', ioType:'个销出库', sourceNo:'SO2024010101', unit:'客户', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:2, qty:4, amount:480.00, person:'赵六', time:'2024-01-20 09:15:00'},
+      {orderNo:'IO2024010008', ioType:'个销退货', sourceNo:'SO2024010101', unit:'上海浦东店', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:1, qty:2, amount:560.00, person:'赵六', time:'2024-01-20 13:30:00'},
+      {orderNo:'IO2024010009', ioType:'店销出库', sourceNo:'DS2024010501', unit:'上海浦东店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:4, qty:4, amount:1800.00, person:'孙七', time:'2024-01-21 10:50:00'},
+      {orderNo:'IO2024010010', ioType:'店销入库', sourceNo:'DS2024010501', unit:'广州天河店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:3, qty:3, amount:1740.00, person:'孙七', time:'2024-01-21 14:25:00'},
+      {orderNo:'IO2024010011', ioType:'店销退货出库', sourceNo:'DS2024010502', unit:'广州天河店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:2, qty:2, amount:110.00, person:'周八', time:'2024-01-22 09:05:00'},
+      {orderNo:'IO2024010012', ioType:'店销退货入库', sourceNo:'DS2024010502', unit:'上海浦东店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:1, qty:1, amount:180.00, person:'周八', time:'2024-01-22 11:40:00'},
+      {orderNo:'IO2024010013', ioType:'内部领用出库', sourceNo:'IL2024010001', unit:'门店申请人', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:3, amount:195.00, person:'吴九', time:'2024-01-23 15:55:00'},
+      {orderNo:'IO2024010014', ioType:'内部领用退还', sourceNo:'IL2024010001', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:1, amount:320.00, person:'吴九', time:'2024-01-23 17:10:00'},
+      {orderNo:'IO2024010015', ioType:'报废出库', sourceNo:'SC2024010001', unit:'门店申请人', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:2, qty:5, amount:240.00, person:'郑十', time:'2024-01-24 08:30:00'},
+      {orderNo:'IO2024010016', ioType:'盘盈入库', sourceNo:'PY2024010001', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:6, amount:570.00, person:'张三', time:'2024-01-25 10:00:00'},
+      {orderNo:'IO2024010017', ioType:'盘亏出库', sourceNo:'PK2024010001', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:2, amount:76.00, person:'张三', time:'2024-01-25 11:20:00'},
+      {orderNo:'IO2024020001', ioType:'主机厂采购入库', sourceNo:'PO2024020001', unit:'奕境', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:2, qty:60, amount:13200.00, person:'李四', time:'2024-02-01 09:45:00'},
+      {orderNo:'IO2024020002', ioType:'维修出库', sourceNo:'RO2024020102', unit:'客户', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:1, qty:1, amount:180.00, person:'王五', time:'2024-02-02 14:30:00'},
+      {orderNo:'IO2024020003', ioType:'个销出库', sourceNo:'SO2024020102', unit:'客户', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:3, qty:10, amount:150.00, person:'赵六', time:'2024-02-03 10:10:00'},
+      {orderNo:'IO2024020004', ioType:'店销出库', sourceNo:'DS2024020503', unit:'深圳南山店', region:'西南区', district:'深圳区', storeName:'深圳南山店', storeCode:'SZ-NS-001', variety:2, qty:5, amount:140.00, person:'孙七', time:'2024-02-04 09:20:00'},
+      {orderNo:'IO2024020005', ioType:'外采入库', sourceNo:'EP2024020032', unit:'外采供应商', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:4, qty:80, amount:6000.00, person:'李四', time:'2024-02-05 15:40:00'},
+      {orderNo:'IO2024020006', ioType:'维修出库', sourceNo:'RO2024020103', unit:'客户', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:2, amount:300.00, person:'王五', time:'2024-02-06 11:05:00'},
+      {orderNo:'IO2024020007', ioType:'店销入库', sourceNo:'DS2024020504', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:3, qty:9, amount:108.00, person:'周八', time:'2024-02-07 13:55:00'},
+      {orderNo:'IO2024020008', ioType:'盘亏出库', sourceNo:'PK2024020002', unit:'上海浦东店', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:1, qty:3, amount:165.00, person:'张三', time:'2024-02-08 16:15:00'}
+    ];
+    var piodFilteredData = [];
+    var piodCurrentPage = 1;
+    var piodPageSize = 20;
+    var piodFilterExpanded = false;
+    var piodInitialized = false;
+
+    function piodRenderTable() {
+      var start = (piodCurrentPage - 1) * piodPageSize;
+      var pageData = piodFilteredData.slice(start, start + piodPageSize);
+      var tbody = document.getElementById('piod-tbody');
+      tbody.innerHTML = pageData.map(function(row, idx) {
+        var unitDisp = row.unit === '客户' ? '客*' : row.unit;
+        var seq = (piodCurrentPage - 1) * piodPageSize + idx + 1;
+        return '<tr>' +
+          '<td class="sticky col-sn">' + seq + '</td>' +
+          '<td class="sticky col-orderno"><a style="color:#185FA5;cursor:pointer" onclick="piodViewDetail(\'' + row.orderNo + '\')">' + row.orderNo + '</a></td>' +
+          '<td class="col-storename">' + row.storeName + '</td>' +
+          '<td class="col-storecode">' + row.storeCode + '</td>' +
+          '<td class="col-type">' + row.ioType + '</td>' +
+          '<td class="col-sourceno">' + row.sourceNo + '</td>' +
+          '<td class="col-unit">' + unitDisp + '</td>' +
+          '<td class="col-variety">' + row.variety + '</td>' +
+          '<td class="col-qty">' + row.qty + '</td>' +
+          '<td class="col-amount">' + row.amount.toFixed(2) + '</td>' +
+          '<td class="col-person">' + row.person + '</td>' +
+          '<td class="col-time">' + row.time + '</td>' +
+          '</tr>';
+      }).join('');
+      var total = piodFilteredData.length;
+      document.getElementById('piod-pg-total').textContent = '共 ' + total + ' 条';
+      piodRenderPages();
+    }
+
+    function piodRenderPages() {
+      var totalPages = Math.ceil(piodFilteredData.length / piodPageSize) || 1;
+      var pages = document.getElementById('piod-pg-pages');
+      var html = '';
+      for (var i = 1; i <= totalPages; i++) {
+        html += i === piodCurrentPage
+          ? '<button class="active" onclick="piodGoPage(' + i + ')">' + i + '</button>'
+          : '<button onclick="piodGoPage(' + i + ')">' + i + '</button>';
+      }
+      pages.innerHTML = html;
+      document.getElementById('piod-pg-prev').disabled = piodCurrentPage === 1;
+      document.getElementById('piod-pg-next').disabled = piodCurrentPage >= totalPages;
+    }
+
+    function piodGoPage(p) { piodCurrentPage = p; piodRenderTable(); }
+    function piodChangePage(delta) { piodGoPage(Math.max(1, Math.min(piodCurrentPage + delta, Math.ceil(piodFilteredData.length / piodPageSize) || 1))); }
+    function piodChangePageSize(size) { piodPageSize = parseInt(size); piodCurrentPage = 1; piodRenderTable(); }
+    function piodGotoPage(v) { var p = parseInt(v); if (p) piodGoPage(p); }
+
+    function piodApplyFilter() {
+      var orderNo = (document.getElementById('piod-flt-orderno').value || '').trim().toLowerCase();
+      var type = (document.getElementById('piod-flt-type').value || '').trim().toLowerCase();
+      var sourceNo = (document.getElementById('piod-flt-sourceno').value || '').trim().toLowerCase();
+      var dateStart = document.getElementById('piod-flt-datestart').value;
+      var dateEnd = document.getElementById('piod-flt-dateend').value;
+      var unit = (document.getElementById('piod-flt-unit').value || '').trim().toLowerCase();
+      var region = (document.getElementById('piod-flt-region').value || '').trim().toLowerCase();
+      var district = (document.getElementById('piod-flt-district').value || '').trim().toLowerCase();
+      var store = (document.getElementById('piod-flt-store').value || '').trim().toLowerCase();
+
+      piodFilteredData = piodAllData.filter(function(row) {
+        if (orderNo && !row.orderNo.toLowerCase().includes(orderNo)) return false;
+        if (type && !row.ioType.toLowerCase().includes(type)) return false;
+        if (sourceNo && !row.sourceNo.toLowerCase().includes(sourceNo)) return false;
+        if (unit && !row.unit.toLowerCase().includes(unit)) return false;
+        if (region && !row.region.toLowerCase().includes(region)) return false;
+        if (district && !row.district.toLowerCase().includes(district)) return false;
+        if (store && !row.storeName.toLowerCase().includes(store)) return false;
+        if (dateStart && row.time.slice(0, 10) < dateStart) return false;
+        if (dateEnd && row.time.slice(0, 10) > dateEnd) return false;
+        return true;
+      });
+      piodCurrentPage = 1;
+      piodRenderTable();
+    }
+
+    function piodResetFilter() {
+      document.getElementById('piod-flt-orderno').value = '';
+      document.getElementById('piod-flt-type').value = '';
+      document.getElementById('piod-flt-sourceno').value = '';
+      document.getElementById('piod-flt-unit').value = '';
+      document.getElementById('piod-flt-region').value = '';
+      document.getElementById('piod-flt-district').value = '';
+      document.getElementById('piod-flt-store').value = '';
+      document.getElementById('piod-flt-datestart').value = '';
+      document.getElementById('piod-flt-dateend').value = '';
+      var textEl = document.querySelector('#page-parts-io-doc-query .lt-date-range-text');
+      if (textEl) textEl.value = '';
+      piodFilteredData = [...piodAllData];
+      piodCurrentPage = 1;
+      piodRenderTable();
+    }
+
+    function piodExportData() { alert('导出功能 - 将导出当前查询结果的 ' + piodFilteredData.length + ' 条数据'); }
+
+    function piodToggleFilter() { piodFilterExpanded = !piodFilterExpanded; toggleFilterGrid('piod-filterGrid', piodFilterExpanded, PIOD_SHOW_COUNT); }
+
+    // Combobox 通用辅助函数
+    function piodFilterCombobox(input) {
+      var wrap = input.closest('.lt-input-wrap.combobox');
+      if (!wrap) return;
+      var list = wrap.querySelector('.lt-datalist');
+      if (!list) return;
+      var val = input.value.toLowerCase();
+      var items = list.querySelectorAll('li');
+      items.forEach(function(item) {
+        var match = item.textContent.toLowerCase().includes(val);
+        item.classList.toggle('hidden', !match);
+      });
+    }
+    function piodShowCombobox(input) {
+      var wrap = input.closest('.lt-input-wrap.combobox');
+      if (!wrap) return;
+      var list = wrap.querySelector('.lt-datalist');
+      if (list) list.classList.add('show');
+    }
+    function piodToggleCombobox(arrow) {
+      var wrap = arrow.closest('.lt-input-wrap.combobox');
+      if (!wrap) return;
+      var list = wrap.querySelector('.lt-datalist');
+      if (!list) return;
+      list.classList.toggle('show');
+      if (list.classList.contains('show')) {
+        var input = wrap.querySelector('input');
+        if (input) input.focus();
+      }
+    }
+    function piodSelectCombobox(li) {
+      var wrap = li.closest('.lt-input-wrap.combobox');
+      if (!wrap) return;
+      var input = wrap.querySelector('input');
+      var list = wrap.querySelector('.lt-datalist');
+      if (input) input.value = li.textContent;
+      if (list) list.classList.remove('show');
+      piodApplyFilter();
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.lt-input-wrap.combobox')) {
+        document.querySelectorAll('#page-parts-io-doc-query .lt-datalist.show').forEach(function(l) { l.classList.remove('show'); });
+      }
+    });
+
+    // 初始化函数
+    function initPiod() {
+      if (!piodInitialized) {
+        piodInitialized = true;
+        // 默认日期范围：覆盖示例数据区间（避免默认"近一月"把 2024 示例数据全部排除导致筛选结果为空）
+        var times = piodAllData.map(function(r) { return r.time.slice(0, 10); }).sort();
+        var ds = times[0];
+        var de = times[times.length - 1];
+        var startEl = document.getElementById('piod-flt-datestart');
+        var endEl = document.getElementById('piod-flt-dateend');
+        if (startEl) startEl.value = ds;
+        if (endEl) endEl.value = de;
+        var textEl = document.querySelector('#page-parts-io-doc-query .lt-date-range-text');
+        if (textEl) textEl.value = ds + '-' + de;
+      }
+      // 单据维度：按出入库时间倒序
+      piodAllData.sort(function(a, b) { return b.time.localeCompare(a.time); });
+      piodFilteredData = [...piodAllData];
+      piodRenderTable();
+      initFilterGrid('piod-filterGrid', PIOD_SHOW_COUNT);
+    }
+
+    // 钻取：点击出入库单号 → 查看出入库明细（配件级，复用 parts-io-query）
+    function piodViewDetail(orderNo) {
+      if (typeof pioResetFilter === 'function') pioResetFilter();
+      document.getElementById('pio-flt-orderno').value = orderNo;
+      showContent('parts-io-query');
+      // 钻取时清空 pio 日期范围：showContent 触发 initPio 会把 pio 日期预填成"近一月"(2026)，
+      // 从而把 2024 示例明细全部排除；清空后仅按单号命中该单据明细
+      var pioDs = document.getElementById('pio-flt-datestart');
+      var pioDe = document.getElementById('pio-flt-dateend');
+      if (pioDs) pioDs.value = '';
+      if (pioDe) pioDe.value = '';
+      var pioText = document.querySelector('#page-parts-io-query .lt-date-range-text');
+      if (pioText) pioText.value = '';
+      pioApplyFilter();
     }
 
     // ===== 维修领用明细 JS =====
@@ -1972,32 +2447,32 @@
 
     // ===== 内部领用明细 JS =====
     var intAllData = [
-      {usageNo:'LY202505001', storeName:'北京朝阳店', storeCode:'BJ001', dept:'维修部', applyPerson:'张三', reason:'维修更换', refNo:'RK202505001', type:'内部领用', partCode:'P001', partName:'机油滤清器', qty:2, price:150.00, amount:300.00, costPrice:85.00, costTotal:170.00, time:'2025-05-20 10:30', picker:'张三', warehouse:'配件仓库A', location:'A01-02', remark:''},
-      {usageNo:'LY202505002', storeName:'上海浦东店', storeCode:'SH001', dept:'保养部', applyPerson:'李四', reason:'定期保养', refNo:'RK202505002', type:'内部领用', partCode:'P002', partName:'刹车片', qty:4, price:150.00, amount:600.00, costPrice:120.00, costTotal:480.00, time:'2025-05-21 14:20', picker:'李四', warehouse:'配件仓库B', location:'B02-01', remark:'急件'},
-      {usageNo:'LY202505003', storeName:'广州天河店', storeCode:'GZ001', dept:'维修部', applyPerson:'王五', reason:'维修更换', refNo:'RK202505003', type:'内部退回', partCode:'P003', partName:'空气滤清器', qty:1, price:0.00, amount:0.00, costPrice:45.00, costTotal:45.00, time:'2025-05-22 09:15', picker:'王五', warehouse:'主仓库', location:'C01-03', remark:'退回入库'},
-      {usageNo:'LY202505004', storeName:'武汉洪山店', storeCode:'WH001', dept:'保养部', applyPerson:'张三', reason:'保养服务', refNo:'RK202505004', type:'内部领用', partCode:'P001', partName:'机油滤清器', qty:3, price:150.00, amount:450.00, costPrice:85.00, costTotal:255.00, time:'2025-05-23 11:40', picker:'张三', warehouse:'主仓库', location:'A01-01', remark:''},
-      {usageNo:'LY202505005', storeName:'深圳南山店', storeCode:'SZ001', dept:'配件部', applyPerson:'李四', reason:'配件领用', refNo:'RK202505005', type:'内部领用', partCode:'P004', partName:'火花塞', qty:8, price:50.00, amount:400.00, costPrice:35.00, costTotal:280.00, time:'2025-05-24 16:30', picker:'李四', warehouse:'配件仓库B', location:'B03-02', remark:'配件领用'},
-      {usageNo:'LY202505006', storeName:'杭州西湖店', storeCode:'HZ001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505006', type:'内部领用', partCode:'P005', partName:'火花塞', qty:5, price:45.00, amount:225.00, costPrice:30.00, costTotal:150.00, time:'2025-05-25 09:15', picker:'赵六', warehouse:'配件仓库C', location:'C02-01', remark:'普通领用'},
-      {usageNo:'LY202505007', storeName:'北京朝阳店', storeCode:'BJ001', dept:'保养部', applyPerson:'钱七', reason:'定期保养', refNo:'RK202505007', type:'内部领用', partCode:'P006', partName:'空调滤清器', qty:2, price:200.00, amount:400.00, costPrice:140.00, costTotal:280.00, time:'2025-05-25 10:45', picker:'钱七', warehouse:'配件仓库A', location:'A01-03', remark:'保养使用'},
-      {usageNo:'LY202505008', storeName:'上海浦东店', storeCode:'SH001', dept:'维修部', applyPerson:'孙八', reason:'维修更换', refNo:'RK202505008', type:'内部领用', partCode:'P007', partName:'机油', qty:4, price:180.00, amount:720.00, costPrice:120.00, costTotal:480.00, time:'2025-05-25 11:20', picker:'孙八', warehouse:'配件仓库B', location:'B01-05', remark:'急件'},
-      {usageNo:'LY202505009', storeName:'广州天河店', storeCode:'GZ001', dept:'配件部', applyPerson:'周九', reason:'配件领用', refNo:'RK202505009', type:'内部领用', partCode:'P008', partName:'雨刷片', qty:6, price:80.00, amount:480.00, costPrice:55.00, costTotal:330.00, time:'2025-05-25 13:30', picker:'周九', warehouse:'配件仓库C', location:'C03-02', remark:'普通领用'},
-      {usageNo:'LY202505010', storeName:'武汉洪山店', storeCode:'WH001', dept:'维修部', applyPerson:'吴十', reason:'维修更换', refNo:'RK202505010', type:'内部领用', partCode:'P009', partName:'电池', qty:1, price:450.00, amount:450.00, costPrice:320.00, costTotal:320.00, time:'2025-05-25 14:15', picker:'吴十', warehouse:'配件仓库A', location:'A02-01', remark:'维修使用'},
-      {usageNo:'LY202505011', storeName:'深圳南山店', storeCode:'SZ001', dept:'保养部', applyPerson:'郑一', reason:'定期保养', refNo:'RK202505011', type:'内部领用', partCode:'P010', partName:'空滤', qty:3, price:60.00, amount:180.00, costPrice:40.00, costTotal:120.00, time:'2025-05-25 15:20', picker:'郑一', warehouse:'配件仓库B', location:'B02-03', remark:'保养更换'},
-      {usageNo:'LY202505012', storeName:'杭州西湖店', storeCode:'HZ001', dept:'维修部', applyPerson:'王二', reason:'维修更换', refNo:'RK202505012', type:'内部领用', partCode:'P011', partName:'刹车油', qty:2, price:120.00, amount:240.00, costPrice:85.00, costTotal:170.00, time:'2025-05-25 16:05', picker:'王二', warehouse:'配件仓库C', location:'C01-05', remark:'维修使用'},
-      {usageNo:'LY202505013', storeName:'北京朝阳店', storeCode:'BJ001', dept:'配件部', applyPerson:'李三', reason:'配件领用', refNo:'RK202505013', type:'内部领用', partCode:'P012', partName:'灯泡', qty:10, price:25.00, amount:250.00, costPrice:18.00, costTotal:180.00, time:'2025-05-25 16:50', picker:'李三', warehouse:'配件仓库A', location:'A03-01', remark:'照明设备'},
-      {usageNo:'LY202505014', storeName:'上海浦东店', storeCode:'SH001', dept:'维修部', applyPerson:'张四', reason:'维修更换', refNo:'RK202505014', type:'内部领用', partCode:'P013', partName:'皮带', qty:2, price:90.00, amount:180.00, costPrice:65.00, costTotal:130.00, time:'2025-05-25 17:25', picker:'张四', warehouse:'配件仓库B', location:'B01-08', remark:'发动机维修'},
-      {usageNo:'LY202505015', storeName:'广州天河店', storeCode:'GZ001', dept:'保养部', applyPerson:'王五', reason:'定期保养', refNo:'RK202505015', type:'内部领用', partCode:'P014', partName:'变速箱油', qty:1, price:280.00, amount:280.00, costPrice:200.00, costTotal:200.00, time:'2025-05-25 18:00', picker:'王五', warehouse:'配件仓库C', location:'C02-05', remark:'保养使用'},
-      {usageNo:'LY202505016', storeName:'武汉洪山店', storeCode:'WH001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505016', type:'内部领用', partCode:'P015', partName:'离合器片', qty:1, price:350.00, amount:350.00, costPrice:250.00, costTotal:250.00, time:'2025-05-25 18:30', picker:'赵六', warehouse:'配件仓库A', location:'A04-02', remark:'变速箱维修'},
-      {usageNo:'LY202505017', storeName:'深圳南山店', storeCode:'SZ001', dept:'配件部', applyPerson:'钱七', reason:'配件领用', refNo:'RK202505017', type:'内部领用', partCode:'P016', partName:'火花塞', qty:4, price:50.00, amount:200.00, costPrice:35.00, costTotal:140.00, time:'2025-05-25 19:15', picker:'钱七', warehouse:'配件仓库B', location:'B03-04', remark:'发动机维修'},
-      {usageNo:'LY202505018', storeName:'杭州西湖店', storeCode:'HZ001', dept:'维修部', applyPerson:'孙八', reason:'维修更换', refNo:'RK202505018', type:'内部领用', partCode:'P017', partName:'刹车片', qty:2, price:150.00, amount:300.00, costPrice:110.00, costTotal:220.00, time:'2025-05-25 20:00', picker:'孙八', warehouse:'配件仓库C', location:'C02-08', remark:'底盘维修'},
-      {usageNo:'LY202505019', storeName:'北京朝阳店', storeCode:'BJ001', dept:'保养部', applyPerson:'周九', reason:'定期保养', refNo:'RK202505019', type:'内部领用', partCode:'P018', partName:'机油滤清器', qty:2, price:150.00, amount:300.00, costPrice:85.00, costTotal:170.00, time:'2025-05-25 20:45', picker:'周九', warehouse:'配件仓库A', location:'A01-04', remark:'保养更换'},
-      {usageNo:'LY202505020', storeName:'上海浦东店', storeCode:'SH001', dept:'配件部', applyPerson:'吴十', reason:'配件领用', refNo:'RK202505020', type:'内部领用', partCode:'P019', partName:'雨刷片', qty:8, price:80.00, amount:640.00, costPrice:55.00, costTotal:440.00, time:'2025-05-25 21:30', picker:'吴十', warehouse:'配件仓库B', location:'B03-06', remark:'外观美容'},
-      {usageNo:'LY202505021', storeName:'广州天河店', storeCode:'GZ001', dept:'维修部', applyPerson:'郑一', reason:'维修更换', refNo:'RK202505021', type:'内部领用', partCode:'P020', partName:'蓄电池', qty:1, price:380.00, amount:380.00, costPrice:270.00, costTotal:270.00, time:'2025-05-25 22:15', picker:'郑一', warehouse:'配件仓库C', location:'C04-01', remark:'电路维修'},
-      {usageNo:'LY202505022', storeName:'武汉洪山店', storeCode:'WH001', dept:'保养部', applyPerson:'李三', reason:'定期保养', refNo:'RK202505022', type:'内部领用', partCode:'P021', partName:'空滤', qty:1, price:60.00, amount:60.00, costPrice:40.00, costTotal:40.00, time:'2025-05-25 23:00', picker:'李三', warehouse:'配件仓库A', location:'A02-03', remark:'保养更换'},
-      {usageNo:'LY202505023', storeName:'深圳南山店', storeCode:'SZ001', dept:'维修部', applyPerson:'张四', reason:'维修更换', refNo:'RK202505023', type:'内部领用', partCode:'P022', partName:'刹车油', qty:3, price:120.00, amount:360.00, costPrice:85.00, costTotal:255.00, time:'2025-05-25 23:45', picker:'张四', warehouse:'配件仓库B', location:'B02-07', remark:'制动系统'},
-      {usageNo:'LY202505024', storeName:'杭州西湖店', storeCode:'HZ001', dept:'配件部', applyPerson:'王五', reason:'配件领用', refNo:'RK202505024', type:'内部领用', partCode:'P023', partName:'灯泡', qty:5, price:25.00, amount:125.00, costPrice:18.00, costTotal:90.00, time:'2025-05-26 00:30', picker:'王五', warehouse:'配件仓库C', location:'C03-05', remark:'照明设备'},
-      {usageNo:'LY202505025', storeName:'北京朝阳店', storeCode:'BJ001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505025', type:'内部领用', partCode:'P024', partName:'皮带', qty:1, price:90.00, amount:90.00, costPrice:65.00, costTotal:65.00, time:'2025-05-26 01:15', picker:'赵六', warehouse:'配件仓库A', location:'A04-04', remark:'发动机维修'},
-      {usageNo:'LY202505026', storeName:'上海浦东店', storeCode:'SH001', dept:'保养部', applyPerson:'钱七', reason:'定期保养', refNo:'RK202505026', type:'内部领用', partCode:'P025', partName:'变速箱油', qty:2, price:280.00, amount:560.00, costPrice:200.00, costTotal:400.00, time:'2025-05-26 02:00', picker:'钱七', warehouse:'配件仓库B', location:'B02-09', remark:'保养使用'}
+      {usageNo:'LY202505001', storeName:'北京朝阳店', storeCode:'BJ001', dept:'维修部', applyPerson:'张三', reason:'维修更换', refNo:'RK202505001', type:'内部领用', partCode:'P001', partName:'机油滤清器', qty:2, price:150.00, amount:300.00, costPrice:85.00, costTotal:170.00, time:'2025-05-20 10:30:00', picker:'张三', warehouse:'配件仓库A', location:'A01-02', remark:''},
+      {usageNo:'LY202505002', storeName:'上海浦东店', storeCode:'SH001', dept:'保养部', applyPerson:'李四', reason:'定期保养', refNo:'RK202505002', type:'内部领用', partCode:'P002', partName:'刹车片', qty:4, price:150.00, amount:600.00, costPrice:120.00, costTotal:480.00, time:'2025-05-21 14:20:00', picker:'李四', warehouse:'配件仓库B', location:'B02-01', remark:'急件'},
+      {usageNo:'LY202505003', storeName:'广州天河店', storeCode:'GZ001', dept:'维修部', applyPerson:'王五', reason:'维修更换', refNo:'RK202505003', type:'内部退回', partCode:'P003', partName:'空气滤清器', qty:1, price:0.00, amount:0.00, costPrice:45.00, costTotal:45.00, time:'2025-05-22 09:15:00', picker:'王五', warehouse:'主仓库', location:'C01-03', remark:'退回入库'},
+      {usageNo:'LY202505004', storeName:'武汉洪山店', storeCode:'WH001', dept:'保养部', applyPerson:'张三', reason:'保养服务', refNo:'RK202505004', type:'内部领用', partCode:'P001', partName:'机油滤清器', qty:3, price:150.00, amount:450.00, costPrice:85.00, costTotal:255.00, time:'2025-05-23 11:40:00', picker:'张三', warehouse:'主仓库', location:'A01-01', remark:''},
+      {usageNo:'LY202505005', storeName:'深圳南山店', storeCode:'SZ001', dept:'配件部', applyPerson:'李四', reason:'配件领用', refNo:'RK202505005', type:'内部领用', partCode:'P004', partName:'火花塞', qty:8, price:50.00, amount:400.00, costPrice:35.00, costTotal:280.00, time:'2025-05-24 16:30:00', picker:'李四', warehouse:'配件仓库B', location:'B03-02', remark:'配件领用'},
+      {usageNo:'LY202505006', storeName:'杭州西湖店', storeCode:'HZ001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505006', type:'内部领用', partCode:'P005', partName:'火花塞', qty:5, price:45.00, amount:225.00, costPrice:30.00, costTotal:150.00, time:'2025-05-25 09:15:00', picker:'赵六', warehouse:'配件仓库C', location:'C02-01', remark:'普通领用'},
+      {usageNo:'LY202505007', storeName:'北京朝阳店', storeCode:'BJ001', dept:'保养部', applyPerson:'钱七', reason:'定期保养', refNo:'RK202505007', type:'内部领用', partCode:'P006', partName:'空调滤清器', qty:2, price:200.00, amount:400.00, costPrice:140.00, costTotal:280.00, time:'2025-05-25 10:45:00', picker:'钱七', warehouse:'配件仓库A', location:'A01-03', remark:'保养使用'},
+      {usageNo:'LY202505008', storeName:'上海浦东店', storeCode:'SH001', dept:'维修部', applyPerson:'孙八', reason:'维修更换', refNo:'RK202505008', type:'内部领用', partCode:'P007', partName:'机油', qty:4, price:180.00, amount:720.00, costPrice:120.00, costTotal:480.00, time:'2025-05-25 11:20:00', picker:'孙八', warehouse:'配件仓库B', location:'B01-05', remark:'急件'},
+      {usageNo:'LY202505009', storeName:'广州天河店', storeCode:'GZ001', dept:'配件部', applyPerson:'周九', reason:'配件领用', refNo:'RK202505009', type:'内部领用', partCode:'P008', partName:'雨刷片', qty:6, price:80.00, amount:480.00, costPrice:55.00, costTotal:330.00, time:'2025-05-25 13:30:00', picker:'周九', warehouse:'配件仓库C', location:'C03-02', remark:'普通领用'},
+      {usageNo:'LY202505010', storeName:'武汉洪山店', storeCode:'WH001', dept:'维修部', applyPerson:'吴十', reason:'维修更换', refNo:'RK202505010', type:'内部领用', partCode:'P009', partName:'电池', qty:1, price:450.00, amount:450.00, costPrice:320.00, costTotal:320.00, time:'2025-05-25 14:15:00', picker:'吴十', warehouse:'配件仓库A', location:'A02-01', remark:'维修使用'},
+      {usageNo:'LY202505011', storeName:'深圳南山店', storeCode:'SZ001', dept:'保养部', applyPerson:'郑一', reason:'定期保养', refNo:'RK202505011', type:'内部领用', partCode:'P010', partName:'空滤', qty:3, price:60.00, amount:180.00, costPrice:40.00, costTotal:120.00, time:'2025-05-25 15:20:00', picker:'郑一', warehouse:'配件仓库B', location:'B02-03', remark:'保养更换'},
+      {usageNo:'LY202505012', storeName:'杭州西湖店', storeCode:'HZ001', dept:'维修部', applyPerson:'王二', reason:'维修更换', refNo:'RK202505012', type:'内部领用', partCode:'P011', partName:'刹车油', qty:2, price:120.00, amount:240.00, costPrice:85.00, costTotal:170.00, time:'2025-05-25 16:05:00', picker:'王二', warehouse:'配件仓库C', location:'C01-05', remark:'维修使用'},
+      {usageNo:'LY202505013', storeName:'北京朝阳店', storeCode:'BJ001', dept:'配件部', applyPerson:'李三', reason:'配件领用', refNo:'RK202505013', type:'内部领用', partCode:'P012', partName:'灯泡', qty:10, price:25.00, amount:250.00, costPrice:18.00, costTotal:180.00, time:'2025-05-25 16:50:00', picker:'李三', warehouse:'配件仓库A', location:'A03-01', remark:'照明设备'},
+      {usageNo:'LY202505014', storeName:'上海浦东店', storeCode:'SH001', dept:'维修部', applyPerson:'张四', reason:'维修更换', refNo:'RK202505014', type:'内部领用', partCode:'P013', partName:'皮带', qty:2, price:90.00, amount:180.00, costPrice:65.00, costTotal:130.00, time:'2025-05-25 17:25:00', picker:'张四', warehouse:'配件仓库B', location:'B01-08', remark:'发动机维修'},
+      {usageNo:'LY202505015', storeName:'广州天河店', storeCode:'GZ001', dept:'保养部', applyPerson:'王五', reason:'定期保养', refNo:'RK202505015', type:'内部领用', partCode:'P014', partName:'变速箱油', qty:1, price:280.00, amount:280.00, costPrice:200.00, costTotal:200.00, time:'2025-05-25 18:00:00', picker:'王五', warehouse:'配件仓库C', location:'C02-05', remark:'保养使用'},
+      {usageNo:'LY202505016', storeName:'武汉洪山店', storeCode:'WH001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505016', type:'内部领用', partCode:'P015', partName:'离合器片', qty:1, price:350.00, amount:350.00, costPrice:250.00, costTotal:250.00, time:'2025-05-25 18:30:00', picker:'赵六', warehouse:'配件仓库A', location:'A04-02', remark:'变速箱维修'},
+      {usageNo:'LY202505017', storeName:'深圳南山店', storeCode:'SZ001', dept:'配件部', applyPerson:'钱七', reason:'配件领用', refNo:'RK202505017', type:'内部领用', partCode:'P016', partName:'火花塞', qty:4, price:50.00, amount:200.00, costPrice:35.00, costTotal:140.00, time:'2025-05-25 19:15:00', picker:'钱七', warehouse:'配件仓库B', location:'B03-04', remark:'发动机维修'},
+      {usageNo:'LY202505018', storeName:'杭州西湖店', storeCode:'HZ001', dept:'维修部', applyPerson:'孙八', reason:'维修更换', refNo:'RK202505018', type:'内部领用', partCode:'P017', partName:'刹车片', qty:2, price:150.00, amount:300.00, costPrice:110.00, costTotal:220.00, time:'2025-05-25 20:00:00', picker:'孙八', warehouse:'配件仓库C', location:'C02-08', remark:'底盘维修'},
+      {usageNo:'LY202505019', storeName:'北京朝阳店', storeCode:'BJ001', dept:'保养部', applyPerson:'周九', reason:'定期保养', refNo:'RK202505019', type:'内部领用', partCode:'P018', partName:'机油滤清器', qty:2, price:150.00, amount:300.00, costPrice:85.00, costTotal:170.00, time:'2025-05-25 20:45:00', picker:'周九', warehouse:'配件仓库A', location:'A01-04', remark:'保养更换'},
+      {usageNo:'LY202505020', storeName:'上海浦东店', storeCode:'SH001', dept:'配件部', applyPerson:'吴十', reason:'配件领用', refNo:'RK202505020', type:'内部领用', partCode:'P019', partName:'雨刷片', qty:8, price:80.00, amount:640.00, costPrice:55.00, costTotal:440.00, time:'2025-05-25 21:30:00', picker:'吴十', warehouse:'配件仓库B', location:'B03-06', remark:'外观美容'},
+      {usageNo:'LY202505021', storeName:'广州天河店', storeCode:'GZ001', dept:'维修部', applyPerson:'郑一', reason:'维修更换', refNo:'RK202505021', type:'内部领用', partCode:'P020', partName:'蓄电池', qty:1, price:380.00, amount:380.00, costPrice:270.00, costTotal:270.00, time:'2025-05-25 22:15:00', picker:'郑一', warehouse:'配件仓库C', location:'C04-01', remark:'电路维修'},
+      {usageNo:'LY202505022', storeName:'武汉洪山店', storeCode:'WH001', dept:'保养部', applyPerson:'李三', reason:'定期保养', refNo:'RK202505022', type:'内部领用', partCode:'P021', partName:'空滤', qty:1, price:60.00, amount:60.00, costPrice:40.00, costTotal:40.00, time:'2025-05-25 23:00:00', picker:'李三', warehouse:'配件仓库A', location:'A02-03', remark:'保养更换'},
+      {usageNo:'LY202505023', storeName:'深圳南山店', storeCode:'SZ001', dept:'维修部', applyPerson:'张四', reason:'维修更换', refNo:'RK202505023', type:'内部领用', partCode:'P022', partName:'刹车油', qty:3, price:120.00, amount:360.00, costPrice:85.00, costTotal:255.00, time:'2025-05-25 23:45:00', picker:'张四', warehouse:'配件仓库B', location:'B02-07', remark:'制动系统'},
+      {usageNo:'LY202505024', storeName:'杭州西湖店', storeCode:'HZ001', dept:'配件部', applyPerson:'王五', reason:'配件领用', refNo:'RK202505024', type:'内部领用', partCode:'P023', partName:'灯泡', qty:5, price:25.00, amount:125.00, costPrice:18.00, costTotal:90.00, time:'2025-05-26 00:30:00', picker:'王五', warehouse:'配件仓库C', location:'C03-05', remark:'照明设备'},
+      {usageNo:'LY202505025', storeName:'北京朝阳店', storeCode:'BJ001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505025', type:'内部领用', partCode:'P024', partName:'皮带', qty:1, price:90.00, amount:90.00, costPrice:65.00, costTotal:65.00, time:'2025-05-26 01:15:00', picker:'赵六', warehouse:'配件仓库A', location:'A04-04', remark:'发动机维修'},
+      {usageNo:'LY202505026', storeName:'上海浦东店', storeCode:'SH001', dept:'保养部', applyPerson:'钱七', reason:'定期保养', refNo:'RK202505026', type:'内部领用', partCode:'P025', partName:'变速箱油', qty:2, price:280.00, amount:560.00, costPrice:200.00, costTotal:400.00, time:'2025-05-26 02:00:00', picker:'钱七', warehouse:'配件仓库B', location:'B02-09', remark:'保养使用'}
     ];
     var intFilteredData = [];
     var intCurrentPage = 1;
@@ -2591,7 +3066,7 @@
       document.getElementById('ts-pg-prev').disabled = tsCurrentPage <= 1;
       document.getElementById('ts-pg-next').disabled = tsCurrentPage >= pages;
       var pgH = '';
-      for (var i = 1; i <= pages; i++) { pgH += '<span class="pg-num'+(i===tsCurrentPage?' active':'')+'" onclick="tsGotoPage('+i+')">'+i+'</span>'; }
+      for (var i = 1; i <= pages; i++) { pgH += '<button class="'+(i===tsCurrentPage?'active':'')+'" onclick="tsGotoPage('+i+')">'+i+'</button>'; }
       document.getElementById('ts-pg-pages').innerHTML = pgH;
     }
     function tsChangePage(delta) { var pages = Math.ceil(tsFilteredData.length / tsPageSize); tsCurrentPage = Math.max(1, Math.min(pages, tsCurrentPage + delta)); tsRenderTable(); }
@@ -3482,7 +3957,7 @@
       document.getElementById('qr-pg-prev').disabled = qrCurrentPage <= 1;
       document.getElementById('qr-pg-next').disabled = qrCurrentPage >= pages;
       var pgH = '';
-      for (var i = 1; i <= pages; i++) { pgH += '<span class="pg-num'+(i===qrCurrentPage?' active':'')+'" onclick="qrGotoPage('+i+')">'+i+'</span>'; }
+      for (var i = 1; i <= pages; i++) { pgH += '<button class="'+(i===qrCurrentPage?'active':'')+'" onclick="qrGotoPage('+i+')">'+i+'</button>'; }
       document.getElementById('qr-pg-pages').innerHTML = pgH;
     }
     function qrChangePage(delta) { var pages = Math.ceil(qrFilteredData.length / qrPageSize); qrCurrentPage = Math.max(1, Math.min(pages, qrCurrentPage + delta)); qrRenderTable(); }
@@ -4364,7 +4839,7 @@
       document.getElementById('thq-pg-prev').disabled = thqCurrentPage <= 1;
       document.getElementById('thq-pg-next').disabled = thqCurrentPage >= pages;
       var pgH = '';
-      for (var i = 1; i <= pages; i++) { pgH += '<span class="pg-num'+(i===thqCurrentPage?' active':'')+'" onclick="thqGotoPage('+i+')">'+i+'</span>'; }
+      for (var i = 1; i <= pages; i++) { pgH += '<button class="'+(i===thqCurrentPage?'active':'')+'" onclick="thqGotoPage('+i+')">'+i+'</button>'; }
       document.getElementById('thq-pg-pages').innerHTML = pgH;
     }
     function thqChangePage(delta) { var pages = Math.ceil(thqFilteredData.length / thqPageSize); thqCurrentPage = Math.max(1, Math.min(pages, thqCurrentPage + delta)); thqRenderTable(); }
@@ -4527,7 +5002,7 @@
       document.getElementById('qrhq-pg-prev').disabled = qrhqCurrentPage <= 1;
       document.getElementById('qrhq-pg-next').disabled = qrhqCurrentPage >= pages;
       var pgH = '';
-      for (var i = 1; i <= pages; i++) { pgH += '<span class="pg-num'+(i===qrhqCurrentPage?' active':'')+'" onclick="qrhqGotoPage('+i+')">'+i+'</span>'; }
+      for (var i = 1; i <= pages; i++) { pgH += '<button class="'+(i===qrhqCurrentPage?'active':'')+'" onclick="qrhqGotoPage('+i+')">'+i+'</button>'; }
       document.getElementById('qrhq-pg-pages').innerHTML = pgH;
     }
     function qrhqChangePage(delta) { var pages = Math.ceil(qrhqFilteredData.length / qrhqPageSize); qrhqCurrentPage = Math.max(1, Math.min(pages, qrhqCurrentPage + delta)); qrhqRenderTable(); }
@@ -4645,7 +5120,7 @@
       document.getElementById('qrt-pg-prev').disabled = qrtCurrentPage <= 1;
       document.getElementById('qrt-pg-next').disabled = qrtCurrentPage >= pages;
       var pgH = '';
-      for (var i = 1; i <= pages; i++) { pgH += '<span class="pg-num'+(i===qrtCurrentPage?' active':'')+'" onclick="qrtGotoPage('+i+')">'+i+'</span>'; }
+      for (var i = 1; i <= pages; i++) { pgH += '<button class="'+(i===qrtCurrentPage?'active':'')+'" onclick="qrtGotoPage('+i+')">'+i+'</button>'; }
       document.getElementById('qrt-pg-pages').innerHTML = pgH;
     }
     function qrtChangePage(delta) { var pages = Math.ceil(qrtFilteredData.length / qrtPageSize); qrtCurrentPage = Math.max(1, Math.min(pages, qrtCurrentPage + delta)); qrtRenderTable(); }
@@ -4908,6 +5383,12 @@
           var parentSubmenu = submenuNested.closest('.submenu');
           if (parentSubmenu) {
             parentSubmenu.classList.add('open');
+          }
+          // 旋转嵌套子菜单的父级箭头
+          var parentItem = submenuNested.previousElementSibling;
+          if (parentItem && parentItem.classList.contains('submenu-item')) {
+            var parentArrow = parentItem.querySelector('.nav-arrow');
+            if (parentArrow) { parentArrow.style.transform = 'rotate(180deg)'; }
           }
         } else {
           // 二级菜单
@@ -5690,6 +6171,7 @@
     {seq:3, code:'WG00003', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS2C', store:'广州风丽', storeCode:'SH001', contact:'李四', phone:'13148710520', finContact:'李四', finPhone:'13148710520', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
     {seq:4, code:'WG00004', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS3D', store:'广州风丽', storeCode:'GZ001', contact:'刘美美', phone:'13148714521', finContact:'刘美美', finPhone:'13148714521', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
   ];
+  var spFilterExpanded = false;
 
   function spRenderTable(data) {
     var list = data || spData;
@@ -5827,39 +6309,40 @@
   var origShowContent2 = window.showContent;
   window.showContent = function(id) {
     if (origShowContent2) origShowContent2(id);
-    if (id === 'supplier-manage') { setTimeout(function(){ spRenderTable(); }, 50); }
+    if (id === 'supplier-manage') { setTimeout(function(){ spRenderTable(); initFilterGrid('sp-filterGrid', 7); }, 50); }
   };
 })();
 
 // ===== 配件采购 JS =====
 var gUserRole = '门店';
-  var ppAllData = [
-  {seq:1,po:'PO202605001',type:'常规',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-15',submitter:'—',stime:'—',sync:'—'},
-  {seq:2,po:'PO202605002',type:'油品',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-18',submitter:'—',stime:'—',sync:'—'},
-  {seq:3,po:'PO202605003',type:'紧急',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:5,amount:'18,500.00',shortage:'DQ202605001',status:'门店审核中',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-20 08:30',sync:'—'},
-  {seq:4,po:'PO202605004',type:'常规',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'门店审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'赵六',stime:'2026-05-21 14:00',sync:'—'},
-  {seq:5,po:'PO202605005',type:'绿色',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:6,amount:'28,300.00',shortage:'—',status:'门店审核中',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'—',submitter:'孙七',stime:'2026-05-21 16:00',sync:'—'},
-  {seq:6,po:'PO202606001',type:'常规',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:10,amount:'41,200.00',shortage:'—',status:'门店审核通过',source:'门店下单',remark:'—',auditor:'王芳',atime:'2026-06-01 11:20',edate:'2026-06-25',submitter:'周八',stime:'2026-05-30 09:00',sync:'2026-05-30 14:00'},
-  {seq:7,po:'PO202606002',type:'定制',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:3,amount:'62,100.00',shortage:'—',status:'门店审核通过',source:'门店下单',remark:'—',auditor:'李明',atime:'2026-06-02 15:40',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-01 10:30',sync:'2026-06-01 16:00'},
-  {seq:8,po:'PO202606003',type:'油品',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:7,amount:'35,600.00',shortage:'DQ202606001',status:'门店审核通过',source:'主机厂代下',remark:'—',auditor:'王芳',atime:'2026-06-03 14:00',edate:'2026-06-28',submitter:'郑十',stime:'2026-06-03 13:00',sync:'—'},
-  {seq:9,po:'PO202606004',type:'常规',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',shortage:'—',status:'总部审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-06-30',submitter:'张三',stime:'2026-06-04 08:00',sync:'—'},
-  {seq:10,po:'PO202606005',type:'紧急',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:4,amount:'22,800.00',shortage:'DQ202606002',status:'总部审核中',source:'主机厂代下',remark:'—',auditor:'—',atime:'—',edate:'2026-06-20',submitter:'李四',stime:'2026-06-06 15:00',sync:'—'},
-  {seq:11,po:'PO202606006',type:'常规',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'43,500.00',shortage:'—',status:'总部审核中',source:'门店下单',remark:'—',auditor:'—',atime:'—',edate:'2026-07-02',submitter:'王五',stime:'2026-06-07 09:30',sync:'2026-06-07 17:00'},
-  {seq:12,po:'PO202606007',type:'绿色',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:13,amount:'51,200.00',shortage:'—',status:'门店审核不通过',source:'主机厂代下',remark:'超出预算额度',auditor:'王芳',atime:'2026-06-09 14:00',edate:'—',submitter:'赵六',stime:'2026-06-08 11:00',sync:'—'},
-  {seq:13,po:'PO202607001',type:'常规',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:6,amount:'26,400.00',shortage:'—',status:'门店审核不通过',source:'门店下单',remark:'配件编码不匹配',auditor:'李明',atime:'2026-07-01 08:30',edate:'2026-07-20',submitter:'孙七',stime:'2026-06-30 10:00',sync:'2026-06-30 16:00'},
-  {seq:14,po:'PO202607002',type:'油品',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'33,700.00',shortage:'DQ202607001',status:'主机厂已审核',source:'门店下单',remark:'—',auditor:'主机厂',atime:'2026-07-22 10:00',edate:'2026-07-22',submitter:'周八',stime:'2026-07-01 09:00',sync:'2026-07-22 10:00'},
-  {seq:15,po:'PO202607003',type:'定制',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'55,000.00',shortage:'—',status:'主机厂已审核',source:'主机厂代下',remark:'—',auditor:'主机厂',atime:'2026-07-25 09:00',edate:'2026-07-25',submitter:'吴九',stime:'2026-07-02 14:30',sync:'2026-07-25 09:00'},
-  {seq:16,po:'PO202607004',type:'常规',region:'华北',district:'石家庄',store:'石家庄长安店',scode:'SJZ001',variety:10,amount:'40,100.00',shortage:'—',status:'主机厂已审核',source:'门店下单',remark:'—',auditor:'主机厂',atime:'2026-07-28 09:00',edate:'2026-07-28',submitter:'郑十',stime:'2026-07-02 08:00',sync:'2026-07-28 09:00'},
-  {seq:17,po:'PO202607005',type:'紧急',region:'西南',district:'昆明',store:'昆明五华店',scode:'KM001',variety:3,amount:'15,200.00',shortage:'—',status:'主机厂已审核',source:'门店下单',remark:'—',auditor:'主机厂',atime:'2026-07-18 09:00',edate:'2026-07-18',submitter:'张三',stime:'2026-07-02 11:00',sync:'2026-07-18 09:00'},
-  {seq:18,po:'PO202607006',type:'绿色',region:'华南',district:'厦门',store:'厦门思明店',scode:'XM001',variety:7,amount:'29,800.00',shortage:'—',status:'主机厂已拒绝',source:'门店下单',remark:'主机厂驳回：规格不符',auditor:'主机厂',atime:'2026-07-03 11:00',edate:'—',submitter:'李四',stime:'2026-07-02 16:00',sync:'—'},
-  {seq:19,po:'PO202607007',type:'常规',region:'华东',district:'宁波',store:'宁波鄞州店',scode:'NB001',variety:14,amount:'52,600.00',shortage:'DQ202607002',status:'主机厂已拒绝',source:'门店下单',remark:'主机厂驳回：库存充足不采购',auditor:'主机厂',atime:'2026-08-01 09:00',edate:'—',submitter:'王五',stime:'2026-07-03 08:30',sync:'—'},
-  {seq:20,po:'PO202607008',type:'油品',region:'华北',district:'济南',store:'济南历下店',scode:'JN001',variety:5,amount:'21,300.00',shortage:'—',status:'主机厂已拒绝',source:'门店下单',remark:'主机厂驳回：重复下单',auditor:'主机厂',atime:'2026-07-30 09:00',edate:'—',submitter:'赵六',stime:'2026-07-03 09:00',sync:'—'}
+var ppAllData = [
+  {seq:1,po:'PO202605001',type:'常规订单',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',edate:'2026-07-25',submitter:'—',stime:'—',sync:'—',recvName:'张丽',recvPhone:'13800001111',recvAddr:'上海市浦东新区张江路100号',auditLog:[],items:[{code:'PJ001',name:'刹车片（前）',taxNo:'',unit:'个',snp:1,price:380,shortQty:5,rel:'',qty:5,amount:1900,maxOrder:100,replace:'',stock:50,intransit:10}]},
+  {seq:2,po:'PO202605002',type:'油品订单',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',edate:'2026-07-28',submitter:'—',stime:'—',sync:'—',recvName:'陈刚',recvPhone:'13900002222',recvAddr:'广州市天河区珠江新城88号',auditLog:[],items:[]},
+  {seq:3,po:'PO202605003',type:'紧急订单',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:5,amount:'18,500.00',shortage:'DQ202605001',status:'门店审核中',source:'主机厂代下',remark:'—',edate:'2026-07-25',submitter:'王五',stime:'2026-07-20 09:00:00',sync:'—',recvName:'李娜',recvPhone:'13700003333',recvAddr:'北京市朝阳区建国路56号',auditLog:[{step:'门店保存提交',person:'王五',time:'2026-07-20 09:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
+  {seq:4,po:'PO202605004',type:'常规订单',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'门店审核中',source:'门店下单',remark:'—',edate:'2026-07-27',submitter:'赵六',stime:'2026-07-20 14:00:00',sync:'—',recvName:'赵静',recvPhone:'13600004444',recvAddr:'成都市武侯区人民南路120号',auditLog:[{step:'门店保存提交',person:'赵六',time:'2026-07-20 14:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
+  {seq:5,po:'PO202605005',type:'绿色通道',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:6,amount:'28,300.00',shortage:'—',status:'门店审核中',source:'主机厂代下',remark:'—',edate:'—',submitter:'孙七',stime:'2026-07-21 10:00:00',sync:'—',recvName:'孙伟',recvPhone:'13500005555',recvAddr:'沈阳市和平区南京北街66号',auditLog:[{step:'门店保存提交',person:'孙七',time:'2026-07-21 10:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
+  {seq:6,po:'PO202606001',type:'常规订单',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:10,amount:'41,200.00',shortage:'—',status:'审核通过',source:'门店下单',remark:'—',edate:'2026-07-26',submitter:'周八',stime:'2026-07-21 14:00:00',sync:'—',recvName:'周琳',recvPhone:'13400006666',recvAddr:'杭州市西湖区文三路88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-21 15:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-21 17:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:7,po:'PO202606002',type:'定制订单',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:3,amount:'62,100.00',shortage:'—',status:'审核通过',source:'门店下单',remark:'—',edate:'2026-07-29',submitter:'吴九',stime:'2026-07-22 09:00:00',sync:'2026-07-22 17:00',recvName:'吴敏',recvPhone:'13300007777',recvAddr:'武汉市光谷大道特1号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-22 11:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-22 15:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:8,po:'PO202606003',type:'油品订单',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:7,amount:'35,600.00',shortage:'DQ202606001',status:'审核通过',source:'主机厂代下',remark:'—',edate:'2026-07-28',submitter:'郑十',stime:'2026-07-22 13:00:00',sync:'—',recvName:'郑佳',recvPhone:'13200008888',recvAddr:'深圳市福田区深南大道200号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-22 14:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-22 16:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:9,po:'PO202606004',type:'常规订单',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',shortage:'—',status:'总部审核中',source:'门店下单',remark:'—',edate:'2026-07-30',submitter:'张三',stime:'2026-07-23 09:00:00',sync:'—',recvName:'张涛',recvPhone:'13100009999',recvAddr:'天津市和平区南京路88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-23 10:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:10,po:'PO202606005',type:'紧急订单',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:4,amount:'22,800.00',shortage:'DQ202606002',status:'总部审核中',source:'主机厂代下',remark:'—',edate:'2026-07-26',submitter:'李四',stime:'2026-07-23 14:00:00',sync:'—',recvName:'李莉',recvPhone:'13000001010',recvAddr:'重庆市渝中区解放碑8号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-23 15:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:11,po:'PO202606006',type:'常规订单',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'43,500.00',shortage:'—',status:'总部审核中',source:'门店下单',remark:'—',edate:'2026-07-30',submitter:'王五',stime:'2026-07-24 09:00:00',sync:'2026-07-24 17:00',recvName:'王芳',recvPhone:'13900002020',recvAddr:'南京市建邺区奥体大街99号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-24 11:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:12,po:'PO202606007',type:'绿色通道',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:13,amount:'51,200.00',shortage:'—',status:'审核不通过',source:'主机厂代下',remark:'超出预算额度',edate:'—',submitter:'赵六',stime:'2026-07-24 13:00:00',sync:'—',recvName:'赵琳',recvPhone:'13800003030',recvAddr:'广州市天河区天河北路233号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-25 09:00:00',result:'驳回',opinion:'超出预算额度',attach:''}],items:[]},
+  {seq:13,po:'PO202607001',type:'常规订单',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:6,amount:'26,400.00',shortage:'—',status:'审核不通过',source:'门店下单',remark:'配件编码不匹配',edate:'2026-07-30',submitter:'孙七',stime:'2026-07-25 08:00:00',sync:'2026-07-25 16:00',recvName:'孙明',recvPhone:'13700004040',recvAddr:'大连市中山区人民路50号',auditLog:[{step:'总部审核',person:'李明',time:'2026-07-26 09:00:00',result:'驳回',opinion:'配件编码不匹配',attach:''}],items:[]},
+  {seq:14,po:'PO202607002',type:'油品订单',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'33,700.00',shortage:'DQ202607001',status:'主机厂已审核',source:'门店下单',remark:'—',edate:'2026-07-30',submitter:'周八',stime:'2026-07-25 10:00:00',sync:'2026-07-30 10:00',recvName:'周丽',recvPhone:'13600005050',recvAddr:'长沙市岳麓区麓山南路100号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-25 12:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-25 14:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-30 10:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:15,po:'PO202607003',type:'定制订单',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'55,000.00',shortage:'—',status:'主机厂已审核',source:'主机厂代下',remark:'—',edate:'2026-07-31',submitter:'吴九',stime:'2026-07-26 09:00:00',sync:'2026-07-31 09:00',recvName:'吴军',recvPhone:'13500006060',recvAddr:'苏州市工业园区现代大道88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-26 11:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-26 14:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-31 09:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:16,po:'PO202607004',type:'常规订单',region:'华北',district:'石家庄',store:'石家庄长安店',scode:'SJZ001',variety:10,amount:'40,100.00',shortage:'—',status:'主机厂已审核',source:'门店下单',remark:'—',edate:'2026-08-02',submitter:'郑十',stime:'2026-07-26 14:00:00',sync:'2026-07-31 10:00',recvName:'郑伟',recvPhone:'13400007070',recvAddr:'石家庄市长安区中山东路88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-26 15:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-26 16:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-31 10:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:17,po:'PO202607005',type:'紧急订单',region:'西南',district:'昆明',store:'昆明五华店',scode:'KM001',variety:3,amount:'15,200.00',shortage:'—',status:'主机厂已审核',source:'门店下单',remark:'—',edate:'2026-08-01',submitter:'张三',stime:'2026-07-27 09:00:00',sync:'2026-07-31 11:00',recvName:'张静',recvPhone:'13300008080',recvAddr:'昆明市五华区人民中路66号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-27 10:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-27 11:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-31 11:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:18,po:'PO202607006',type:'绿色通道',region:'华南',district:'厦门',store:'厦门思明店',scode:'XM001',variety:7,amount:'29,800.00',shortage:'—',status:'主机厂已拒绝',source:'门店下单',remark:'主机厂驳回：规格不符',edate:'—',submitter:'李四',stime:'2026-07-27 13:00:00',sync:'—',recvName:'李萍',recvPhone:'13200009090',recvAddr:'厦门市思明区湖滨南路100号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-27 14:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-27 15:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-28 09:00:00',result:'驳回',opinion:'规格不符',attach:''}],items:[]},
+  {seq:19,po:'PO202607007',type:'常规订单',region:'华东',district:'宁波',store:'宁波鄞州店',scode:'NB001',variety:14,amount:'52,600.00',shortage:'DQ202607002',status:'主机厂已拒绝',source:'门店下单',remark:'主机厂驳回：库存充足不采购',edate:'—',submitter:'王五',stime:'2026-07-28 09:00:00',sync:'—',recvName:'王芳',recvPhone:'13100001010',recvAddr:'宁波市鄞州区中山东路88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-28 10:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-28 11:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-29 09:00:00',result:'驳回',opinion:'库存充足不采购',attach:''}],items:[]},
+  {seq:20,po:'PO202607008',type:'油品订单',region:'华北',district:'济南',store:'济南历下店',scode:'JN001',variety:5,amount:'21,300.00',shortage:'—',status:'主机厂已拒绝',source:'门店下单',remark:'主机厂驳回：重复下单',edate:'—',submitter:'赵六',stime:'2026-07-28 13:00:00',sync:'—',recvName:'赵林',recvPhone:'13000002020',recvAddr:'济南市历下区经十路100号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-28 14:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-28 15:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-29 10:00:00',result:'驳回',opinion:'重复下单',attach:''}],items:[]}
 ];
 var ppFilteredData = [];
 var ppCurrentPage = 1;
 var ppPageSize = 20;
 var ppFilterExpanded = false;
 var ppInitialized = false;
+var ppSelectedRows = [];
 
 function ppRenderTable() {
   var start = (ppCurrentPage - 1) * ppPageSize;
@@ -5868,7 +6351,13 @@ function ppRenderTable() {
   if (!tbody) return;
   tbody.innerHTML = pageData.map(function(r, idx) {
     var ri = start + idx;
+    var log = r.auditLog || [];
+    var last = log.length ? log[log.length - 1] : null;
+    var auditorDisp = last ? last.person : '—';
+    var atimeDisp = last ? last.time : '—';
+    var remarkDisp = (r.status === '未提交') ? '—' : (last ? (last.opinion || '—') : (r.remark || '—'));
     return '<tr>'
+      + '<td class="sticky col-check pp-col-check-cell"><input type="checkbox" class="pp-list-check" data-seq="'+r.seq+'" '+(r.status === '审核通过' && (!r.sync || r.sync === '—') ? '' : 'disabled')+'></td>'
       + '<td class="sticky col-seq">'+r.seq+'</td>'
       + '<td class="sticky col-po-no">'+r.po+'</td>'
       + '<td class="col-order-type">'+r.type+'</td>'
@@ -5880,9 +6369,9 @@ function ppRenderTable() {
       + '<td class="col-total-amount">'+r.amount+'</td>'
       + '<td class="col-shortage-no">'+r.shortage+'</td>'
       + '<td class="col-order-status">'+r.status+'</td>'
-      + '<td class="col-audit-remark">'+r.remark+'</td>'
-      + '<td class="col-auditor">'+r.auditor+'</td>'
-      + '<td class="col-audit-time">'+r.atime+'</td>'
+      + '<td class="col-audit-remark">'+remarkDisp+'</td>'
+      + '<td class="col-auditor">'+auditorDisp+'</td>'
+      + '<td class="col-audit-time">'+atimeDisp+'</td>'
       + '<td class="col-expected-date">'+r.edate+'</td>'
       + '<td class="col-order-source">'+(r.source||'—')+'</td>'
       + '<td class="col-submitter">'+r.submitter+'</td>'
@@ -5904,6 +6393,7 @@ function ppRenderPages() {
   pages.innerHTML = html;
   document.getElementById('pp-pg-prev').disabled = ppCurrentPage === 1;
   document.getElementById('pp-pg-next').disabled = ppCurrentPage >= totalPages;
+  ppToggleCheckCol();
 }
 function ppGoPage(p) { ppCurrentPage = p; ppRenderTable(); }
 function ppChangePage(d) { ppGoPage(Math.max(1, Math.min(ppCurrentPage + d, Math.ceil(ppFilteredData.length / ppPageSize) || 1))); }
@@ -5952,16 +6442,10 @@ function ppResetFilter() {
   ppFilteredData = [].concat(ppAllData);
   ppCurrentPage = 1;
   ppRenderTable();
+  ppFilterExpanded = false;
+  initFilterGrid('pp-filterGrid', 7);
 }
 function ppExportData() { alert('导出 ' + ppFilteredData.length + ' 条配件采购数据'); }
-function ppToggleFilter() {
-  ppFilterExpanded = !ppFilterExpanded;
-  var grid = document.getElementById('pp-filterGrid');
-  var items = grid.querySelectorAll('.lt-filter-item');
-  for (var i = 8; i < items.length; i++) { items[i].style.display = ppFilterExpanded ? '' : 'none'; }
-  var toggleEl = grid.querySelector('.lt-filter-toggle');
-  if (toggleEl) toggleEl.innerHTML = ppFilterExpanded ? '&#xFE40; 收起' : '&#xFE40; 展开';
-}
 function ppFilterCombobox(input) {
   var wrap = input.closest('.lt-input-wrap.combobox');
   if (!wrap) return;
@@ -5994,10 +6478,7 @@ document.addEventListener('click', function(e) {
 function initPp() {
   if (!ppInitialized) {
     ppInitialized = true;
-    var now = new Date();
-    var s = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-    if (s.getMonth() !== ((now.getMonth() - 1 + 12) % 12)) s = new Date(now.getFullYear(), now.getMonth(), 0);
-    var ds = s.toISOString().split('T')[0], de = now.toISOString().split('T')[0];
+    var ds = '2026-05-01', de = '2026-08-31';
     var se = document.getElementById('pp-flt-date-start'), ee = document.getElementById('pp-flt-date-end');
     if (se) se.value = ds; if (ee) ee.value = de;
     var te = document.querySelector('#page-parts-procurement .lt-date-range-text');
@@ -6005,9 +6486,8 @@ function initPp() {
   }
   ppFilteredData = [].concat(ppAllData);
   ppRenderTable();
-  var grid = document.getElementById('pp-filterGrid');
-  var items = grid.querySelectorAll('.lt-filter-item');
-  for (var i = 8; i < items.length; i++) { items[i].style.display = 'none'; }
+  ppApplyRoleUI();
+  initFilterGrid('pp-filterGrid', 7);
 }
 
 // ===== 配件采购明细 JS =====
@@ -6155,16 +6635,16 @@ function initPpd() {
 
 // ===== 配件发货及交期 JS =====
 var pdsAllData = [
-  {seq:1,po:'PO202605001',store:'上海浦东店',scode:'SH001',province:'上海',stime:'2026-05-18 10:00',hqno:'HQ202605001',hqtime:'2026-05-18 16:00',dno:'DH202605001',dtime:'2026-05-22 09:00',lno:'SF1234567890',ltime:'2026-05-23 14:00',lnode:'已到达上海分拨中心',est:'2026-05-25',signtime:'2026-05-25 15:30',pcode:'PJ001',pname:'刹车片（前）'},
-  {seq:2,po:'PO202605002',store:'广州风丽店',scode:'GZ001',province:'广东',stime:'2026-05-19 11:00',hqno:'HQ202605002',hqtime:'2026-05-19 17:30',dno:'DH202605002',dtime:'2026-05-23 10:00',lno:'YT9876543210',ltime:'2026-05-24 08:00',lnode:'已签收',est:'2026-05-26',signtime:'2026-05-26 10:00',pcode:'PJ002',pname:'机油滤清器'},
-  {seq:3,po:'PO202605003',store:'北京朝阳店',scode:'BJ001',province:'北京',stime:'2026-05-20 08:30',hqno:'HQ202605003',hqtime:'2026-05-20 15:00',dno:'—',dtime:'—',lno:'—',ltime:'—',lnode:'待发货',est:'2026-06-10',signtime:'—',pcode:'PJ003',pname:'空气滤芯'},
-  {seq:4,po:'PO202606001',store:'杭州西湖店',scode:'HZ001',province:'浙江',stime:'2026-05-30 09:00',hqno:'HQ202606001',hqtime:'2026-05-30 16:00',dno:'DH202606001',dtime:'2026-06-05 08:00',lno:'ZTO202606001',ltime:'2026-06-06 10:00',lnode:'运输中-已离开杭州',est:'2026-06-08',signtime:'2026-06-08 14:00',pcode:'PJ004',pname:'火花塞'},
-  {seq:5,po:'PO202606002',store:'武汉光谷店',scode:'WH001',province:'湖北',stime:'2026-06-01 10:30',hqno:'HQ202606002',hqtime:'2026-06-01 17:00',dno:'DH202606002',dtime:'2026-06-06 09:00',lno:'SF202606002',ltime:'2026-06-07 11:00',lnode:'运输中-已到达武汉',est:'2026-06-08',signtime:'2026-06-08 16:00',pcode:'PJ001',pname:'刹车片（前）'},
-  {seq:6,po:'PO202606003',store:'深圳福田店',scode:'SZ001',province:'广东',stime:'2026-06-03 13:00',hqno:'HQ202606003',hqtime:'2026-06-03 18:00',dno:'DH202606003',dtime:'2026-06-08 10:00',lno:'YT202606003',ltime:'2026-06-09 09:00',lnode:'运输中-已到达深圳',est:'2026-06-10',signtime:'—',pcode:'PJ005',pname:'刹车油'},
-  {seq:7,po:'PO202606004',store:'天津和平店',scode:'TJ001',province:'天津',stime:'2026-06-04 08:00',hqno:'HQ202606004',hqtime:'2026-06-04 15:00',dno:'DH202606004',dtime:'2026-06-09 11:00',lno:'ZTO202606004',ltime:'2026-06-10 08:00',lnode:'已签收',est:'2026-06-11',signtime:'2026-06-11 09:30',pcode:'PJ006',pname:'空调滤芯'},
-  {seq:8,po:'PO202606005',store:'重庆渝中店',scode:'CQ001',province:'重庆',stime:'2026-06-06 15:00',hqno:'HQ202606005',hqtime:'2026-06-06 19:00',dno:'DH202606005',dtime:'2026-06-11 09:00',lno:'SF202606005',ltime:'2026-06-12 14:00',lnode:'待发货',est:'2026-06-20',signtime:'—',pcode:'PJ007',pname:'变速箱油'},
-  {seq:9,po:'PO202606006',store:'南京建邺店',scode:'NJ001',province:'江苏',stime:'2026-06-07 09:30',hqno:'HQ202606006',hqtime:'2026-06-07 17:00',dno:'DH202606006',dtime:'2026-06-12 08:00',lno:'YT202606006',ltime:'2026-06-13 10:00',lnode:'已签收',est:'2026-06-14',signtime:'2026-06-14 15:00',pcode:'PJ008',pname:'雨刮器'},
-  {seq:10,po:'PO202607001',store:'大连中山店',scode:'DL001',province:'辽宁',stime:'2026-06-30 10:00',hqno:'HQ202607001',hqtime:'2026-06-30 17:30',dno:'DH202607001',dtime:'2026-07-03 09:00',lno:'SF202607001',ltime:'2026-07-03 14:00',lnode:'运输中',est:'2026-07-05',signtime:'—',pcode:'PJ002',pname:'机油滤清器'}
+  {seq:1,po:'PO202605001',store:'上海浦东店',scode:'SH001',province:'上海',stime:'2026-05-18 10:00:00',hqno:'HQ202605001',hqtime:'2026-05-18 16:00:00',dno:'DH202605001',dtime:'2026-05-22 09:00:00',lno:'SF1234567890',ltime:'2026-05-23 14:00:00',lnode:'已到达上海分拨中心',est:'2026-05-25',signtime:'2026-05-25 15:30:00',pcode:'PJ001',pname:'刹车片（前）'},
+  {seq:2,po:'PO202605002',store:'广州风丽店',scode:'GZ001',province:'广东',stime:'2026-05-19 11:00:00',hqno:'HQ202605002',hqtime:'2026-05-19 17:30:00',dno:'DH202605002',dtime:'2026-05-23 10:00:00',lno:'YT9876543210',ltime:'2026-05-24 08:00:00',lnode:'已签收',est:'2026-05-26',signtime:'2026-05-26 10:00:00',pcode:'PJ002',pname:'机油滤清器'},
+  {seq:3,po:'PO202605003',store:'北京朝阳店',scode:'BJ001',province:'北京',stime:'2026-05-20 08:30:00',hqno:'HQ202605003',hqtime:'2026-05-20 15:00:00',dno:'—',dtime:'—',lno:'—',ltime:'—',lnode:'待发货',est:'2026-06-10',signtime:'—',pcode:'PJ003',pname:'空气滤芯'},
+  {seq:4,po:'PO202606001',store:'杭州西湖店',scode:'HZ001',province:'浙江',stime:'2026-05-30 09:00:00',hqno:'HQ202606001',hqtime:'2026-05-30 16:00:00',dno:'DH202606001',dtime:'2026-06-05 08:00:00',lno:'ZTO202606001',ltime:'2026-06-06 10:00:00',lnode:'运输中-已离开杭州',est:'2026-06-08',signtime:'2026-06-08 14:00:00',pcode:'PJ004',pname:'火花塞'},
+  {seq:5,po:'PO202606002',store:'武汉光谷店',scode:'WH001',province:'湖北',stime:'2026-06-01 10:30:00',hqno:'HQ202606002',hqtime:'2026-06-01 17:00:00',dno:'DH202606002',dtime:'2026-06-06 09:00:00',lno:'SF202606002',ltime:'2026-06-07 11:00:00',lnode:'运输中-已到达武汉',est:'2026-06-08',signtime:'2026-06-08 16:00:00',pcode:'PJ001',pname:'刹车片（前）'},
+  {seq:6,po:'PO202606003',store:'深圳福田店',scode:'SZ001',province:'广东',stime:'2026-06-03 13:00:00',hqno:'HQ202606003',hqtime:'2026-06-03 18:00:00',dno:'DH202606003',dtime:'2026-06-08 10:00:00',lno:'YT202606003',ltime:'2026-06-09 09:00:00',lnode:'运输中-已到达深圳',est:'2026-06-10',signtime:'—',pcode:'PJ005',pname:'刹车油'},
+  {seq:7,po:'PO202606004',store:'天津和平店',scode:'TJ001',province:'天津',stime:'2026-06-04 08:00:00',hqno:'HQ202606004',hqtime:'2026-06-04 15:00:00',dno:'DH202606004',dtime:'2026-06-09 11:00:00',lno:'ZTO202606004',ltime:'2026-06-10 08:00:00',lnode:'已签收',est:'2026-06-11',signtime:'2026-06-11 09:30:00',pcode:'PJ006',pname:'空调滤芯'},
+  {seq:8,po:'PO202606005',store:'重庆渝中店',scode:'CQ001',province:'重庆',stime:'2026-06-06 15:00:00',hqno:'HQ202606005',hqtime:'2026-06-06 19:00:00',dno:'DH202606005',dtime:'2026-06-11 09:00:00',lno:'SF202606005',ltime:'2026-06-12 14:00:00',lnode:'待发货',est:'2026-06-20',signtime:'—',pcode:'PJ007',pname:'变速箱油'},
+  {seq:9,po:'PO202606006',store:'南京建邺店',scode:'NJ001',province:'江苏',stime:'2026-06-07 09:30:00',hqno:'HQ202606006',hqtime:'2026-06-07 17:00:00',dno:'DH202606006',dtime:'2026-06-12 08:00:00',lno:'YT202606006',ltime:'2026-06-13 10:00:00',lnode:'已签收',est:'2026-06-14',signtime:'2026-06-14 15:00:00',pcode:'PJ008',pname:'雨刮器'},
+  {seq:10,po:'PO202607001',store:'大连中山店',scode:'DL001',province:'辽宁',stime:'2026-06-30 10:00:00',hqno:'HQ202607001',hqtime:'2026-06-30 17:30:00',dno:'DH202607001',dtime:'2026-07-03 09:00:00',lno:'SF202607001',ltime:'2026-07-03 14:00:00',lnode:'运输中',est:'2026-07-05',signtime:'—',pcode:'PJ002',pname:'机油滤清器'}
 ];
 var pdsFilteredData = [];
 var pdsCurrentPage = 1;
@@ -6520,22 +7000,23 @@ function initFsq() {
 
 // ===== 配件外采 JS =====
 var epAllData = [
-  {seq:1,orderNo:'WC202605001',supplier:'联友科技武汉',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:8,amount:'32,500.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-05-20 15:00',edate:'2026-06-12',submitter:'张三',stime:'2026-05-18 09:00'},
-  {seq:2,orderNo:'WC202605002',supplier:'XX科技',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:5,amount:'18,200.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-05-21 10:00',edate:'2026-06-15',submitter:'李四',stime:'2026-05-19 14:00'},
-  {seq:3,orderNo:'WC202605003',supplier:'联友科技武汉',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:3,amount:'28,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-22 11:00'},
-  {seq:4,orderNo:'WC202606001',supplier:'XX科技',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:6,amount:'22,400.00',status:'已驳回',remark:'供应商资质过期',auditor:'李明',atime:'2026-06-02 09:30',edate:'—',submitter:'赵六',stime:'2026-06-01 08:00'},
-  {seq:5,orderNo:'WC202606002',supplier:'联友科技武汉',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:10,amount:'45,800.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-06-05 14:00',edate:'2026-06-25',submitter:'孙七',stime:'2026-06-04 10:30'},
-  {seq:6,orderNo:'WC202606003',supplier:'XX科技',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:7,amount:'31,200.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-06-28',submitter:'周八',stime:'2026-06-08 15:00'},
-  {seq:7,orderNo:'WC202606004',supplier:'联友科技武汉',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:12,amount:'52,100.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-06-10 11:00',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-09 09:00'},
-  {seq:8,orderNo:'WC202606005',supplier:'XX科技',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:4,amount:'15,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-30',submitter:'郑十',stime:'2026-06-12 16:00'},
-  {seq:9,orderNo:'WC202607001',supplier:'联友科技武汉',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-01 10:30',edate:'2026-07-20',submitter:'张三',stime:'2026-06-30 08:00'},
-  {seq:10,orderNo:'WC202607002',supplier:'XX科技',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:5,amount:'19,700.00',status:'已取消',remark:'门店预算调整',auditor:'李明',atime:'2026-07-02 16:00',edate:'—',submitter:'李四',stime:'2026-07-01 13:00'},
-  {seq:11,orderNo:'WC202607003',supplier:'联友科技武汉',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'44,300.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-22',submitter:'王五',stime:'2026-07-02 10:00'},
-  {seq:12,orderNo:'WC202607004',supplier:'XX科技',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:6,amount:'25,100.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-03 09:00',edate:'2026-07-25',submitter:'赵六',stime:'2026-07-02 14:00'},
-  {seq:13,orderNo:'WC202607005',supplier:'联友科技武汉',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:3,amount:'12,800.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-07-15',submitter:'孙七',stime:'2026-07-03 09:30'},
-  {seq:14,orderNo:'WC202607006',supplier:'XX科技',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'35,200.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-07-03 14:00',edate:'2026-07-28',submitter:'周八',stime:'2026-07-03 08:00'},
-  {seq:15,orderNo:'WC202607007',supplier:'联友科技武汉',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'58,000.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-30',submitter:'吴九',stime:'2026-07-03 11:00'}
+  {seq:1,orderNo:'WC202605001',supplier:'联友科技武汉',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:8,amount:'32,500.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-05-20 15:00:00',edate:'2026-06-12',submitter:'张三',stime:'2026-05-18 09:00:00',recvName:'张伟',recvPhone:'13800001234',recvAddr:'上海市浦东新区张江路 88 号',items:[{code:'290F60471R',name:'整车控制器',unit:'EA',snp:10,price:799.70,qty:30,amount:23991.00,maxOrder:999,replace:'无',stock:20,intransit:0},{code:'291A12345X',name:'电机控制模块',unit:'EA',snp:5,price:850.90,qty:10,amount:8509.00,maxOrder:500,replace:'无',stock:8,intransit:3}],auditLog:[{step:'门店审核',person:'李明',time:'2026-05-20 15:00:00',result:'通过',opinion:'同意',attach:''}]},
+  {seq:2,orderNo:'WC202605002',supplier:'XX科技',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:5,amount:'18,200.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-05-21 10:00:00',edate:'2026-06-15',submitter:'李四',stime:'2026-05-19 14:00:00',recvName:'李娜',recvPhone:'13800005678',recvAddr:'广州市天河区天河路 100 号',items:[{code:'292B22222Y',name:'前大灯总成',unit:'个',snp:1,price:680.00,qty:20,amount:13600.00,maxOrder:200,replace:'无',stock:15,intransit:5},{code:'292B33333Z',name:'后尾灯总成',unit:'个',snp:1,price:460.00,qty:10,amount:4600.00,maxOrder:200,replace:'无',stock:10,intransit:2}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-05-21 10:00:00',result:'通过',opinion:'同意',attach:''}]},
+  {seq:3,orderNo:'WC202605003',supplier:'联友科技武汉',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:3,amount:'28,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-22 11:00:00',recvName:'王强',recvPhone:'13800009012',recvAddr:'北京市朝阳区建国路 88 号',items:[{code:'293C11111A',name:'制动片套装',unit:'套',snp:4,price:520.00,qty:35,amount:18200.00,maxOrder:300,replace:'无',stock:25,intransit:0},{code:'293C22222B',name:'刹车盘',unit:'个',snp:2,price:520.00,qty:20,amount:10400.00,maxOrder:300,replace:'无',stock:12,intransit:4}],auditLog:[]},
+  {seq:4,orderNo:'WC202606001',supplier:'XX科技',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:6,amount:'22,400.00',status:'已驳回',remark:'供应商资质过期',auditor:'李明',atime:'2026-06-02 09:30:00',edate:'—',submitter:'赵六',stime:'2026-06-01 08:00:00',recvName:'刘洋',recvPhone:'13800003456',recvAddr:'成都市武侯区人民南路 88 号',items:[{code:'294D11111C',name:'蓄电池',unit:'EA',snp:6,price:880.00,qty:20,amount:17600.00,maxOrder:400,replace:'无',stock:18,intransit:0},{code:'294D22222D',name:'发电机',unit:'EA',snp:3,price:480.00,qty:10,amount:4800.00,maxOrder:400,replace:'无',stock:6,intransit:2}],auditLog:[{step:'门店审核',person:'李明',time:'2026-06-02 09:30:00',result:'驳回',opinion:'供应商资质过期',attach:''}]},
+  {seq:5,orderNo:'WC202606002',supplier:'联友科技武汉',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:10,amount:'45,800.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-06-05 14:00:00',edate:'2026-06-25',submitter:'孙七',stime:'2026-06-04 10:30:00',recvName:'陈静',recvPhone:'13800007890',recvAddr:'沈阳市和平区青年大街 200 号',items:[{code:'295E11111E',name:'中控显示屏',unit:'EA',snp:2,price:1290.00,qty:25,amount:32250.00,maxOrder:250,replace:'无',stock:9,intransit:1},{code:'295E22222F',name:'仪表盘总成',unit:'EA',snp:2,price:1355.00,qty:10,amount:13550.00,maxOrder:250,replace:'无',stock:5,intransit:0}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-06-05 14:00:00',result:'通过',opinion:'同意',attach:''}]},
+  {seq:6,orderNo:'WC202606003',supplier:'XX科技',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:7,amount:'31,200.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-06-28',submitter:'周八',stime:'2026-06-08 15:00:00',recvName:'赵磊',recvPhone:'13800001122',recvAddr:'杭州市西湖区文三路 100 号',items:[{code:'296F11111G',name:'空调压缩机',unit:'EA',snp:4,price:760.00,qty:30,amount:22800.00,maxOrder:350,replace:'无',stock:14,intransit:3},{code:'296F22222H',name:'冷凝器',unit:'EA',snp:3,price:840.00,qty:10,amount:8400.00,maxOrder:350,replace:'无',stock:7,intransit:1}],auditLog:[]},
+  {seq:7,orderNo:'WC202606004',supplier:'联友科技武汉',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:12,amount:'52,100.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-06-10 11:00:00',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-09 09:00:00',recvName:'孙琳',recvPhone:'13800003344',recvAddr:'武汉市洪山区光谷大道 88 号',items:[{code:'297G11111I',name:'动力电池模组',unit:'EA',snp:1,price:1999.00,qty:20,amount:39980.00,maxOrder:100,replace:'无',stock:4,intransit:2},{code:'297G22222J',name:'电池管理单元',unit:'EA',snp:1,price:1212.00,qty:10,amount:12120.00,maxOrder:100,replace:'无',stock:3,intransit:0}],auditLog:[{step:'门店审核',person:'李明',time:'2026-06-10 11:00:00',result:'通过',opinion:'同意',attach:''}]},
+  {seq:8,orderNo:'WC202606005',supplier:'XX科技',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:4,amount:'15,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-30',submitter:'郑十',stime:'2026-06-12 16:00:00',recvName:'周涛',recvPhone:'13800005566',recvAddr:'深圳市福田区深南大道 100 号',items:[{code:'298H11111K',name:'雨刮电机',unit:'EA',snp:8,price:320.00,qty:30,amount:9600.00,maxOrder:600,replace:'无',stock:30,intransit:0},{code:'298H22222L',name:'喷水壶总成',unit:'EA',snp:5,price:600.00,qty:10,amount:6000.00,maxOrder:600,replace:'无',stock:12,intransit:5}],auditLog:[]},
+  {seq:9,orderNo:'WC202607001',supplier:'联友科技武汉',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-01 10:30:00',edate:'2026-07-20',submitter:'张三',stime:'2026-06-30 08:00:00',recvName:'吴敏',recvPhone:'13800007788',recvAddr:'天津市和平区南京路 100 号',items:[{code:'299I11111M',name:'转向机总成',unit:'EA',snp:2,price:1290.00,qty:20,amount:25800.00,maxOrder:200,replace:'无',stock:8,intransit:1},{code:'299I22222N',name:'转向拉杆',unit:'EA',snp:2,price:1310.00,qty:10,amount:13100.00,maxOrder:200,replace:'无',stock:5,intransit:0}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-01 10:30:00',result:'通过',opinion:'同意',attach:''}]},
+  {seq:10,orderNo:'WC202607002',supplier:'XX科技',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:5,amount:'19,700.00',status:'已取消',remark:'门店预算调整',auditor:'李明',atime:'2026-07-02 16:00:00',edate:'—',submitter:'李四',stime:'2026-07-01 13:00:00',recvName:'郑浩',recvPhone:'13800009900',recvAddr:'重庆市渝中区解放碑步行街 88 号',items:[{code:'300J11111O',name:'音响主机',unit:'EA',snp:4,price:690.00,qty:20,amount:13800.00,maxOrder:300,replace:'无',stock:16,intransit:0},{code:'300J22222P',name:'扬声器套装',unit:'套',snp:2,price:590.00,qty:10,amount:5900.00,maxOrder:300,replace:'无',stock:9,intransit:3}],auditLog:[{step:'门店审核',person:'李明',time:'2026-07-02 16:00:00',result:'通过',opinion:'门店取消',attach:''}]},
+  {seq:11,orderNo:'WC202607003',supplier:'联友科技武汉',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'44,300.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-22',submitter:'王五',stime:'2026-07-02 10:00:00',recvName:'冯雪',recvPhone:'13800002233',recvAddr:'南京市建邺区江东中路 100 号',items:[{code:'301K11111Q',name:'前保险杠总成',unit:'EA',snp:2,price:880.00,qty:35,amount:30800.00,maxOrder:350,replace:'无',stock:11,intransit:2},{code:'301K22222R',name:'后保险杠总成',unit:'EA',snp:2,price:1350.00,qty:10,amount:13500.00,maxOrder:350,replace:'无',stock:6,intransit:0}],auditLog:[]},
+  {seq:12,orderNo:'WC202607004',supplier:'XX科技',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:6,amount:'25,100.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-03 09:00:00',edate:'2026-07-25',submitter:'赵六',stime:'2026-07-02 14:00:00',recvName:'蒋勇',recvPhone:'13800004455',recvAddr:'广州市天河区天河路 200 号',items:[{code:'302L11111S',name:'天窗总成',unit:'EA',snp:1,price:1090.00,qty:15,amount:16350.00,maxOrder:150,replace:'无',stock:7,intransit:1},{code:'302L22222T',name:'天窗导轨',unit:'EA',snp:1,price:875.00,qty:10,amount:8750.00,maxOrder:150,replace:'无',stock:4,intransit:0}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-03 09:00:00',result:'通过',opinion:'同意',attach:''}]},
+  {seq:13,orderNo:'WC202607005',supplier:'联友科技武汉',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:3,amount:'12,800.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-07-15',submitter:'孙七',stime:'2026-07-03 09:30:00',recvName:'韩梅',recvPhone:'13800006677',recvAddr:'大连市中山区人民路 100 号',items:[{code:'303M11111U',name:'轮毂轴承',unit:'EA',snp:6,price:420.00,qty:20,amount:8400.00,maxOrder:500,replace:'无',stock:22,intransit:0},{code:'303M22222V',name:'半轴总成',unit:'EA',snp:3,price:440.00,qty:10,amount:4400.00,maxOrder:500,replace:'无',stock:10,intransit:4}],auditLog:[]},
+  {seq:14,orderNo:'WC202607006',supplier:'XX科技',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'35,200.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-07-03 14:00:00',edate:'2026-07-28',submitter:'周八',stime:'2026-07-03 08:00:00',recvName:'曹宇',recvPhone:'13800008899',recvAddr:'长沙市岳麓区麓谷大道 88 号',items:[{code:'304N11111W',name:'排气管总成',unit:'EA',snp:4,price:760.00,qty:30,amount:22800.00,maxOrder:400,replace:'无',stock:13,intransit:2},{code:'304N22222X',name:'消声器',unit:'EA',snp:3,price:1240.00,qty:10,amount:12400.00,maxOrder:400,replace:'无',stock:6,intransit:0}],auditLog:[{step:'门店审核',person:'李明',time:'2026-07-03 14:00:00',result:'通过',opinion:'同意',attach:''}]},
+  {seq:15,orderNo:'WC202607007',supplier:'联友科技武汉',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'58,000.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-30',submitter:'吴九',stime:'2026-07-03 11:00:00',recvName:'邓超',recvPhone:'13800001010',recvAddr:'苏州市工业园区星湖街 100 号',items:[{code:'305O11111Y',name:'发动机ECU',unit:'EA',snp:1,price:1999.00,qty:20,amount:39980.00,maxOrder:100,replace:'无',stock:5,intransit:1},{code:'305O22222Z',name:'节气门体',unit:'EA',snp:1,price:1802.00,qty:10,amount:18020.00,maxOrder:100,replace:'无',stock:3,intransit:0}],auditLog:[]}
 ];
+
 var epFilteredData = [];
 var epCurrentPage = 1;
 var epPageSize = 20;
@@ -6566,7 +7047,7 @@ function epRenderTable() {
       + '<td class="col-expected-date">'+r.edate+'</td>'
       + '<td class="col-submitter">'+r.submitter+'</td>'
       + '<td class="col-submit-time">'+r.stime+'</td>'
-      + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="epOpenView('+ ri +')" style="color:#185FA5;cursor:pointer">查看</a> <a href="javascript:void(0)" onclick="epOpenEdit('+ ri +')" style="color:#185FA5;cursor:pointer">编辑</a> <a href="javascript:void(0)" onclick="alert(\'删除功能待开发\')" style="color:#185FA5;cursor:pointer">删除</a> <a href="javascript:void(0)" onclick="epOpenAudit('+ ri +')" style="color:#185FA5;cursor:pointer">审核</a></td>'
+      + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="epOpenView('+ ri +')" style="color:#185FA5;cursor:pointer">查看</a> <a href="javascript:void(0)" onclick="epOpenEdit('+ ri +')" style="color:#185FA5;cursor:pointer">编辑</a> <a href="javascript:void(0)" onclick="alert(\'删除功能待开发\')" style="color:#185FA5;cursor:pointer">删除</a> <a href="javascript:void(0)" onclick="epOpenView('+ ri +',{audit:true})" style="color:#185FA5;cursor:pointer">审核</a></td>'
       + '</tr>';
   }).join('');
   document.getElementById('ep-pg-total').textContent = '共 ' + epFilteredData.length + ' 条';
@@ -6591,7 +7072,6 @@ function epApplyFilter() {
   var qStatus = document.getElementById('ep-flt-status')?.value || '';
   var qRegion = (document.getElementById('ep-flt-region')?.value || '').toLowerCase();
   var qDistrict = (document.getElementById('ep-flt-district')?.value || '').toLowerCase();
-  var qDealer = (document.getElementById('ep-flt-dealer')?.value || '').toLowerCase();
   var qStore = (document.getElementById('ep-flt-store')?.value || '').toLowerCase();
   var ds = document.getElementById('ep-flt-date-start')?.value || '';
   var de = document.getElementById('ep-flt-date-end')?.value || '';
@@ -6610,7 +7090,7 @@ function epApplyFilter() {
   epRenderTable();
 }
 function epResetFilter() {
-  ['ep-flt-order-no','ep-flt-region','ep-flt-district','ep-flt-dealer','ep-flt-store'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  ['ep-flt-order-no','ep-flt-region','ep-flt-district','ep-flt-store'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('ep-flt-supplier') && (document.getElementById('ep-flt-supplier').value = '');
   document.getElementById('ep-flt-status') && (document.getElementById('ep-flt-status').value = '');
   var dtext = document.querySelector('#page-external-procurement .lt-date-range-text');
@@ -6622,14 +7102,6 @@ function epResetFilter() {
   epRenderTable();
 }
 function epExportData() { alert('导出 ' + epFilteredData.length + ' 条配件外采数据'); }
-function epToggleFilter() {
-  epFilterExpanded = !epFilterExpanded;
-  var grid = document.getElementById('ep-filterGrid');
-  var items = grid.querySelectorAll('.lt-filter-item');
-  for (var i = 7; i < items.length; i++) { items[i].style.display = epFilterExpanded ? '' : 'none'; }
-  var toggleEl = grid.querySelector('.lt-filter-toggle');
-  if (toggleEl) toggleEl.innerHTML = epFilterExpanded ? '&#xFE40; 收起' : '&#xFE40; 展开';
-}
 function epFilterCombobox(input) {
   var wrap = input.closest('.lt-input-wrap.combobox');
   if (!wrap) return;
@@ -6670,15 +7142,14 @@ function initEp() {
   }
   epFilteredData = [].concat(epAllData);
   epRenderTable();
-  var grid = document.getElementById('ep-filterGrid');
-  var items = grid.querySelectorAll('.lt-filter-item');
-  for (var i = 7; i < items.length; i++) { items[i].style.display = 'none'; }
+  initFilterGrid('ep-filterGrid', 7);
 }
 
 // ===== 配件采购 面板（新增/编辑/查看）=====
 var ppFormMode = 'add';
 var ppCurrentRec = null;
 var ppPartsList = [];
+var ppRebateAvail = 0;
 
 function ppOpenAdd() { ppFormMode = 'add'; ppCurrentRec = null; ppRenderPanel(); }
 function ppGetActions(ri, r) {
@@ -6687,12 +7158,11 @@ function ppGetActions(ri, r) {
   var btns = ['<a href="javascript:void(0)" onclick="ppOpenView(' + ri + ')" style="color:#185FA5;cursor:pointer">查看</a>'];
   // 门店规则（门店 与 超级管理员 可见）
   if (role === '门店' || role === '超级管理员') {
-    if (s === '未提交' || s === '门店审核不通过') {
+    if (s === '未提交' || s === '审核不通过') {
       btns.push('<a href="javascript:void(0)" onclick="ppOpenEdit(' + ri + ')" style="color:#185FA5;cursor:pointer">编辑</a>');
       btns.push('<a href="javascript:void(0)" onclick="alert(\'删除功能待开发\')" style="color:#185FA5;cursor:pointer">删除</a>');
     }
     if (s === '门店审核中') {
-      btns.push('<a href="javascript:void(0)" onclick="ppOpenEdit(' + ri + ')" style="color:#185FA5;cursor:pointer">编辑</a>');
       btns.push('<a href="javascript:void(0)" onclick="ppOpenAudit(' + ri + ')" style="color:#185FA5;cursor:pointer">审核</a>');
     }
   }
@@ -6746,7 +7216,9 @@ function setGlobalRole(role, e) {
   for (var i = 0; i < items.length; i++) { items[i].classList.toggle('active', items[i].getAttribute('data-role') === role); }
   var m = document.getElementById('lt-user-menu');
   if (m) m.classList.remove('open');
+  if (typeof ppApplyRoleUI === 'function') ppApplyRoleUI();
   if (typeof ppRenderTable === 'function') ppRenderTable();
+  if (typeof csApplyStoreDefault === 'function') csApplyStoreDefault();
 }
 document.addEventListener('click', function() {
   var m = document.getElementById('lt-user-menu');
@@ -6761,82 +7233,203 @@ function ppfGetPrice(name) {
   for (var k in m) { if (name && name.indexOf(k) !== -1) return m[k]; }
   return 200;
 }
+function getRebateAvail() {
+  return ppRebateAvail;
+}
+function computeCashRebateFor(list, rebateAvail) {
+  var total = list.reduce(function(s, p) { return s + (p.amount || 0); }, 0);
+  var threshold = total * 0.99;
+  var rows = list.map(function(p) {
+    var amt = p.amount || 0, rebate, cash;
+    if (rebateAvail >= threshold) {
+      rebate = Math.round(amt * 0.99 * 100) / 100;
+      cash = Math.round((amt - rebate) * 100) / 100;
+    } else {
+      var share = total > 0 ? (amt / total) : 0;
+      rebate = Math.round(rebateAvail * share * 100) / 100;
+      cash = Math.round((amt - rebate) * 100) / 100;
+    }
+    return { cash: cash, rebate: rebate };
+  });
+  return {
+    rows: rows, totalAmount: total,
+    totalCash: rows.reduce(function(s, r) { return s + r.cash; }, 0),
+    totalRebate: rows.reduce(function(s, r) { return s + r.rebate; }, 0)
+  };
+}
 function ppfAddPart() {
   var idx = ppPartsList.length;
-  ppPartsList.push({code:'PJ'+(idx+1).toString().padStart(3,'0'), name:'刹车片（前）', series:'Model S', model:'2025款 Model S', unit:'个', qty:1, price:380, amount:380});
+  ppPartsList.push({code:'PJ'+(idx+1).toString().padStart(3,'0'), name:'刹车片（前）', taxNo:'', unit:'个', snp:1, price:380, qty:1, amount:380, shortQty:0, rel:'', maxOrder:100, stock:50, intransit:10, replace:''});
   ppfRenderParts();
 }
 function ppfRemovePart(idx) { ppPartsList.splice(idx, 1); ppfRenderParts(); }
 function ppfRenderParts() {
   var tbody = document.getElementById('ppf-parts-tbody');
   if (!tbody) return;
+  var calc = computeCashRebateFor(ppPartsList, getRebateAvail());
+  var ro = (ppFormMode === 'view');
   if (ppPartsList.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#999;padding:16px">暂无配件明细，请点击"添加配件"</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="17" style="text-align:center;color:#999;padding:16px">暂无配件明细，请点击"添加配件"</td></tr>';
   } else {
     tbody.innerHTML = ppPartsList.map(function(p, i) {
+      var c = calc.rows[i];
+      var bg = ro ? 'background:#f5f5f5' : '';
+      var codeHtml = '<input value="'+p.code+'" readonly style="width:100px;background:#f5f5f5;color:#888">';
+      var nameHtml = ro
+        ? '<input value="'+p.name+'" readonly style="background:#f5f5f5">'
+        : '<input value="'+p.name+'" onchange="ppPartsList['+i+'].name=this.value;var pr=ppfGetPrice(this.value);ppPartsList['+i+'].price=pr;ppPartsList['+i+'].amount=pr*ppPartsList['+i+'].qty;ppfRenderParts()">';
+      var unitHtml = ro
+        ? '<input value="'+p.unit+'" readonly style="width:80px;background:#f5f5f5">'
+        : '<input value="'+p.unit+'" onchange="ppPartsList['+i+'].unit=this.value" style="width:80px">';
+      var snpHtml = ro
+        ? '<input type="number" min="0" step="0.01" value="'+(p.snp||1)+'" readonly style="width:90px;background:#f5f5f5">'
+        : '<input type="number" min="0" step="0.01" value="'+(p.snp||1)+'" onchange="ppPartsList['+i+'].snp=parseFloat(this.value)||1" style="width:90px">';
+      var priceHtml = ro
+        ? '<input type="number" min="0" step="0.01" value="'+p.price+'" readonly style="width:90px;background:#f5f5f5">'
+        : '<input type="number" min="0" step="0.01" value="'+p.price+'" onchange="ppPartsList['+i+'].price=parseFloat(this.value)||0;ppPartsList['+i+'].amount=ppPartsList['+i+'].price*ppPartsList['+i+'].qty;ppfRenderParts()" style="width:90px">';
+      var shortHtml = ro
+        ? '<input type="number" min="0" value="'+(p.shortQty||0)+'" readonly style="width:80px;background:#f5f5f5">'
+        : '<input type="number" min="0" value="'+(p.shortQty||0)+'" onchange="ppPartsList['+i+'].shortQty=parseInt(this.value)||0;ppfRenderParts()" style="width:80px">';
+      var relHtml = ro
+        ? '<input value="'+(p.rel||'')+'" readonly style="width:120px;background:#f5f5f5">'
+        : '<input value="'+(p.rel||'')+'" onchange="ppPartsList['+i+'].rel=this.value" style="width:120px">';
+      var qtyHtml = ro
+        ? '<input type="number" min="1" value="'+p.qty+'" readonly style="width:70px;background:#f5f5f5">'
+        : '<input type="number" min="1" value="'+p.qty+'" onchange="ppPartsList['+i+'].qty=parseInt(this.value)||1;ppPartsList['+i+'].amount=ppPartsList['+i+'].price*ppPartsList['+i+'].qty;ppfRenderParts()" style="width:70px">';
+      var maxHtml = '<input type="number" min="0" value="'+(p.maxOrder||0)+'" readonly style="width:90px;background:#f5f5f5">';
+      var repHtml = '<input value="'+(p.replace||'')+'" readonly style="width:80px;background:#f5f5f5">';
+      var stockHtml = '<input type="number" min="0" value="'+(p.stock||0)+'" readonly style="width:70px;background:#f5f5f5">';
+      var inHtml = '<input type="number" min="0" value="'+(p.intransit||0)+'" readonly style="width:70px;background:#f5f5f5">';
+      var checkHtml = ro ? '' : '<td style="text-align:center"><input type="checkbox" class="ppf-row-check" data-i="'+i+'"'+(ppSelectedRows.indexOf(i)!==-1?' checked':'')+' onchange="ppfToggleRow('+i+', this.checked)"></td>';
       return '<tr>'
+        + checkHtml
         + '<td>'+(i+1)+'</td>'
-        + '<td><input value="'+p.code+'" onchange="ppPartsList['+i+'].code=this.value"></td>'
-        + '<td><input value="'+p.name+'" onchange="ppPartsList['+i+'].name=this.value;var pr=ppfGetPrice(this.value);ppPartsList['+i+'].price=pr;ppPartsList['+i+'].amount=pr*ppPartsList['+i+'].qty;ppfRenderParts()"></td>'
-        + '<td><input value="'+p.series+'" onchange="ppPartsList['+i+'].series=this.value"></td>'
-        + '<td><input value="'+p.model+'" onchange="ppPartsList['+i+'].model=this.value"></td>'
-        + '<td><select onchange="ppPartsList['+i+'].unit=this.value"><option>'+p.unit+'</option><option>个</option><option>套</option><option>瓶</option><option>条</option></select></td>'
-        + '<td><input type="number" min="1" value="'+p.qty+'" onchange="ppPartsList['+i+'].qty=parseInt(this.value)||1;ppPartsList['+i+'].amount=ppPartsList['+i+'].price*ppPartsList['+i+'].qty;ppfRenderParts()" style="width:60px"></td>'
-        + '<td><input type="number" min="0" step="0.01" value="'+p.price+'" onchange="ppPartsList['+i+'].price=parseFloat(this.value)||0;ppPartsList['+i+'].amount=ppPartsList['+i+'].price*ppPartsList['+i+'].qty;ppfRenderParts()" style="width:80px"></td>'
+        + '<td>'+codeHtml+'</td>'
+        + '<td>'+nameHtml+'</td>'
+        + '<td>'+unitHtml+'</td>'
+        + '<td>'+snpHtml+'</td>'
+        + '<td>'+priceHtml+'</td>'
+        + '<td>'+shortHtml+'</td>'
+        + '<td>'+relHtml+'</td>'
+        + '<td>'+qtyHtml+'</td>'
         + '<td>¥'+p.amount.toFixed(2)+'</td>'
-        + '<td><a href="javascript:void(0)" onclick="ppfRemovePart('+i+')" style="color:#861B2F">删除</a></td>'
+        + '<td>¥'+c.cash.toFixed(2)+'</td>'
+        + '<td>¥'+c.rebate.toFixed(2)+'</td>'
+        + '<td>'+maxHtml+'</td>'
+        + '<td>'+repHtml+'</td>'
+        + '<td>'+stockHtml+'</td>'
+        + '<td>'+inHtml+'</td>'
         + '</tr>';
     }).join('');
   }
-  ppfUpdateTotals();
+  // 同步表头全选 checkbox 状态
+  var checkAll = document.getElementById('ppf-check-all');
+  if (checkAll) checkAll.checked = ppPartsList.length > 0 && ppSelectedRows.length === ppPartsList.length;
+  ppfUpdateTotals(calc);
 }
-function ppfUpdateTotals() {
-  var c = ppPartsList.length;
-  var t = ppPartsList.reduce(function(s, p) { return s + (p.amount || 0); }, 0);
+function ppfUpdateTotals(calc) {
+  calc = calc || computeCashRebateFor(ppPartsList, getRebateAvail());
   var el = document.getElementById('ppf-totals');
-  if (el) el.innerHTML = '合计品种: <b>'+c+'</b> &nbsp; 合计金额(含税): <b>¥'+t.toFixed(2)+'</b>';
+  if (el) el.innerHTML = '预估现金合计(含税): <b>¥'+calc.totalCash.toFixed(2)+'</b> &nbsp; 预估返利合计(含税): <b>¥'+calc.totalRebate.toFixed(2)+'</b> &nbsp; 预估金额合计(含税): <b>¥'+calc.totalAmount.toFixed(2)+'</b>';
+}
+function ppfCalcCashRebate() { ppfRenderParts(); }
+function ppRebateAvailSet(v) { ppRebateAvail = v || 0; ppfRenderParts(); }
+function ppfToggleRow(i, checked) {
+  if (checked) { if (ppSelectedRows.indexOf(i) === -1) ppSelectedRows.push(i); }
+  else { ppSelectedRows = ppSelectedRows.filter(function(x){ return x !== i; }); }
+  var all = document.getElementById('ppf-check-all');
+  if (all) all.checked = ppPartsList.length > 0 && ppSelectedRows.length === ppPartsList.length;
+}
+function ppfToggleAll(checked) {
+  ppSelectedRows = checked ? ppPartsList.map(function(_, i){ return i; }) : [];
+  ppfRenderParts();
+}
+function ppfRemoveSelected() {
+  if (!ppSelectedRows.length) { alert('请先勾选要删除的配件'); return; }
+  if (!confirm('确认删除已勾选的 ' + ppSelectedRows.length + ' 行配件？')) return;
+  var sorted = ppSelectedRows.slice().sort(function(a,b){ return b-a; });
+  for (var i = 0; i < sorted.length; i++) ppPartsList.splice(sorted[i], 1);
+  ppSelectedRows = [];
+  ppfRenderParts();
 }
 function ppRenderPanel() {
   ppPartsList = [];
+  ppRebateAvail = 0;
   var title = document.getElementById('pp-panel-title');
   var badge = document.getElementById('pp-panel-badge');
+  var toolbar = document.getElementById('pp-parts-toolbar');
+  var auditSec = document.getElementById('pp-audit-records-section');
+  var partsSecTitle = document.getElementById('pp-parts-section-title');
+  var recTbody = document.getElementById('pp-audit-records-tbody');
+  var basicInfoGrid = document.getElementById('pp-basic-info');
   if (ppFormMode === 'add') {
-    if (title) title.textContent = '配件采购';
+    if (title) title.textContent = '配件采购单';
     if (badge) { badge.textContent = '新增'; badge.className = 'pm-panel-badge'; }
     ppSetPanelReadonly(false);
-    document.getElementById('pp-form-po-no').value = 'PO'+new Date().toISOString().slice(0,10).replace(/-/g,'')+String(Math.floor(Math.random()*900+100));
-    document.getElementById('pp-form-apply-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('pp-form-type').value = ''; document.getElementById('pp-form-store').value = '';
-    document.getElementById('pp-form-edate').value = ''; document.getElementById('pp-form-shortage').value = ''; document.getElementById('pp-form-remark').value = '';
+    if (toolbar) toolbar.innerHTML = '<button class="lt-btn lt-btn-default" onclick="alert(\'选择缺件（占位）\')">选择缺件</button><button class="lt-btn lt-btn-primary" onclick="ppfAddPart()">+ 添加配件</button><button class="lt-btn lt-btn-default" onclick="alert(\'导入（占位）\')">导入</button><button class="lt-btn lt-btn-default" onclick="ppfRemoveSelected()">删除配件</button><button class="lt-btn lt-btn-default" onclick="ppOpenCalendar()">集单日历</button><button class="lt-btn lt-btn-default" onclick="ppShowBalance()">账户余额</button>';
+    if (auditSec) auditSec.style.display = 'none';
+    var checkCol = document.getElementById('ppf-check-col'); if (checkCol) checkCol.style.display = '';
+    ppSelectedRows = [];
+    document.getElementById('pp-form-type').value = '';
+    document.getElementById('pp-form-store').value = ppGetDefaultStore();
+    document.getElementById('pp-form-edate').value = '';
+    var ppDc = ppStoreContacts[ppGetDefaultStore()] || ppStoreContacts['默认'] || {name:'', phone:'', addr:''};
+    document.getElementById('pp-form-recv-name').value = ppDc.name;
+    document.getElementById('pp-form-recv-phone').value = ppDc.phone;
+    document.getElementById('pp-form-recv-addr').value = ppDc.addr;
   } else if (ppFormMode === 'edit' && ppCurrentRec) {
-    if (title) title.textContent = '配件采购';
+    if (title) title.textContent = '配件采购单';
     if (badge) { badge.textContent = '编辑'; badge.className = 'pm-panel-badge'; }
     ppSetPanelReadonly(false);
-    document.getElementById('pp-form-po-no').value = ppCurrentRec.po || '';
+    if (toolbar) toolbar.innerHTML = '<button class="lt-btn lt-btn-default" onclick="alert(\'选择缺件（占位）\')">选择缺件</button><button class="lt-btn lt-btn-primary" onclick="ppfAddPart()">+ 添加配件</button><button class="lt-btn lt-btn-default" onclick="alert(\'导入（占位）\')">导入</button><button class="lt-btn lt-btn-default" onclick="ppfRemoveSelected()">删除配件</button><button class="lt-btn lt-btn-default" onclick="ppOpenCalendar()">集单日历</button><button class="lt-btn lt-btn-default" onclick="ppShowBalance()">账户余额</button>';
+    if (auditSec) auditSec.style.display = 'none';
+    var checkCol = document.getElementById('ppf-check-col'); if (checkCol) checkCol.style.display = '';
+    ppSelectedRows = [];
     document.getElementById('pp-form-type').value = ppCurrentRec.type || '';
-    document.getElementById('pp-form-store').value = ppCurrentRec.store || '';
+    document.getElementById('pp-form-store').value = ppCurrentRec.store || ppGetDefaultStore();
     document.getElementById('pp-form-edate').value = ppCurrentRec.edate || '';
-    document.getElementById('pp-form-shortage').value = ppCurrentRec.shortage === '—' ? '' : (ppCurrentRec.shortage || '');
-    document.getElementById('pp-form-remark').value = ppCurrentRec.remark === '—' ? '' : (ppCurrentRec.remark || '');
-    document.getElementById('pp-form-apply-date').value = ppCurrentRec.stime ? ppCurrentRec.stime.split(' ')[0] : '';
-    ppPartsList = [{code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款 Model S',unit:'个',qty:5,price:380,amount:1900}];
+    document.getElementById('pp-form-recv-name').value = ppCurrentRec.recvName || '';
+    document.getElementById('pp-form-recv-phone').value = ppCurrentRec.recvPhone || '';
+    document.getElementById('pp-form-recv-addr').value = ppCurrentRec.recvAddr || '';
+    ppPartsList = (ppCurrentRec.items && ppCurrentRec.items.length) ? ppCurrentRec.items.slice() : [{code:'PJ001',name:'刹车片（前）',taxNo:'',unit:'个',snp:1,price:380,qty:5,amount:1900,shortQty:5,rel:'',maxOrder:100,stock:50,intransit:10,replace:''}];
   } else if (ppFormMode === 'view' && ppCurrentRec) {
-    if (title) title.textContent = '配件采购';
+    if (title) title.textContent = '订单详情';
     if (badge) { badge.textContent = '查看详情'; badge.className = 'pm-panel-badge'; }
     ppSetPanelReadonly(true);
-    document.getElementById('pp-form-po-no').value = ppCurrentRec.po || '';
+    var checkCol = document.getElementById('ppf-check-col'); if (checkCol) checkCol.style.display = 'none';
+    if (toolbar) { toolbar.innerHTML = '<button class="lt-btn lt-btn-default" onclick="ppExportData()">导出</button>'; toolbar.style.display = ''; }
+    if (auditSec) auditSec.style.display = '';
+    if (recTbody) {
+      var log = ppCurrentRec.auditLog || [];
+      if (log.length === 0) {
+        recTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:16px">暂无审批记录</td></tr>';
+      } else {
+        recTbody.innerHTML = log.map(function(l, i){
+          return '<tr><td>'+(i+1)+'</td><td>'+(l.step||'—')+'</td><td>'+(l.person||'—')+'</td><td>'+(l.time||'—')+'</td><td>'+(l.result||'—')+'</td><td>'+(l.opinion||'—')+'</td><td>'+(l.attach||'—')+'</td></tr>';
+        }).join('');
+      }
+    }
     document.getElementById('pp-form-type').value = ppCurrentRec.type || '';
     document.getElementById('pp-form-store').value = ppCurrentRec.store || '';
     document.getElementById('pp-form-edate').value = ppCurrentRec.edate || '';
-    document.getElementById('pp-form-shortage').value = ppCurrentRec.shortage === '—' ? '' : (ppCurrentRec.shortage || '');
-    document.getElementById('pp-form-remark').value = ppCurrentRec.remark === '—' ? '' : (ppCurrentRec.remark || '');
-    document.getElementById('pp-form-apply-date').value = ppCurrentRec.stime ? ppCurrentRec.stime.split(' ')[0] : '';
-    ppPartsList = [{code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款',unit:'个',qty:5,price:380,amount:1900},{code:'PJ002',name:'机油滤清器',series:'Model 3',model:'2025款',unit:'个',qty:10,price:85,amount:850}];
+    document.getElementById('pp-form-recv-name').value = ppCurrentRec.recvName || '';
+    document.getElementById('pp-form-recv-phone').value = ppCurrentRec.recvPhone || '';
+    document.getElementById('pp-form-recv-addr').value = ppCurrentRec.recvAddr || '';
+    ppPartsList = (ppCurrentRec.items && ppCurrentRec.items.length) ? ppCurrentRec.items.slice() : [{code:'PJ001',name:'刹车片（前）',taxNo:'',unit:'个',snp:1,price:380,qty:5,amount:1900,shortQty:5,rel:'',maxOrder:100,stock:50,intransit:10,replace:''},{code:'PJ002',name:'机油滤清器',taxNo:'',unit:'个',snp:1,price:85,qty:10,amount:850,shortQty:10,rel:'',maxOrder:200,stock:120,intransit:0,replace:''}];
   }
   document.getElementById('pp-panel-overlay').classList.add('show');
   document.getElementById('pp-panel').classList.add('show');
   ppfRenderParts();
 }
+function ppGetDefaultStore() {
+  var role = gUserRole || '门店';
+  return role === '总部' ? '总部' : '当前门店';
+}
+var ppStoreContacts = {
+  '当前门店': {name:'张伟', phone:'13800001234', addr:'上海市浦东新区张江路 88 号'},
+  '总部': {name:'李娜', phone:'13900005678', addr:'北京市朝阳区总部大厦 1 层'},
+  '默认': {name:'王芳', phone:'13700008888', addr:'默认收货地址'}
+};
 function ppSetPanelReadonly(readonly) {
   var wrap = document.getElementById('pp-panel');
   if (!wrap) return;
@@ -6844,16 +7437,23 @@ function ppSetPanelReadonly(readonly) {
     if (readonly) { el.readOnly = true; el.disabled = true; el.style.background = '#f5f5f5'; }
     else { el.readOnly = false; el.disabled = false; el.style.background = ''; }
   });
-  document.getElementById('ppf-add-btn').style.display = readonly ? 'none' : '';
-  document.getElementById('ppf-del-col').style.display = readonly ? 'none' : '';
-  document.getElementById('pp-panel-footer').style.display = readonly ? 'none' : '';
+  wrap.querySelectorAll('.pm-form-item input, .pm-form-item select, .pm-form-item textarea').forEach(function(el) {
+    if (el.classList.contains('js-lock')) return;
+    if (readonly) { el.readOnly = true; el.disabled = true; el.style.background = '#f5f5f5'; }
+    else { el.readOnly = false; el.disabled = false; el.style.background = ''; }
+  });
+  var toolbar = document.getElementById('pp-parts-toolbar');
+  if (toolbar) toolbar.style.display = readonly ? 'none' : '';
+  var footer = document.getElementById('pp-panel-footer');
+  if (footer) footer.style.display = readonly ? 'none' : '';
 }
-function ppfSubmit() { alert('提交成功'); ppClosePanel(); }
+function ppfSubmit() { alert('已提交，请等待审核'); ppClosePanel(); }
 function ppfSaveDraft() { alert('草稿已保存'); ppClosePanel(); }
 function ppfResetForm() {
-  ppPartsList = []; ppfRenderParts();
-  document.getElementById('pp-form-type').value = ''; document.getElementById('pp-form-store').value = '';
-  document.getElementById('pp-form-edate').value = ''; document.getElementById('pp-form-shortage').value = ''; document.getElementById('pp-form-remark').value = '';
+  ppPartsList = []; ppRebateAvail = 0; ppfRenderParts();
+  document.getElementById('pp-form-type').value = ''; document.getElementById('pp-form-store').value = ppGetDefaultStore();
+  document.getElementById('pp-form-edate').value = '';
+  document.getElementById('pp-form-recv-name').value = ''; document.getElementById('pp-form-recv-phone').value = ''; document.getElementById('pp-form-recv-addr').value = '';
 }
 
 // ===== 配件采购 审核面板 =====
@@ -6862,129 +7462,338 @@ function ppCloseAuditPanel() { document.getElementById('pp-audit-overlay').class
 function ppaRenderPanel() {
   if (!ppCurrentRec) return;
   document.getElementById('ppa-status-badge').textContent = ppCurrentRec.status || '';
-  var cls = (ppCurrentRec.status === '门店审核通过' || ppCurrentRec.status === '主机厂已审核') ? 'pass' : ((ppCurrentRec.status === '门店审核不通过' || ppCurrentRec.status === '主机厂已拒绝') ? 'reject' : '');
+  var cls = (ppCurrentRec.status === '审核通过' || ppCurrentRec.status === '主机厂已审核') ? 'pass' : ((ppCurrentRec.status === '审核不通过' || ppCurrentRec.status === '主机厂已拒绝') ? 'reject' : '');
   document.getElementById('ppa-status-badge').className = 'pm-panel-badge ' + cls;
   var info = document.getElementById('ppa-basic-info');
   var fs = [
-    {l:'采购单号',v:ppCurrentRec.po},{l:'订单类型',v:ppCurrentRec.type},{l:'门店',v:ppCurrentRec.store},
-    {l:'大区',v:ppCurrentRec.region||'—'},{l:'小区',v:ppCurrentRec.district||'—'},{l:'关联的缺件单',v:ppCurrentRec.shortage||'—'},
-    {l:'期望到货日期',v:ppCurrentRec.edate||'—'},{l:'备注',v:ppCurrentRec.remark||'—'}
+    {l:'采购方',v:ppCurrentRec.store,req:true},
+    {l:'订单类型',v:ppCurrentRec.type,req:true},
+    {l:'期望到货日期',v:ppCurrentRec.edate||'—',req:true},
+    {l:'收货联系人',v:ppCurrentRec.recvName||'—',req:true},
+    {l:'收货联系电话',v:ppCurrentRec.recvPhone||'—',req:true},
+    {l:'收货地址',v:ppCurrentRec.recvAddr||'—',req:true}
   ];
-  info.innerHTML = fs.map(function(f){return '<div class="pm-form-item"><label>'+f.l+'</label><input readonly class="pm-readonly" value="'+f.v+'"></div>';}).join('');
-  var items = [{s:1,code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款',unit:'个',q:5,price:380,amt:1900},{s:2,code:'PJ002',name:'机油滤清器',series:'Model 3',model:'2025款',unit:'个',q:10,price:85,amt:850}];
-  document.getElementById('ppa-parts-tbody').innerHTML = items.map(function(p){return '<tr><td>'+p.s+'</td><td>'+p.code+'</td><td>'+p.name+'</td><td>'+p.series+'</td><td>'+p.model+'</td><td>'+p.unit+'</td><td>'+p.q+'</td><td>'+p.price.toFixed(2)+'</td><td>¥'+p.amt.toFixed(2)+'</td></tr>';}).join('');
-  document.getElementById('ppa-totals').innerHTML = '合计品种: <b>2</b> &nbsp; 合计金额(含税): <b>¥2750.00</b>';
+  info.innerHTML = fs.map(function(f){return '<div class="pm-form-item'+(f.req?' required':'')+'"><label>'+f.l+'</label><input readonly class="pm-readonly" value="'+f.v+'"></div>';}).join('');
+  var items = (ppCurrentRec.items && ppCurrentRec.items.length) ? ppCurrentRec.items : [
+    {code:'290F60471R',name:'整车控制器',taxNo:'',unit:'EA',snp:10,price:799.70,shortQty:6,rel:'无',qty:98,amount:78370.6,maxOrder:999,replace:'替换件编码',stock:0,intransit:0},
+    {code:'TEST101',name:'前灯总成(左)',taxNo:'',unit:'个',snp:1,price:502.86,shortQty:2,rel:'有',qty:99,amount:49783.14,maxOrder:99,replace:'无',stock:0,intransit:0},
+    {code:'TEST103',name:'前灯总成(右)',taxNo:'',unit:'L',snp:1,price:425.53,shortQty:3,rel:'有',qty:99,amount:42127.47,maxOrder:20,replace:'替换件编码',stock:0,intransit:0}
+  ];
+  var rebateAvail = items.reduce(function(s,p){return s+(p.amount||0);}, 0);
+  var calc = computeCashRebateFor(items, rebateAvail);
+  ppRebateAvail = rebateAvail;
+  document.getElementById('ppa-parts-tbody').innerHTML = items.map(function(p, i){var c=calc.rows[i];return '<tr><td>'+(i+1)+'</td><td>'+p.code+'</td><td>'+p.name+'</td><td>'+(p.unit||'')+'</td><td>'+(p.snp||'')+'</td><td>¥'+p.price.toFixed(2)+'</td><td>'+(p.shortQty||0)+'</td><td>'+(p.rel||'')+'</td><td>'+(p.qty||0).toFixed(2)+'</td><td>¥'+p.amount.toFixed(2)+'</td><td>¥'+c.cash.toFixed(2)+'</td><td>¥'+c.rebate.toFixed(2)+'</td><td>'+(p.maxOrder||0)+'</td><td>'+(p.replace||'')+'</td><td>'+(p.stock||0)+'</td><td>'+(p.intransit||0)+'</td></tr>';}).join('');
+  document.getElementById('ppa-totals').innerHTML = '预估现金合计(含税): <b>¥'+calc.totalCash.toFixed(2)+'</b> &nbsp; 预估返利合计(含税): <b>¥'+calc.totalRebate.toFixed(2)+'</b> &nbsp; 预估金额合计(含税): <b>¥'+calc.totalAmount.toFixed(2)+'</b>';
   var atb = document.getElementById('ppa-audit-tbody');
-  var ppCanAudit = (gUserRole === '门店' && ppCurrentRec.status === '门店审核中') || (gUserRole === '总部' && ppCurrentRec.status === '总部审核中');
-  if (ppCanAudit) {
-    atb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:16px">暂无审核记录</td></tr>';
-    document.getElementById('ppa-audit-area').style.display = '';
+  var log = ppCurrentRec.auditLog || [];
+  if (log.length === 0) {
+    atb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:16px">暂无审核记录</td></tr>';
   } else {
-    atb.innerHTML = '<tr><td>'+(ppCurrentRec.auditor||'—')+'</td><td>'+(ppCurrentRec.atime||'—')+'</td><td>'+(ppCurrentRec.status||'—')+'</td><td>'+(ppCurrentRec.remark||'—')+'</td></tr>';
-    document.getElementById('ppa-audit-area').style.display = 'none';
+    atb.innerHTML = log.map(function(l){return '<tr><td>'+(l.step||'—')+'</td><td>'+(l.person||'—')+'</td><td>'+(l.time||'—')+'</td><td>'+(l.result||'—')+'</td><td>'+(l.opinion||'—')+'</td><td>'+(l.attach||'—')+'</td></tr>';}).join('');
   }
+  var canAudit = (ppCurrentRec.status === '门店审核中' || ppCurrentRec.status === '总部审核中');
+  document.getElementById('ppa-audit-area').style.display = canAudit ? '' : 'none';
+  var radios = document.getElementsByName('ppa-result');
+  for (var ri = 0; ri < radios.length; ri++) { radios[ri].checked = (radios[ri].value === 'pass'); }
   document.getElementById('ppa-comment').value = '';
   document.getElementById('pp-audit-overlay').classList.add('show');
   document.getElementById('pp-audit-panel').classList.add('show');
 }
-function ppaApprove() {
-  var c = document.getElementById('ppa-comment').value;
-  if (!c) { alert('请输入审核意见'); return; }
-  if (ppCurrentRec.status === '门店审核中') { ppCurrentRec.status = '门店审核通过'; }
-  else if (ppCurrentRec.status === '总部审核中') { ppCurrentRec.status = '主机厂已审核'; }
-  ppCurrentRec.auditor = '当前用户'; ppCurrentRec.remark = c;
-  ppCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
-  alert('审核通过'); ppCloseAuditPanel();
+function ppaSubmit() {
+  if (!ppCurrentRec) return;
+  var radios = document.getElementsByName('ppa-result');
+  var result = 'pass';
+  for (var i = 0; i < radios.length; i++) { if (radios[i].checked) { result = radios[i].value; break; } }
+  var comment = document.getElementById('ppa-comment').value.trim();
+  if (result === 'reject' && !comment) { alert('驳回必填审核意见'); return; }
+  var role = gUserRole || '门店';
+  var log = ppCurrentRec.auditLog || (ppCurrentRec.auditLog = []);
+  var stepName = (role === '总部') ? '总部审核' : '门店审核';
+  var now = new Date().toISOString().slice(0,16).replace('T',' ');
+  log.push({step: stepName, person: role + '用户', time: now, result: result === 'pass' ? '通过' : '驳回', opinion: comment || '同意', attach: ''});
+  if (result === 'reject') {
+    ppCurrentRec.status = '审核不通过';
+  } else {
+    if (ppCurrentRec.status === '门店审核中') {
+      if (ppCurrentRec.type === '定制订单') {
+        ppCurrentRec.status = '总部审核中';
+      } else if (ppCurrentRec.type === '常规订单' || ppCurrentRec.type === '油品订单') {
+        ppCurrentRec.status = '审核通过';   // 有集单日历：先不推 SAP，sync 留空=待集单
+      } else {
+        ppCurrentRec.status = '审核通过';
+        ppCurrentRec.sync = now;           // 紧急/绿色通道：无需集单，审核通过立即推 SAP
+      }
+    } else if (ppCurrentRec.status === '总部审核中') {
+      ppCurrentRec.status = '审核通过';
+      ppCurrentRec.sync = now;             // 定制订单走完总部审，立即推 SAP
+    }
+  }
+  ppCurrentRec.remark = comment || '同意';
+  alert(result === 'pass' ? '审核通过' : '审核驳回');
+  ppCloseAuditPanel();
+  if (typeof ppRenderTable === 'function') ppRenderTable();
 }
-function ppaReject() {
-  var c = document.getElementById('ppa-comment').value;
-  if (!c) { alert('请输入审核意见'); return; }
-  if (ppCurrentRec.status === '门店审核中') { ppCurrentRec.status = '门店审核不通过'; }
-  else if (ppCurrentRec.status === '总部审核中') { ppCurrentRec.status = '主机厂已拒绝'; }
-  ppCurrentRec.auditor = '当前用户'; ppCurrentRec.remark = c;
-  ppCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
-  alert('审核驳回'); ppCloseAuditPanel();
+function ppShowBalance() {
+  var role = gUserRole || '门店';
+  var balance = (role === '总部') ? 125000.00 : 8500.00;
+  alert('账户余额：¥' + balance.toFixed(2) + '（角色=' + role + '）');
+}
+function ppOpenCalendar() { alert('集单日历（占位）：按日历查看历史集单批次'); }
+function ppApplyRoleUI() {
+  var role = gUserRole || '门店';
+  var addBtn = document.getElementById('pp-add-btn');
+  var mcBtn = document.getElementById('pp-manual-collect-btn');
+  if (addBtn) addBtn.style.display = (role === '门店' || role === '超级管理员') ? '' : 'none';
+  if (mcBtn) mcBtn.style.display = (role === '总部' || role === '超级管理员') ? '' : 'none';
+  ppToggleCheckCol();
+}
+function ppToggleCheckCol() {
+  var show = (gUserRole || '门店') !== '门店';
+  var page = document.getElementById('page-parts-procurement');
+  if (page) page.classList.toggle('pp-hide-check', !show);
+}
+function ppToggleAllList(checkAll) {
+  var boxes = document.querySelectorAll('#pp-tbody .pp-list-check:not([disabled])');
+  boxes.forEach(function(b){ b.checked = checkAll; });
+}
+function ppManualCollect() {
+  var boxes = document.querySelectorAll('#pp-tbody .pp-list-check:checked');
+  if (boxes.length === 0) { alert('请先勾选要下发的订单（仅“审核通过”状态可勾选）'); return; }
+  if (confirm('确认将 ' + boxes.length + ' 条订单下发到 SAP？')) {
+    var now = new Date().toISOString().slice(0,16).replace('T',' ');
+    boxes.forEach(function(b){
+      var seq = b.getAttribute('data-seq');
+      var rec = ppAllData.find(function(r){ return String(r.seq) === String(seq); });
+      if (rec) rec.sync = now;
+    });
+    alert('已下发 SAP：' + boxes.length + ' 条订单');
+    ppRenderTable();
+  }
 }
 
 // ===== 配件外采 面板（新增/编辑/查看）=====
 var epFormMode = 'add';
 var epCurrentRec = null;
 var epPartsList = [];
+var epSelectedRows = [];
+
+function epGetDefaultStore() {
+  var role = gUserRole || '门店';
+  return role === '总部' ? '总部' : '当前门店';
+}
+var epStoreContacts = {
+  '当前门店': {name:'张伟', phone:'13800001234', addr:'上海市浦东新区张江路 88 号'},
+  '总部': {name:'李娜', phone:'13900005678', addr:'北京市朝阳区总部大厦 1 层'},
+  '默认': {name:'王芳', phone:'13700008888', addr:'默认收货地址'}
+};
+var epStoreRegionMap = {
+  '当前门店': {region:'华东', district:'上海'},
+  '总部': {region:'华北', district:'北京'},
+  '默认': {region:'—', district:'—'}
+};
 
 function epOpenAdd() { epFormMode = 'add'; epCurrentRec = null; epRenderPanel(); }
-function epOpenView(idx) { epFormMode = 'view'; epCurrentRec = epFilteredData[idx]; epRenderPanel(); }
+function epOpenView(idx, opts) { epFormMode = 'view'; epCurrentRec = epFilteredData[idx]; epRenderPanel(opts); }
 function epOpenEdit(idx) { epFormMode = 'edit'; epCurrentRec = epFilteredData[idx]; epRenderPanel(); }
 function epClosePanel() { document.getElementById('ep-panel-overlay').classList.remove('show'); document.getElementById('ep-panel').classList.remove('show'); }
 
 function epfAddPart() {
   var idx = epPartsList.length;
-  epPartsList.push({code:'PJ'+(idx+1).toString().padStart(3,'0'), name:'刹车片（前）', series:'Model S', model:'2025款 Model S', unit:'个', qty:1, price:380, amount:380});
+  epPartsList.push({code:'PJ'+(idx+1).toString().padStart(3,'0'), name:'刹车片（前）', unit:'个', snp:1, price:380, qty:1, amount:380, maxOrder:100, replace:'', stock:50, intransit:10});
   epfRenderParts();
 }
-function epfRemovePart(idx) { epPartsList.splice(idx, 1); epfRenderParts(); }
 function epfRenderParts() {
   var tbody = document.getElementById('epf-parts-tbody');
   if (!tbody) return;
+  var ro = (epFormMode === 'view');
   if (epPartsList.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#999;padding:16px">暂无配件明细，请点击"添加配件"</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;color:#999;padding:16px">暂无配件明细，请点击"备件选择"或"导入"</td></tr>';
   } else {
     tbody.innerHTML = epPartsList.map(function(p, i) {
+      var codeHtml = ro
+        ? '<input value="'+p.code+'" readonly style="width:100px;background:#f5f5f5">'
+        : '<input value="'+p.code+'" onchange="epPartsList['+i+'].code=this.value" style="width:100px">';
+      var nameHtml = ro
+        ? '<input value="'+p.name+'" readonly style="background:#f5f5f5">'
+        : '<input value="'+p.name+'" onchange="epPartsList['+i+'].name=this.value;var pr=ppfGetPrice(this.value);epPartsList['+i+'].price=pr;epPartsList['+i+'].amount=pr*epPartsList['+i+'].qty;epfRenderParts()">';
+      var unitHtml = ro
+        ? '<input value="'+p.unit+'" readonly style="width:80px;background:#f5f5f5">'
+        : '<input value="'+p.unit+'" onchange="epPartsList['+i+'].unit=this.value" style="width:80px">';
+      var snpHtml = ro
+        ? '<input type="number" min="0" step="0.01" value="'+(p.snp||1)+'" readonly style="width:80px;background:#f5f5f5">'
+        : '<input type="number" min="0" step="0.01" value="'+(p.snp||1)+'" onchange="epPartsList['+i+'].snp=parseFloat(this.value)||1" style="width:80px">';
+      var priceHtml = ro
+        ? '<input type="number" min="0" step="0.01" value="'+p.price+'" readonly style="width:90px;background:#f5f5f5">'
+        : '<input type="number" min="0" step="0.01" value="'+p.price+'" onchange="epPartsList['+i+'].price=parseFloat(this.value)||0;epPartsList['+i+'].amount=epPartsList['+i+'].price*epPartsList['+i+'].qty;epfRenderParts()" style="width:90px">';
+      var qtyHtml = ro
+        ? '<input type="number" min="1" value="'+p.qty+'" readonly style="width:70px;background:#f5f5f5">'
+        : '<input type="number" min="1" value="'+p.qty+'" onchange="epPartsList['+i+'].qty=parseInt(this.value)||1;epPartsList['+i+'].amount=epPartsList['+i+'].price*epPartsList['+i+'].qty;epfRenderParts()" style="width:70px">';
+      var maxHtml = '<input type="number" min="0" value="'+(p.maxOrder||0)+'" readonly style="width:100px;background:#f5f5f5">';
+      var repHtml = '<input value="'+(p.replace||'')+'" readonly style="width:80px;background:#f5f5f5">';
+      var stockHtml = '<input type="number" min="0" value="'+(p.stock||0)+'" readonly style="width:70px;background:#f5f5f5">';
+      var inHtml = '<input type="number" min="0" value="'+(p.intransit||0)+'" readonly style="width:70px;background:#f5f5f5">';
+      var checkHtml = ro ? '' : '<td style="text-align:center"><input type="checkbox" class="epf-row-check" data-i="'+i+'"'+(epSelectedRows.indexOf(i)!==-1?' checked':'')+' onchange="epfToggleRow('+i+', this.checked)"></td>';
       return '<tr>'
+        + checkHtml
         + '<td>'+(i+1)+'</td>'
-        + '<td><input value="'+p.code+'" onchange="epPartsList['+i+'].code=this.value"></td>'
-        + '<td><input value="'+p.name+'" onchange="epPartsList['+i+'].name=this.value;var pr=ppfGetPrice(this.value);epPartsList['+i+'].price=pr;epPartsList['+i+'].amount=pr*epPartsList['+i+'].qty;epfRenderParts()"></td>'
-        + '<td><input value="'+p.series+'" onchange="epPartsList['+i+'].series=this.value"></td>'
-        + '<td><input value="'+p.model+'" onchange="epPartsList['+i+'].model=this.value"></td>'
-        + '<td><select onchange="epPartsList['+i+'].unit=this.value"><option>'+p.unit+'</option><option>个</option><option>套</option><option>瓶</option><option>条</option></select></td>'
-        + '<td><input type="number" min="1" value="'+p.qty+'" onchange="epPartsList['+i+'].qty=parseInt(this.value)||1;epPartsList['+i+'].amount=epPartsList['+i+'].price*epPartsList['+i+'].qty;epfRenderParts()" style="width:60px"></td>'
-        + '<td><input type="number" min="0" step="0.01" value="'+p.price+'" onchange="epPartsList['+i+'].price=parseFloat(this.value)||0;epPartsList['+i+'].amount=epPartsList['+i+'].price*epPartsList['+i+'].qty;epfRenderParts()" style="width:80px"></td>'
-        + '<td>¥'+p.amount.toFixed(2)+'</td>'
-        + '<td><a href="javascript:void(0)" onclick="epfRemovePart('+i+')" style="color:#861B2F">删除</a></td>'
+        + '<td>'+codeHtml+'</td>'
+        + '<td>'+nameHtml+'</td>'
+        + '<td>'+unitHtml+'</td>'
+        + '<td>'+snpHtml+'</td>'
+        + '<td>'+priceHtml+'</td>'
+        + '<td>'+qtyHtml+'</td>'
+        + '<td>¥'+(p.amount||0).toFixed(2)+'</td>'
+        + '<td>'+maxHtml+'</td>'
+        + '<td>'+repHtml+'</td>'
+        + '<td>'+stockHtml+'</td>'
+        + '<td>'+inHtml+'</td>'
         + '</tr>';
     }).join('');
   }
+  var checkAll = document.getElementById('epf-check-all');
+  if (checkAll) checkAll.checked = epPartsList.length > 0 && epSelectedRows.length === epPartsList.length;
   epfUpdateTotals();
 }
 function epfUpdateTotals() {
-  var c = epPartsList.length;
   var t = epPartsList.reduce(function(s, p) { return s + (p.amount || 0); }, 0);
   var el = document.getElementById('epf-totals');
-  if (el) el.innerHTML = '合计品种: <b>'+c+'</b> &nbsp; 合计金额(含税): <b>¥'+t.toFixed(2)+'</b>';
+  if (el) el.innerHTML = '预估金额合计(含税): <b>¥'+t.toFixed(2)+'</b>';
 }
-function epRenderPanel() {
+function epfToggleRow(i, checked) {
+  if (checked) { if (epSelectedRows.indexOf(i) === -1) epSelectedRows.push(i); }
+  else { epSelectedRows = epSelectedRows.filter(function(x){ return x !== i; }); }
+  var all = document.getElementById('epf-check-all');
+  if (all) all.checked = epPartsList.length > 0 && epSelectedRows.length === epPartsList.length;
+}
+function epfToggleAll(checked) {
+  epSelectedRows = checked ? epPartsList.map(function(_, i){ return i; }) : [];
+  epfRenderParts();
+}
+function epfRemoveSelected() {
+  if (!epSelectedRows.length) { alert('请先勾选要删除的配件'); return; }
+  if (!confirm('确认删除已勾选的 ' + epSelectedRows.length + ' 行配件？')) return;
+  var sorted = epSelectedRows.slice().sort(function(a,b){ return b-a; });
+  for (var i = 0; i < sorted.length; i++) epPartsList.splice(sorted[i], 1);
+  epSelectedRows = [];
+  epfRenderParts();
+}
+function epfSelectPart() { alert('备件选择（占位）：打开备件选型弹窗'); }
+function epfImport() { alert('导入（占位）：支持 Excel 批量导入'); }
+
+function epRenderPanel(opts) {
+  opts = opts || {};
   epPartsList = [];
   var title = document.getElementById('ep-panel-title');
   var badge = document.getElementById('ep-panel-badge');
+  var toolbar = document.getElementById('ep-parts-toolbar');
+  var auditRecSec = document.getElementById('ep-audit-records-section');
+  var auditResSec = document.getElementById('ep-audit-result-section');
+  var checkCol = document.getElementById('epf-check-col');
+  var viewOnly = document.querySelectorAll('.ep-view-only');
+  var purchaser = document.getElementById('ep-form-purchaser');
+  var supplier = document.getElementById('ep-form-supplier');
+  var edate = document.getElementById('ep-form-edate');
+  var recvName = document.getElementById('ep-form-recv-name');
+  var recvPhone = document.getElementById('ep-form-recv-phone');
+  var recvAddr = document.getElementById('ep-form-recv-addr');
+  var orderNo = document.getElementById('ep-form-order-no');
+  var applyDate = document.getElementById('ep-form-apply-date');
+  var region = document.getElementById('ep-form-region');
+  var district = document.getElementById('ep-form-district');
+  var remark = document.getElementById('ep-form-remark');
+
   if (epFormMode === 'add') {
     if (title) title.textContent = '配件外采';
-    if (badge) { badge.textContent = '新增'; badge.className = 'pm-panel-badge'; }
+    if (badge) { badge.textContent = '新增'; badge.className = 'pm-panel-badge add'; }
     epSetPanelReadonly(false);
-    document.getElementById('ep-form-order-no').value = 'WC'+new Date().toISOString().slice(0,10).replace(/-/g,'')+String(Math.floor(Math.random()*900+100));
-    document.getElementById('ep-form-apply-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('ep-form-supplier').value = ''; document.getElementById('ep-form-store').value = '';
-    document.getElementById('ep-form-edate').value = ''; document.getElementById('ep-form-remark').value = '';
+    if (toolbar) toolbar.innerHTML = '<button class="lt-btn lt-btn-default" onclick="epfSelectPart()">备件选择</button><button class="lt-btn lt-btn-default" onclick="epfImport()">导入</button><button class="lt-btn lt-btn-default" onclick="epfRemoveSelected()">备件删除</button><button class="lt-btn lt-btn-default" onclick="epfResetForm()">重置</button>';
+    if (auditRecSec) auditRecSec.style.display = 'none';
+    if (auditResSec) auditResSec.style.display = 'none';
+    if (checkCol) checkCol.style.display = '';
+    viewOnly.forEach(function(el){ el.style.display = 'none'; });
+    epSelectedRows = [];
+    var store = epGetDefaultStore();
+    var dc = epStoreContacts[store] || epStoreContacts['默认'] || {name:'', phone:'', addr:''};
+    var rm = epStoreRegionMap[store] || epStoreRegionMap['默认'] || {region:'—', district:'—'};
+    if (purchaser) purchaser.value = store;
+    if (supplier) supplier.value = '';
+    if (edate) edate.value = '';
+    if (recvName) recvName.value = dc.name;
+    if (recvPhone) recvPhone.value = dc.phone;
+    if (recvAddr) recvAddr.value = dc.addr;
+    if (orderNo) orderNo.value = 'WC'+new Date().toISOString().slice(0,10).replace(/-/g,'')+String(Math.floor(Math.random()*900+100));
+    if (applyDate) applyDate.value = new Date().toISOString().split('T')[0];
+    if (region) region.value = rm.region;
+    if (district) district.value = rm.district;
+    if (remark) remark.value = '—';
+    epPartsList = [];
   } else if (epFormMode === 'edit' && epCurrentRec) {
     if (title) title.textContent = '配件外采';
     if (badge) { badge.textContent = '编辑'; badge.className = 'pm-panel-badge'; }
     epSetPanelReadonly(false);
-    document.getElementById('ep-form-order-no').value = epCurrentRec.orderNo || '';
-    document.getElementById('ep-form-supplier').value = epCurrentRec.supplier || '';
-    document.getElementById('ep-form-store').value = epCurrentRec.store || '';
-    document.getElementById('ep-form-edate').value = epCurrentRec.edate || '';
-    document.getElementById('ep-form-remark').value = epCurrentRec.remark === '—' ? '' : (epCurrentRec.remark || '');
-    document.getElementById('ep-form-apply-date').value = epCurrentRec.stime ? epCurrentRec.stime.split(' ')[0] : '';
-    epPartsList = [{code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款 Model S',unit:'个',qty:5,price:380,amount:1900}];
+    if (toolbar) toolbar.innerHTML = '<button class="lt-btn lt-btn-default" onclick="epfSelectPart()">备件选择</button><button class="lt-btn lt-btn-default" onclick="epfImport()">导入</button><button class="lt-btn lt-btn-default" onclick="epfRemoveSelected()">备件删除</button><button class="lt-btn lt-btn-default" onclick="epfResetForm()">重置</button>';
+    if (auditRecSec) auditRecSec.style.display = 'none';
+    if (auditResSec) auditResSec.style.display = 'none';
+    if (checkCol) checkCol.style.display = '';
+    viewOnly.forEach(function(el){ el.style.display = 'none'; });
+    epSelectedRows = [];
+    if (purchaser) purchaser.value = epCurrentRec.store || epGetDefaultStore();
+    if (supplier) supplier.value = epCurrentRec.supplier || '';
+    if (edate) edate.value = epCurrentRec.edate || '';
+    if (recvName) recvName.value = epCurrentRec.recvName || '';
+    if (recvPhone) recvPhone.value = epCurrentRec.recvPhone || '';
+    if (recvAddr) recvAddr.value = epCurrentRec.recvAddr || '';
+    if (orderNo) orderNo.value = epCurrentRec.orderNo || '';
+    if (applyDate) applyDate.value = epCurrentRec.stime ? epCurrentRec.stime.split(' ')[0] : '';
+    if (region) region.value = epCurrentRec.region || '—';
+    if (district) district.value = epCurrentRec.district || '—';
+    if (remark) remark.value = epCurrentRec.remark || '—';
+    epPartsList = (epCurrentRec.items && epCurrentRec.items.length) ? epCurrentRec.items.slice() : [];
   } else if (epFormMode === 'view' && epCurrentRec) {
-    if (title) title.textContent = '配件外采';
-    if (badge) { badge.textContent = '查看详情'; badge.className = 'pm-panel-badge'; }
+    if (title) title.textContent = '订单详情';
+    if (badge) { badge.textContent = '查看详情'; badge.className = 'pm-panel-badge detail'; }
     epSetPanelReadonly(true);
-    document.getElementById('ep-form-order-no').value = epCurrentRec.orderNo || '';
-    document.getElementById('ep-form-supplier').value = epCurrentRec.supplier || '';
-    document.getElementById('ep-form-store').value = epCurrentRec.store || '';
-    document.getElementById('ep-form-edate').value = epCurrentRec.edate || '';
-    document.getElementById('ep-form-remark').value = epCurrentRec.remark === '—' ? '' : (epCurrentRec.remark || '');
-    document.getElementById('ep-form-apply-date').value = epCurrentRec.stime ? epCurrentRec.stime.split(' ')[0] : '';
-    epPartsList = [{code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款',unit:'个',qty:5,price:380,amount:1900},{code:'PJ003',name:'空气滤芯',series:'Model X',model:'2025款',unit:'个',qty:3,price:120,amount:360}];
+    if (toolbar) toolbar.innerHTML = '';
+    if (checkCol) checkCol.style.display = 'none';
+    viewOnly.forEach(function(el){ el.style.display = ''; });
+    if (purchaser) purchaser.value = epCurrentRec.store || '';
+    if (supplier) supplier.value = epCurrentRec.supplier || '';
+    if (edate) edate.value = epCurrentRec.edate || '';
+    if (recvName) recvName.value = epCurrentRec.recvName || '—';
+    if (recvPhone) recvPhone.value = epCurrentRec.recvPhone || '—';
+    if (recvAddr) recvAddr.value = epCurrentRec.recvAddr || '—';
+    epPartsList = (epCurrentRec.items && epCurrentRec.items.length) ? epCurrentRec.items.slice() : [];
+
+    if (auditRecSec) {
+      auditRecSec.style.display = '';
+      var recTbody = document.getElementById('ep-audit-records-tbody');
+      var log = epCurrentRec.auditLog || [];
+      if (!log.length && (epCurrentRec.status === '已通过' || epCurrentRec.status === '已驳回')) {
+        log = [{step:'门店审核', person:(epCurrentRec.auditor||'—'), time:(epCurrentRec.atime||'—'), result:(epCurrentRec.status==='已通过'?'通过':'驳回'), opinion:(epCurrentRec.remark||'—'), attach:''}];
+      }
+      if (recTbody) {
+        if (!log.length) recTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:16px">暂无审批记录</td></tr>';
+        else recTbody.innerHTML = log.map(function(l, i){ return '<tr><td>'+(i+1)+'</td><td>'+(l.step||'—')+'</td><td>'+(l.person||'—')+'</td><td>'+(l.time||'—')+'</td><td>'+(l.result||'—')+'</td><td>'+(l.opinion||'—')+'</td><td>'+(l.attach||'—')+'</td></tr>'; }).join('');
+      }
+    }
+    if (auditResSec) {
+      var canAudit = (epCurrentRec.status === '待审核' || epCurrentRec.status === '审核中');
+      auditResSec.style.display = '';
+      var radios = document.getElementsByName('ep-result');
+      for (var ri = 0; ri < radios.length; ri++) radios[ri].checked = (radios[ri].value === 'pass');
+      var comment = document.getElementById('ep-audit-comment');
+      if (comment) comment.value = '';
+      var auditResult = document.getElementById('ep-audit-result');
+      if (auditResult) {
+        auditResult.style.display = '';
+        auditResult.querySelectorAll('input, textarea, button').forEach(function(el){ el.disabled = !canAudit; });
+      }
+      if (opts.audit) {
+        var resBody = auditResSec.querySelector('.pm-section-title').nextElementSibling;
+        if (resBody) resBody.style.display = '';
+        setTimeout(function(){ if (auditResSec) auditResSec.scrollIntoView({behavior:'smooth'}); }, 100);
+      }
+    }
   }
   document.getElementById('ep-panel-overlay').classList.add('show');
   document.getElementById('ep-panel').classList.add('show');
@@ -6994,64 +7803,59 @@ function epSetPanelReadonly(readonly) {
   var wrap = document.getElementById('ep-panel');
   if (!wrap) return;
   wrap.querySelectorAll('.pp-parts-table input, .pp-parts-table select').forEach(function(el) {
+    if (el.closest('#ep-audit-result')) return;
     if (readonly) { el.readOnly = true; el.disabled = true; el.style.background = '#f5f5f5'; }
     else { el.readOnly = false; el.disabled = false; el.style.background = ''; }
   });
-  document.getElementById('epf-add-btn').style.display = readonly ? 'none' : '';
-  document.getElementById('epf-del-col').style.display = readonly ? 'none' : '';
-  document.getElementById('ep-panel-footer').style.display = readonly ? 'none' : '';
+  wrap.querySelectorAll('.pm-form-item input, .pm-form-item select, .pm-form-item textarea').forEach(function(el) {
+    if (el.classList.contains('js-lock')) return;
+    if (el.closest('#ep-audit-result')) return;
+    if (readonly) { el.readOnly = true; el.disabled = true; el.style.background = '#f5f5f5'; }
+    else { el.readOnly = false; el.disabled = false; el.style.background = ''; }
+  });
+  var toolbar = document.getElementById('ep-parts-toolbar');
+  if (toolbar) toolbar.style.display = readonly ? 'none' : '';
+  var footer = document.getElementById('ep-panel-footer');
+  if (footer) footer.style.display = readonly ? 'none' : '';
 }
-function epfSubmit() { alert('提交成功'); epClosePanel(); }
-function epfSaveDraft() { alert('草稿已保存'); epClosePanel(); }
+function epfSubmit() {
+  var supplier = document.getElementById('ep-form-supplier').value;
+  var edate = document.getElementById('ep-form-edate').value;
+  if (!supplier) { alert('请选择外采供应商'); return; }
+  if (!edate) { alert('请选择期望到货日期'); return; }
+  if (!epPartsList.length) { alert('请至少添加一条配件明细'); return; }
+  alert('提交成功'); epClosePanel();
+}
+function epfSaveDraft() { alert('暂存成功'); epClosePanel(); }
 function epfResetForm() {
-  epPartsList = []; epfRenderParts();
-  document.getElementById('ep-form-supplier').value = ''; document.getElementById('ep-form-store').value = '';
-  document.getElementById('ep-form-edate').value = ''; document.getElementById('ep-form-remark').value = '';
+  epPartsList = []; epSelectedRows = []; epfRenderParts();
+  var store = epGetDefaultStore();
+  var dc = epStoreContacts[store] || epStoreContacts['默认'] || {name:'', phone:'', addr:''};
+  document.getElementById('ep-form-purchaser').value = store;
+  document.getElementById('ep-form-supplier').value = '';
+  document.getElementById('ep-form-edate').value = '';
+  document.getElementById('ep-form-recv-name').value = dc.name;
+  document.getElementById('ep-form-recv-phone').value = dc.phone;
+  document.getElementById('ep-form-recv-addr').value = dc.addr;
 }
-
-// ===== 配件外采 审核面板 =====
-function epOpenAudit(idx) { epCurrentRec = epFilteredData[idx]; epaRenderPanel(); }
-function epCloseAuditPanel() { document.getElementById('ep-audit-overlay').classList.remove('show'); document.getElementById('ep-audit-panel').classList.remove('show'); }
-function epaRenderPanel() {
+function epAuditSubmit() {
   if (!epCurrentRec) return;
-  document.getElementById('epa-status-badge').textContent = epCurrentRec.status || '';
-  var cls = epCurrentRec.status === '已通过' ? 'pass' : (epCurrentRec.status === '已驳回' ? 'reject' : '');
-  document.getElementById('epa-status-badge').className = 'pm-panel-badge ' + cls;
-  var info = document.getElementById('epa-basic-info');
-  var fs = [
-    {l:'外采单号',v:epCurrentRec.orderNo},{l:'外采供应商',v:epCurrentRec.supplier},{l:'门店',v:epCurrentRec.store},
-    {l:'大区',v:epCurrentRec.region||'—'},{l:'小区',v:epCurrentRec.district||'—'},
-    {l:'期望到货日期',v:epCurrentRec.edate||'—'},{l:'备注',v:epCurrentRec.remark||'—'}
-  ];
-  info.innerHTML = fs.map(function(f){return '<div class="pm-form-item"><label>'+f.l+'</label><input readonly class="pm-readonly" value="'+f.v+'"></div>';}).join('');
-  var items = [{s:1,code:'PJ001',name:'刹车片（前）',series:'Model S',model:'2025款',unit:'个',q:5,price:380,amt:1900},{s:2,code:'PJ003',name:'空气滤芯',series:'Model X',model:'2025款',unit:'个',q:3,price:120,amt:360}];
-  document.getElementById('epa-parts-tbody').innerHTML = items.map(function(p){return '<tr><td>'+p.s+'</td><td>'+p.code+'</td><td>'+p.name+'</td><td>'+p.series+'</td><td>'+p.model+'</td><td>'+p.unit+'</td><td>'+p.q+'</td><td>'+p.price.toFixed(2)+'</td><td>¥'+p.amt.toFixed(2)+'</td></tr>';}).join('');
-  document.getElementById('epa-totals').innerHTML = '合计品种: <b>2</b> &nbsp; 合计金额(含税): <b>¥2260.00</b>';
-  var atb = document.getElementById('epa-audit-tbody');
-  if (epCurrentRec.status === '已通过' || epCurrentRec.status === '已驳回') {
-    atb.innerHTML = '<tr><td>'+(epCurrentRec.auditor||'—')+'</td><td>'+(epCurrentRec.atime||'—')+'</td><td>'+(epCurrentRec.status||'—')+'</td><td>'+(epCurrentRec.remark||'—')+'</td></tr>';
-    document.getElementById('epa-audit-area').style.display = 'none';
-  } else {
-    atb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:16px">暂无审核记录</td></tr>';
-    document.getElementById('epa-audit-area').style.display = '';
-  }
-  document.getElementById('epa-comment').value = '';
-  document.getElementById('ep-audit-overlay').classList.add('show');
-  document.getElementById('ep-audit-panel').classList.add('show');
-}
-function epaApprove() {
-  var c = document.getElementById('epa-comment').value;
-  if (!c) { alert('请输入审核意见'); return; }
-  epCurrentRec.status = '已通过'; epCurrentRec.auditor = '当前用户'; epCurrentRec.remark = c;
-  epCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
-  alert('审核通过'); epCloseAuditPanel();
-}
-function epaReject() {
-  var c = document.getElementById('epa-comment').value;
-  if (!c) { alert('请输入审核意见'); return; }
-  epCurrentRec.status = '已驳回'; epCurrentRec.auditor = '当前用户'; epCurrentRec.remark = c;
-  epCurrentRec.atime = new Date().toISOString().slice(0,16).replace('T',' ');
-  alert('审核驳回'); epCloseAuditPanel();
+  var radios = document.getElementsByName('ep-result');
+  var result = 'pass';
+  for (var i = 0; i < radios.length; i++) { if (radios[i].checked) { result = radios[i].value; break; } }
+  var comment = document.getElementById('ep-audit-comment').value.trim();
+  if (result === 'reject' && !comment) { alert('驳回必填审核意见'); return; }
+  var role = gUserRole || '门店';
+  var log = epCurrentRec.auditLog || (epCurrentRec.auditLog = []);
+  var now = new Date().toISOString().slice(0,16).replace('T',' ');
+  log.push({step: (role === '总部' ? '总部审核' : '门店审核'), person: role + '用户', time: now, result: result === 'pass' ? '通过' : '驳回', opinion: comment || '同意', attach: ''});
+  epCurrentRec.status = result === 'pass' ? '已通过' : '已驳回';
+  epCurrentRec.auditor = role + '用户';
+  epCurrentRec.atime = now;
+  epCurrentRec.remark = comment || '同意';
+  alert(result === 'pass' ? '审核通过' : '审核驳回');
+  epClosePanel();
+  if (typeof epRenderTable === 'function') epRenderTable();
 }
 
 // ======= 用户服务满意度 =======
@@ -7254,7 +8058,7 @@ function renderUssTable() {
 
   var pagesHtml = '';
   for (var p = 1; p <= totalPages; p++) {
-    pagesHtml += '<span class="pg-num' + (p === ussPage ? ' current' : '') + '" onclick="ussGotoPage(' + p + ')">' + p + '</span>';
+    pagesHtml += '<button class="' + (p === ussPage ? 'active' : '') + '" onclick="ussGotoPage(' + p + ')">' + p + '</button>';
   }
   document.getElementById('uss-pg-pages').innerHTML = pagesHtml;
   document.getElementById('uss-pg-goto').value = '';
@@ -8136,3 +8940,791 @@ function rlhExport(){
   a.click();
   setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
 }
+
+/* =========== 新增 10 个配件管理菜单（奕境0725，依据 PRD-配件0625） =========== */
+/* 通用状态容器 */
+var NP = {};
+/* 日期种子（固定，保证 mock 数据稳定） */
+var NP_SEED = '2026-07-20';
+
+function npEscape(s){ if(s===null||s===undefined) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function npRandStr(key, idx, min, max){ return Math.round(min + (max-min) * seededRand(key, idx)); }
+function npPick(key, idx, arr){ return arr[Math.floor(seededRand(key, idx) * arr.length) % arr.length]; }
+function npDate(key, idx){ var base = new Date(2026,6,20); var d = new Date(base.getTime() - npRandStr(key, idx, 0, 400)*86400000); var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return y+'-'+m+'-'+day; }
+function npDateTime(key, idx){ return npDate(key, idx) + ' ' + String(npRandStr(key, idx, 8, 17)).padStart(2,'0') + ':' + String(npRandStr(key+'-m', idx, 0, 59)).padStart(2,'0') + ':' + String(npRandStr(key+'-s', idx, 0, 59)).padStart(2,'0'); }
+function npDateTimeWithin(key, idx, maxDays){ var _base=new Date(2026,6,20); var _d=new Date(_base.getTime()-npRandStr(key,idx,0,maxDays)*86400000); var _y=_d.getFullYear(), _m=String(_d.getMonth()+1).padStart(2,'0'), _day=String(_d.getDate()).padStart(2,'0'); var _ds=_y+'-'+_m+'-'+_day; return _ds+' '+String(npRandStr(key+'-h',idx,8,17)).padStart(2,'0')+':'+String(npRandStr(key+'-m2',idx,0,59)).padStart(2,'0')+':'+String(npRandStr(key+'-s2',idx,0,59)).padStart(2,'0'); }
+/* 限定 [0, maxDays] 天内的日期时间（用于"最近"类 mock） */
+function npDateTimeWithin(key, idx, maxDays){ var base = new Date(2026,6,20); var d = new Date(base.getTime() - npRandStr(key, idx, 0, maxDays)*86400000); var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); var ds=y+'-'+m+'-'+day; return ds + ' ' + String(npRandStr(key+'-h', idx, 8, 17)).padStart(2,'0') + ':' + String(npRandStr(key+'-m2', idx, 0, 59)).padStart(2,'0') + ':' + String(npRandStr(key+'-s2', idx, 0, 59)).padStart(2,'0'); }
+function npMoney(key, idx, min, max){ return (npRandStr(key, idx, min, max)).toFixed(2); }
+
+/* 通用弹窗：复用已有 .modal-overlay / .modal-box / .modal-header / .modal-body / .modal-close */
+function npOpenModal(title, bodyHtml, footerHtml, opts){
+  opts = opts || {};
+  var w = opts.width || 780;
+  var overlay = document.getElementById('np-modal-root');
+  if(!overlay){
+    overlay = document.createElement('div'); overlay.id='np-modal-root'; overlay.className='modal-overlay';
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML =
+    '<div class="modal-box" style="width:'+w+'px;max-width:94vw;">' +
+      '<div class="modal-header"><h3>'+npEscape(title)+'</h3><button class="modal-close" onclick="npCloseModal()">&times;</button></div>' +
+      '<div class="modal-body" id="np-modal-body">'+bodyHtml+'</div>' +
+      (footerHtml ? '<div class="modal-footer" id="np-modal-footer">'+footerHtml+'</div>' : '') +
+    '</div>';
+  overlay.classList.add('show');
+  overlay.onclick = function(e){ if(e.target === overlay) npCloseModal(); };
+  return overlay;
+}
+function npCloseModal(){ var o=document.getElementById('np-modal-root'); if(o){ o.classList.remove('show'); o.innerHTML=''; } }
+
+/* 通用筛选项 */
+function npFItem(label, controlHtml){
+  return '<div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">'+npEscape(label)+'</span>'+controlHtml+'</div></div>';
+}
+/* 通用下拉（带箭头）—— 替代 npFItem 包 <select>，避免 plain 隐藏箭头 */
+function npSelect(label, innerHtml){
+  return '<div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">'+npEscape(label)+'</span>'+innerHtml+'</div></div>';
+}
+/* 通用模糊下拉（combobox） */
+function npComboMarkup(K, fieldId, prefix, opts){
+  var lis = '<li data-val="" onclick="npComboboxSelect(this)">请选择</li>' +
+    opts.map(function(o){ return '<li data-val="'+npEscape(o)+'" onclick="npComboboxSelect(this)">'+npEscape(o)+'</li>'; }).join('');
+  return '<div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative" data-k="'+K+'">' +
+    '<span class="lt-filter-prefix">'+npEscape(prefix)+'</span>' +
+    '<input type="text" id="'+fieldId+'" placeholder="请选择或输入" onfocus="npComboboxShow(this)" oninput="npComboboxFilter(this)">' +
+    '<span class="cb-arrow" onclick="npComboboxToggle(this)">▼</span>' +
+    '<ul class="lt-datalist">'+lis+'</ul></div></div>';
+}
+function npComboboxFilter(input){
+  var w = input.closest('.lt-input-wrap.combobox'); if(!w) return;
+  var l = w.querySelector('.lt-datalist'); if(!l) return;
+  var v = input.value.toLowerCase();
+  l.querySelectorAll('li').forEach(function(li){ li.classList.toggle('hidden', !li.textContent.toLowerCase().includes(v)); });
+}
+function npComboboxShow(input){
+  var w = input.closest('.lt-input-wrap.combobox'); if(!w) return;
+  var l = w.querySelector('.lt-datalist'); if(l) l.classList.add('show');
+}
+function npComboboxToggle(arrow){
+  var w = arrow.closest('.lt-input-wrap.combobox'); if(!w) return;
+  var l = w.querySelector('.lt-datalist'); if(!l) return;
+  l.classList.toggle('show');
+  if(l.classList.contains('show')){ var i = w.querySelector('input'); if(i) i.focus(); }
+}
+function npComboboxSelect(li){
+  var w = li.closest('.lt-input-wrap.combobox'); if(!w) return;
+  var inp = w.querySelector('input'); var l = w.querySelector('.lt-datalist');
+  if(inp) inp.value = li.textContent.trim();
+  if(l){ l.classList.remove('show'); l.querySelectorAll('li').forEach(function(x){ x.classList.remove('hidden'); }); }
+  var k = w.getAttribute('data-k'); if(k && NP[k] && NP[k].query) NP[k].query();
+}
+/* 通用表头 */
+function npTH(cols){
+  var h='';
+  for(var i=0;i<cols.length;i++){ h += '<th'+(cols[i].cls?' class="'+cols[i].cls+'"':'')+(cols[i].w?' style="width:'+cols[i].w+'px;min-width:'+cols[i].w+'px;"':'')+'>'+npEscape(cols[i].t)+'</th>'; }
+  return h;
+}
+/* 通用分页表格渲染 */
+function npRenderTable(modKey, tbodyId, pagerId, cols, data, state){
+  var pageSize = state.pageSize || 10;
+  var total = data.length;
+  var pages = Math.max(1, Math.ceil(total / pageSize));
+  if(state.page > pages) state.page = pages;
+  if(state.page < 1) state.page = 1;
+  var start = (state.page - 1) * pageSize;
+  var rows = data.slice(start, start + pageSize);
+  var tb = document.getElementById(tbodyId);
+  if(!tb) return;
+  var html='';
+  for(var i=0;i<rows.length;i++){
+    html += '<tr>';
+    for(var c=0;c<cols.length;c++){
+      var col = cols[c];
+      var cell = col.f ? col.f(rows[i], start+i) : npEscape(rows[i][col.k]);
+      html += '<td'+(col.cls?' class="'+col.cls+'"':'')+((col.w)?' style="width:'+col.w+'px;min-width:'+col.w+'px;"':'')+'>'+cell+'</td>';
+    }
+    html += '</tr>';
+  }
+  if(rows.length===0) html = '<tr><td colspan="'+cols.length+'" style="text-align:center;color:#999;padding:30px;">暂无数据</td></tr>';
+  tb.innerHTML = html;
+  var pg = document.getElementById(pagerId);
+  if(pg){
+    state._pages = pages;
+    var ph = '<div class="lt-pager-left"><span class="pager-total">共 '+total+' 条</span></div>' +
+      '<div class="lt-pager-right">' +
+      '<button onclick="npPagerPrev(\''+modKey+'\')" '+(state.page<=1?'disabled':'')+'>上一页</button>' +
+      '<span class="pg-pages">';
+    if(pages<=7){
+      for(var p=1;p<=pages;p++){ ph += '<button class="'+(p===state.page?'active':'')+'" onclick="npPagerGo(\''+modKey+'\','+p+')">'+p+'</button>'; }
+    } else if(state.page<=4){
+      for(var p=1;p<=6;p++){ ph += '<button class="'+(p===state.page?'active':'')+'" onclick="npPagerGo(\''+modKey+'\','+p+')">'+p+'</button>'; }
+      ph += '<span class="pager-ellipsis">...</span>';
+      ph += '<button onclick="npPagerGo(\''+modKey+'\','+pages+')">'+pages+'</button>';
+    } else if(state.page>=pages-3){
+      ph += '<button onclick="npPagerGo(\''+modKey+'\',1)">1</button>';
+      ph += '<span class="pager-ellipsis">...</span>';
+      for(var p=pages-5;p<=pages;p++){ ph += '<button class="'+(p===state.page?'active':'')+'" onclick="npPagerGo(\''+modKey+'\','+p+')">'+p+'</button>'; }
+    } else {
+      ph += '<button onclick="npPagerGo(\''+modKey+'\',1)">1</button>';
+      ph += '<span class="pager-ellipsis">...</span>';
+      for(var p=state.page-2;p<=state.page+2;p++){ ph += '<button class="'+(p===state.page?'active':'')+'" onclick="npPagerGo(\''+modKey+'\','+p+')">'+p+'</button>'; }
+      ph += '<span class="pager-ellipsis">...</span>';
+      ph += '<button onclick="npPagerGo(\''+modKey+'\','+pages+')">'+pages+'</button>';
+    }
+    ph += '</span>' +
+      '<button onclick="npPagerNext(\''+modKey+'\')" '+(state.page>=pages?'disabled':'')+'>下一页</button>' +
+      '<span class="pager-goto">前往 <input type="text" onkeydown="if(event.key===\'Enter\')npPagerGoto(\''+modKey+'\',this.value)"> 页</span>' +
+      '<select class="pager-size" onchange="npPagerSize(\''+modKey+'\',this.value)">' +
+        '<option value="10"'+((state.pageSize||10)==10?' selected':'')+'>10条/页</option>' +
+        '<option value="20"'+((state.pageSize||10)==20?' selected':'')+'>20条/页</option>' +
+        '<option value="50"'+((state.pageSize||10)==50?' selected':'')+'>50条/页</option>' +
+        '<option value="100"'+((state.pageSize||10)==100?' selected':'')+'>100条/页</option>' +
+      '</select>' +
+      '</div>';
+    pg.innerHTML = ph;
+  }
+}
+function npPagerGo(modKey,p){ var s=NP[modKey]; if(!s) return; var pages=s._pages||1; p=Math.max(1,Math.min(pages,p)); s.page=p; s.render(); }
+function npPagerPrev(modKey){ if(NP[modKey]) npPagerGo(modKey,(NP[modKey].page||1)-1); }
+function npPagerNext(modKey){ if(NP[modKey]) npPagerGo(modKey,(NP[modKey].page||1)+1); }
+function npPagerGoto(modKey,v){ var p=parseInt(v,10); if(!isNaN(p)&&p>0) npPagerGo(modKey,p); }
+function npPagerSize(modKey,v){ var s=NP[modKey]; if(!s) return; s.pageSize=parseInt(v,10)||10; s.page=1; s.render(); }
+/* 通用页面外壳 */
+function npShell(modKey, bc3, filterHtml, toolbarHtml, theadHtml, tbodyId, pagerId){
+  return '<div class="lt-wrap">' +
+    '<div class="lt-filter"><div class="lt-filter-grid" id="'+modKey+'-filterGrid">'+filterHtml+
+      '<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="NP[\''+modKey+'\'].query()">查询</button><button class="lt-btn lt-btn-default" onclick="NP[\''+modKey+'\'].reset()">重置</button><a href="javascript:void(0)" class="lt-filter-toggle" onclick="npToggleFilter(\''+modKey+'\')">﹀ 展开</a></div>' +
+    '</div></div>' +
+    '<div class="lt-list-area"><div class="lt-toolbar"><div class="lt-toolbar-left">'+toolbarHtml+'</div></div>' +
+    '<div class="lt-table-wrap"><table class="lt-table"><thead><tr>'+theadHtml+'</tr></thead><tbody id="'+tbodyId+'"></tbody></table></div>' +
+    '<div class="lt-pager" id="'+pagerId+'"></div></div></div>';
+}
+function npToggleFilter(modKey){
+  var st = NP[modKey]; if(!st) return;
+  st._fExp = !st._fExp;
+  toggleFilterGrid(modKey+'-filterGrid', st._fExp, st._fShow||7);
+}
+
+/* ============ 模块 1：外采件名称库（PRD 5.1.2） ============ */
+NP['external-part-name'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
+(function(){
+  var a=[]; var brands=[['品牌1','品牌2'],['博世'],['壳牌','美孚'],['嘉实多'],['电装','德尔福']]; var statusArr=['启用','停用'];
+  for(var i=0;i<36;i++){
+    a.push({ idx:i+1, name:'外采件'+String.fromCharCode(65+(i%26))+String(i).padStart(2,'0'), brands:brands[i%brands.length], status:npPick('epn-s',i,statusArr), updateTime:npDateTime('epn-t',i) });
+  }
+  NP['external-part-name'].allData=a;
+})();
+function initExternalPartName(){
+  var K='external-part-name'; var st=NP[K];
+  var filter = npFItem('外采件名称','<input type="text" id="epn-f-name" placeholder="请输入">') +
+    npFItem('外采品牌','<input type="text" id="epn-f-brand" placeholder="请输入">') +
+    npSelect('状态','<select id="epn-f-status"><option value="">请选择</option><option>启用</option><option>停用</option></select>');
+  var toolbar = '<button class="lt-btn lt-btn-primary" onclick="epnOpenAdd()">新增</button><button class="lt-btn lt-btn-default" onclick="npToast(\'导入功能演示\')">导入</button><button class="lt-btn lt-btn-default" onclick="npToast(\'导出功能演示\')">导出</button>';
+  var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'外采件名称',f:function(r){return npEscape(r.name);}},{t:'外采件品牌',f:function(r){return (r.brands||[]).map(function(b){return '<span class="lt-tag">'+npEscape(b)+'</span>';}).join(' ');}},{t:'状态',w:90,f:function(r){return r.status==='启用'?'<span class="lt-badge ok">启用</span>':'<span class="lt-badge off">停用</span>';}},{t:'最近更新时间',w:160,f:function(r){return r.updateTime;}},{t:'操作',w:120,cls:'col-actions sticky',f:function(r){var t=r.status==='启用'?'停用':'启用';return '<a href="javascript:void(0)" class="lt-btn-link" onclick="epnOpenEdit('+r.idx+')">编辑</a> <a href="javascript:void(0)" class="lt-btn-link" onclick="epnToggle('+r.idx+')">'+t+'</a>';}}];
+  var root=document.getElementById('page-external-part-name');
+  root.innerHTML = npShell(K, {l2:'基础数据',l3:'外采件名称库'}, filter, toolbar, npTH(cols), 'epn-tbody', 'epn-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var n=(document.getElementById('epn-f-name')||{}).value||''; var b=(document.getElementById('epn-f-brand')||{}).value||''; var s=(document.getElementById('epn-f-status')||{}).value||''; st.filtered=st.allData.filter(function(r){ return (n===''||r.name.indexOf(n)>=0)&&(b===''||r.brands.join(',').indexOf(b)>=0)&&(s===''||r.status===s); }); st.page=1; st.render(); };
+  st.reset=function(){ var e1=document.getElementById('epn-f-name'); if(e1)e1.value=''; var e2=document.getElementById('epn-f-brand'); if(e2)e2.value=''; var e3=document.getElementById('epn-f-status'); if(e3)e3.value=''; st.filtered=st.allData.slice(); st.page=1; st.render(); };
+  st.render=function(){ npRenderTable(K,'epn-tbody','epn-pager',cols,st.filtered,st); };
+  st.filtered=st.allData.slice(); st.page=1; st.render();
+}
+function epnOpenAdd(){ epnOpenEdit(-1); }
+function epnOpenEdit(idx){
+  var rec = idx>=0 ? NP['external-part-name'].allData[idx] : null;
+  var brands = rec ? rec.brands.slice() : ['品牌1'];
+  var status = rec ? rec.status : '启用';
+  var html = '<div class="np-form"><div class="np-field"><label class="np-req">外采件名称</label><input id="epn-m-name" class="np-input" value="'+npEscape(rec?rec.name:'')+'" placeholder="请输入"></div>'+
+    '<div class="np-field"><label>外采件品牌</label><div class="np-tag-input" id="epn-m-tags"></div></div>'+
+    '<div class="np-field"><label>状态</label><select id="epn-m-status" class="np-input"><option value="启用" '+(status==='启用'?'selected':'')+'>启用</option><option value="停用" '+(status==='停用'?'selected':'')+'>停用</option></select></div></div>';
+  npOpenModal(rec?'维护外采件名称':'维护外采件名称', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="epnSave('+idx+')">确定</button>');
+  var box=document.getElementById('epn-m-tags');
+  function renderTags(){ box.innerHTML = brands.map(function(b,i){return '<span class="lt-tag">'+npEscape(b)+' <a href="javascript:void(0)" onclick="epnDelTag('+i+')">&times;</a></span>';}).join('') + '<input id="epn-m-taginp" class="np-tag-inp" placeholder="回车添加">'; var ti=document.getElementById('epn-m-taginp'); ti.onkeydown=function(e){ if(e.key==='Enter'){ e.preventDefault(); var v=ti.value.trim(); if(v&&brands.indexOf(v)<0){ brands.push(v); renderTags(); } } }; };
+  window.epnDelTag=function(i){ brands.splice(i,1); renderTags(); };
+  renderTags();
+}
+function epnSave(idx){
+  var name=(document.getElementById('epn-m-name')||{}).value||''; var status=(document.getElementById('epn-m-status')||{}).value||'启用';
+  var tags=[]; var box=document.getElementById('epn-m-tags'); if(box){ box.querySelectorAll('.lt-tag').forEach(function(t){ var x=t.textContent.replace('×','').trim(); if(x) tags.push(x); }); }
+  if(!name){ npToast('请填写外采件名称'); return; }
+  if(idx>=0){ var r=NP['external-part-name'].allData[idx]; r.name=name; r.status=status; r.brands=tags; r.updateTime=npDateTime('epn-save',idx); }
+  else { NP['external-part-name'].allData.unshift({ idx:NP['external-part-name'].allData.length, name:name, brands:tags, status:status, updateTime:npDateTime('epn-new',0) }); }
+  npCloseModal(); NP['external-part-name'].query ? NP['external-part-name'].query() : (NP['external-part-name'].filtered=NP['external-part-name'].allData.slice(), NP['external-part-name'].render());
+  npToast('已保存');
+}
+function epnToggle(idx){ var r=NP['external-part-name'].allData[idx]; r.status = r.status==='启用'?'停用':'启用'; r.updateTime=npDateTime('epn-tg',idx); NP['external-part-name'].render(); }
+
+/* ============ 模块 2：组合件（PRD 5.1.3） ============ */
+NP['part-combo'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
+(function(){
+  var a=[]; var yesno=['是','否']; var pnames=['火花塞','机油滤清器','刹车片','雨刮片','蓄电池','皮带','灯泡','离合器片','减震器','氧传感器'];
+  for(var i=0;i<28;i++){
+    var cnt=npRandStr('pc-c',i,1,3); var parts=[]; for(var j=0;j<cnt;j++){ var pi=(i*3+j)%pnames.length; parts.push({ code:'P'+String(1000+i*3+j), name:pnames[pi], status:'可用', first:npDate('pc-f',i*3+j) }); }
+    a.push({ idx:i, code:'C'+String(2000+i), name:'组合件'+String(i+1).padStart(2,'0'), parts:parts, enabled:npPick('pc-e',i,yesno), combo:npPick('pc-co',i,yesno), updateTime:npDateTime('pc-t',i), firstTime:npDate('pc-ft',i) });
+  }
+  NP['part-combo'].allData=a;
+})();
+function initPartCombo(){
+  var K='part-combo'; var st=NP[K];
+  var filter = npFItem('组合编码','<input type="text" id="pc-f-code" placeholder="请输入">') +
+    npFItem('组合名称','<input type="text" id="pc-f-name" placeholder="请输入">') +
+    npFItem('备件编码','<input type="text" id="pc-f-pcode" placeholder="请输入">') +
+    npFItem('备件名称','<input type="text" id="pc-f-pname" placeholder="请输入">') +
+    npSelect('是否启用','<select id="pc-f-en"><option value="">请选择</option><option>是</option><option>否</option></select>') +
+    npSelect('组合采购','<select id="pc-f-co"><option value="">请选择</option><option>是</option><option>否</option></select>');
+  var toolbar='<button class="lt-btn lt-btn-primary" onclick="pcOpenEdit(-1)">新增</button>';
+  var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'组合编码',f:function(r){return r.code;}},{t:'组合名称',f:function(r){return npEscape(r.name);}},{t:'备件编码',f:function(r){return r.parts.map(function(p){return p.code;}).join('<br>');}},{t:'备件名称',f:function(r){return r.parts.map(function(p){return npEscape(p.name);}).join('<br>');}},{t:'是否启用',w:90,f:function(r){return r.enabled;}},{t:'组合采购',w:90,f:function(r){return r.combo;}},{t:'最近更新时间',w:150,f:function(r){return r.updateTime;}},{t:'首次录入时间',w:120,f:function(r){return r.firstTime;}},{t:'操作',w:90,cls:'col-actions sticky',f:function(r){return '<a href="javascript:void(0)" class="lt-btn-link" onclick="pcOpenEdit('+r.idx+')">编辑</a>';}}];
+  var root=document.getElementById('page-part-combo');
+  root.innerHTML = npShell(K, {l2:'基础数据',l3:'组合件维护'}, filter, toolbar, npTH(cols), 'pc-tbody', 'pc-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var c=(document.getElementById('pc-f-code')||{}).value||''; var n=(document.getElementById('pc-f-name')||{}).value||''; var pc=(document.getElementById('pc-f-pcode')||{}).value||''; var pn=(document.getElementById('pc-f-pname')||{}).value||''; var en=(document.getElementById('pc-f-en')||{}).value||''; var co=(document.getElementById('pc-f-co')||{}).value||''; st.filtered=st.allData.filter(function(r){ return (c===''||r.code.indexOf(c)>=0)&&(n===''||r.name.indexOf(n)>=0)&&(pc===''||r.parts.some(function(p){return p.code.indexOf(pc)>=0;}))&&(pn===''||r.parts.some(function(p){return p.name.indexOf(pn)>=0;}))&&(en===''||r.enabled===en)&&(co===''||r.combo===co); }); st.page=1; st.render(); };
+  st.reset=function(){ ['pc-f-code','pc-f-name','pc-f-pcode','pc-f-pname'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); ['pc-f-en','pc-f-co'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); st.filtered=st.allData.slice(); st.page=1; st.render(); };
+  st.render=function(){ npRenderTable(K,'pc-tbody','pc-pager',cols,st.filtered,st); };
+  st.filtered=st.allData.slice(); st.page=1; st.render();
+}
+function pcOpenEdit(idx){
+  var rec = idx>=0 ? NP['part-combo'].allData[idx] : null;
+  var parts = rec ? rec.parts.slice() : [];
+  var enabled = rec ? rec.enabled : '是'; var combo = rec ? rec.combo : '否';
+  var html='<div class="np-form"><div class="np-field"><label class="np-req">组合编码</label><input id="pc-m-code" class="np-input" value="'+npEscape(rec?rec.code:'')+'" '+(rec?'readonly':'')+' placeholder="请输入"></div>'+
+    '<div class="np-field"><label class="np-req">组合名称</label><input id="pc-m-name" class="np-input" value="'+npEscape(rec?rec.name:'')+'" placeholder="请输入"></div>'+
+    '<div class="np-field"><label class="np-req">是否启用</label><select id="pc-m-en" class="np-input"><option value="是" '+(enabled==='是'?'selected':'')+'>是</option><option value="否" '+(enabled==='否'?'selected':'')+'>否</option></select></div>'+
+    '<div class="np-field"><label>组合采购</label><select id="pc-m-co" class="np-input"><option value="否" '+(combo==='否'?'selected':'')+'>否</option><option value="是" '+(combo==='是'?'selected':'')+'>是</option></select></div>'+
+    '<div class="np-field"><label>配件清单</label><button class="lt-btn lt-btn-default" onclick="pcOpenPicker()">选择</button></div>'+
+    '<div class="np-subtable-wrap"><table class="lt-table"><thead><tr><th>序号</th><th>操作</th><th>备件编码</th><th>备件名称</th><th>是否启用</th><th>首次录入时间</th></tr></thead><tbody id="pc-m-parts"></tbody></table></div></div>';
+  npOpenModal('维护组合件', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="pcSave('+idx+')">确定</button>');
+  window.pcPartsCache = parts;
+  function renderParts(){ var tb=document.getElementById('pc-m-parts'); if(!tb)return; tb.innerHTML=parts.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td><a href="javascript:void(0)" class="lt-btn-link" onclick="pcDelPart('+i+')">删除</a></td><td>'+p.code+'</td><td>'+npEscape(p.name)+'</td><td>'+p.status+'</td><td>'+p.first+'</td></tr>';}).join('')||'<tr><td colspan="6" style="text-align:center;color:#999;">暂未选择配件</td></tr>'; }
+  window.pcDelPart=function(i){ parts.splice(i,1); renderParts(); };
+  renderParts();
+}
+function pcOpenPicker(){
+  var pool=[]; var names=['火花塞','机油滤清器','刹车片','雨刮片','蓄电池','皮带','灯泡','离合器片','减震器','氧传感器','冷凝器','水泵','节温器','气囊','转向机'];
+  for(var i=0;i<24;i++){ pool.push({ code:'P'+String(3000+i), name:names[i%names.length], source:'奕境', pswitch:'开', status:'可用', cat:'常规件' }); }
+  var html='<div class="np-picker"><div class="np-picker-left"><div class="lt-filter-grid" style="grid-template-columns:1fr 1fr;">'+
+    npFItem('配件编码','<input id="pcp-f-code" class="np-input" placeholder="输入">')+
+    npFItem('配件名称','<input id="pcp-f-name" class="np-input" placeholder="输入">')+
+    npSelect('配件来源','<select id="pcp-f-src" class="np-input"><option>奕境</option><option>门店</option></select>')+
+    npSelect('采购开关','<select id="pcp-f-sw" class="np-input"><option>开</option><option>关</option></select>')+
+    npSelect('配件状态','<select id="pcp-f-st" class="np-input"><option>可用</option><option>不可用</option></select>')+
+    npSelect('配件类别','<select id="pcp-f-cat" class="np-input"><option>常规件</option><option>事故件</option></select>')+
+    '</div><div class="lt-toolbar"><button class="lt-btn lt-btn-primary" onclick="pcPickerFilter()">查询</button></div>'+
+    '<div class="np-picker-table-wrap"><table class="lt-table"><thead><tr><th style="width:40px;">选</th><th>序号</th><th>配件编码</th><th>配件名称</th><th>状态</th><th>类别</th></tr></thead><tbody id="pcp-tbody"></tbody></table></div></div>'+
+    '<div class="np-picker-right"><div class="np-picker-right-head">已选（<span id="pcp-cnt">0</span>） <a href="javascript:void(0)" class="lt-btn-link" onclick="pcPickerClear()">清空</a></div><div id="pcp-picked" class="np-picked-list"></div></div></div>';
+  npOpenModal('配件选择', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="pcPickerConfirm()">确定</button>', {width:900});
+  window.pcPickerPool = pool; window.pcPickerSel = (window.pcPartsCache||[]).map(function(p){return p.code;});
+  pcPickerRender(); pcRenderPicked();
+}
+function pcPickerRender(){
+  var tb=document.getElementById('pcp-tbody'); if(!tb)return;
+  tb.innerHTML = window.pcPickerPool.map(function(p,i){ var chk=window.pcPickerSel.indexOf(p.code)>=0?'checked':''; return '<tr><td><input type="checkbox" '+chk+' onchange="pcPickerToggle(\''+p.code+'\')"></td><td>'+(i+1)+'</td><td>'+p.code+'</td><td>'+npEscape(p.name)+'</td><td>'+p.status+'</td><td>'+p.cat+'</td></tr>'; }).join('');
+}
+function pcRenderPicked(){
+  var box=document.getElementById('pcp-picked'); if(!box)return;
+  var sel=window.pcPickerSel||[];
+  box.innerHTML = sel.map(function(code){ var p=window.pcPickerPool.find(function(x){return x.code===code;}); if(!p)return ''; return '<div class="np-picked-item"><span>'+npEscape(p.name)+'（'+p.code+'）</span><a href="javascript:void(0)" onclick="pcPickerToggle(\''+p.code+'\')">移除</a></div>'; }).join('') || '<div class="np-picked-item" style="justify-content:center;color:#999;">暂未选择配件</div>';
+}
+function pcPickerFilter(){ npPickerFilter(); }
+function npPickerFilter(){ pcPickerRender(); }
+function pcPickerToggle(code){ var a=window.pcPickerSel; var i=a.indexOf(code); if(i>=0)a.splice(i,1); else a.push(code); document.getElementById('pcp-cnt').textContent=a.length; pcRenderPicked(); }
+function pcPickerClear(){ window.pcPickerSel=[]; pcPickerRender(); pcRenderPicked(); }
+function pcPickerConfirm(){
+  var parts=window.pcPickerSel.map(function(code){ var p=window.pcPickerPool.find(function(x){return x.code===code;}); return p?{code:p.code,name:p.name,status:'可用',first:npDate('pcp',Math.floor(seededRand('pcp',code.length)*100))}:null; }).filter(Boolean);
+  window.pcPartsCache = parts; var tb=document.getElementById('pc-m-parts'); if(tb){ tb.innerHTML=parts.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td><a href="javascript:void(0)" class="lt-btn-link" onclick="pcDelPart('+i+')">删除</a></td><td>'+p.code+'</td><td>'+npEscape(p.name)+'</td><td>'+p.status+'</td><td>'+p.first+'</td></tr>';}).join('')||'<tr><td colspan="6" style="text-align:center;color:#999;">暂未选择配件</td></tr>'; }
+  npCloseModal(); npToast('已选择 '+parts.length+' 个配件');
+}
+function pcSave(idx){
+  var code=(document.getElementById('pc-m-code')||{}).value||''; var name=(document.getElementById('pc-m-name')||{}).value||''; var en=(document.getElementById('pc-m-en')||{}).value||'是'; var co=(document.getElementById('pc-m-co')||{}).value||'否';
+  if(!code||!name){ npToast('请填写组合编码、组合名称'); return; }
+  var parts=window.pcPartsCache||[];
+  if(idx>=0){ var r=NP['part-combo'].allData[idx]; r.name=name; r.enabled=en; r.combo=co; r.parts=parts; r.updateTime=npDateTime('pc-s',idx); }
+  else { NP['part-combo'].allData.unshift({ idx:NP['part-combo'].allData.length, code:code, name:name, parts:parts, enabled:en, combo:co, updateTime:npDateTime('pc-n',0), firstTime:npDate('pc-nf',0) }); }
+  npCloseModal(); NP['part-combo'].query(); npToast('已保存');
+}
+
+/* ============ 模块 3：库存上下限（PRD 5.1.4） ============ */
+NP['stock-limit'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
+(function(){
+  var a=[]; var stores=[['奕境经开店','S001'],['奕境滨江店','S002'],['奕境高新店','S003'],['奕境空港店','S004']];
+  for(var i=0;i<40;i++){ var up=npRandStr('sl-u',i,10,9999); var low=npRandStr('sl-l',i,1,Math.max(1,up-1)); var st=stores[i%stores.length]; a.push({ idx:i, store:st[0], storeCode:st[1], pcode:'P'+String(4000+i), pname:'配件'+String(i+1).padStart(3,'0'), up:up, low:low, updateTime:npDateTime('sl-t',i) }); }
+  NP['stock-limit'].allData=a;
+})();
+function initStockLimit(){
+  var K='stock-limit'; var st=NP[K];
+  var filter = npFItem('门店','<input type="text" id="sl-f-store" placeholder="门店名称(编码)">') +
+    npFItem('备件编码','<input type="text" id="sl-f-code" placeholder="请输入">') +
+    npFItem('备件名称','<input type="text" id="sl-f-name" placeholder="请输入">') +
+    npFItem('近1年有出入库记录','<input type="checkbox" id="sl-f-recent" checked>') +
+    npComboMarkup('stock-limit','sl-f-area','大区',['东区','南区']) +
+    npComboMarkup('stock-limit','sl-f-zone','小区',['华中','华南']);
+  var toolbar='<button class="lt-btn lt-btn-default" onclick="npToast(\'导出功能演示\')">导出</button><button class="lt-btn lt-btn-default" onclick="npToast(\'批量导入功能演示\')">批量导入</button>';
+  var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'门店',f:function(r){return npEscape(r.store);}},{t:'备件编码',f:function(r){return r.pcode;}},{t:'备件名称',f:function(r){return npEscape(r.pname);}},{t:'库存上限',w:100,f:function(r){return r.up;}},{t:'库存下限',w:100,f:function(r){return r.low;}},{t:'最近更新时间',w:150,f:function(r){return r.updateTime;}},{t:'操作',w:90,cls:'col-actions sticky',f:function(r){return '<a href="javascript:void(0)" class="lt-btn-link" onclick="slOpenEdit('+r.idx+')">编辑</a>';}}];
+  var root=document.getElementById('page-stock-limit');
+  root.innerHTML = npShell(K, {l2:'基础数据',l3:'库存上下限'}, filter, toolbar, npTH(cols), 'sl-tbody', 'sl-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var s=(document.getElementById('sl-f-store')||{}).value||''; var c=(document.getElementById('sl-f-code')||{}).value||''; var n=(document.getElementById('sl-f-name')||{}).value||''; var recent=document.getElementById('sl-f-recent')?document.getElementById('sl-f-recent').checked:true; st.filtered=st.allData.filter(function(r){ return (s===''||r.store.indexOf(s)>=0||r.storeCode.indexOf(s)>=0)&&(c===''||r.pcode.indexOf(c)>=0)&&(n===''||r.pname.indexOf(n)>=0); }); st.page=1; st.render(); };
+  st.reset=function(){ ['sl-f-store','sl-f-code','sl-f-name'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); var rc=document.getElementById('sl-f-recent'); if(rc)rc.checked=true; ['sl-f-area','sl-f-zone'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); st.filtered=st.allData.slice(); st.page=1; st.render(); };
+  st.render=function(){ npRenderTable(K,'sl-tbody','sl-pager',cols,st.filtered,st); };
+  st.filtered=st.allData.slice(); st.page=1; st.render();
+}
+function slOpenEdit(idx){
+  var r=NP['stock-limit'].allData[idx];
+  var html='<div class="np-form"><div class="np-field"><label class="np-req">门店</label><input id="sl-m-store" class="np-input" value="'+npEscape(r.store)+'('+r.storeCode+')" readonly></div>'+
+    '<div class="np-field"><label class="np-req">备件编码</label><input id="sl-m-code" class="np-input" value="'+r.pcode+'" readonly></div>'+
+    '<div class="np-field"><label class="np-req">备件名称</label><input id="sl-m-name" class="np-input" value="'+npEscape(r.pname)+'" readonly></div>'+
+    '<div class="np-field"><label class="np-req">库存上限</label><input id="sl-m-up" class="np-input" value="'+r.up+'" placeholder="≤10000的正整数"></div>'+
+    '<div class="np-field"><label class="np-req">库存下限</label><input id="sl-m-low" class="np-input" value="'+r.low+'" placeholder="<库存上限的正整数"></div></div>';
+  npOpenModal('维护库存上下限', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="slSave('+idx+')">保存</button>');
+}
+function slSave(idx){
+  var up=parseInt((document.getElementById('sl-m-up')||{}).value,10); var low=parseInt((document.getElementById('sl-m-low')||{}).value,10);
+  if(!(up>=1&&up<=10000)||!(low>=1&&low<up)){ npToast('上限需为≤10000正整数；下限需为正整数且小于上限'); return; }
+  var r=NP['stock-limit'].allData[idx]; r.up=up; r.low=low; r.updateTime=npDateTime('sl-s',idx); npCloseModal(); NP['stock-limit'].render(); npToast('已保存');
+}
+
+/* ============ 模块 4：门店最低订货金额（PRD 5.1.5） ============ */
+NP['min-order-amount'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
+(function(){
+  var a=[]; var stores=[['奕境经开店','S001'],['奕境滨江店','S002'],['奕境高新店','S003'],['奕境空港店','S004']]; var types=['常规订单','紧急订单','三包订单','定制订单','油品订单','直发订单'];
+  for(var i=0;i<30;i++){ var st=stores[i%stores.length]; a.push({ idx:i, store:st[0], storeCode:st[1], type:types[i%types.length], disabled:npPick('mo-d',i,['启用','停用']), minAmount:npRandStr('mo-m',i,100,5000), updateTime:npDateTime('mo-t',i) }); }
+  NP['min-order-amount'].allData=a;
+})();
+function initMinOrderAmount(){
+  var K='min-order-amount'; var st=NP[K];
+  var filter = npComboMarkup('min-order-amount','mo-f-area','大区',['东区','南区']) +
+    npComboMarkup('min-order-amount','mo-f-zone','小区',['华中','华南']) +
+    npFItem('门店','<input type="text" id="mo-f-store" placeholder="门店名称(编码)">') +
+    npComboMarkup('min-order-amount','mo-f-type','订单类型',['常规订单','紧急订单','三包订单','定制订单','油品订单','直发订单']);
+  var toolbar='<button class="lt-btn lt-btn-default" onclick="moSaveAll()">保存</button><button class="lt-btn lt-btn-default" onclick="npToast(\'导入功能演示\')">导入</button><button class="lt-btn lt-btn-default" onclick="npToast(\'导出功能演示\')">导出</button>';
+  var cols=[{t:'',w:40,f:function(r){return '<input type="checkbox" class="mo-chk" data-idx="'+r.idx+'">';}},{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'门店编码',f:function(r){return r.storeCode;}},{t:'门店',f:function(r){return npEscape(r.store);}},{t:'订单类型',f:function(r){return r.type;}},{t:'是否停用',w:110,f:function(r){return '<select class="np-inline" onchange="moSetDis('+r.idx+',this.value)"><option value="启用" '+(r.disabled==='启用'?'selected':'')+'>启用</option><option value="停用" '+(r.disabled==='停用'?'selected':'')+'>停用</option></select>';}},{t:'采购最小金额',w:130,f:function(r){return '<input class="np-inline" style="width:100px;" value="'+r.minAmount+'" onchange="moSetAmt('+r.idx+',this.value)">';}},{t:'最近更新时间',w:150,f:function(r){return r.updateTime;}}];
+  var root=document.getElementById('page-min-order-amount');
+  root.innerHTML = npShell(K, {l2:'基础数据',l3:'门店最低订货金额'}, filter, toolbar, npTH(cols), 'mo-tbody', 'mo-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var s=(document.getElementById('mo-f-store')||{}).value||''; var t=(document.getElementById('mo-f-type')||{}).value||''; st.filtered=st.allData.filter(function(r){ return (s===''||r.store.indexOf(s)>=0||r.storeCode.indexOf(s)>=0)&&(t===''||r.type===t); }); st.page=1; st.render(); };
+  st.reset=function(){ var e=document.getElementById('mo-f-store'); if(e)e.value=''; ['mo-f-area','mo-f-zone','mo-f-type'].forEach(function(id){var x=document.getElementById(id); if(x)x.value='';}); st.filtered=st.allData.slice(); st.page=1; st.render(); };
+  st.render=function(){ st.filtered.sort(function(a,b){return (b.updateTime||'').localeCompare(a.updateTime||'');}); npRenderTable(K,'mo-tbody','mo-pager',cols,st.filtered,st); };
+  st.filtered=st.allData.slice(); st.page=1; st.render();
+}
+function moSetDis(idx,v){ NP['min-order-amount'].allData[idx].disabled=v; NP['min-order-amount'].allData[idx].updateTime=npDateTime('mo-d',idx); }
+function moSetAmt(idx,v){ var n=parseFloat(v); if(isNaN(n)||n<=0){ npToast('采购最小金额需为>0正整数'); return; } NP['min-order-amount'].allData[idx].minAmount=v; NP['min-order-amount'].allData[idx].updateTime=npDateTime('mo-a',idx); }
+function moSaveAll(){ var cnt=0; document.querySelectorAll('.mo-chk:checked').forEach(function(c){ cnt++; }); npToast('已保存 '+cnt+' 行'); }
+
+/* ============ 模块 5：集单日历设置（PRD 5.1.6） ============ */
+NP['order-calendar'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
+(function(){
+  var a=[]; var types=['常规订单','紧急订单','三包订单']; var months=['一月','二月','三月','四月','五月','六月','七月','八月'];
+  for(var i=0;i<16;i++){ var stores=[]; var n=npRandStr('oc-s',i,1,5); for(var j=0;j<n;j++){ stores.push({code:'S'+String(100+j), name:'门店'+(j+1)}); } a.push({ idx:i, name:'集单日历'+String(i+1).padStart(2,'0'), type:types[i%types.length], year:2025, times:['09:00'], stores:stores, months:months, status:'启用', updateTime:npDateTime('oc-t',i) }); }
+  NP['order-calendar'].allData=a;
+})();
+function initOrderCalendar(){
+  var K='order-calendar'; var st=NP[K];
+  var filter = npComboMarkup('order-calendar','oc-f-type','订单类型',['常规订单','紧急订单','三包订单']) +
+    npFItem('日历名称','<input type="text" id="oc-f-name" placeholder="请输入">') +
+    npComboMarkup('order-calendar','oc-f-year','日历年份',['2025','2026']) +
+    npSelect('状态','<select id="oc-f-status"><option value="">请选择</option><option>启用</option></select>') +
+    npFItem('门店','<input type="text" id="oc-f-store" placeholder="门店名称(编码)">');
+  var toolbar='<button class="lt-btn lt-btn-primary" onclick="ocOpenEdit(-1)">新增</button>';
+  var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'日历名称',f:function(r){return npEscape(r.name);}},{t:'订单类型',f:function(r){return r.type;}},{t:'日历年份',w:90,f:function(r){return r.year;}},{t:'门店数量',w:90,f:function(r){return '<a href="javascript:void(0)" class="lt-btn-link" onclick="npToast(\'日历视图（演示）：'+r.stores.length+' 家门店，集单时间 '+r.times.join('、')+'\')">'+r.stores.length+'</a>';}},{t:'最近更新时间',w:150,f:function(r){return r.updateTime;}},{t:'状态',w:80,f:function(r){return '<span class="lt-badge ok">启用</span>';}},{t:'操作',w:90,cls:'col-actions sticky',f:function(r){return '<a href="javascript:void(0)" class="lt-btn-link" onclick="ocOpenEdit('+r.idx+')">编辑</a>';}}];
+  var root=document.getElementById('page-order-calendar');
+  root.innerHTML = npShell(K, {l2:'基础数据',l3:'集单日历设置'}, filter, toolbar, npTH(cols), 'oc-tbody', 'oc-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var t=(document.getElementById('oc-f-type')||{}).value||''; var n=(document.getElementById('oc-f-name')||{}).value||''; var y=(document.getElementById('oc-f-year')||{}).value||''; var s=(document.getElementById('oc-f-status')||{}).value||''; var stf=(document.getElementById('oc-f-store')||{}).value||''; st.filtered=st.allData.filter(function(r){ return (t===''||r.type===t)&&(n===''||r.name.indexOf(n)>=0)&&(y===''||String(r.year)===y)&&(s===''||s==='启用')&&(stf===''||r.stores.some(function(x){return x.name.indexOf(stf)>=0;}))&&(stf===''||r.stores.some(function(x){return x.code.indexOf(stf)>=0;})); }); st.page=1; st.render(); };
+  st.reset=function(){ ['oc-f-name','oc-f-store'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); ['oc-f-type','oc-f-year','oc-f-status'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); st.filtered=st.allData.slice(); st.page=1; st.render(); };
+  st.render=function(){ st.filtered.sort(function(a,b){return (b.updateTime||'').localeCompare(a.updateTime||'');}); npRenderTable(K,'oc-tbody','oc-pager',cols,st.filtered,st); };
+  st.filtered=st.allData.slice(); st.page=1; st.render();
+}
+function ocOpenEdit(idx){
+  var rec = idx>=0 ? NP['order-calendar'].allData[idx] : null;
+  var name=rec?rec.name:''; var type=rec?rec.type:'常规订单'; var year=rec?rec.year:2025; var times=rec?rec.times.slice():['09:00']; var stores=rec?rec.stores.slice():[];
+  window.ocTimes=times; window.ocStores=stores; window.ocSelected={};
+  var months=rec?rec.months:['一月','二月','三月','四月','五月','六月','七月','八月'];
+  var calHtml='<div class="np-cal-grid">'; for(var m=0;m<months.length;m++){ calHtml+='<div class="np-cal-month"><div class="np-cal-mtitle">'+months[m]+' '+year+'年</div><div class="np-cal-days">'; for(var d=1;d<=28;d++){ var sel=(d===24)?' np-cal-sel':''; calHtml+='<span class="np-cal-day'+sel+'" onclick="ocPickDay(this,'+m+','+d+')">'+d+'</span>'; } calHtml+='</div></div>'; }
+  calHtml+='</div>';
+  var html='<div class="np-form"><div class="np-field"><label class="np-req">订单类型</label><select id="oc-m-type" class="np-input"><option value="常规订单" '+(type==='常规订单'?'selected':'')+'>常规订单</option><option value="紧急订单" '+(type==='紧急订单'?'selected':'')+'>紧急订单</option><option value="三包订单" '+(type==='三包订单'?'selected':'')+'>三包订单</option></select></div>'+
+    '<div class="np-field"><label class="np-req">日历名称</label><input id="oc-m-name" class="np-input" value="'+npEscape(name)+'" placeholder="请输入"></div>'+
+    '<div class="np-field"><label class="np-req">日历年份</label><input id="oc-m-year" class="np-input" value="'+year+'" readonly></div>'+
+    '<div class="np-field"><label class="np-req">状态</label><select id="oc-m-status" class="np-input"><option>启用</option></select></div>'+
+    '<div class="np-field"><label>集单时间</label><div id="oc-m-times" class="np-times"></div><button class="lt-btn lt-btn-default" onclick="ocAddTime()">+ 添加时间</button></div>'+
+    '<div class="np-field"><label>集单日历</label>'+calHtml+'</div>'+
+    '<div class="np-field"><label>门店</label><button class="lt-btn lt-btn-default" onclick="npToast(\'添加门店（演示）\')">添加门店</button> <button class="lt-btn lt-btn-default" onclick="ocRenderStores()">删除门店</button></div>'+
+    '<div class="np-subtable-wrap"><table class="lt-table"><thead><tr><th style="width:40px;">选</th><th>序号</th><th>门店编码</th><th>门店名称</th></tr></thead><tbody id="oc-m-stores"></tbody></table></div></div>';
+  npOpenModal('集单日历设置', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">重置</button><button class="lt-btn lt-btn-primary" onclick="ocSave('+idx+')">保存</button>', {width:920});
+  ocRenderTimes(); ocRenderStores();
+}
+function ocAddTime(){ window.ocTimes.push('09:00'); ocRenderTimes(); }
+function ocDelTime(i){ window.ocTimes.splice(i,1); ocRenderTimes(); }
+function ocRenderTimes(){ var box=document.getElementById('oc-m-times'); if(!box)return; box.innerHTML=window.ocTimes.map(function(t,i){return '<span class="np-time-chip">'+t+' <a href="javascript:void(0)" onclick="ocDelTime('+i+')">&times;</a></span>';}).join(''); }
+function ocPickDay(el,m,d){ el.classList.toggle('np-cal-sel'); }
+function ocRenderStores(){ var tb=document.getElementById('oc-m-stores'); if(!tb)return; tb.innerHTML=window.ocStores.map(function(s,i){return '<tr><td><input type="checkbox" class="oc-store-chk"></td><td>'+(i+1)+'</td><td>'+s.code+'</td><td>'+npEscape(s.name)+'</td></tr>';}).join('')||'<tr><td colspan="4" style="text-align:center;color:#999;">暂未选择门店</td></tr>'; }
+function ocSave(idx){
+  var name=(document.getElementById('oc-m-name')||{}).value||''; var type=(document.getElementById('oc-m-type')||{}).value||'常规订单';
+  if(!name){ npToast('请填写日历名称'); return; }
+  if(window.ocStores.length===0){ npToast('请至少选择一个门店'); return; }
+  var times=window.ocTimes.slice(); var stores=window.ocStores.slice();
+  if(idx>=0){ var r=NP['order-calendar'].allData[idx]; r.name=name; r.type=type; r.times=times; r.stores=stores; r.updateTime=npDateTime('oc-s',idx); }
+  else { NP['order-calendar'].allData.unshift({ idx:NP['order-calendar'].allData.length, name:name, type:type, year:2025, times:times, stores:stores, months:['一月','二月','三月','四月','五月','六月','七月','八月'], status:'启用', updateTime:npDateTime('oc-n',0) }); }
+  npCloseModal(); NP['order-calendar'].query(); npToast('已保存');
+}
+
+/* === NP MODULES 6-10 BELOW === */
+
+/* =========== 模块 6：账户余额（PRD 5.2.5） =========== */
+NP['account-balance'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null, tab:'list' };
+(function(){
+  var a=[]; var names=[['奕境经开店','S001'],['奕境滨江店','S002'],['奕境高新店','S003'],['奕境空港店','S004']]; var accts=['现金账户','返利账户','通用账户'];
+  for(var i=0;i<22;i++){ var n=names[i%names.length]; var det=[]; var dbase=new Date(2026,5,20); for(var j=0;j<5;j++){ var dd=new Date(dbase.getTime()-j*3*86400000); var y=dd.getFullYear(),m=String(dd.getMonth()+1).padStart(2,'0'),d=String(dd.getDate()).padStart(2,'0'); det.push({ time:y+'-'+m+'-'+d+' 10:'+String(npRandStr('ab-t',i*5+j,10,59)).padStart(2,'0')+':00', kind:npPick('ab-k',i*5+j,['现金','返利']), amt:(npRandStr('ab-a',i*5+j,-5000,18000)).toFixed(2), cash:(npRandStr('ab-c',i*5+j,10000,90000)).toFixed(2), rebate:(npRandStr('ab-r',i*5+j,2000,40000)).toFixed(2), doctype:npPick('ab-dt',i*5+j,['配件采购','配件销售','退货退款']), docno:'DOC'+String(5000+i*5+j), memo:npPick('ab-m',i*5+j,['月度结算','活动返利','采购扣款','退款入账']) }); }
+    a.push({ idx:i, storeCode:n[1], storeName:n[0], account:npPick('ab-ac',i,accts), cash:(npRandStr('ab-c2',i,10000,90000)).toFixed(2), rebate:(npRandStr('ab-r2',i,2000,40000)).toFixed(2), updateTime:npDateTime('ab-u',i), details:det }); }
+  NP['account-balance'].allData=a;
+})();
+function initAccountBalance(){
+  var K='account-balance'; var st=NP[K];
+  var filter = npFItem('门店','<input type="text" id="ab-f-store" placeholder="门店名称(编码)">');
+  var tabs = '<div class="np-tabs"><div class="np-tab '+(st.tab==='list'?'active':'')+'" onclick="abSwitchTab(\'list\')">账户余额</div><div class="np-tab '+(st.tab==='detail'?'active':'')+'" onclick="abSwitchTab(\'detail\')">资金明细</div></div><div class="np-info-banner">对余额有疑问，可先点击“资金明细”查看明细</div>';
+  var root=document.getElementById('page-account-balance');
+  root.innerHTML = '<div class="lt-wrap">'+
+    '<div class="lt-filter"><div class="lt-filter-grid" id="'+K+'-filterGrid">'+filter+'<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="NP[\''+K+'\'].query()">查询</button><button class="lt-btn lt-btn-default" onclick="NP[\''+K+'\'].reset()">重置</button><a href="javascript:void(0)" class="lt-filter-toggle" onclick="npToggleFilter(\''+K+'\')">﹀ 展开</a></div></div></div>'+
+    '<div class="lt-list-area"><div class="lt-toolbar"><div class="lt-toolbar-left" id="ab-tabbar">'+tabs+'</div></div>'+
+    '<div id="ab-list-area"><div class="lt-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'序号',w:60},{t:'门店编码'},{t:'门店名称'},{t:'账户名称'},{t:'现金账户余额',w:130},{t:'返利账户余额',w:130},{t:'更新时间',w:150}])+'</tr></thead><tbody id="ab-tbody"></tbody></table></div><div class="lt-pager" id="ab-pager"></div></div>'+
+    '<div id="ab-detail-area" style="display:none;"><div class="lt-filter-grid" style="grid-template-columns:repeat(4,1fr);">'+npSelect('扣款/入账金额','<select id="abd-f-type" class="np-input"><option value="">请选择</option><option>扣款</option><option>入账</option></select>')+npSelect('现金/返利','<select id="abd-f-kind" class="np-input"><option value="">请选择</option><option>现金</option><option>返利</option></select>')+npFItem('关联单据号','<input type="text" id="abd-f-doc" class="np-input" placeholder="请输入">')+npFItem('日期','<input type="date" id="abd-f-date" class="np-input">')+'<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="abdQuery()">查询</button><button class="lt-btn lt-btn-default" onclick="npToast(\'导出功能演示\')">导出</button></div></div><div class="np-info-banner">负数：资金扣款，正数：资金入账</div><div class="lt-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'序号',w:60},{t:'时间',w:150},{t:'现金/返利'},{t:'扣款/入账金额',w:130},{t:'现金账户余额',w:130},{t:'返利账户余额',w:130},{t:'关联单据类型'},{t:'关联单据号'},{t:'备注'}])+'</tr></thead><tbody id="abd-tbody"></tbody></table></div><div class="lt-pager" id="abd-pager"></div></div>'+
+    '</div></div>';
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var s=(document.getElementById('ab-f-store')||{}).value||''; st.filtered=st.allData.filter(function(r){return s===''||r.storeName.indexOf(s)>=0||r.storeCode.indexOf(s)>=0;}); st.page=1; abRenderList(); };
+  st.reset=function(){ var e=document.getElementById('ab-f-store'); if(e)e.value=''; st.filtered=st.allData.slice(); st.page=1; abRenderList(); };
+  st.render=function(){ if(st.tab==='detail'){ abdQuery(); } else { abRenderList(); } };
+  st.filtered=st.allData.slice(); st.page=1; abRenderList();
+}
+function abSwitchTab(tab){ var st=NP['account-balance']; st.tab=tab; document.getElementById('ab-tabbar').querySelectorAll('.np-tab').forEach(function(t,i){ t.classList.toggle('active', (i===0&&tab==='list')||(i===1&&tab==='detail')); }); document.getElementById('ab-list-area').style.display = tab==='list'?'':'none'; document.getElementById('ab-detail-area').style.display = tab==='detail'?'':'none'; if(tab==='detail'){ st.render(); } }
+function abRenderList(){ var K='account-balance', st=NP[K]; var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'门店编码',f:function(r){return r.storeCode;}},{t:'门店名称',f:function(r){return npEscape(r.storeName);}},{t:'账户名称',f:function(r){return r.account;}},{t:'现金账户余额',w:130,f:function(r){return '<span class="np-money">¥'+r.cash+'</span>';}},{t:'返利账户余额',w:130,f:function(r){return '<span class="np-money">¥'+r.rebate+'</span>';}},{t:'更新时间',w:150,f:function(r){return r.updateTime;}}]; npRenderTable(K,'ab-tbody','ab-pager',cols,st.filtered,st); }
+function abdQuery(){ var K='account-balance', st=NP[K]; var rows=[]; st.filtered.forEach(function(r){ (r.details||[]).forEach(function(d){ rows.push(d); }); }); var type=(document.getElementById('abd-f-type')||{}).value||''; var kind=(document.getElementById('abd-f-kind')||{}).value||''; var doc=(document.getElementById('abd-f-doc')||{}).value||''; rows=rows.filter(function(d){ return (type===''||(type==='扣款'?parseFloat(d.amt)<0:parseFloat(d.amt)>0))&&(kind===''||d.kind===kind)&&(doc===''||d.docno.indexOf(doc)>=0); }); var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'时间',w:150,f:function(r){return r.time;}},{t:'现金/返利',f:function(r){return r.kind;}},{t:'扣款/入账金额',w:130,f:function(r){var v=parseFloat(r.amt);return '<span class="'+(v<0?'np-red':'np-green')+'">'+r.amt+'</span>';}},{t:'现金账户余额',w:130,f:function(r){return '¥'+r.cash;}},{t:'返利账户余额',w:130,f:function(r){return '¥'+r.rebate;}},{t:'关联单据类型',f:function(r){return r.doctype;}},{t:'关联单据号',f:function(r){return r.docno;}},{t:'备注',f:function(r){return npEscape(r.memo);}}]; npRenderTable(K,'abd-tbody','abd-pager',cols,rows,{page:1,pageSize:10}); }
+
+/* =========== 模块 7：配件退货索赔（PRD 5.2.4） =========== */
+NP['parts-return'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null, step:1 };
+(function(){
+  var a=[]; var reasons=['物流异常','配件目录错误','门店订货错误','总部铺货退货','其他']; var statuses=['未提交','审核中','审核不通过','审核通过']; var stores=[['奕境经开店','S001'],['奕境滨江店','S002'],['奕境高新店','S003'],['奕境空港店','S004']];
+  for(var i=0;i<26;i++){ var n=stores[i%stores.length]; var vcount=npRandStr('pr-v',i,1,5); var lines=[]; for(var j=0;j<vcount;j++){ var price=(npRandStr('pr-p',i*5+j,20,800)).toFixed(2); var ship=npRandStr('pr-sh',i*5+j,5,50); var sign=npRandStr('pr-sk',i*5+j,1,ship); lines.push({ signNo:'RK'+String(8000+i*5+j), pcode:'P'+String(5000+i*5+j), pname:'配件'+String(i*5+j+1).padStart(3,'0'), unit:'个', price:price, ship:ship, sign:sign, ret:npRandStr('pr-rt',i*5+j,1,sign), amt:(price*npRandStr('pr-rt2',i*5+j,1,sign)).toFixed(2) }); }
+    a.push({ idx:i, returnNo:'TH'+String(2026000+i), purchaseNo:'CG'+String(3000+i), storeName:n[0], storeCode:n[1], variety:vcount, totalAmt:(npRandStr('pr-ta',i,100,9000)).toFixed(2), totalQty:npRandStr('pr-tq',i,5,200), reason:reasons[i%reasons.length], status:statuses[i%statuses.length], auditMemo:npPick('pr-am',i,['符合退货标准','已核实物流异常','目录匹配无误']), auditTime:npDateTime('pr-at',i), auditor:npPick('pr-au',i,['张审核','李审核','王审核']), submitter:npPick('pr-su',i,['门店甲','门店乙','门店丙']), submitTime:npDateTimeWithin('pr-st',i,40), lines:lines }); }
+  NP['parts-return'].allData=a;
+})();
+function initPartsReturn(){
+  var K='parts-return'; var st=NP[K];
+  var dateRangeHtml = '<div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">退货日期</span>'
+    + '<input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="prApplyFilter">'
+    + '<div class="lt-date-range-drop">'
+    + '<input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="pr-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')">'
+    + '<span>—</span>'
+    + '<input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="pr-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')">'
+    + '</div></div></div>';
+  var filter = npFItem('退货单号','<input type="text" id="pr-f-no" class="np-input" placeholder="请输入">') +
+    npSelect('退货状态','<select id="pr-f-status" class="np-input"><option value="">请选择</option><option>未提交</option><option>审核中</option><option>审核不通过</option><option>审核通过</option></select>') +
+    npComboMarkup('parts-return','pr-f-reason','退货原因',['物流异常','配件目录错误','门店订货错误','总部铺货退货','其他']) +
+    dateRangeHtml +
+    npFItem('采购单号','<input type="text" id="pr-f-pno" class="np-input" placeholder="请输入">');
+  var toolbar='<button class="lt-btn lt-btn-primary" onclick="prToggleStep(1)">新建</button><button class="lt-btn lt-btn-default" onclick="npToast(\'导出功能演示\')">导出</button><button class="lt-btn lt-btn-default" onclick="npToast(\'打印功能演示\')">打印</button>';
+  var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'退货单号',w:120,f:function(r){return '<a href="javascript:void(0)" class="lt-btn-link" onclick="prOpenDetail('+r.idx+')">'+r.returnNo+'</a>';}},{t:'门店名称',f:function(r){return npEscape(r.storeName);}},{t:'门店编码',w:90,f:function(r){return r.storeCode;}},{t:'采购单号',f:function(r){return r.purchaseNo;}},{t:'退货品种数',w:90,f:function(r){return r.variety;}},{t:'退货总金额',w:110,f:function(r){return '<span class="np-money">¥'+r.totalAmt+'</span>';}},{t:'退货总数量',w:90,f:function(r){return r.totalQty;}},{t:'退货原因',f:function(r){return r.reason;}},{t:'退货单状态',w:100,f:function(r){return '<span class="lt-badge '+(r.status==='审核通过'?'ok':(r.status==='审核不通过'?'off':'warn'))+'">'+r.status+'</span>';}},{t:'审核备注',f:function(r){return npEscape(r.auditMemo);}},{t:'审核时间',w:150,f:function(r){return r.auditTime;}},{t:'审核人',w:90,f:function(r){return npEscape(r.auditor);}},{t:'提交人',w:90,f:function(r){return npEscape(r.submitter);}},{t:'提交时间',w:150,f:function(r){return r.submitTime;}},{t:'操作',w:140,cls:'col-actions sticky',f:function(r){var ops=[]; if(r.status==='未提交'){ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="npToast(\'删除（演示）\')">删除</a>');ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="prOpenEdit('+r.idx+')">编辑</a>');} if(r.status==='审核中'){ops.push('<a href="javascript:void(0)" class="lt-link np-red" onclick="npToast(\'撤回（演示）\')">撤回</a>');} if(r.status==='审核不通过'){ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="prOpenEdit('+r.idx+')">编辑</a>');} if(r.status==='审核通过'){} if(r.status!=='审核通过'){ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="prOpenAudit('+r.idx+')">审核</a>');} ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="prOpenDetail('+r.idx+')">查看</a>'); return ops.join(' ');}}];
+  var root=document.getElementById('page-parts-return');
+  root.innerHTML = npShell(K, {l2:'配件订单管理',l3:'配件退货'}, filter, toolbar, npTH(cols), 'pr-tbody', 'pr-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var no=(document.getElementById('pr-f-no')||{}).value||''; var stt=(document.getElementById('pr-f-status')||{}).value||''; var rs=(document.getElementById('pr-f-reason')||{}).value||''; var pno=(document.getElementById('pr-f-pno')||{}).value||''; var ds=(document.getElementById('pr-flt-date-start')||{}).value||''; var de=(document.getElementById('pr-flt-date-end')||{}).value||''; st.filtered=st.allData.filter(function(r){ return (no===''||r.returnNo.indexOf(no)>=0)&&(stt===''||r.status===stt)&&(rs===''||r.reason===rs)&&(pno===''||r.purchaseNo.indexOf(pno)>=0)&&(ds===''||(r.submitTime||'').slice(0,10)>=ds)&&(de===''||(r.submitTime||'').slice(0,10)<=de); }); st.page=1; st.render(); };
+  st.reset=function(){ ['pr-f-no','pr-f-pno'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); ['pr-f-status','pr-f-reason'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); var ds=document.getElementById('pr-flt-date-start'); if(ds)ds.value=''; var de=document.getElementById('pr-flt-date-end'); if(de)de.value=''; var dtx=document.querySelector('#page-parts-return .lt-date-range-text'); if(dtx)dtx.value=''; st.filtered=st.allData.slice(); st.page=1; st.render(); };
+  st.render=function(){ npRenderTable(K,'pr-tbody','pr-pager',cols,st.filtered,st); };
+  (function(){ var _base=new Date(2026,6,20); var _p=function(n){return (n<10?'0':'')+n;}; var _sd=new Date(_base.getFullYear(),_base.getMonth(),_base.getDate()-30); var _ds=_sd.getFullYear()+'-'+_p(_sd.getMonth()+1)+'-'+_p(_sd.getDate()); var _de=_base.getFullYear()+'-'+_p(_base.getMonth()+1)+'-'+_p(_base.getDate()); var _s=document.getElementById('pr-flt-date-start'); if(_s)_s.value=_ds; var _x=document.getElementById('pr-flt-date-end'); if(_x)_x.value=_de; var _t=document.querySelector('#page-parts-return .lt-date-range-text'); if(_t)_t.value=_ds+'-'+_de; })();
+  st.query();
+}
+function prApplyFilter(){ var st=NP['parts-return']; if(st&&st.query){ st.query(); } }
+function prToggleStep(step){ NP['parts-return'].step=step; if(step===1){ prOpenStep1(); } }
+function prOpenStep1(){
+  var pools=[]; for(var i=0;i<10;i++){ pools.push({ signNo:'RK'+String(8100+i), recvTime:npDateTime('pr1-rt',i), purchaseNo:'CG'+String(3100+i), shipNo:'FH'+String(4100+i), shipVar:npRandStr('pr1-sv',i,1,8), shipQty:npRandStr('pr1-sq',i,10,120), signVar:npRandStr('pr1-gv',i,1,8), signQty:npRandStr('pr1-gq',i,10,120) }); }
+  var html='<div class="np-step"><div class="np-step-bar"><span class="np-step-cur">第1步：选择签收入库单</span><span class="np-step-next">第2步：填写退货明细</span></div>'+
+    '<div class="lt-filter-grid" style="grid-template-columns:repeat(4,1fr);">'+npFItem('采购单号','<input id="pr1-f-pno" class="np-input" placeholder="输入">')+npFItem('发货单号','<input id="pr1-f-shno" class="np-input" placeholder="输入">')+npFItem('签收入库单号','<input id="pr1-f-sign" class="np-input" placeholder="输入">')+npFItem('收货日期','<input type="date" id="pr1-f-date" class="np-input">')+
+    '<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="npToast(\'查询（演示）\')">查询</button><button class="lt-btn lt-btn-default" onclick="npCloseModal()">返回</button></div></div>'+
+    '<div class="lt-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'签收入库单号'},{t:'收货时间',w:150},{t:'采购单号'},{t:'发货单号'},{t:'发货品种'},{t:'发货数量'},{t:'签收品种'},{t:'签收数量'},{t:'操作',w:80,cls:'col-actions sticky'}])+'</tr></thead><tbody>'+pools.map(function(p,i){return '<tr><td>'+p.signNo+'</td><td>'+p.recvTime+'</td><td>'+p.purchaseNo+'</td><td>'+p.shipNo+'</td><td>'+p.shipVar+'</td><td>'+p.shipQty+'</td><td>'+p.signVar+'</td><td>'+p.signQty+'</td><td class="col-actions sticky"><a href="javascript:void(0)" class="lt-btn-link" onclick="prOpenStep2(\''+p.signNo+'\')">退货</a></td></tr>';}).join('')+'</tbody></table></div></div>';
+  npOpenModal('新增配件退货单', html, '', {width:960});
+}
+function prOpenStep2(signNo){
+  var r=NP['parts-return'].allData.find(function(x){return x.lines&&x.lines[0]&&x.lines[0].signNo===signNo;})||NP['parts-return'].allData[0];
+  var rows=r.lines;
+  var html='<div class="np-step"><div class="np-step-bar"><span class="np-step-done">第1步：选择签收入库单</span><span class="np-step-cur">第2步：填写退货明细</span></div>'+
+    '<div class="np-form" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;"><div class="np-field"><label>发货单号</label><input class="np-input" value="'+(r.lines[0]?r.lines[0].signNo:'')+'" readonly></div><div class="np-field"><label>采购单号</label><input class="np-input" value="'+r.purchaseNo+'" readonly></div><div class="np-field"><label>收货日期</label><input class="np-input" value="'+r.submitTime.split(' ')[0]+'" readonly></div><div class="np-field"><label>签收入库单号</label><input class="np-input" value="'+(r.lines[0]?r.lines[0].signNo:'')+'" readonly></div></div>'+
+    '<div class="np-field" style="margin:8px 0;"><label class="np-req">发票号</label><input id="pr2-invoice" class="np-input" placeholder="请输入发票号"></div>'+
+    '<div class="np-field" style="margin:8px 0;"><label class="np-req">退货原因</label><select id="pr2-reason" class="np-input"><option>物流异常</option><option>配件目录错误</option><option>门店订货错误</option><option>总部铺货退货</option><option>其他</option></select><div class="np-hint">物流异常：收货48小时内提交退货索赔</div></div>'+
+    '<div class="np-sub-table-wrap"><div class="np-upload">附件：<button class="lt-btn lt-btn-default" onclick="npToast(\'上传文件（演示）\')">上传文件</button> <span class="np-hint">支持 jpg/png/pdf，单个≤10MB</span></div><table class="lt-table"><thead><tr>'+npTH([{t:'选',w:40},{t:'签收入库单号'},{t:'配件编码'},{t:'配件名称'},{t:'单位'},{t:'单价'},{t:'发货数量'},{t:'签收数量'},{t:'退货数量',w:100},{t:'退货金额'}])+'</tr></thead><tbody>'+rows.map(function(l,i){return '<tr><td><input type="checkbox" class="pr2-chk" data-i="'+i+'" onchange="pr2Chk('+i+')"></td><td>'+l.signNo+'</td><td>'+l.pcode+'</td><td>'+npEscape(l.pname)+'</td><td>'+l.unit+'</td><td>'+l.price+'</td><td>'+l.ship+'</td><td>'+l.sign+'</td><td><input id="pr2-ret-'+i+'" class="np-input" style="width:80px;" oninput="pr2Amt('+i+')" placeholder="≤'+(l.sign)+'"></td><td id="pr2-amt-'+i+'">'+(l.amt)+'</td></tr>';}).join('')+'</tbody></table></div>'+
+    '<div class="np-total">预估退货金额合计(含税)：<span class="np-money" id="pr2-total">0.00</span></div>';
+  npOpenModal('退货', html, '<button class="lt-btn lt-btn-default" onclick="prCloseStep2()">暂存</button><button class="lt-btn lt-btn-primary" onclick="pr2Submit()">保存提交</button>', {width:920});
+  window.pr2Rows=rows;
+}
+function pr2Chk(i){ var c=document.querySelector('.pr2-chk[data-i="'+i+'"]'); var inp=document.getElementById('pr2-ret-'+i); if(c&&!c.checked){ inp.value=''; pr2Amt(i); } }
+function pr2Amt(i){ var r=window.pr2Rows[i]; var inp=document.getElementById('pr2-ret-'+i); var v=parseFloat(inp.value)||0; if(v>r.sign){ inp.value=r.sign; v=r.sign; } document.getElementById('pr2-amt-'+i).textContent=(r.price*v).toFixed(2); var total=0; window.pr2Rows.forEach(function(x,idx){ var iv=parseFloat(document.getElementById('pr2-ret-'+idx).value)||0; total+=x.price*iv; }); document.getElementById('pr2-total').textContent=total.toFixed(2); }
+function pr2Submit(){ var any=false; document.querySelectorAll('.pr2-chk:checked').forEach(function(c){ var i=c.getAttribute('data-i'); var v=parseFloat(document.getElementById('pr2-ret-'+i).value)||0; if(v<=0){ npToast('退货数量必填'); any=true; } }); if(any)return; var total=document.getElementById('pr2-total').textContent; npCloseModal(); npToast('已提交退货单，金额 ¥'+total); }
+function prCloseStep2(){ npCloseModal(); npToast('已暂存'); }
+function prOpenEdit(idx){ prOpenDetail(idx,true); }
+function prOpenDetail(idx, editable){
+  var r=NP['parts-return'].allData[idx];
+  var html='<div class="np-collapse"><div class="np-sec"><div class="np-sec-h" onclick="npSec(this)">退货单信息 ▾</div><div class="np-sec-b"><div class="np-form" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;">'+
+    '<div class="np-field"><label>发货单号</label><input class="np-input" value="'+(r.lines[0]?r.lines[0].signNo:'')+'" readonly></div>'+
+    '<div class="np-field"><label>采购单号</label><input class="np-input" value="'+r.purchaseNo+'" readonly></div>'+
+    '<div class="np-field"><label>收货日期</label><input class="np-input" value="'+r.submitTime.split(' ')[0]+'" readonly></div>'+
+    '<div class="np-field"><label>签收入库单号</label><input class="np-input" value="'+(r.lines[0]?r.lines[0].signNo:'')+'" readonly></div>'+
+    '<div class="np-field"><label>发票号</label><input class="np-input" value="FP'+String(6000+idx)+'" readonly></div>'+
+    '<div class="np-field"><label>退货原因</label><input class="np-input" value="'+r.reason+'" readonly></div></div>'+
+    '<div class="np-sub-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'签收入库单号'},{t:'配件编码'},{t:'配件名称'},{t:'单位'},{t:'单价'},{t:'发货数量'},{t:'签收数量'},{t:'退货数量'},{t:'退货金额'}])+'</tr></thead><tbody>'+r.lines.map(function(l){return '<tr><td>'+l.signNo+'</td><td>'+l.pcode+'</td><td>'+npEscape(l.pname)+'</td><td>'+l.unit+'</td><td>'+l.price+'</td><td>'+l.ship+'</td><td>'+l.sign+'</td><td>'+l.ret+'</td><td>'+l.amt+'</td></tr>';}).join('')+'</tbody></table></div>'+
+    '<div class="np-total">预估退货金额合计(含税)：<span class="np-money">¥'+r.totalAmt+'</span></div></div></div>'+
+    '<div class="np-sec"><div class="np-sec-h" onclick="npSec(this)">审核记录 ▾</div><div class="np-sec-b"><table class="lt-table"><thead><tr>'+npTH([{t:'审批环节'},{t:'审批人'},{t:'提交时间'},{t:'评审结论'},{t:'评审意见'}])+'</tr></thead><tbody>'+(r.status==='未提交'?'<tr><td colspan="5" style="text-align:center;color:#999;">暂无审核记录</td></tr>':'<tr><td>总部审核</td><td>'+r.auditor+'</td><td>'+r.auditTime+'</td><td>'+r.status+'</td><td>'+r.auditMemo+'</td></tr>')+'</tbody></table></div></div>'+
+    (editable?'':'<div class="np-sec"><div class="np-sec-h" onclick="npSec(this)">审核结果 ▾</div><div class="np-sec-b"><label class="np-req">审核结果</label><div><label style="margin-right:16px;"><input type="radio" name="pr-audit" value="通过"> 通过</label><label><input type="radio" name="pr-audit" value="驳回"> 驳回</label></div><div class="np-field" style="margin-top:8px;"><label>审核意见</label><textarea id="pr-audit-memo" class="np-input" rows="3" placeholder="请输入审核意见"></textarea></div></div></div>')+
+    '</div>';
+  npOpenModal('退货单信息', html, editable?'<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="npToast(\'已保存编辑（演示）\')">保存</button>':'<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="prSubmitAudit('+idx+')">提交</button>', {width:900});
+}
+function prSubmitAudit(idx){ var res=document.querySelector('input[name="pr-audit"]:checked'); if(!res){ npToast('请选择审核结果'); return; } var r=NP['parts-return'].allData[idx]; r.status=res.value==='通过'?'审核通过':'审核不通过'; r.auditTime=npDateTime('pr-au2',idx); r.auditor='当前审核人'; npCloseModal(); NP['parts-return'].render(); npToast('审核'+res.value); }
+function prOpenAudit(idx){ prOpenDetail(idx,false); }
+function npSec(el){ var b=el.nextElementSibling; if(b.style.display==='none'){ b.style.display=''; el.textContent=el.textContent.replace('▸','▾'); } else { b.style.display='none'; el.textContent=el.textContent.replace('▾','▸'); } }
+
+/* =========== 模块 8：缺件单（PRD 5.5.1） =========== */
+NP['shortage-order'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
+(function(){
+  var a=[]; var types=['维修工单缺件','维修预约缺件','手动登记']; var urg=['一般','紧急']; var statuses=['未提交','审核中','审核通过','审核不通过','已作废']; var stores=[['奕境经开店','S001'],['奕境滨江店','S002'],['奕境高新店','S003'],['奕境空港店','S004']];
+  for(var i=0;i<30;i++){ var n=stores[i%stores.length]; var type=types[i%types.length]; var ur=urg[i%2]; var stt=statuses[i%statuses.length]; var lines=[]; var lc=npRandStr('so-l',i,1,4); for(var j=0;j<lc;j++){ lines.push({ pcode:'P'+String(6000+i*4+j), pname:'配件'+String(i*4+j+1).padStart(3,'0'), unit:'个', qty:npRandStr('so-q',i*4+j,1,20), stock:npRandStr('so-sk',i*4+j,0,30), transit:npRandStr('so-tr',i*4+j,0,15), price:(npRandStr('so-pr',i*4+j,10,500)).toFixed(2), amt:'' }); }
+    a.push({ idx:i, orderNo:'QJ'+String(2026000+i), storeName:n[0], storeCode:n[1], type:type, relateNo:type==='手动登记'?'XS'+String(7000+i):'GD'+String(8000+i), urgency:ur, status:stt, customer:'王*'+npRandStr('so-c',i,1,9), plate:'沪A'+String(npRandStr('so-p',i,10000,99999)), vin:'LV'+String(npRandStr('so-v',i,100000,999999)), registrant:npPick('so-rg',i,['店员甲','店员乙','店员丙']), submitTime:npDateTime('so-st',i), memo:npPick('so-m',i,['客户急用','预约到店','事故维修']), expectDate:npDate('so-ed',i), source:npPick('so-sc',i,['咨询','交押金','事故车','意向车型','其他']), lines:lines }); }
+  NP['shortage-order'].allData=a;
+})();
+function initShortageOrder(){
+  var K='shortage-order'; var st=NP[K];
+  var soDateRangeHtml = '<div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span>'
+    + '<input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="soApplyFilter">'
+    + '<div class="lt-date-range-drop">'
+    + '<input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="so-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')">'
+    + '<span>—</span>'
+    + '<input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="so-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')">'
+    + '</div></div></div>';
+  var filter = npFItem('缺件单号','<input type="text" id="so-f-no" class="np-input" placeholder="请输入">') +
+    npFItem('客户','<input type="text" id="so-f-cust" class="np-input" placeholder="请输入">') +
+    npSelect('紧急度','<select id="so-f-urg" class="np-input"><option value="">请选择</option><option>一般</option><option>紧急</option></select>') +
+    soDateRangeHtml +
+    npFItem('关联单号','<input type="text" id="so-f-rel" class="np-input" placeholder="请输入">') +
+    npFItem('车牌号','<input type="text" id="so-f-plate" class="np-input" placeholder="请输入">') +
+    npFItem('VIN','<input type="text" id="so-f-vin" class="np-input" placeholder="请输入">') +
+    npSelect('单据状态','<select id="so-f-status" class="np-input"><option value="">请选择</option><option>未提交</option><option>审核中</option><option>审核通过</option><option>审核不通过</option><option>已作废</option></select>');
+  var toolbar='<button class="lt-btn lt-btn-primary" onclick="soOpenRegister()">登记</button>';
+  var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'缺件单号',w:120,f:function(r){return '<a href="javascript:void(0)" class="lt-btn-link" onclick="soOpenDetail('+r.idx+')">'+r.orderNo+'</a>';}},{t:'门店名称',f:function(r){return npEscape(r.storeName);}},{t:'门店编码',w:90,f:function(r){return r.storeCode;}},{t:'缺件类型',w:110,f:function(r){return r.type;}},{t:'关联单号',f:function(r){return r.relateNo;}},{t:'紧急度',w:80,f:function(r){return r.urgency==='紧急'?'<span class="np-red">紧急</span>':'一般';}},{t:'单据状态',w:100,f:function(r){return '<span class="lt-badge '+(r.status==='审核通过'?'ok':(r.status==='已作废'||r.status==='审核不通过'?'off':'warn'))+'">'+r.status+'</span>';}},{t:'客户',f:function(r){return npEscape(r.customer);}},{t:'车牌号',w:100,f:function(r){return r.plate;}},{t:'VIN码',w:120,f:function(r){return r.vin;}},{t:'登记人',f:function(r){return r.registrant;}},{t:'提交时间',w:150,f:function(r){return r.submitTime;}},{t:'备注',f:function(r){return npEscape(r.memo);}},{t:'操作',w:150,cls:'col-actions sticky',f:function(r){var ops=[]; if(r.status==='未提交'||r.status==='审核不通过'){ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="soOpenEdit('+r.idx+')">编辑</a>');ops.push('<a href="javascript:void(0)" class="lt-link np-red" onclick="soVoid('+r.idx+')">作废</a>');} if(r.status==='审核中'){ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="soOpenAudit('+r.idx+')">审核</a>');} if(r.status==='审核通过'){ops.push('<a href="javascript:void(0)" class="lt-link np-red" onclick="soVoid('+r.idx+')">作废</a>');} if(r.status==='已作废'){ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="soOpenDetail('+r.idx+')">查看</a>');} if(ops.length===0){ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="soOpenDetail('+r.idx+')">查看</a>');} return ops.join(' ');}}];
+  var root=document.getElementById('page-shortage-order');
+  root.innerHTML = npShell(K, {l2:'门店缺件管理',l3:'缺件单'}, filter, toolbar, npTH(cols), 'so-tbody', 'so-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var no=(document.getElementById('so-f-no')||{}).value||''; var c=(document.getElementById('so-f-cust')||{}).value||''; var u=(document.getElementById('so-f-urg')||{}).value||''; var rel=(document.getElementById('so-f-rel')||{}).value||''; var p=(document.getElementById('so-f-plate')||{}).value||''; var v=(document.getElementById('so-f-vin')||{}).value||''; var s=(document.getElementById('so-f-status')||{}).value||''; var ds=(document.getElementById('so-flt-date-start')||{}).value||''; var de=(document.getElementById('so-flt-date-end')||{}).value||''; st.filtered=st.allData.filter(function(r){return (no===''||r.orderNo.indexOf(no)>=0)&&(c===''||r.customer.indexOf(c)>=0)&&(u===''||r.urgency===u)&&(rel===''||r.relateNo.indexOf(rel)>=0)&&(p===''||r.plate.indexOf(p)>=0)&&(v===''||r.vin.indexOf(v)>=0)&&(s===''||r.status===s)&&(ds===''||(r.submitTime||'').slice(0,10)>=ds)&&(de===''||(r.submitTime||'').slice(0,10)<=de);}); st.page=1; st.render(); };
+  st.reset=function(){ ['so-f-no','so-f-cust','so-f-rel','so-f-plate','so-f-vin'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); ['so-f-urg','so-f-status'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); var ds=document.getElementById('so-flt-date-start'); if(ds)ds.value=''; var de=document.getElementById('so-flt-date-end'); if(de)de.value=''; var dtx=document.querySelector('#page-shortage-order .lt-date-range-text'); if(dtx)dtx.value=''; st.filtered=st.allData.slice(); st.page=1; st.render(); };
+  st.render=function(){ npRenderTable(K,'so-tbody','so-pager',cols,st.filtered,st); };
+  st.filtered=st.allData.slice(); st.page=1; st.render();
+}
+function soApplyFilter(){ var st=NP['shortage-order']; if(st&&st.query){ st.query(); } }
+function soVoid(idx){ var r=NP['shortage-order'].allData[idx]; if(r.status==='审核通过'){ r.status='已作废'; } else { r.status='已作废'; } NP['shortage-order'].render(); npToast('已作废'); }
+function soOpenEdit(idx){ soOpenRegister(idx); }
+function soOpenRegister(idx){
+  var rec = idx>=0?NP['shortage-order'].allData[idx]:null;
+  var lines = rec?rec.lines.slice():[];
+  window.soLines=lines; window.soEditIdx=idx;
+  var html='<div class="np-form" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;">'+
+    '<div class="np-field"><label class="np-req">紧急度</label><select id="so-r-urg" class="np-input"><option value="一般" '+(rec&&rec.urgency==='一般'?'selected':'')+'>一般</option><option value="紧急" '+(rec&&rec.urgency==='紧急'?'selected':'')+'>紧急</option></select></div>'+
+    '<div class="np-field"><label class="np-req">期望到货日期</label><input type="date" id="so-r-ed" class="np-input" value="'+(rec?rec.expectDate:npDate('so-new',0))+'"></div>'+
+    '<div class="np-field"><label>缺件来源</label><select id="so-r-src" class="np-input"><option value="">请选择</option><option>咨询</option><option>交押金</option><option>事故车</option><option>意向车型</option><option>其他</option></select></div>'+
+    '<div class="np-field"><label>关联单号</label><input id="so-r-rel" class="np-input" value="'+(rec?rec.relateNo:'')+'" placeholder="选择销售单"><button class="lt-btn lt-btn-default" onclick="soOpenPickSale()">选择</button></div>'+
+    '<div class="np-field"><label>客户</label><input id="so-r-cust" class="np-input" value="'+(rec?rec.customer:'')+'" placeholder="可搜索选择"></div>'+
+    '<div class="np-field"><label>联系电话</label><input id="so-r-tel" class="np-input" value="'+(rec?'158****'+npRandStr('so-t',idx||0,1000,9999):'')+'"></div>'+
+    '<div class="np-field"><label>车牌号</label><input id="so-r-plate" class="np-input" value="'+(rec?rec.plate:'')+'"></div>'+
+    '<div class="np-field"><label>VIN</label><input id="so-r-vin" class="np-input" value="'+(rec?rec.vin:'')+'"></div>'+
+    '<div class="np-field" style="grid-column:1/3;"><label>备注(<20字)</label><input id="so-r-memo" class="np-input" value="'+(rec?npEscape(rec.memo):'')+'" maxlength="20"></div></div>'+
+    '<div class="lt-toolbar" style="margin:8px 0;"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-default" onclick="soAddPart()">添加配件</button><button class="lt-btn lt-btn-default" onclick="soDelPart()">删除配件</button><button class="lt-btn lt-btn-default" onclick="npToast(\'重置（演示）\')">重置</button></div></div>'+
+    '<div class="np-sub-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'选',w:40},{t:'配件编码'},{t:'配件名称'},{t:'单位'},{t:'缺件数量',w:90},{t:'库存数'},{t:'在途数'},{t:'单价(含税)',w:100},{t:'金额(含税)'}])+'</tr></thead><tbody id="so-parts"></tbody></table></div>'+
+    '<div class="np-total">预估金额合计(含税)：<span class="np-money" id="so-total">0.00</span></div>';
+  npOpenModal('缺件登记', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-default" onclick="npToast(\'已暂存（演示）\')">暂存</button><button class="lt-btn lt-btn-primary" onclick="soSave('+(idx>=0?idx:-1)+')">保存提交</button>', {width:960});
+  function renderLines(){ var tb=document.getElementById('so-parts'); if(!tb)return; tb.innerHTML=lines.map(function(l,i){return '<tr><td><input type="checkbox" class="so-part-chk"></td><td>'+l.pcode+'</td><td>'+npEscape(l.pname)+'</td><td>'+l.unit+'</td><td><input id="so-qty-'+i+'" class="np-input" style="width:70px;" value="'+l.qty+'" oninput="soAmt('+i+')"></td><td>'+l.stock+'</td><td>'+l.transit+'</td><td>'+l.price+'</td><td id="so-amt-'+i+'">'+l.amt+'</td></tr>';}).join('')||'<tr><td colspan="9" style="text-align:center;color:#999;">请添加配件</td></tr>'; }
+  window.soAddPart=function(){ lines.push({pcode:'P'+String(7000+lines.length),pname:'新配件'+(lines.length+1),unit:'个',qty:1,stock:npRandStr('so-ns',lines.length,0,20),transit:npRandStr('so-nt',lines.length,0,10),price:(npRandStr('so-np',lines.length,10,500)).toFixed(2),amt:''}); renderLines(); soRecalc(); };
+  window.soDelPart=function(){ var tb=document.getElementById('so-parts'); if(!tb)return; var kept=[]; tb.querySelectorAll('tr').forEach(function(tr,ii){ var chk=tr.querySelector('.so-part-chk'); if(chk&&!chk.checked){ kept.push(lines[ii]); } }); lines=kept; window.soLines=lines; renderLines(); soRecalc(); };
+  window.soAmt=function(i){ var v=parseFloat(document.getElementById('so-qty-'+i).value)||0; var amt=(parseFloat(lines[i].price)*v).toFixed(2); document.getElementById('so-amt-'+i).textContent=amt; lines[i].amt=amt; soRecalc(); };
+  function soRecalc(){ var t=0; lines.forEach(function(l,i){ t+=parseFloat(l.amt||(l.price*(parseFloat(l.qty)||0))); }); var el=document.getElementById('so-total'); if(el)el.textContent=t.toFixed(2); }
+  renderLines(); soRecalc();
+}
+function soRecalc(){ var lines=window.soLines||[]; var t=0; lines.forEach(function(l){ t+=parseFloat(l.amt||(parseFloat(l.price||0)*(parseFloat(l.qty)||0))); }); var el=document.getElementById('so-total'); if(el)el.textContent=t.toFixed(2); }
+function soAddPart(){ if(window.soAddPart)window.soAddPart(); }
+function soDelPart(){ if(window.soDelPart)window.soDelPart(); }
+function soOpenPickSale(){
+  var pools=[]; for(var i=0;i<8;i++){ pools.push({ saleNo:'XS'+String(7000+i), cust:'客户'+(i+1), plate:'沪A'+String(npRandStr('sop',i,10000,99999)), vin:'LV'+String(npRandStr('sopv',i,100000,999999)), saleDate:npDate('sopd',i), variety:npRandStr('sopv2',i,1,6), recv:npPick('sopr',i,['已收款','未收款']), out:npPick('sopo',i,['已出库','未出库']), submit:npDateTime('sops',i) }); }
+  var html='<div class="lt-filter-grid" style="grid-template-columns:repeat(3,1fr);">'+npFItem('销售单号','<input class="np-input" placeholder="输入">')+npFItem('客户','<input class="np-input" placeholder="输入">')+npFItem('车牌号','<input class="np-input" placeholder="输入">')+'<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="npToast(\'查询（演示）\')">查询</button></div></div><div class="lt-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'选',w:40},{t:'销售单号'},{t:'客户'},{t:'车牌号'},{t:'VIN'},{t:'销售日期'},{t:'合计品种'},{t:'收款登记'},{t:'出库状态'},{t:'提交时间'}])+'</tr></thead><tbody>'+pools.map(function(p,i){return '<tr><td><input type="radio" name="sop" value="'+p.saleNo+'" onchange="window.soPickSale=\''+p.saleNo+'\'"></td><td>'+p.saleNo+'</td><td>'+p.cust+'</td><td>'+p.plate+'</td><td>'+p.vin+'</td><td>'+p.saleDate+'</td><td>'+p.variety+'</td><td>'+p.recv+'</td><td>'+p.out+'</td><td>'+p.submit+'</td></tr>';}).join('')+'</tbody></table></div>';
+  npOpenModal('选择销货单', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="soConfirmSale()">确定</button>', {width:940});
+}
+function soConfirmSale(){ var v=window.soPickSale; if(!v){ npToast('请选择销售单'); return; } var e=document.getElementById('so-r-rel'); if(e)e.value=v; npCloseModal(); npToast('已关联 '+v); }
+function soSave(idx){ var urg=(document.getElementById('so-r-urg')||{}).value||'一般'; var ed=(document.getElementById('so-r-ed')||{}).value||npDate('so-sv',0); var lines=window.soLines||[]; if(lines.length===0){ npToast('请至少添加一个配件'); return; } if(idx>=0){ var r=NP['shortage-order'].allData[idx]; r.urgency=urg; r.expectDate=ed; r.lines=lines; r.status='审核中'; r.submitTime=npDateTime('so-sv2',idx); } else { NP['shortage-order'].allData.unshift({ idx:NP['shortage-order'].allData.length, orderNo:'QJ'+String(2026000+NP['shortage-order'].allData.length), storeName:'奕境经开店', storeCode:'S001', type:'手动登记', relateNo:window.soPickSale||'', urgency:urg, status:'未提交', customer:(document.getElementById('so-r-cust')||{}).value||'新客户', plate:(document.getElementById('so-r-plate')||{}).value||'沪A00000', vin:(document.getElementById('so-r-vin')||{}).value||'LV000000', registrant:'店员甲', submitTime:npDateTime('so-sv3',0), memo:(document.getElementById('so-r-memo')||{}).value||'', expectDate:ed, source:'其他', lines:lines }); }
+  npCloseModal(); NP['shortage-order'].query(); npToast('已保存提交'); }
+function soOpenDetail(idx){ soOpenAudit(idx,true); }
+function soOpenAudit(idx, view){ var r=NP['shortage-order'].allData[idx];
+  var html='<div class="np-collapse"><div class="np-sec"><div class="np-sec-h" onclick="npSec(this)">缺件单信息 ▾</div><div class="np-sec-b"><div class="np-form" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;">'+
+    '<div class="np-field"><label class="np-req">紧急度</label><input class="np-input" value="'+r.urgency+'" readonly></div>'+
+    '<div class="np-field"><label class="np-req">期望到货日期</label><input class="np-input" value="'+r.expectDate+'" readonly></div>'+
+    '<div class="np-field"><label>缺件来源</label><input class="np-input" value="'+r.source+'" readonly></div>'+
+    '<div class="np-field"><label>关联单号</label><input class="np-input" value="'+r.relateNo+'" readonly></div>'+
+    '<div class="np-field"><label>客户</label><input class="np-input" value="'+npEscape(r.customer)+'" readonly></div>'+
+    '<div class="np-field"><label>联系电话</label><input class="np-input" value="'+(r.customer?'158****1234':'')+'" readonly></div>'+
+    '<div class="np-field"><label>车牌号</label><input class="np-input" value="'+r.plate+'" readonly></div>'+
+    '<div class="np-field"><label>VIN</label><input class="np-input" value="'+r.vin+'" readonly></div></div>'+
+    '<div class="np-sub-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'配件编码'},{t:'配件名称'},{t:'单位'},{t:'缺件数量'},{t:'库存数'},{t:'在途数'},{t:'单价(含税)'},{t:'金额(含税)'}])+'</tr></thead><tbody>'+r.lines.map(function(l){return '<tr><td>'+l.pcode+'</td><td>'+npEscape(l.pname)+'</td><td>'+l.unit+'</td><td>'+l.qty+'</td><td>'+l.stock+'</td><td>'+l.transit+'</td><td>'+l.price+'</td><td>'+(l.amt||(l.price*l.qty).toFixed(2))+'</td></tr>';}).join('')+'</tbody></table></div>'+
+    '<div class="np-total">预估金额合计(含税)：<span class="np-money">¥'+(function(){var t=0;r.lines.forEach(function(l){t+=parseFloat(l.amt||(parseFloat(l.price)*l.qty));});return t.toFixed(2);})()+'</span></div></div></div>'+
+    '<div class="np-sec"><div class="np-sec-h" onclick="npSec(this)">审核记录 ▾</div><div class="np-sec-b"><table class="lt-table"><thead><tr>'+npTH([{t:'审批环节'},{t:'审批人'},{t:'提交时间'},{t:'评审结论'},{t:'评审意见'}])+'</tr></thead><tbody>'+(r.status==='未提交'?'<tr><td colspan="5" style="text-align:center;color:#999;">暂无审核记录</td></tr>':'<tr><td>门店审核</td><td>店长</td><td>'+r.submitTime+'</td><td>'+r.status+'</td><td>已核实</td></tr>')+'</tbody></table></div></div>'+
+    (view?'':'<div class="np-sec"><div class="np-sec-h" onclick="npSec(this)">审核结果 ▾</div><div class="np-sec-b"><label class="np-req">审核结果</label><div><label style="margin-right:16px;"><input type="radio" name="so-audit" value="通过"> 通过</label><label><input type="radio" name="so-audit" value="驳回"> 驳回</label></div><textarea id="so-audit-memo" class="np-input" rows="3" placeholder="审核意见" style="margin-top:8px;"></textarea></div></div>')+'</div>';
+  npOpenModal('缺件单详情', html, view?'<button class="lt-btn lt-btn-default" onclick="npCloseModal()">关闭</button>':'<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="soSubmitAudit('+idx+')">提交</button>', {width:920});
+}
+function soSubmitAudit(idx){ var res=document.querySelector('input[name="so-audit"]:checked'); if(!res){ npToast('请选择审核结果'); return; } var r=NP['shortage-order'].allData[idx]; r.status=res.value==='通过'?'审核通过':'审核不通过'; npCloseModal(); NP['shortage-order'].render(); npToast('审核'+res.value); }
+
+/* =========== 模块 9：缺件分配（PRD 5.5.2） =========== */
+NP['shortage-allocation'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
+(function(){
+  var a=[]; var urg=['一般','紧急']; var sources=['维修工单缺件','手动登记','预约缺件']; var stores=[['奕境经开店','S001'],['奕境滨江店','S002'],['奕境高新店','S003'],['奕境空港店','S004']];
+  for(var i=0;i<28;i++){ var n=stores[i%stores.length]; var ur=urg[i%2]; var q=ur==='紧急'?npRandStr('sa-q',i,5,30):npRandStr('sa-q2',i,1,20); var res=npRandStr('sa-r',i,0,Math.max(0,q-1)); a.push({ idx:i, pcode:'P'+String(8000+i), pname:'缺件配件'+String(i+1).padStart(3,'0'), storeName:n[0], storeCode:n[1], orderNo:'QJ'+String(2026000+i), urgency:ur, expectDate:npDate('sa-ed',i), qty:q, reserved:res, relateNo:'GD'+String(9000+i), customer:'李*'+npRandStr('sa-c',i,1,9), plate:'沪B'+String(npRandStr('sa-p',i,10000,99999)), vin:'LV'+String(npRandStr('sa-v',i,100000,999999)), registrant:npPick('sa-rg',i,['店员甲','店员乙']), regTime:npDateTime('sa-rt',i), source:sources[i%sources.length], goodStock:npRandStr('sa-g',i,q,q+40) }); }
+  NP['shortage-allocation'].allData=a;
+})();
+function initShortageAllocation(){
+  var K='shortage-allocation'; var st=NP[K];
+  var filter = npFItem('配件编码','<input type="text" id="sa-f-code" class="np-input" placeholder="请输入">') +
+    npFItem('配件名称','<input type="text" id="sa-f-name" class="np-input" placeholder="请输入">') +
+    npSelect('紧急度','<select id="sa-f-urg" class="np-input"><option value="">请选择</option><option>紧急</option><option>一般</option></select>') +
+    npFItem('登记人','<input type="text" id="sa-f-rg" class="np-input" placeholder="请输入">') +
+    npFItem('客户','<input type="text" id="sa-f-cust" class="np-input" placeholder="请输入">') +
+    npFItem('车牌号','<input type="text" id="sa-f-plate" class="np-input" placeholder="请输入">') +
+    npFItem('缺件单号','<input type="text" id="sa-f-order" class="np-input" placeholder="请输入">') +
+    npFItem('关联单号','<input type="text" id="sa-f-rel" class="np-input" placeholder="请输入">') +
+    npSelect('排序','<select id="sa-f-sort" class="np-input"><option value="">请选择</option><option>紧急度</option><option>登记日期</option><option>期望到货日期</option></select>');
+  var toolbar='';
+  var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'配件编码',f:function(r){return r.pcode;}},{t:'配件名称',f:function(r){return npEscape(r.pname);}},{t:'门店名称',f:function(r){return npEscape(r.storeName);}},{t:'门店编码',w:90,f:function(r){return r.storeCode;}},{t:'缺件单号',w:120,f:function(r){return '<a href="javascript:void(0)" class="lt-btn-link" onclick="soOpenDetail('+r.idx+')">'+r.orderNo+'</a>';}},{t:'紧急度',w:80,f:function(r){return r.urgency==='紧急'?'<span class="np-red">紧急</span>':'一般';}},{t:'期望到货日期',w:120,f:function(r){return r.expectDate;}},{t:'缺件数量',w:90,f:function(r){return r.qty;}},{t:'预留数量',w:90,f:function(r){return r.reserved;}},{t:'关联单号',f:function(r){return r.relateNo;}},{t:'客户',f:function(r){return npEscape(r.customer);}},{t:'车牌号',w:100,f:function(r){return r.plate;}},{t:'VIN码',w:120,f:function(r){return r.vin;}},{t:'登记人',f:function(r){return r.registrant;}},{t:'登记时间',w:150,f:function(r){return r.regTime;}},{t:'缺件来源',f:function(r){return r.source;}},{t:'操作',w:90,cls:'col-actions sticky',f:function(r){return '<a href="javascript:void(0)" class="lt-btn-link" onclick="saOpenAlloc('+r.idx+')">分配库存</a>';}}];
+  var root=document.getElementById('page-shortage-allocation');
+  root.innerHTML = npShell(K, {l2:'门店缺件管理',l3:'缺件分配'}, filter, toolbar, npTH(cols), 'sa-tbody', 'sa-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var c=(document.getElementById('sa-f-code')||{}).value||''; var n=(document.getElementById('sa-f-name')||{}).value||''; var u=(document.getElementById('sa-f-urg')||{}).value||''; var rg=(document.getElementById('sa-f-rg')||{}).value||''; var cust=(document.getElementById('sa-f-cust')||{}).value||''; var p=(document.getElementById('sa-f-plate')||{}).value||''; var o=(document.getElementById('sa-f-order')||{}).value||''; var rel=(document.getElementById('sa-f-rel')||{}).value||''; var sort=(document.getElementById('sa-f-sort')||{}).value||''; var f=st.allData.filter(function(r){return (c===''||r.pcode.indexOf(c)>=0)&&(n===''||r.pname.indexOf(n)>=0)&&(u===''||r.urgency===u)&&(rg===''||r.registrant.indexOf(rg)>=0)&&(cust===''||r.customer.indexOf(cust)>=0)&&(p===''||r.plate.indexOf(p)>=0)&&(o===''||r.orderNo.indexOf(o)>=0)&&(rel===''||r.relateNo.indexOf(rel)>=0);}); if(sort==='紧急度'){ f=f.slice().sort(function(a,b){ return (a.urgency===b.urgency)?(a.regTime<b.regTime?-1:1):(a.urgency==='紧急'?-1:1); }); } else if(sort==='登记日期'){ f=f.slice().sort(function(a,b){ return (a.regTime<b.regTime?-1:1); }); } else if(sort==='期望到货日期'){ f=f.slice().sort(function(a,b){ return (a.expectDate<b.expectDate?-1:1); }); } st.filtered=f; st.page=1; st.render(); };
+  st.reset=function(){ ['sa-f-code','sa-f-name','sa-f-rg','sa-f-cust','sa-f-plate','sa-f-order','sa-f-rel'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); ['sa-f-urg','sa-f-sort'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); st.filtered=st.allData.slice(); st.page=1; st.render(); };
+  st.render=function(){ npRenderTable(K,'sa-tbody','sa-pager',cols,st.filtered,st); };
+  st.filtered=st.allData.slice(); st.page=1; st.render();
+}
+function saOpenAlloc(idx){
+  var st=NP['shortage-allocation'];
+  var r=st.allData[idx];
+  // 同配件（pcode）的全部缺件单，支持一次性多单分配
+  var group=st.allData.filter(function(x){ return x.pcode===r.pcode; });
+  var rows=group.map(function(x){
+    var xi=x.idx;
+    return '<tr>'+
+      '<td><input type="checkbox" class="sa-chk" data-i="'+xi+'"'+(xi===idx?' checked':'')+'></td>'+
+      '<td><input id="sa-alloc-'+xi+'" class="np-input" style="width:90px;" oninput="saAllocIn('+xi+')" placeholder="≤'+(x.qty-x.reserved)+'"></td>'+
+      '<td><input id="sa-cancel-'+xi+'" class="np-input" style="width:90px;" oninput="saCancelIn('+xi+')" placeholder="≤'+x.reserved+'" '+(x.reserved===0?'disabled':'')+'></td>'+
+      '<td>'+x.orderNo+'</td>'+
+      '<td>'+x.expectDate+'</td>'+
+      '<td>'+x.qty+'</td>'+
+      '<td>'+x.reserved+'</td>'+
+      '<td>'+npEscape(x.registrant)+'</td>'+
+      '<td>'+x.regTime+'</td>'+
+    '</tr>';
+  }).join('');
+  var html='<div class="np-form" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 18px;margin-bottom:8px;">'+
+    '<div class="np-field"><label>配件编码</label><input class="np-input" value="'+r.pcode+'" readonly></div>'+
+    '<div class="np-field"><label>配件名称</label><input class="np-input" value="'+npEscape(r.pname)+'" readonly></div>'+
+    '<div class="np-field"><label>良品库存</label><input class="np-input" value="'+r.goodStock+'" readonly></div></div>'+
+    '<div class="np-field" style="margin-bottom:8px;"><label><input type="checkbox" id="sa-auto" onchange="saAutoFill()"> 自动填充分配数量（对勾选行）</label></div>'+
+    '<div class="np-sub-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'选',w:40},{t:'本次分配数',w:110},{t:'本次取消数',w:110},{t:'缺件单号'},{t:'期望到货日期'},{t:'缺件数量'},{t:'预留数量'},{t:'登记人'},{t:'登记时间'}])+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div class="np-hint">规则：本次取消≤已分配数量；本次分配≤未分配数量；良品库存−已预留合计≥本次分配合计−本次取消合计；同行不可既分配又取消。可勾选同一配件的多个缺件单一次性分配。</div>';
+  npOpenModal('缺件分配（'+group.length+' 张缺件单）', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="saSubmit()">确定</button>', {width:920});
+}
+function saAllocIn(idx){ var c=document.getElementById('sa-cancel-'+idx); if(c){ c.value=''; } document.querySelector('.sa-chk[data-i="'+idx+'"]').checked=true; }
+function saCancelIn(idx){ var a=document.getElementById('sa-alloc-'+idx); if(a){ a.value=''; a.disabled=true; } document.querySelector('.sa-chk[data-i="'+idx+'"]').checked=true; }
+function saSubmit(){
+  var st=NP['shortage-allocation'];
+  var chks=document.querySelectorAll('.sa-chk:checked');
+  if(chks.length===0){ npToast('请至少勾选一张缺件单'); return; }
+  var rows=[], totalAlloc=0, totalCancel=0, partGood=0, usedReserved=0;
+  for(var i=0;i<chks.length;i++){
+    var xi=parseInt(chks[i].getAttribute('data-i'),10);
+    var r=st.allData[xi];
+    if(i===0) partGood=r.goodStock;
+    usedReserved += r.reserved;
+    var alloc=parseFloat((document.getElementById('sa-alloc-'+xi)||{}).value)||0;
+    var cancel=parseFloat((document.getElementById('sa-cancel-'+xi)||{}).value)||0;
+    if(alloc>0&&cancel>0){ npToast('缺件单 '+r.orderNo+'：同一行不可既分配又取消'); return; }
+    if(cancel>r.reserved){ npToast('缺件单 '+r.orderNo+'：本次取消数≤已分配数量'); return; }
+    if(alloc>(r.qty-r.reserved)){ npToast('缺件单 '+r.orderNo+'：本次分配数≤未分配数量'); return; }
+    totalAlloc+=alloc; totalCancel+=cancel; rows.push({xi:xi,alloc:alloc,cancel:cancel});
+  }
+  if((partGood-usedReserved) < (totalAlloc-totalCancel)){ npToast('良品库存−已预留合计不足'); return; }
+  for(var j=0;j<rows.length;j++){ var rr=st.allData[rows[j].xi]; rr.reserved=rr.reserved+rows[j].alloc-rows[j].cancel; }
+  npCloseModal(); st.render(); npToast('分配成功：+'+(totalAlloc-totalCancel));
+}
+function saAutoFill(){
+  var on=document.getElementById('sa-auto') && document.getElementById('sa-auto').checked;
+  var chks=document.querySelectorAll('.sa-chk:checked');
+  for(var i=0;i<chks.length;i++){
+    var xi=parseInt(chks[i].getAttribute('data-i'),10);
+    var r=NP['shortage-allocation'].allData[xi];
+    var a=document.getElementById('sa-alloc-'+xi); var c=document.getElementById('sa-cancel-'+xi);
+    if(on){ if(a){ a.value=r.qty-r.reserved; } if(c){ c.value=''; } } else { if(a){ a.value=''; } }
+  }
+}
+
+/* =========== 模块 10：缺件分配历史（PRD 5.5.3） =========== */
+NP['shortage-allocation-history'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
+(function(){
+  var a=[]; var urg=['一般','紧急']; var sources=['维修工单缺件','手动登记','预约缺件']; var stores=[['奕境经开店','S001'],['奕境滨江店','S002'],['奕境高新店','S003'],['奕境空港店','S004']]; var whs=[['中心仓','A01'],['门店仓','B02'],['前置仓','C03']];
+  for(var i=0;i<34;i++){ var n=stores[i%stores.length]; var w=whs[i%whs.length]; var ur=urg[i%2]; a.push({ idx:i, pcode:'P'+String(8000+i), pname:'缺件配件'+String(i+1).padStart(3,'0'), storeName:n[0], storeCode:n[1], orderNo:'QJ'+String(2026000+i), urgency:ur, expectDate:npDate('sah-ed',i), qty:npRandStr('sah-q',i,1,20), reserved:npRandStr('sah-r',i,0,15), whName:w[0], whCode:w[1], allocator:npPick('sah-al',i,['仓管甲','仓管乙','系统']), allocTime:npDateTime('sah-at',i), relateNo:'GD'+String(9000+i), customer:'赵*'+npRandStr('sah-c',i,1,9), plate:'沪C'+String(npRandStr('sah-p',i,10000,99999)), vin:'LV'+String(npRandStr('sah-v',i,100000,999999)), regPerson:npPick('sah-rp',i,['店员甲','店员乙']), regDate:npDate('sah-rd',i), regSource:sources[i%sources.length] }); }
+  NP['shortage-allocation-history'].allData=a;
+})();
+function initShortageAllocationHistory(){
+  var K='shortage-allocation-history'; var st=NP[K];
+  var sahDateRangeHtml = '<div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">分配日期</span>'
+    + '<input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="sahApplyFilter">'
+    + '<div class="lt-date-range-drop">'
+    + '<input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="sah-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')">'
+    + '<span>—</span>'
+    + '<input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="sah-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')">'
+    + '</div></div></div>';
+  var filter = npFItem('配件编码','<input type="text" id="sah-f-code" class="np-input" placeholder="请输入">') +
+    npFItem('配件名称','<input type="text" id="sah-f-name" class="np-input" placeholder="请输入">') +
+    npSelect('紧急度','<select id="sah-f-urg" class="np-input"><option value="">请选择</option><option>紧急</option><option>一般</option></select>') +
+    npFItem('登记人','<input type="text" id="sah-f-rg" class="np-input" placeholder="请输入">') +
+    npFItem('客户','<input type="text" id="sah-f-cust" class="np-input" placeholder="请输入">') +
+    npFItem('车牌号','<input type="text" id="sah-f-plate" class="np-input" placeholder="请输入">') +
+    npFItem('缺件单号','<input type="text" id="sah-f-order" class="np-input" placeholder="请输入">') +
+    npFItem('关联单号','<input type="text" id="sah-f-rel" class="np-input" placeholder="请输入">') +
+    sahDateRangeHtml;
+  var toolbar='';
+  var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'配件编码',f:function(r){return r.pcode;}},{t:'配件名称',f:function(r){return npEscape(r.pname);}},{t:'门店名称',f:function(r){return npEscape(r.storeName);}},{t:'门店编码',w:90,f:function(r){return r.storeCode;}},{t:'缺件单号',w:120,f:function(r){return r.orderNo;}},{t:'紧急度',w:80,f:function(r){return r.urgency==='紧急'?'<span class="np-red">紧急</span>':'一般';}},{t:'期望到货日期',w:120,f:function(r){return r.expectDate;}},{t:'缺件数量',w:90,f:function(r){return r.qty;}},{t:'预留数量',w:90,f:function(r){return r.reserved;}},{t:'仓库名称',w:90,f:function(r){return r.whName;}},{t:'仓位编码',w:90,f:function(r){return r.whCode;}},{t:'分配人',f:function(r){return r.allocator;}},{t:'分配时间',w:150,f:function(r){return r.allocTime;}},{t:'关联单号',f:function(r){return r.relateNo;}},{t:'客户',f:function(r){return npEscape(r.customer);}},{t:'车牌号',w:100,f:function(r){return r.plate;}},{t:'VIN码',w:120,f:function(r){return r.vin;}},{t:'登记人员',f:function(r){return r.regPerson;}},{t:'登记日期',w:110,f:function(r){return r.regDate;}},{t:'登记来源',f:function(r){return r.regSource;}}];
+  var root=document.getElementById('page-shortage-allocation-history');
+  root.innerHTML = npShell(K, {l2:'门店缺件管理',l3:'缺件分配历史'}, filter, toolbar, npTH(cols), 'sah-tbody', 'sah-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){ var c=(document.getElementById('sah-f-code')||{}).value||''; var n=(document.getElementById('sah-f-name')||{}).value||''; var u=(document.getElementById('sah-f-urg')||{}).value||''; var rg=(document.getElementById('sah-f-rg')||{}).value||''; var cust=(document.getElementById('sah-f-cust')||{}).value||''; var p=(document.getElementById('sah-f-plate')||{}).value||''; var o=(document.getElementById('sah-f-order')||{}).value||''; var rel=(document.getElementById('sah-f-rel')||{}).value||''; var ds=(document.getElementById('sah-flt-date-start')||{}).value||''; var de=(document.getElementById('sah-flt-date-end')||{}).value||''; st.filtered=st.allData.filter(function(r){return (c===''||r.pcode.indexOf(c)>=0)&&(n===''||r.pname.indexOf(n)>=0)&&(u===''||r.urgency===u)&&(rg===''||r.allocator.indexOf(rg)>=0)&&(cust===''||r.customer.indexOf(cust)>=0)&&(p===''||r.plate.indexOf(p)>=0)&&(o===''||r.orderNo.indexOf(o)>=0)&&(rel===''||r.relateNo.indexOf(rel)>=0)&&(ds===''||(r.allocTime||'').slice(0,10)>=ds)&&(de===''||(r.allocTime||'').slice(0,10)<=de);}); st.page=1; st.render(); };
+  st.reset=function(){ ['sah-f-code','sah-f-name','sah-f-rg','sah-f-cust','sah-f-plate','sah-f-order','sah-f-rel'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';}); var u=document.getElementById('sah-f-urg'); if(u)u.value=''; var ds=document.getElementById('sah-flt-date-start'); if(ds)ds.value=''; var de=document.getElementById('sah-flt-date-end'); if(de)de.value=''; var dtx=document.querySelector('#page-shortage-allocation-history .lt-date-range-text'); if(dtx)dtx.value=''; st.filtered=st.allData.slice(); st.page=1; st.render(); };
+  st.render=function(){ npRenderTable(K,'sah-tbody','sah-pager',cols,st.filtered,st); };
+  st.filtered=st.allData.slice(); st.page=1; st.render();
+}
+
+function sahApplyFilter(){ var st=NP['shortage-allocation-history']; if(st&&st.query){ st.query(); } }
+
+/* =========== 通用提示 =========== */
+function npToast(msg){ var t=document.getElementById('np-toast'); if(!t){ t=document.createElement('div'); t.id='np-toast'; t.className='np-toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(window.npToastTimer); window.npToastTimer=setTimeout(function(){ t.classList.remove('show'); },1800); }
+
+/* =========== 通用模糊下拉（combobox）助手：静态页面复用 =========== */
+/* 按最近 .lt-input-wrap.combobox 定位；模糊用 includes（大小写不敏感）；选中后调 wrap 上 data-apply 指定的全局过滤函数 */
+function gtComboboxFilter(input) {
+  var w = input.closest('.lt-input-wrap.combobox'); if (!w) return;
+  var l = w.querySelector('.lt-datalist'); if (!l) return;
+  var v = input.value.toLowerCase();
+  l.querySelectorAll('li').forEach(function (li) { li.classList.toggle('hidden', !li.textContent.toLowerCase().includes(v)); });
+}
+function gtComboboxShow(input) {
+  var w = input.closest('.lt-input-wrap.combobox'); if (!w) return;
+  var l = w.querySelector('.lt-datalist'); if (l) l.classList.add('show');
+}
+function gtComboboxToggle(arrow) {
+  var w = arrow.closest('.lt-input-wrap.combobox'); if (!w) return;
+  var l = w.querySelector('.lt-datalist'); if (!l) return;
+  l.classList.toggle('show');
+  if (l.classList.contains('show')) { var i = w.querySelector('input'); if (i) i.focus(); }
+}
+function gtComboboxSelect(li) {
+  var w = li.closest('.lt-input-wrap.combobox'); if (!w) return;
+  var inp = w.querySelector('input'); var l = w.querySelector('.lt-datalist');
+  if (inp) inp.value = li.textContent.trim();
+  if (l) { l.classList.remove('show'); l.querySelectorAll('li').forEach(function (x) { x.classList.remove('hidden'); }); }
+  var apply = w.getAttribute('data-apply'); if (apply && window[apply]) window[apply]();
+}
+

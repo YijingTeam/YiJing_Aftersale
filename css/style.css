@@ -183,6 +183,15 @@
       font-size: 13px;
     }
 
+    /* 有子菜单的条目：文字左、箭头右 */
+    .submenu-item.has-submenu {
+      display: flex;
+      align-items: center;
+    }
+    .submenu-item.has-submenu .nav-arrow {
+      margin-left: auto;
+    }
+
     /* 当前页面高亮 */
     .nav-item.current > .nav-link {
       background: var(--sidebar-hover);
@@ -553,6 +562,7 @@
       appearance: none;
       -webkit-appearance: none;
     }
+    .lt-input-wrap input[readonly] { background:#f5f7fa; color:#999; cursor:not-allowed; }
     .lt-input-wrap:focus-within { border-color: #861B2F; }
     .lt-input-wrap::after {
       content: '';
@@ -812,7 +822,17 @@
     .lt-pager .pager-goto input { width: 40px; height: 28px; border: 1px solid #e0e0e0; border-radius: 4px; text-align: center; font-size: 12px; color: #333; outline: none; }
     .lt-pager .pager-goto input:focus { border-color: #861B2F; }
     .lt-pager .pager-size { height: 28px; border: 1px solid #e0e0e0; border-radius: 4px; padding: 0 6px; font-size: 12px; color: #666; background: #fff; outline: none; cursor: pointer; }
+    /* 账户余额：列表区/明细区作为 flex 列，翻页器才能被钉在底部（对齐全局 .lt-list-area 行为） */
+    #ab-list-area, #ab-detail-area { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    #ab-list-area[style*="display:none"], #ab-detail-area[style*="display:none"] { display: none; }
     .lt-pager .pager-total { color: #999; }
+
+    /* 通用：操作列固定右侧（np 新页面共用；宽度由各页 cols.w / 内联提供） */
+    .lt-table th.col-actions,
+    .lt-table td.col-actions { position: sticky; right: 0; z-index: 2; background: #fff; border-left: 1px solid #e8e8e8; }
+    .lt-table thead th.col-actions { position: sticky; top: 0; right: 0; z-index: 6; background: #f0f0f0; }
+    .lt-table tbody tr:nth-child(even) td.col-actions { background: #fafafa; }
+    .lt-table tbody tr:hover td.col-actions { background: #fdf5f6; }
 
     /* 下拉模糊搜索 combobox */
     .lt-datalist {
@@ -902,6 +922,39 @@
     #page-parts-inventory-ledger .lt-table th.col-stock, #page-parts-inventory-ledger .lt-table td.col-stock { min-width: 90px; }
     #page-parts-inventory-ledger .lt-table th.col-in-count, #page-parts-inventory-ledger .lt-table td.col-in-count { min-width: 80px; }
     #page-parts-inventory-ledger .lt-table th.col-out-count, #page-parts-inventory-ledger .lt-table td.col-out-count { min-width: 80px; }
+    /* 出入库配件查询冻结列（序号 + 配件编码 + 配件名称） */
+    #page-parts-io-query .lt-table th.col-sn, #page-parts-io-query .lt-table td.col-sn { left: 0; width: 40px; min-width: 40px; max-width: 40px; overflow: hidden; }
+    #page-parts-io-query .lt-table th.col-code, #page-parts-io-query .lt-table td.col-code { left: 40px; width: 100px; min-width: 100px; max-width: 100px; overflow: hidden; }
+    #page-parts-io-query .lt-table th.col-name, #page-parts-io-query .lt-table td.col-name { left: 140px; width: 120px; min-width: 120px; max-width: 120px; overflow: hidden; }
+    /* 出入库配件查询非冻结列 */
+    #page-parts-io-query .lt-table th.col-orderno, #page-parts-io-query .lt-table td.col-orderno { min-width: 140px; }
+    #page-parts-io-query .lt-table th.col-type, #page-parts-io-query .lt-table td.col-type { min-width: 120px; }
+    #page-parts-io-query .lt-table th.col-sourceno, #page-parts-io-query .lt-table td.col-sourceno { min-width: 130px; }
+    #page-parts-io-query .lt-table th.col-plate, #page-parts-io-query .lt-table td.col-plate { min-width: 100px; }
+    #page-parts-io-query .lt-table th.col-unit, #page-parts-io-query .lt-table td.col-unit { min-width: 110px; }
+    #page-parts-io-query .lt-table th.col-variety, #page-parts-io-query .lt-table td.col-variety { min-width: 80px; }
+    #page-parts-io-query .lt-table th.col-qty, #page-parts-io-query .lt-table td.col-qty { min-width: 80px; }
+    #page-parts-io-query .lt-table th.col-amount, #page-parts-io-query .lt-table td.col-amount { min-width: 120px; }
+    #page-parts-io-query .lt-table th.col-person, #page-parts-io-query .lt-table td.col-person { min-width: 90px; }
+    #page-parts-io-query .lt-table th.col-time, #page-parts-io-query .lt-table td.col-time { min-width: 150px; }
+    #page-parts-io-query .lt-table th.col-storename, #page-parts-io-query .lt-table td.col-storename { min-width: 120px; }
+    #page-parts-io-query .lt-table th.col-storecode, #page-parts-io-query .lt-table td.col-storecode { min-width: 100px; }
+    #page-parts-io-query .lt-table th.col-unit-price, #page-parts-io-query .lt-table td.col-unit-price { min-width: 100px; }
+    #page-parts-io-query .lt-table th.col-uom, #page-parts-io-query .lt-table td.col-uom { min-width: 80px; }
+
+    /* 出入库单据查询 列宽与冻结列 */
+    #page-parts-io-doc-query .lt-table th.col-sn, #page-parts-io-doc-query .lt-table td.col-sn { left: 0; width: 40px; min-width: 40px; max-width: 40px; overflow: hidden; }
+    #page-parts-io-doc-query .lt-table th.col-orderno, #page-parts-io-doc-query .lt-table td.col-orderno { left: 40px; width: 160px; min-width: 160px; max-width: 160px; overflow: hidden; }
+    #page-parts-io-doc-query .lt-table th.col-type, #page-parts-io-doc-query .lt-table td.col-type { min-width: 120px; }
+    #page-parts-io-doc-query .lt-table th.col-sourceno, #page-parts-io-doc-query .lt-table td.col-sourceno { min-width: 130px; }
+    #page-parts-io-doc-query .lt-table th.col-unit, #page-parts-io-doc-query .lt-table td.col-unit { min-width: 110px; }
+    #page-parts-io-doc-query .lt-table th.col-variety, #page-parts-io-doc-query .lt-table td.col-variety { min-width: 80px; }
+    #page-parts-io-doc-query .lt-table th.col-qty, #page-parts-io-doc-query .lt-table td.col-qty { min-width: 80px; }
+    #page-parts-io-doc-query .lt-table th.col-amount, #page-parts-io-doc-query .lt-table td.col-amount { min-width: 120px; }
+    #page-parts-io-doc-query .lt-table th.col-person, #page-parts-io-doc-query .lt-table td.col-person { min-width: 90px; }
+    #page-parts-io-doc-query .lt-table th.col-time, #page-parts-io-doc-query .lt-table td.col-time { min-width: 150px; }
+    #page-parts-io-doc-query .lt-table th.col-storename, #page-parts-io-doc-query .lt-table td.col-storename { min-width: 120px; }
+    #page-parts-io-doc-query .lt-table th.col-storecode, #page-parts-io-doc-query .lt-table td.col-storecode { min-width: 100px; }
     /* 维修领用明细冻结列 */
     #page-repair-requisition-detail .lt-table th.col-seq, #page-repair-requisition-detail .lt-table td.col-seq { left: 0; width: 40px; min-width: 40px; max-width: 40px; overflow: hidden; }
     #page-repair-requisition-detail .lt-table th.col-order-no, #page-repair-requisition-detail .lt-table td.col-order-no { left: 40px; width: 160px; min-width: 160px; max-width: 160px; overflow: hidden; }
@@ -1681,6 +1734,16 @@
     .pm-form-item.required > label::before { content:'*'; color:#861B2F; margin-right:2px; }
     .lt-input-wrap.required .lt-filter-prefix::before { content:'*'; color:#861B2F; margin-right:2px; }
     .pm-readonly { background:#f5f7fa !important; color:#999 !important; cursor:not-allowed; }
+    /* 配件采购：永远只读字段（采购方 / 收货三字段，带 js-lock）与所有只读 input 统一灰显 */
+    .pm-form-item input[readonly],
+    .pm-form-item textarea[readonly],
+    .pm-form-item select[readonly],
+    .pm-form-item input.js-lock,
+    .pm-form-item textarea.js-lock {
+      background:#f5f7fa; color:#999; cursor:not-allowed;
+    }
+    /* 配件明细工具栏：display:flex 由 class 提供，避免被 ppSetPanelReadonly 的 style.display='' 抹掉，使 gap 真正生效；间距对齐列表工具栏 8px */
+    .pp-parts-toolbar { display:flex; align-items:center; gap:8px; float:right; }
     .pm-checkbox-row { flex-direction:row !important; gap:20px !important; align-items:center; grid-column:1/-1; padding-top:4px; }
     .pm-checkbox-row label { font-size:13px; color:#333; display:flex; align-items:center; gap:4px; cursor:pointer; }
     .pm-tip-warn { background:#fff7e6; border:1px solid #ffd591; border-radius:4px; padding:8px 14px; font-size:12px; color:#d46b08; margin-bottom:14px; }
@@ -1732,10 +1795,19 @@
     #page-supplier-manage .lt-table tbody tr:nth-child(even) td.col-actions { background:#fafafa; }
     #page-supplier-manage .lt-table tbody tr:hover td.col-actions { background:#fdf5f6; }
     /* ===== 配件采购 冻结列 ===== */
-    #page-parts-procurement .lt-table th.col-seq, #page-parts-procurement .lt-table td.col-seq { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
+    #page-parts-procurement .lt-table th.col-check, #page-parts-procurement .lt-table td.col-check { position:sticky; left:0; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; text-align:center; }
+    #page-parts-procurement .lt-table thead th.col-check { z-index:4; }
+    #page-parts-procurement .lt-table th.col-seq, #page-parts-procurement .lt-table td.col-seq { position:sticky; left:40px; z-index:2; width:40px; min-width:40px; max-width:40px; overflow:hidden; }
     #page-parts-procurement .lt-table thead th.col-seq { z-index:4; }
-    #page-parts-procurement .lt-table th.col-po-no, #page-parts-procurement .lt-table td.col-po-no { position:sticky; left:40px; z-index:2; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
+    #page-parts-procurement .lt-table th.col-po-no, #page-parts-procurement .lt-table td.col-po-no { position:sticky; left:80px; z-index:2; width:160px; min-width:160px; max-width:160px; overflow:hidden; }
     #page-parts-procurement .lt-table thead th.col-po-no { z-index:4; }
+    /* 门店视角隐藏勾选列时，回收 sticky 偏移，消除左侧 40px 死位 */
+    #page-parts-procurement.pp-hide-check .lt-table th.col-check,
+    #page-parts-procurement.pp-hide-check .lt-table td.col-check { display:none; }
+    #page-parts-procurement.pp-hide-check .lt-table th.col-seq,
+    #page-parts-procurement.pp-hide-check .lt-table td.col-seq { left:0; }
+    #page-parts-procurement.pp-hide-check .lt-table th.col-po-no,
+    #page-parts-procurement.pp-hide-check .lt-table td.col-po-no { left:40px; }
     #page-parts-procurement .lt-table th.col-order-source, #page-parts-procurement .lt-table td.col-order-source { width:110px; min-width:110px; max-width:110px; }
     #page-parts-procurement .lt-table td.col-actions { position:sticky; right:0; z-index:2; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#fff; }
     #page-parts-procurement .lt-table thead th.col-actions { position:sticky; top:0; right:0; z-index:5; width:130px; min-width:130px; max-width:130px; border-left:1px solid #ccc; background:#f0f0f0; }
@@ -1874,4 +1946,227 @@
 #page-repair-stats-query .rs-note { font-size:11px; color:#888; line-height:1.7; margin:12px 2px 0; }
 #page-repair-stats-query .rs-pager { display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:10px 2px; font-size:12px; color:#555; flex-wrap:wrap; flex-shrink:0; }
 #page-repair-stats-query .rs-pager .pg { width:26px; height:24px; border:1px solid #ddd; border-radius:4px; background:#fff; cursor:pointer; font-size:12px; }
+
+/* ============================================================
+   配件管理新增 10 菜单 · 组件样式（.np-* 体系 + 补充 .lt-*）
+   ============================================================ */
+
+/* 标签 / 徽标 / 链接（.lt-* 补充） */
+.lt-tag { display:inline-flex; align-items:center; gap:3px; background:#fbeaee; color:#861B2F; border:1px solid #f1c9d2; border-radius:3px; padding:1px 6px; font-size:12px; line-height:1.6; }
+.lt-tag a { color:#861B2F; cursor:pointer; text-decoration:none; font-weight:700; }
+.lt-tag a:hover { color:#c0392b; }
+.lt-badge { display:inline-block; padding:1px 9px; border-radius:11px; font-size:12px; line-height:1.7; }
+.lt-badge.ok { background:#e8f6ee; color:#27ae60; }
+.lt-badge.off { background:#fdecea; color:#c0392b; }
+.lt-badge.warn { background:#fff4e0; color:#d68910; }
+.lt-link { color:#861B2F; cursor:pointer; text-decoration:none; font-size:13px; }
+.lt-link:hover { text-decoration:underline; }
+.lt-link.np-red { color:#c0392b; }
+
+/* 通用表单 */
+.np-form { margin-bottom:6px; }
+.np-field { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.np-field > label { width:90px; flex-shrink:0; color:#555; font-size:13px; text-align:right; }
+.np-field > label.np-req { color:#333; font-weight:600; }
+.np-field > label.np-req::before { content:'*'; color:#e74c3c; margin-right:2px; }
+.np-input { width:100%; height:34px; padding:0 10px; border:1px solid #ddd; border-radius:4px; font-size:13px; color:#333; background:#fff; outline:none; }
+.np-input:focus { border-color:#861B2F; }
+textarea.np-input { height:auto; padding:8px 10px; line-height:1.6; resize:vertical; }
+/* 筛选区里 .lt-input-wrap 已带边框，去掉 .np-input 多余边框（防双线） */
+.lt-input-wrap .np-input { border:none; background:transparent; padding:0 6px; }
+
+/* 金额 / 红绿强调 */
+.np-money { color:#c0392b; font-weight:600; }
+.np-red { color:#c0392b; }
+.np-green { color:#27ae60; }
+.lt-red { color:#c0392b; font-weight:600; }
+.lt-green { color:#27ae60; font-weight:600; }
+
+/* 行内控件（表格内 select/input） */
+.np-inline { height:30px; border:1px solid #ddd; border-radius:4px; padding:0 8px; font-size:13px; color:#333; background:#fff; outline:none; }
+.np-inline:focus { border-color:#861B2F; }
+
+/* 标签输入（外采件品牌） */
+.np-tag-input { min-height:34px; border:1px solid #ddd; border-radius:4px; padding:4px 6px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; background:#fff; }
+.np-tag-inp { border:none; outline:none; flex:1; min-width:80px; font-size:13px; height:26px; }
+
+/* 子表（弹窗内配件清单等） */
+.np-sub-table-wrap, .np-subtable-wrap { margin:6px 0 10px; border:1px solid #eee; border-radius:6px; overflow:auto; max-height:300px; }
+.np-sub-table-wrap .lt-table, .np-subtable-wrap .lt-table { margin:0; }
+
+/* 折叠区块（详情/审核） */
+.np-collapse { display:flex; flex-direction:column; gap:10px; }
+.np-sec { border:1px solid #eee; border-radius:6px; overflow:hidden; }
+.np-sec-h { background:#fafafa; padding:9px 12px; font-size:13px; font-weight:600; color:#333; cursor:pointer; user-select:none; }
+.np-sec-b { padding:10px 12px; }
+
+/* 步骤条（退货/缺件流程） */
+.np-step-bar { display:flex; gap:10px; margin-bottom:12px; }
+.np-step-bar > span { padding:5px 14px; border-radius:14px; font-size:12.5px; }
+.np-step-cur { background:#861B2F; color:#fff; }
+.np-step-next { background:#eee; color:#999; }
+.np-step-done { background:#e8f6ee; color:#27ae60; }
+
+/* 时间标签（集单时间） */
+.np-times { display:flex; flex-wrap:wrap; gap:6px; align-items:center; min-height:30px; }
+.np-time-chip { display:inline-flex; align-items:center; gap:4px; background:#fbeaee; color:#861B2F; border:1px solid #f1c9d2; border-radius:12px; padding:2px 8px; font-size:12px; }
+.np-time-chip a { color:#861B2F; cursor:pointer; font-weight:700; }
+
+/* 集单日历 */
+.np-cal-grid { display:flex; flex-wrap:wrap; gap:10px; max-height:260px; overflow:auto; }
+.np-cal-month { border:1px solid #eee; border-radius:6px; padding:6px 8px; width:150px; flex-shrink:0; }
+.np-cal-mtitle { font-size:12px; color:#333; font-weight:600; margin-bottom:6px; text-align:center; }
+.np-cal-days { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.np-cal-day { display:flex; align-items:center; justify-content:center; height:24px; font-size:11px; border-radius:4px; cursor:pointer; color:#555; }
+.np-cal-day:hover { background:#fbeaee; }
+.np-cal-sel { background:#861B2F; color:#fff; }
+
+/* Tab 切换（账户余额） */
+.np-tabs { display:flex; gap:0; margin-bottom:10px; }
+.np-tab { padding:7px 16px; font-size:13px; color:#666; cursor:pointer; border:1px solid #e0e0e0; border-bottom:none; background:#fafafa; }
+.np-tab:first-child { border-radius:4px 0 0 0; }
+.np-tab:last-child { border-radius:0 4px 0 0; }
+.np-tab.active { color:#861B2F; font-weight:600; border-color:#861B2F; background:#fff; }
+.np-info-banner { background:#f0f7ff; color:#2c6cb0; border:1px solid #d6e8ff; padding:6px 10px; border-radius:4px; font-size:12px; margin-bottom:10px; }
+
+/* 选择弹窗（右栏已选列表） */
+.np-picker { display:flex; gap:12px; }
+.np-picker-left { flex:1; min-width:0; }
+.np-picker-right { width:200px; flex-shrink:0; border-left:1px solid #eee; padding-left:12px; }
+.np-picker-right-head { font-size:13px; color:#333; margin-bottom:8px; }
+.np-picked-list { display:flex; flex-direction:column; gap:6px; max-height:320px; overflow:auto; }
+.np-picked-list .np-picked-item { display:flex; align-items:center; justify-content:space-between; gap:6px; background:#fafafa; border:1px solid #eee; border-radius:4px; padding:5px 8px; font-size:12px; color:#444; }
+.np-picked-list .np-picked-item a { color:#c0392b; cursor:pointer; }
+.np-picker-table-wrap { max-height:300px; overflow:auto; border:1px solid #eee; border-radius:6px; margin-top:6px; }
+
+/* 合计条 */
+.np-total { text-align:right; margin-top:10px; font-size:13px; color:#555; }
+.np-total .np-money { font-size:15px; }
+
+/* 上传 / 提示 */
+.np-upload { margin:8px 0; font-size:13px; color:#555; }
+.np-hint { color:#999; font-size:12px; margin-top:4px; }
+
+/* 弹窗底部按钮条（npOpenModal 生成 .modal-footer，原样式缺失，此处补齐） */
+.modal-footer { display:flex; justify-content:flex-end; gap:8px; padding:12px 18px; border-top:1px solid #eee; background:#fafafa; border-radius:0 0 8px 8px; flex-shrink:0; }
+
+/* 轻提示 toast */
+.np-toast { position:fixed; left:50%; top:22px; transform:translateX(-50%) translateY(-8px); background:rgba(35,35,35,0.92); color:#fff; padding:9px 16px; border-radius:6px; font-size:13px; z-index:10001; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; max-width:80vw; box-shadow:0 4px 16px rgba(0,0,0,.2); }
+.np-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 #page-repair-stats-query .rs-pager .pg.cur { background:#861B2F; color:#fff; border-color:#861B2F; }
+
+/* ============ 归档分类配置：树形 ============ */
+.arc-tree { padding:4px 0; font-size:13px; }
+.arc-node { }
+.arc-row { display:flex; align-items:center; gap:6px; padding:7px 12px 7px calc(12px + (var(--lv) - 1) * 22px); border-bottom:1px solid #f0f0f0; }
+.arc-row:hover { background:#fdf5f6; }
+.arc-toggle { width:16px; text-align:center; cursor:pointer; color:#861B2F; user-select:none; flex-shrink:0; font-size:12px; }
+.arc-toggle.empty { cursor:default; }
+.arc-name { font-weight:500; color:#333; }
+.arc-remark { color:#999; font-size:12px; margin-left:8px; }
+.arc-actions { margin-left:auto; display:none; gap:10px; padding-left:16px; }
+.arc-row:hover .arc-actions { display:inline-flex; }
+.arc-actions .arc-disabled { color:#bbb; cursor:not-allowed; }
+.arc-empty { padding:40px; text-align:center; color:#999; }
+.arc-parent-path { color:#555; font-size:13px; }
+
+/* ============ 归档分类配置2：三列联列（仿故障树） ============ */
+.ft2-topbar { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid #eee; background:#fff; flex-shrink:0; }
+.ft2-breadcrumb { font-size:13px; color:#666; max-width:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ft2-topbar-right { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.ft2-search-input { width:180px; height:30px; border:1px solid #ddd; border-radius:4px; padding:0 10px; font-size:12px; outline:none; transition:border-color .2s; }
+.ft2-search-input:focus { border-color:#861B2F; }
+.ft2-search-input::placeholder { color:#bbb; }
+
+/* 搜索结果栏 */
+.ft2-result-bar { display:flex; align-items:center; gap:10px; padding:8px 16px; background:#fffbeb; border-bottom:1px solid #f0e6c8; flex-shrink:0; }
+.ft2-result-count { font-size:13px; color:#d97706; font-weight:500; white-space:nowrap; }
+.ft2-result-tags { display:flex; flex-wrap:wrap; gap:4px; flex:1; overflow:hidden; }
+.ft2-tag { display:inline-block; font-size:11px; padding:1px 8px; background:#fef3c7; color:#92400e; border-radius:10px; white-space:nowrap; }
+
+/* 三列联列容器 */
+.ft2-cascade { display:flex; gap:1px; background:#e0e0e0; flex:1; min-height:0; }
+.ft2-col { flex:1; min-width:0; background:#fff; display:flex; flex-direction:column; }
+.ft2-col-header { display:flex; align-items:center; gap:6px; padding:10px 12px; border-bottom:1px solid #eee; background:#fafafa; flex-shrink:0; }
+.ft2-col-title { font-weight:600; font-size:13px; color:#333; }
+.ft2-col-count { font-size:12px; color:#999; }
+.ft2-col-add { font-size:12px; color:#861B2F; cursor:pointer; margin-left:auto; white-space:nowrap; }
+.ft2-col-add:hover { text-decoration:underline; }
+.ft2-col-body { flex:1; overflow-y:auto; overflow-x:hidden; }
+
+/* 行 */
+.ft2-row { display:flex; align-items:center; gap:6px; padding:8px 12px; cursor:pointer; border-bottom:1px solid #f5f5f5; transition:background .15s; }
+.ft2-row:hover { background:#fdf5f6; }
+.ft2-row.selected { background:#fef0f2; }
+.ft2-row.ft2-matched { outline:2px solid #fbbf24; outline-offset:-2px; }
+
+.ft2-row-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; color:#333; min-width:0; }
+.ft2-row.selected .ft2-row-name { font-weight:600; color:#861B2F; }
+
+/* 数量徽章 */
+.ft2-badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:#e0f2fe; color:#0369a1; font-size:11px; border-radius:9px; flex-shrink:0; }
+
+/* 状态标签 */
+.ft2-status { font-size:11px; padding:1px 7px; border-radius:3px; flex-shrink:0; white-space:nowrap; }
+.ft2-status-enable { color:#16a34a; border:1px solid #bbf7d0; background:#f0fdf4; }
+.ft2-status-disable { color:#999; border:1px solid #e5e5e5; background:#f9f9f9; }
+
+/* 操作图标 */
+.ft2-actions { display:flex; align-items:center; gap:4px; opacity:0; transition:opacity .15s; flex-shrink:0; }
+.ft2-row:hover .ft2-actions,
+.ft2-row.selected .ft2-actions { opacity:1; }
+.ft2-action-icon { font-size:14px; cursor:pointer; text-decoration:none; color:#999; padding:2px; line-height:1; }
+.ft2-action-icon:hover { color:#861B2F; }
+
+/* 空状态 */
+.ft2-empty { padding:40px 16px; text-align:center; color:#999; font-size:13px; }
+
+/* 编辑/新增弹窗中的"上级分类"禁用输入框 */
+.ft2-parent-input { width:100%; height:32px; border:1px solid #ddd; border-radius:4px; padding:0 10px; font-size:13px; background:#f5f5f5; color:#666; cursor:not-allowed; box-sizing:border-box; }
+
+/* 常用件建储情况（需求 6.2）：双 Tab 切换 建储明细 / 待建储明细 */
+.cs-tabs { display:flex; gap:4px; padding:10px 16px 0; background:#fff; border-bottom:1px solid #eee; }
+.cs-tab { border:none; background:transparent; padding:8px 18px; font-size:14px; cursor:pointer; color:#555; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.cs-tab:hover { color:#861B2F; }
+.cs-tab.active { color:#861B2F; font-weight:600; border-bottom-color:#ff6b35; }
+.cs-panel { padding:0; }
+/* 高度链：让 npShell 的 .lt-wrap 填满 Tab 条以下的剩余空间，翻页器钉在视口底部（与其它配件页一致） */
+#page-common-stock { display:flex; flex-direction:column; height:calc(100vh - 58px); }
+#page-common-stock .cs-tabs { flex-shrink:0; }
+#page-common-stock .cs-panel { flex:1; min-height:0; display:flex; flex-direction:column; }
+#page-common-stock .cs-panel .lt-wrap { height:100%; }
+/* 常用件建储情况（需求 6.2）：冻结前 3 列，对齐配件库存台账/出入库配件查询写法 */
+#page-common-stock .lt-table th.col-seq,  #page-common-stock .lt-table td.col-seq  { left:0;    width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
+#page-common-stock .lt-table th.col-code, #page-common-stock .lt-table td.col-code { left:40px; width:110px; min-width:110px; max-width:110px; overflow:hidden; }
+#page-common-stock .lt-table th.col-name, #page-common-stock .lt-table td.col-name { left:150px;width:170px; min-width:170px; max-width:170px; overflow:hidden; }
+#page-common-stock .lt-table th.col-suggest,#page-common-stock .lt-table td.col-suggest{ min-width:90px; }
+#page-common-stock .lt-table th.col-actual, #page-common-stock .lt-table td.col-actual { min-width:110px; }
+#page-common-stock .lt-table th.col-price,  #page-common-stock .lt-table td.col-price  { min-width:110px; }
+#page-common-stock .lt-table th.col-pending,#page-common-stock .lt-table td.col-pending{ min-width:100px; }
+#page-common-stock .lt-table th.col-total,  #page-common-stock .lt-table td.col-total  { min-width:120px; }
+#page-common-stock .lt-table th.col-car,    #page-common-stock .lt-table td.col-car    { min-width:170px; }
+#page-common-stock .lt-table th.col-cat,    #page-common-stock .lt-table td.col-cat    { min-width:110px; }
+#page-common-stock .lt-table th.col-attr,   #page-common-stock .lt-table td.col-attr   { min-width:140px; }
+#page-common-stock .lt-table th.col-valid,  #page-common-stock .lt-table td.col-valid  { min-width:90px; }
+#page-common-stock .lt-table th.col-mdate,  #page-common-stock .lt-table td.col-mdate  { min-width:150px; }
+
+/* 常用件建储维护 - 页面列宽 */
+#page-common-stock-maintain.page-content.active { display:flex; flex-direction:column; height:calc(100vh - 58px); }
+#page-common-stock-maintain .lt-wrap { height:100%; }
+/* 冻结列 */
+#page-common-stock-maintain .lt-table th.col-seq,   #page-common-stock-maintain .lt-table td.col-seq   { left:0;    width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
+#page-common-stock-maintain .lt-table th.col-code,  #page-common-stock-maintain .lt-table td.col-code  { left:40px; width:110px; min-width:110px; max-width:110px; overflow:hidden; }
+#page-common-stock-maintain .lt-table th.col-name,  #page-common-stock-maintain .lt-table td.col-name  { left:150px;width:170px; min-width:170px; max-width:170px; overflow:hidden; }
+/* 非冻结列 */
+#page-common-stock-maintain .lt-table th.col-suggest,#page-common-stock-maintain .lt-table td.col-suggest{ min-width:90px; }
+#page-common-stock-maintain .lt-table th.col-price,  #page-common-stock-maintain .lt-table td.col-price  { min-width:110px; }
+#page-common-stock-maintain .lt-table th.col-car,    #page-common-stock-maintain .lt-table td.col-car    { min-width:170px; }
+#page-common-stock-maintain .lt-table th.col-cat,    #page-common-stock-maintain .lt-table td.col-cat    { min-width:110px; }
+#page-common-stock-maintain .lt-table th.col-attr,   #page-common-stock-maintain .lt-table td.col-attr   { min-width:140px; }
+#page-common-stock-maintain .lt-table th.col-valid,  #page-common-stock-maintain .lt-table td.col-valid  { min-width:90px; }
+#page-common-stock-maintain .lt-table th.col-update, #page-common-stock-maintain .lt-table td.col-update { min-width:150px; }
+#page-common-stock-maintain .lt-table th.col-actions,#page-common-stock-maintain .lt-table td.col-actions{ min-width:100px; }
+/* 变更记录弹窗内表格冻结列 */
+#np-modal-body .csm-log-table th.col-seq,  #np-modal-body .csm-log-table td.col-seq  { left:0;   width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; position:sticky; z-index:2; }
+#np-modal-body .csm-log-table th.col-code, #np-modal-body .csm-log-table td.col-code { left:40px;width:80px;  min-width:80px;  max-width:80px;  overflow:hidden; position:sticky; z-index:2; }
+#np-modal-body .csm-log-table th.col-name, #np-modal-body .csm-log-table td.col-name { left:120px;width:120px;min-width:120px; max-width:120px; overflow:hidden; position:sticky; z-index:2; }
