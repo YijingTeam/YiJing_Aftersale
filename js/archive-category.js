@@ -404,7 +404,7 @@ function arcImport() {
     '<p style="margin:0;font-size:12px;color:#bbb">支持 .csv 格式</p>' +
     '<input type="file" id="arc-import-file" accept=".csv" style="display:none">' +
     '</div>' +
-    '<p style="margin:10px 0 0;font-size:12px;color:#999">按1级/2级/3级分类名称解析，自动创建或更新树节点</p>' +
+    '<p style="margin:10px 0 0;font-size:12px;color:#999">≤1000条，按1级/2级/3级分类名称解析，自动创建或更新树节点</p>' +
     '</div>';
   npOpenModal('导入分类数据', body, '', { width: 560 });
   setTimeout(function () {

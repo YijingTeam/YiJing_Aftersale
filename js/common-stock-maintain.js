@@ -180,7 +180,7 @@ function csmOpenImport() {
     '<p style="margin:0;font-size:12px;color:#bbb">支持 .xlsx / .xls 格式</p>' +
     '<input type="file" id="csm-import-file" accept=".xlsx,.xls" style="display:none">' +
     '</div>' +
-    '<p style="margin:10px 0 0;font-size:12px;color:#999">按配件编码匹配，更新建议数量和是否有效，自动记录变更</p>' +
+    '<p style="margin:10px 0 0;font-size:12px;color:#999">≤1000条，按配件编码匹配，更新建议数量和是否有效，自动记录变更</p>' +
     '</div>';
   npOpenModal('导入数据', body, '', { width: 560 });
 

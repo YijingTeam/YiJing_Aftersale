@@ -1203,6 +1203,10 @@
     .ts-panel-fixed { flex-shrink:0; padding:0 20px 16px; background:#fff; border-bottom:1px solid #f0d0d5; scrollbar-gutter: stable; overflow-y:auto; }
     .ts-panel-fixed-actions { display:flex; justify-content:flex-end; align-items:center; padding:12px 0 10px; border-bottom:1px dashed #eee; margin-bottom:12px; }
     .ts-panel-fixed-actions:empty { display:none; }
+    .ts-panel-fixed-subject { margin-right:auto; display:flex; align-items:center; gap:6px; min-width:0; max-width:60%; }
+    .ts-panel-fixed-subject-label { font-size:13px; color:#666; flex-shrink:0; }
+    .ts-panel-subject-link { color:#861B2F; text-decoration:underline; cursor:pointer; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ts-panel-subject-link:hover { color:#c0392b; }
     .ts-panel-fixed .ts-form-grid { gap:10px 20px; }
     .ts-section { margin-bottom:20px; }
     .ts-section-title { font-size:14px; font-weight:600; color:#333; padding:6px 0 8px; margin-bottom:12px; border-bottom:1px solid #f0d0d5; display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }

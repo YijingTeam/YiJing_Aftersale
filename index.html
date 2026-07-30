@@ -36,11 +36,12 @@
           <div class="submenu submenu-nested">
             <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support')" data-module="tech-support" data-roles="门店 超级管理员">技术支持</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support-hq')" data-module="tech-support-hq" data-roles="总部 超级管理员">总部技术支持处理</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support-hq-828')" data-module="tech-support-hq-828" data-roles="总部 超级管理员">总部技术支持处理828</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('archive-category')" data-module="archive-category" data-roles="超级管理员">归档分类配置(备用)</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('archive-category2')" data-module="archive-category2" data-roles="总部 超级管理员">归档分类配置</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report')" data-module="quality-report" data-roles="门店 超级管理员">质量报告</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report-hq')" data-module="quality-report-hq" data-roles="总部 超级管理员">总部质量报告处理</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report-template')" data-module="quality-report-template" data-roles="总部 超级管理员">质量报告模板</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('archive-category')" data-module="archive-category" data-roles="超级管理员">归档分类配置(备用)</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('archive-category2')" data-module="archive-category2" data-roles="总部 超级管理员">归档分类配置</div>
           </div>
         </div>
       </div>
@@ -2996,6 +2997,15 @@
                 </select>
               </div>
             </div>
+            <div class="lt-filter-item">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">允许个销</span>
+                <select id="pm-flt-allow-personal">
+                  <option value="">全部</option>
+                  <option value="是">是</option>
+                  <option value="否">否</option>
+                </select>
+              </div>
+            </div>
             <div class="lt-filter-footer">
               <button class="lt-btn lt-btn-primary" onclick="pmApplyFilter()">查询</button>
               <button class="lt-btn lt-btn-default" onclick="pmResetFilter()">重置</button>
@@ -3647,6 +3657,7 @@
     </div>
     <div class="ts-panel-fixed">
       <div class="ts-panel-fixed-actions">
+        <div class="ts-panel-fixed-subject" id="ts-panel-header-subject"></div>
         <div class="ts-panel-actions" id="ts-panel-actions"></div>
       </div>
       <div class="ts-form-grid col4">
@@ -3776,22 +3787,58 @@
       <div class="ts-section" id="ts-section-repair-status" style="display:none">
         <div class="ts-section-title" onclick="tsToggleSection('repair-status')"><span class="ts-section-toggle"></span>故障维修情况</div>
         <div class="ts-section-body">
+          <!-- Row 1: 线下处理 + 维修工单 + 工单状态 + 质检时间 -->
           <div class="ts-form-grid col4">
-            <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">维修工单</span><input type="text" id="ts-form-repair-status-order" placeholder="请输入维修工单号"></div>
-            <div class="ts-form-item-inline"><span class="ts-form-label-inline">工单当前状态</span><select id="ts-form-repair-status-state" onchange="tsOnRepairStatusChange()"><option value="">请选择</option><option>接待完毕</option><option>维修进行中</option><option>质检完毕</option><option>结算进行中</option><option>已结算</option></select></div>
-            <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">质检时间</span><input type="text" id="ts-form-quality-check-time" readonly placeholder="年月日 时分秒" style="background:#f5f5f5;color:#999"></div>
-            <div></div>
+            <div class="ts-form-item-inline"><span class="ts-form-label-inline">线下处理</span><select id="ts-form-repair-online" onchange="tsOnRepairOnlineChange()"><option value="">请选择</option><option>是</option><option>否</option></select></div>
+            <div class="ts-form-item-inline plain js-repair-online-field"><span class="ts-form-label-inline">维修工单</span><input type="text" id="ts-form-repair-status-order" placeholder="请输入"><svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+            <div class="ts-form-item-inline js-repair-online-field"><span class="ts-form-label-inline">工单当前状态</span><select id="ts-form-repair-status-state" onchange="tsOnRepairStatusChange()"><option value="">请选择</option><option>接待完毕</option><option>维修进行中</option><option>质检完毕</option><option>结算进行中</option><option>已结算</option></select></div>
+            <div class="ts-form-item-inline plain js-repair-online-field"><span class="ts-form-label-inline">质检时间</span><input type="text" id="ts-form-quality-check-time" readonly placeholder="年月日 时分秒" style="background:#f5f5f5;color:#999"></div>
           </div>
-          <!-- 维修配件列表 -->
-          <div class="ts-repaitable-wrap">
-            <table class="lt-table" id="ts-repair-parts-table">
-              <thead><tr>
-                <th>序号</th><th>配件编码</th><th>配件名称</th><th>故障件编码</th><th>账类</th><th>配件数量</th><th>维修项目类型</th><th>维修类别</th>
-              </tr></thead>
-              <tbody id="ts-repair-parts-body">
-                <tr><td colspan="8" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>
-              </tbody>
-            </table>
+          <!-- 线上维修内容区 -->
+          <div id="ts-repair-online-content" style="display:none">
+            <!-- 维修配件列表 -->
+            <div class="ts-repaitable-wrap">
+              <table class="lt-table" id="ts-repair-parts-table">
+                <thead><tr>
+                  <th>序号</th><th>配件编码</th><th>配件名称</th><th>故障件编码</th><th>账类</th><th>配件数量</th><th>维修项目类型</th><th>维修类别</th>
+                </tr></thead>
+                <tbody id="ts-repair-parts-body">
+                  <tr><td colspan="8" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- 车辆处理时间 -->
+            <div class="ts-form-grid col4" style="margin-top:12px">
+              <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">车辆处理时间</span><input type="text" placeholder="年月日 时分秒" onfocus="this.type='datetime-local';this.step='1'" onblur="if(!this.value)this.type='text'" id="ts-form-vehicle-handle-time"></div>
+              <div></div><div></div><div></div>
+            </div>
+            <!-- 其它情况补充 -->
+            <div class="ts-form-grid col1" style="margin-top:12px">
+              <div class="ts-form-item full">
+                <textarea id="ts-form-other-note" placeholder="请输入线下维修情况说明"></textarea>
+              </div>
+            </div>
+          </div>
+          <!-- 线上处理 -->
+          <div id="ts-repair-offline-section" style="margin-top:12px">
+            <div class="ts-form-grid col4">
+              <div class="ts-form-item-inline"><span class="ts-form-label-inline">线上处理</span><select id="ts-form-repair-offline" onchange="tsOnRepairOfflineChange()"><option value="">请选择</option><option>是</option><option>否</option></select></div>
+              <div class="ts-form-item-inline plain js-repair-offline-ota" style="display:none"><span class="ts-form-label-inline">OTA推送时间</span><input type="text" placeholder="年月日 时分秒" onfocus="this.type='datetime-local';this.step='1'" onblur="if(!this.value)this.type='text'" id="ts-form-repair-ota-time"></div>
+              <div class="ts-form-item-inline plain js-repair-offline-ota" style="display:none"><span class="ts-form-label-inline">OTA处理时间</span><input type="text" id="ts-form-repair-ota-process-time" readonly placeholder="年月日 时分秒" style="background:#f5f5f5;color:#999"></div>
+              <div></div>
+            </div>
+            <div id="ts-repair-offline-content" style="display:none">
+              <div class="ts-form-grid col1" style="margin-top:12px">
+                <div class="ts-form-item full">
+                  <textarea id="ts-form-offline-note" placeholder="请输入其它情况补充"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 提交/取消 -->
+          <div class="ts-repair-submit-area" id="ts-repair-submit-area" style="display:none;margin-top:12px;text-align:right;">
+            <button class="lt-btn lt-btn-primary" onclick="tsSubmitRepairEdit()">提交</button>
+            <button class="lt-btn lt-btn-default" onclick="tsCancelRepairEdit()">取消</button>
           </div>
         </div>
       </div>
@@ -4055,6 +4102,11 @@
             <tr><td style="border:1px solid #e8e8e8;padding:6px">外采件<br><span style="color:#888;font-size:11px">配件来源：门店</span></td><td style="border:1px solid #e8e8e8;padding:6px">DMS，非直营新增/导入</td><td style="border:1px solid #e8e8e8;padding:6px;color:green;text-align:center">&#10004;</td><td style="border:1px solid #e8e8e8;padding:6px;color:red;text-align:center">&#10008;</td><td style="border:1px solid #e8e8e8;padding:6px;color:green;text-align:center">&#10004;</td></tr>
           </tbody>
         </table>
+        <h4 style="color:#185FA5;border-left:3px solid #185FA5;padding-left:8px;margin:20px 0 12px 0">配件个销选择规则（0828）</h4>
+        <p style="margin:4px 0">直营店可选个销配件：配件来源"奕境"、允许个销"是"</p>
+        <p style="margin:4px 0">非直营店可选个销配件：</p>
+        <p style="margin:2px 0 2px 16px">1. 配件来源"奕境"、直营店外采件"否"、允许个销"是"</p>
+        <p style="margin:2px 0 2px 16px">2. 配件来源"门店"</p>
       </div>
       <!-- 门店经营情况页面说明（动态显示） -->
       <div id="page-desc-store-operation" style="display:none;padding:16px;font-size:13px;line-height:2.0">
@@ -4441,6 +4493,9 @@
           <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="yj-out-snp" value="1.00"></div>
           <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="yj-ref-price" readonly class="pm-readonly"></div>
           <div class="pm-form-item"><label>销售价(含税)</label><input type="text" id="yj-sell-price" readonly class="pm-readonly"></div>
+          <div class="pm-form-item"><label>允许个销</label>
+            <select id="yj-allow-personal"><option>是</option><option>否</option></select>
+          </div>
         </div>
       </div>
 
@@ -4492,6 +4547,9 @@
           <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="add-store-out-snp" value="1.00"></div>
           <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="add-store-ref-price" placeholder="请输入"></div>
           <div class="pm-form-item required"><label>销售价(含税)</label><input type="number" id="add-store-sell-price" value="350.00"></div>
+          <div class="pm-form-item"><label>允许个销</label>
+            <select id="add-store-allow-personal"><option>是</option><option>否</option></select>
+          </div>
         </div>
       </div>
 
@@ -4544,6 +4602,9 @@
           <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="edit-store-out-snp" value="1.00"></div>
           <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="edit-store-ref-price" placeholder="请输入"></div>
           <div class="pm-form-item required"><label>销售价(含税)</label><input type="number" id="edit-store-sell-price" value="350.00"></div>
+          <div class="pm-form-item"><label>允许个销</label>
+            <select id="edit-store-allow-personal"><option>是</option><option>否</option></select>
+          </div>
         </div>
       </div>
     </div>

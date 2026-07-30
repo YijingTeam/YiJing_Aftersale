@@ -71,6 +71,9 @@
 
     // 显示内容
     function showContent(module) {
+      // 828 alias: 总部技术支持处理828 指向同一页面
+      window._isThq828 = (module === 'tech-support-hq-828');
+      if (module === 'tech-support-hq-828') module = 'tech-support-hq';
       // 隐藏所有页面
       document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
 
@@ -2942,6 +2945,7 @@
       var archiveCategories = ['发动机','变速箱','电气','底盘','车身'];
       var subjects = ['发动机异响严重','变速箱换挡顿挫','刹车时有尖锐异响','方向盘转向发沉','中控屏幕黑屏','空调制冷效果差','底盘有异响','高速行驶车身抖动'];
       var vins = ['LC0C76C4XM0001234','LGXC16DF8M0002567','LBEKBGKA0MZ003890','LLV3B2A15M0004456','LGWEE7A5XM0006721','LMGA425B1M0008891','LHGCR2650M0009903','LJ12FKS24M0011230'];
+      var faultDescriptions = ['P001-大屏无显示','P002-大屏偶发无网络','P003-音响无声音','P004-空调不制冷','P005-转向异响','P006-刹车偏软','P007-电机抖动','P008-充电缓慢'];
       for (var i = 0; i < 42; i++) {
         var idx = i % 8;
         var d = new Date();
@@ -2950,7 +2954,7 @@
         tsAllData.push({
           id:i+1, orderNo:'TS2026' + String(i+1).padStart(4,'0'), status:statuses[i%statuses.length],
           province:provinces[idx], city:cities[idx], storeName:stores[idx], storeCode:storeCodes[idx],
-          submitDate:ds, carSeries:carSeries[idx], subject:subjects[idx],
+          submitDate:ds, carSeries:carSeries[idx], subject:stores[idx] + ' ' + carModels[i % 4] + '-' + vins[idx].substring(11) + ' ' + faultDescriptions[idx],
           archiveCategory:archiveCategories[i%5], vin:vins[idx],
           faultDate:ds, faultSystem:faultSystems[i%7], faultNature:faultNatures[i%3],
           prodDate:'2024-0'+(i%9+1)+'-'+String((i%28)+1).padStart(2,'0'),
@@ -2958,6 +2962,8 @@
           importance:['A','B','C','D'][i%4],
           repairOrder: i%3!==0 ? 'RO2026'+String(i+1).padStart(4,'0') : '',
           repairParts: tsGenerateRepairParts(i%3!==0 ? 'RO2026'+String(i+1).padStart(4,'0') : ''),
+          repairStatusState: i%3!==0 ? ['接待完毕','维修进行中','质检完毕','结算进行中','已结算'][i%5] : '',
+          qualityCheckTime: (i%3!==0 && i%5 >= 2) ? '2026-06-'+String((i%28)+1).padStart(2,'0')+' 10:30:00' : '',
           complaintOrder: i%5!==0 ? 'CO2026'+String(i+1).padStart(4,'0') : '',
           warningOrder: i%4!==0 ? 'WO2026'+String(i+1).padStart(4,'0') : '',
           // 已关单的数据加关单信息
@@ -2973,7 +2979,7 @@
           latestOtaTime: (function(){ var ota=new Date(d); ota.setDate(ota.getDate()-i*5); return ota.toISOString().split('T')[0]; })(),
           faultPartCode: 'FP'+String(1000+i*7).padStart(6,'0'),
           faultPartName: ['连杆总成','刹车片','空调压缩机','转向器','中控屏','电池模组','传感器','减震器'][i%8],
-          faultDescription: ['P001-大屏无显示','P002-大屏偶发无网络','P003-音响无声音','P004-空调不制冷','P005-转向异响','P006-刹车偏软','P007-电机抖动','P008-充电缓慢'][i%8],
+          faultDescription: faultDescriptions[idx],
           customerComplaint: '客户反映'+subjects[idx]+'，多次出现，影响日常使用，已到店检查。',
           faultCondition: '故障发生在车辆行驶/启动/怠速等条件下，现象：'+subjects[idx]+'，经初步检查发现异常，需进一步检测确认。',
           repairSolution: '1. 拆卸相关部件进行专项检测；2. 更换故障件并测试；3. 复检确认问题是否解决；4. 跟踪3天确认稳定性。',
@@ -3156,16 +3162,31 @@
       if (item.repairOrder) tsRepairPartsMap[item.repairOrder] = item.repairParts || [];
       tsFillPanelForm(item);
       tsInitUploadDrag();
+      // 头部左侧显示"主题：超链接"（仅详情模式）
+      var headSub = document.getElementById('ts-panel-header-subject');
+      if (headSub && item) {
+        var subj = item.subject || '';
+        headSub.innerHTML =
+          '<span class="ts-panel-fixed-subject-label">飞书群：</span>' +
+          '<a class="ts-panel-subject-link" target="_blank" rel="noopener" ' +
+          'href="https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=5bfk5511-8c0d-46e4-a4bc-d0ee053b2e5c" ' +
+          'title="' + npEscape(subj) + '">' + npEscape(subj) + '</a>';
+      }
       var prefix = role === 'hq' ? '总部技术支持处理' : '技术支持';
       document.getElementById('ts-panel-title').textContent = prefix;
       var badge = document.getElementById('ts-panel-badge');
       badge.textContent = '详情'; badge.className = 'ts-panel-mode-badge detail';
       tsSetPanelReadonly(true);
       tsUpdatePanelButtons();
+      var offSec = document.getElementById('ts-repair-offline-section');
+      if (offSec) offSec.style.display = '';
       document.getElementById('ts-panel').classList.add('show');
       document.getElementById('ts-panel-overlay').classList.add('show');
     }
     function tsClosePanel() {
+      window._thq828RepairEditing = false;
+      var sa = document.getElementById('ts-repair-submit-area');
+      if (sa) sa.style.display = 'none';
       document.getElementById('ts-panel').classList.remove('show');
       document.getElementById('ts-panel-overlay').classList.remove('show');
     }
@@ -3192,6 +3213,9 @@
       var rpBody = document.getElementById('ts-repair-parts-body');
       if (rpBody) rpBody.innerHTML = '<tr><td colspan="8" class="empty-cell">暂无数据</td></tr>';
       selIds.forEach(function(id){ var el=document.getElementById(id); if(el)el.value=''; });
+      // 清空头部左侧主题容器（仅详情模式填入，新增/编辑模式保持空）
+      var headSub = document.getElementById('ts-panel-header-subject');
+      if (headSub) headSub.innerHTML = '';
     }
     function tsFillPanelForm(item) {
       if (!item) return;
@@ -3215,10 +3239,20 @@
       document.getElementById('ts-form-latest-ota-time').value = item.latestOtaTime || '';
       if (document.getElementById('ts-form-fault-system')) document.getElementById('ts-form-fault-system').value = item.faultSystem || '';
       if (document.getElementById('ts-form-fault-description')) document.getElementById('ts-form-fault-description').value = item.faultDescription || '';
-      document.getElementById('ts-form-repair-status-order').value = item.repairStatusOrder || '';
+      document.getElementById('ts-form-repair-status-order').value = item.repairStatusOrder || item.repairOrder || '';
       tsRenderRepairParts(item.repairStatusOrder || item.repairOrder || '');
       document.getElementById('ts-form-repair-status-state').value = item.repairStatusState || '';
       document.getElementById('ts-form-quality-check-time').value = item.qualityCheckTime || '';
+      document.getElementById('ts-form-other-note').value = item.otherNote || '';
+      document.getElementById('ts-form-repair-ota-time').value = item.repairOtaTime || '';
+      document.getElementById('ts-form-repair-ota-process-time').value = item.otaProcessTime || '';
+      var hasRepairOrder = !!(item.repairStatusOrder || item.repairOrder);
+      document.getElementById('ts-form-repair-online').value = item.repairOnline || (hasRepairOrder ? '是' : '');
+      document.getElementById('ts-form-repair-offline').value = item.repairOffline || '';
+      document.getElementById('ts-form-vehicle-handle-time').value = item.vehicleHandleTime || '';
+      document.getElementById('ts-form-offline-note').value = item.offlineNote || '';
+      tsOnRepairOnlineChange();
+      tsOnRepairOfflineChange();
       if (document.getElementById('ts-form-cause-analysis')) document.getElementById('ts-form-cause-analysis').value = item.causeAnalysis || '';
       if (document.getElementById('ts-form-suggestion')) document.getElementById('ts-form-suggestion').value = item.suggestion || '';
       if (document.getElementById('ts-form-has-fault-code')) document.getElementById('ts-form-has-fault-code').value = item.hasFaultCode || '';
@@ -3264,7 +3298,7 @@
       // "故障件维修情况"仅 HQ 详情显示；其他 5 种模式隐藏
       var repairSec = document.getElementById('ts-section-repair-status');
       if (repairSec) {
-        repairSec.style.display = (tsPanelRole === 'hq' && tsPanelMode === 'detail') ? '' : 'none';
+        repairSec.style.display = (tsPanelMode === 'detail') ? '' : 'none';
       }
     }
     function tsUpdatePanelButtons() {
@@ -3287,14 +3321,27 @@
         if (isHq) {
           if (status === '待技术援助答复') {
             topBtns = '<button class="lt-btn" style="background:#861B2F;color:#fff" onclick="tsHqClose()">关单</button>';
+            if (!window._thq828RepairEditing) {
+              topBtns += '<button class="lt-btn lt-btn-primary" onclick="tsStartRepairEdit()">维护故障维修情况</button>';
+            }
+          } else if (status === '已关单') {
+            if (!window._thq828RepairEditing) {
+              topBtns = '<button class="lt-btn lt-btn-primary" onclick="tsStartRepairEdit()">维护故障维修情况</button>';
+            }
           }
         } else {
           if (status === '待提交') {
             topBtns = '<button class="lt-btn lt-btn-primary" onclick="tsSaveAndSubmit()">提交</button><button class="lt-btn lt-btn-default" onclick="tsOpenEdit(tsCurrentItem.id);tsClosePanel()">修改</button><button class="lt-btn lt-btn-default" onclick="tsCancelOrder(tsCurrentItem.id);tsClosePanel()">作废</button><button class="lt-btn lt-btn-default" onclick="alert(\'维修历史\')">维修历史</button>';
           } else if (status === '待技术援助答复') {
             topBtns = '<button class="lt-btn lt-btn-default" onclick="alert(\'维修开单\')">维修开单</button><button class="lt-btn lt-btn-default" onclick="alert(\'维修历史\')">维修历史</button>';
+            if (!window._thq828RepairEditing) {
+              topBtns += '<button class="lt-btn lt-btn-primary" onclick="tsStartRepairEdit()">维护故障维修情况</button>';
+            }
           } else if (status === '已关单') {
             topBtns = '<button class="lt-btn lt-btn-default" onclick="alert(\'维修开单\')">维修开单</button><button class="lt-btn lt-btn-default" onclick="alert(\'维修历史\')">维修历史</button><button class="lt-btn lt-btn-primary" onclick="tsConvertToReport()">转质量报告</button>';
+            if (!window._thq828RepairEditing) {
+              topBtns += '<button class="lt-btn lt-btn-primary" onclick="tsStartRepairEdit()">维护故障维修情况</button>';
+            }
             bottomBtns = '';
           } else if (status === '已作废' /* || status === '已退废弃' */) {
             topBtns = '<button class="lt-btn lt-btn-default" onclick="alert(\'维修历史\')">维修历史</button>';
@@ -3303,6 +3350,96 @@
       }
       topDiv.innerHTML = topBtns;
       bottomDiv.innerHTML = bottomBtns;
+    }
+    function tsStartRepairEdit() {
+      window._thq828RepairEditing = true;
+      document.getElementById('ts-panel-actions').innerHTML = '';
+      var sec = document.getElementById('ts-section-repair-status');
+      if (!sec) return;
+      var isThq = window._isThq828;
+      function unlock(el) {
+        el.disabled = false;
+        if (el.tagName === 'INPUT' && el.type === 'text') el.readOnly = false;
+      }
+      function unlockContainer(containerId) {
+        var c = document.getElementById(containerId);
+        if (!c) return;
+        var inps = c.querySelectorAll('input, select, textarea');
+        for (var i = 0; i < inps.length; i++) unlock(inps[i]);
+      }
+      function unlockByClass(cls) {
+        var els = document.querySelectorAll(cls);
+        for (var i = 0; i < els.length; i++) unlock(els[i]);
+      }
+      if (isThq) {
+        // thq → 只解锁"线上处理"区域
+        var offlineSel = document.getElementById('ts-form-repair-offline');
+        if (offlineSel) offlineSel.disabled = false;
+        unlockByClass('.js-repair-offline-ota input, .js-repair-offline-ota select, .js-repair-offline-ota textarea');
+        unlockContainer('ts-repair-offline-content');
+      } else {
+        // ts → 只解锁"线下处理"区域
+        var onlineSel = document.getElementById('ts-form-repair-online');
+        if (onlineSel) onlineSel.disabled = false;
+        unlockByClass('.js-repair-online-field input, .js-repair-online-field select, .js-repair-online-field textarea');
+        unlockContainer('ts-repair-online-content');
+        // 线下处理区域的三个字段中，工单状态和质检时间保持只读
+        var stateEl = document.getElementById('ts-form-repair-status-state');
+        var qtEl = document.getElementById('ts-form-quality-check-time');
+        if (stateEl) { stateEl.disabled = true; }
+        if (qtEl) { qtEl.disabled = true; if (qtEl.tagName === 'INPUT') qtEl.readOnly = true; }
+        // 编辑态隐藏"线上处理"区域
+        var offlineSec = document.getElementById('ts-repair-offline-section');
+        if (offlineSec) offlineSec.style.display = 'none';
+      }
+      document.getElementById('ts-repair-submit-area').style.display = 'block';
+    }
+    function tsSubmitRepairEdit() {
+      window._thq828RepairEditing = false;
+      tsCurrentItem.repairStatusOrder = document.getElementById('ts-form-repair-status-order').value;
+      tsCurrentItem.otherNote = document.getElementById('ts-form-other-note').value;
+      tsCurrentItem.repairOtaTime = document.getElementById('ts-form-repair-ota-time').value;
+      tsCurrentItem.otaProcessTime = document.getElementById('ts-form-repair-ota-process-time').value;
+      tsCurrentItem.repairOnline = document.getElementById('ts-form-repair-online').value;
+      tsCurrentItem.repairOffline = document.getElementById('ts-form-repair-offline').value;
+      tsCurrentItem.vehicleHandleTime = document.getElementById('ts-form-vehicle-handle-time').value;
+      tsCurrentItem.offlineNote = document.getElementById('ts-form-offline-note').value;
+      var idx = tsAllData.findIndex(function(r) { return r.id === tsCurrentItem.id; });
+      if (idx !== -1) tsAllData[idx] = tsCurrentItem;
+      tsSetPanelReadonly(true);
+      var offSec = document.getElementById('ts-repair-offline-section');
+      if (offSec) offSec.style.display = '';
+      document.getElementById('ts-repair-submit-area').style.display = 'none';
+      tsUpdatePanelButtons();
+      if (typeof npToast === 'function') npToast('故障维修情况已保存');
+    }
+    function tsCancelRepairEdit() {
+      window._thq828RepairEditing = false;
+      tsSetPanelReadonly(true);
+      var offSec = document.getElementById('ts-repair-offline-section');
+      if (offSec) offSec.style.display = '';
+      document.getElementById('ts-repair-submit-area').style.display = 'none';
+      tsUpdatePanelButtons();
+    }
+    function tsOnRepairOnlineChange() {
+      var sel = document.getElementById('ts-form-repair-online');
+      var content = document.getElementById('ts-repair-online-content');
+      var show = (sel && sel.value === '是');
+      if (content) content.style.display = show ? '' : 'none';
+      var fields = document.querySelectorAll('.js-repair-online-field');
+      for (var i = 0; i < fields.length; i++) {
+        fields[i].style.display = show ? '' : 'none';
+      }
+    }
+    function tsOnRepairOfflineChange() {
+      var sel = document.getElementById('ts-form-repair-offline');
+      var content = document.getElementById('ts-repair-offline-content');
+      var show = (sel && sel.value === '是');
+      if (content) content.style.display = show ? '' : 'none';
+      var otas = document.querySelectorAll('.js-repair-offline-ota');
+      for (var i = 0; i < otas.length; i++) {
+        otas[i].style.display = show ? '' : 'none';
+      }
     }
     function tsSavePanel() {
       if (!tsCheckFaultCode()) return;
@@ -5700,18 +5837,18 @@
 (function(){
   // 模拟数据
   const pmData = [
-    {seq:1, code:'290F60471R', name:'减速器加油口密封垫', status:'可用', category:'事故件', attribute:'关键配件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', urgent:'是', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:2, code:'TEST01101', name:'减速器加油口密封垫', status:'可用', category:'常规件', attribute:'自制件', isOil:'否', directPurchase:'-', series:'车系1', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:3, code:'290F60472R', name:'前保险杠总成', status:'可用', category:'事故件', attribute:'沿用件', isOil:'否', directPurchase:'否', series:'车系2', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'', urgent:'否', direct:'是', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:4, code:'TEST01102', name:'机油滤芯器', status:'可用', category:'常规件', attribute:'保养件', isOil:'是', directPurchase:'-', series:'车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:12.00, outSNP:2.00, minQty:12.00, maxQty:20.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:5, code:'290F60473R', name:'后视镜壳体LH', status:'可用', category:'X', attribute:'事故/车身件', isOil:'否', directPurchase:'是', series:'车系1,车系2,车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:24.00, outSNP:2.00, minQty:24.00, maxQty:1000.00, replaceCode:'配件编码', urgent:'是', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:6, code:'TEST01103', name:'空气滤芯', status:'可用', category:'事故件', attribute:'发动机件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:7, code:'290F60474R', name:'变速箱油5L', status:'可用', category:'事故件', attribute:'变速箱件', isOil:'是', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:1000.00, replaceCode:'', urgent:'否', direct:'是', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:8, code:'TEST01104', name:'刹车片前', status:'可用', category:'X', attribute:'电器', isOil:'否', directPurchase:'是', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:9, code:'290F60475R', name:'防冻液4L', status:'不可用', category:'事故件', attribute:'空调及安全设备', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:10, code:'TEST01105', name:'玻璃水2L', status:'不可用', category:'常规件', attribute:'化学类原辅材料', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:11, code:'290F60476R', name:'雨刮片24寸', status:'不可用', category:'事故件', attribute:'精品', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
-    {seq:12, code:'WC000001', name:'车载香薰', status:'不可用', category:'常规件', attribute:'随车工具', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00'},
+    {seq:1, code:'290F60471R', name:'减速器加油口密封垫', status:'可用', category:'事故件', attribute:'关键配件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', urgent:'是', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:2, code:'TEST01101', name:'减速器加油口密封垫', status:'可用', category:'常规件', attribute:'自制件', isOil:'否', directPurchase:'-', series:'车系1', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'配件编码', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:3, code:'290F60472R', name:'前保险杠总成', status:'可用', category:'事故件', attribute:'沿用件', isOil:'否', directPurchase:'否', series:'车系2', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:10.00, replaceCode:'', urgent:'否', direct:'是', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:4, code:'TEST01102', name:'机油滤芯器', status:'可用', category:'常规件', attribute:'保养件', isOil:'是', directPurchase:'-', series:'车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'Kg', source:'门店', purchaseSNP:12.00, outSNP:2.00, minQty:12.00, maxQty:20.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:5, code:'290F60473R', name:'后视镜壳体LH', status:'可用', category:'X', attribute:'事故/车身件', isOil:'否', directPurchase:'是', series:'车系1,车系2,车系3', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'是', unit:'台', source:'奕境', purchaseSNP:24.00, outSNP:2.00, minQty:24.00, maxQty:1000.00, replaceCode:'配件编码', urgent:'是', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:6, code:'TEST01103', name:'空气滤芯', status:'可用', category:'事故件', attribute:'发动机件', isOil:'否', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:7, code:'290F60474R', name:'变速箱油5L', status:'可用', category:'事故件', attribute:'变速箱件', isOil:'是', directPurchase:'否', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:1000.00, replaceCode:'', urgent:'否', direct:'是', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:8, code:'TEST01104', name:'刹车片前', status:'可用', category:'X', attribute:'电器', isOil:'否', directPurchase:'是', series:'-', model:'01 六座版无备胎,01...', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:9, code:'290F60475R', name:'防冻液4L', status:'不可用', category:'事故件', attribute:'空调及安全设备', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:10, code:'TEST01105', name:'玻璃水2L', status:'不可用', category:'常规件', attribute:'化学类原辅材料', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:11, code:'290F60476R', name:'雨刮片24寸', status:'不可用', category:'事故件', attribute:'精品', isOil:'否', directPurchase:'否', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'台', source:'奕境', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'是'},
+    {seq:12, code:'WC000001', name:'车载香薰', status:'不可用', category:'常规件', attribute:'随车工具', isOil:'否', directPurchase:'-', series:'-', model:'', refPrice:120.00, sellPrice:120.00, normalPrice:100.00, urgentPrice:110.00, purchaseSwitch:'否', unit:'EA', source:'门店', purchaseSNP:1.00, outSNP:1.00, minQty:1.00, maxQty:100.00, replaceCode:'', urgent:'否', direct:'否', updateTime:'2025-03-24 13:00:00', createTime:'2025-01-01 13:00:00', allowPersonalSale:'否'},
   ];
 
   let pmPage = 1, pmPageSize = 20;
@@ -5719,10 +5856,12 @@
   function pmRenderTable() {
     const tbody = document.getElementById('pm-tbody');
     if (!tbody) return;
+    var filtered = pmGetFilteredData();
     let html = '';
-    pmData.forEach(function(r, i) {
+    filtered.forEach(function(r, i) {
+      var origIdx = pmData.indexOf(r);
       html += '<tr>'
-        + '<td class="sticky col-seq">'+ r.seq +'</td>'
+        + '<td class="sticky col-seq">'+ (i+1) +'</td>'
         + '<td>'+ r.code +'</td>'
         + '<td>'+ r.name +'</td>'
         + '<td>'+ r.status +'</td>'
@@ -5746,11 +5885,11 @@
         + '<td>'+ r.replaceCode +'</td>'
         + '<td>'+ r.updateTime +'</td>'
         + '<td>'+ r.createTime +'</td>'
-        + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="pmOpenEditModal('+ i +')" style="color:#185FA5;cursor:pointer">编辑</a> <a href="javascript:void(0)" onclick="pmOpenDetailPanel('+ i +')" style="color:#185FA5;cursor:pointer;margin-left:6px">详情</a></td>'
+        + '<td class="sticky col-actions"><a href="javascript:void(0)" onclick="pmOpenEditModal('+ origIdx +')" style="color:#185FA5;cursor:pointer">编辑</a> <a href="javascript:void(0)" onclick="pmOpenDetailPanel('+ origIdx +')" style="color:#185FA5;cursor:pointer;margin-left:6px">详情</a></td>'
         + '</tr>';
     });
     tbody.innerHTML = html;
-    document.getElementById('pm-pg-total').textContent = '共 '+ pmData.length +' 条';
+    document.getElementById('pm-pg-total').textContent = '共 '+ filtered.length +' 条';
     var pgEl = document.getElementById('pm-pg-pages');
     if(pgEl) pgEl.innerHTML = '<span class="pg-num active">1</span>';
   }
@@ -5821,6 +5960,9 @@
       document.getElementById('yj-out-snp').value = row.outSNP;
       document.getElementById('yj-ref-price').value = row.refPrice.toFixed(2);
       document.getElementById('yj-sell-price').value = row.sellPrice.toFixed(2);
+      var yjAp = document.getElementById('yj-allow-personal');
+      yjAp.value = row.allowPersonalSale;
+      yjAp.disabled = (gUserRole !== '总部');
     } else {
       title.textContent = '配件维护(门店)';
       badge.textContent = '编辑';
@@ -5843,6 +5985,9 @@
       document.getElementById('edit-store-out-snp').value = row.outSNP;
       document.getElementById('edit-store-ref-price').value = row.refPrice.toFixed(2);
       document.getElementById('edit-store-sell-price').value = row.sellPrice.toFixed(2);
+      var esAp = document.getElementById('edit-store-allow-personal');
+      esAp.value = row.allowPersonalSale;
+      esAp.disabled = true;
     }
     pmOpenPanel();
   };
@@ -5883,6 +6028,7 @@
       document.getElementById('yj-out-snp').value = row.outSNP;
       document.getElementById('yj-ref-price').value = row.refPrice.toFixed(2);
       document.getElementById('yj-sell-price').value = row.sellPrice.toFixed(2);
+      document.getElementById('yj-allow-personal').value = row.allowPersonalSale;
       pmSetBodyReadonly('pmp-body-yj');
     } else {
       document.getElementById('pmp-body-edit-store').style.display = 'block';
@@ -5902,6 +6048,7 @@
       document.getElementById('edit-store-out-snp').value = row.outSNP;
       document.getElementById('edit-store-ref-price').value = row.refPrice.toFixed(2);
       document.getElementById('edit-store-sell-price').value = row.sellPrice.toFixed(2);
+      document.getElementById('edit-store-allow-personal').value = row.allowPersonalSale;
       pmSetBodyReadonly('pmp-body-edit-store');
     }
     pmOpenPanel();
@@ -5932,6 +6079,7 @@
     document.getElementById('add-store-out-snp').value = '1.00';
     document.getElementById('add-store-ref-price').value = '';
     document.getElementById('add-store-sell-price').value = '350.00';
+    document.getElementById('add-store-allow-personal').value = '是';
     pmOpenPanel();
   };
 
@@ -5953,6 +6101,7 @@
     var urgent = document.getElementById('pm-flt-urgent').value;
     var direct = document.getElementById('pm-flt-direct').value;
     var directPurchase = document.getElementById('pm-flt-direct-purchase').value;
+    var allowPersonalSale = document.getElementById('pm-flt-allow-personal').value;
 
     return pmData.filter(function(r) {
       if (source && r.source !== source) return false;
@@ -5966,6 +6115,7 @@
       if (series && r.series.toLowerCase().indexOf(series) === -1) return false;
       if (model && r.model.toLowerCase().indexOf(model) === -1) return false;
       if (directPurchase && r.directPurchase !== directPurchase) return false;
+      if (allowPersonalSale && r.allowPersonalSale !== allowPersonalSale) return false;
       if (urgent && r.urgent !== urgent) return false;
       if (direct && r.direct !== direct) return false;
       return true;
@@ -6031,6 +6181,7 @@
     document.getElementById('pm-flt-urgent').value = '';
     document.getElementById('pm-flt-direct').value = '';
     document.getElementById('pm-flt-direct-purchase').value = '';
+    document.getElementById('pm-flt-allow-personal').value = '';
     pmRenderTable();
   };
   window.pmToggleFilter = function() {};
