@@ -1251,6 +1251,8 @@
     /* 全局统一必填*样式：required class + ::before 替代 span.req */
     .ts-form-item-inline.required .ts-form-label-inline::before,
     .qr-form-item-inline.required .qr-form-label-inline::before { content:'*'; color:#861B2F; margin-right:2px; }
+    .ts-form-item.required .ts-form-label::before,
+    .qr-form-item.required .qr-form-label::before { content:'*'; color:#861B2F; margin-right:2px; }
     .ts-form-item-inline input,
     .ts-form-item-inline select { height:32px; flex:1; min-width:0; border:none; outline:none; padding:0 10px; font-size:12px; color:#333; background:transparent; font-family:inherit; }
     .ts-form-item-inline select { cursor:pointer; appearance:none; -webkit-appearance:none; padding-right:24px; }
@@ -2174,3 +2176,15 @@ textarea.np-input { height:auto; padding:8px 10px; line-height:1.6; resize:verti
 #np-modal-body .csm-log-table th.col-seq,  #np-modal-body .csm-log-table td.col-seq  { left:0;   width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; position:sticky; z-index:2; }
 #np-modal-body .csm-log-table th.col-code, #np-modal-body .csm-log-table td.col-code { left:40px;width:80px;  min-width:80px;  max-width:80px;  overflow:hidden; position:sticky; z-index:2; }
 #np-modal-body .csm-log-table th.col-name, #np-modal-body .csm-log-table td.col-name { left:120px;width:120px;min-width:120px; max-width:120px; overflow:hidden; position:sticky; z-index:2; }
+
+/* ===== 门店多选弹框 ===== */
+input[readonly][placeholder="点击选择门店"] { cursor: pointer; }
+.ms-store-filter { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ms-store-filter .lt-filter-footer { grid-column: 3; }
+.ms-store-body { display:flex; gap:14px; }
+.ms-store-left { flex:1; min-width:0; display:flex; flex-direction:column; gap:10px; }
+.ms-store-right { width:320px; flex-shrink:0; border-left:1px solid #f0f0f0; padding-left:14px; display:flex; flex-direction:column; gap:10px; }
+.ms-store-right-head { display:flex; align-items:center; gap:8px; font-size:13px; color:#333; }
+.ms-store-right-head .lt-btn { margin-left:auto; }
+.ms-store-table-wrap { max-height:320px; overflow:auto; border:1px solid #eee; border-radius:6px; }
+.ms-store-table-wrap table { min-width:0; }

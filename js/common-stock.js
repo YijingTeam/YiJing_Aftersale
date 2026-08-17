@@ -55,9 +55,9 @@ function csSeed() {
   var attrs = CS_ATTR_OPTS;                                                     // 配件销售属性：全站统一 12 项
   var stores = [                                                                // 大区/小区/门店：循环分配 6 个门店
     { region: '华东', district: '上海', store: '上海浦东店' },
-    { region: '华南', district: '广州', store: '广州风丽店' },
+    { region: '华南', district: '广州', store: '广州天河店' },
     { region: '华北', district: '北京', store: '北京朝阳店' },
-    { region: '西南', district: '成都', store: '成都武侯店' },
+    { region: '西南', district: '成都', store: '成都锦江店' },
     { region: '东北', district: '沈阳', store: '沈阳和平店' },
     { region: '华东', district: '杭州', store: '杭州西湖店' }
   ];

@@ -220,6 +220,7 @@
         if (module === 'stock-limit') { initStockLimit(); }
         if (module === 'min-order-amount') { initMinOrderAmount(); }
         if (module === 'order-calendar') { initOrderCalendar(); }
+        if (module === 'store-manage') { initStoreManage(); }
         if (module === 'parts-return') { initPartsReturn(); }
         if (module === 'account-balance') { initAccountBalance(); }
         if (module === 'shortage-order') { initShortageOrder(); }
@@ -672,10 +673,11 @@
 
     function ltGetFilteredData() {
       var taskName = document.getElementById('lt-taskname') ? document.getElementById('lt-taskname').value.trim() : '';
+      var storeKw = document.getElementById('lt-store') ? document.getElementById('lt-store').value.trim().toLowerCase() : '';
       return ltAllData.filter(function(r) {
         if (ltRegionSelected && ltRegionSelected !== r.dq) return false;
         if (ltDistrictSelected && ltDistrictSelected !== r.xq) return false;
-        if (ltStoreSelected && ltStoreSelected !== r.storeCode) return false;
+        if (storeKw && r.storeName.toLowerCase().indexOf(storeKw) === -1 && r.storeCode.toLowerCase().indexOf(storeKw) === -1) return false;
         if (ltTasktypeSelected && ltTasktypeSelected !== r.taskType) return false;
         if (taskName && r.storeName.toLowerCase().indexOf(taskName.toLowerCase()) === -1) return false;
         return true;
@@ -1218,31 +1220,31 @@
 
     // ===== 出入库配件查询 JS =====
     var pioAllData = [
-      {code:'P001001', name:'机油滤清器', orderNo:'IO2024010001', ioType:'主机厂采购入库', sourceNo:'PO2024010001', plate:'', unit:'奕境', variety:3, qty:200, amount:1050.00, person:'张三', time:'2024-01-15 09:30:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:5.25, uom:'EA'},
-      {code:'P001002', name:'空气滤清器', orderNo:'IO2024010002', ioType:'主机厂采购退货', sourceNo:'PO2023120088', plate:'', unit:'北京朝阳店', variety:2, qty:50, amount:225.00, person:'张三', time:'2024-01-16 14:10:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:4.50, uom:'EA'},
-      {code:'P001003', name:'刹车片', orderNo:'IO2024010003', ioType:'外采入库', sourceNo:'EP2024010031', plate:'', unit:'外采供应商', variety:5, qty:120, amount:15360.00, person:'李四', time:'2024-01-17 10:05:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:128.00, uom:'EA'},
-      {code:'P001004', name:'火花塞', orderNo:'IO2024010004', ioType:'外采退货', sourceNo:'EP2024010031', plate:'', unit:'上海浦东店', variety:1, qty:20, amount:500.00, person:'李四', time:'2024-01-18 16:20:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:25.00, uom:'EA'},
-      {code:'P001005', name:'雨刮器', orderNo:'IO2024010005', ioType:'维修出库', sourceNo:'RO2024010201', plate:'京A12345', unit:'客户', variety:1, qty:2, amount:136.00, person:'王五', time:'2024-01-19 11:40:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:68.00, uom:'EA'},
-      {code:'P001006', name:'机油', orderNo:'IO2024010006', ioType:'维修退料', sourceNo:'RO2024010201', plate:'京A12345', unit:'北京朝阳店', variety:1, qty:1, amount:85.00, person:'王五', time:'2024-01-19 15:00:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:85.00, uom:'L'},
-      {code:'P001007', name:'变速箱油', orderNo:'IO2024010007', ioType:'个销出库', sourceNo:'SO2024010101', plate:'沪B88888', unit:'客户', variety:2, qty:4, amount:480.00, person:'赵六', time:'2024-01-20 09:15:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:120.00, uom:'L'},
-      {code:'P001008', name:'减震器', orderNo:'IO2024010008', ioType:'个销退货', sourceNo:'SO2024010101', plate:'沪B88888', unit:'上海浦东店', variety:1, qty:2, amount:560.00, person:'赵六', time:'2024-01-20 13:30:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:280.00, uom:'EA'},
-      {code:'P001009', name:'轮胎', orderNo:'IO2024010009', ioType:'店销出库', sourceNo:'DS2024010501', plate:'粤C66666', unit:'上海浦东店', variety:4, qty:4, amount:1800.00, person:'孙七', time:'2024-01-21 10:50:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:450.00, uom:'EA'},
-      {code:'P001010', name:'电瓶', orderNo:'IO2024010010', ioType:'店销入库', sourceNo:'DS2024010501', plate:'', unit:'广州天河店', variety:3, qty:3, amount:1740.00, person:'孙七', time:'2024-01-21 14:25:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:580.00, uom:'EA'},
-      {code:'P001011', name:'空调滤芯', orderNo:'IO2024010011', ioType:'店销退货出库', sourceNo:'DS2024010502', plate:'粤C66666', unit:'广州天河店', variety:2, qty:2, amount:110.00, person:'周八', time:'2024-01-22 09:05:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:55.00, uom:'EA'},
-      {code:'P001012', name:'刹车盘', orderNo:'IO2024010012', ioType:'店销退货入库', sourceNo:'DS2024010502', plate:'', unit:'上海浦东店', variety:1, qty:1, amount:180.00, person:'周八', time:'2024-01-22 11:40:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:180.00, uom:'EA'},
-      {code:'P001013', name:'转向助力油', orderNo:'IO2024010013', ioType:'内部领用出库', sourceNo:'IL2024010001', plate:'', unit:'门店申请人', variety:1, qty:3, amount:195.00, person:'吴九', time:'2024-01-23 15:55:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:65.00, uom:'L'},
-      {code:'P001014', name:'离合器片', orderNo:'IO2024010014', ioType:'内部领用退还', sourceNo:'IL2024010001', plate:'', unit:'北京朝阳店', variety:1, qty:1, amount:320.00, person:'吴九', time:'2024-01-23 17:10:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:320.00, uom:'EA'},
-      {code:'P001015', name:'防冻液', orderNo:'IO2024010015', ioType:'报废出库', sourceNo:'SC2024010001', plate:'', unit:'门店申请人', variety:2, qty:5, amount:240.00, person:'郑十', time:'2024-01-24 08:30:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:48.00, uom:'L'},
-      {code:'P001016', name:'传动皮带', orderNo:'IO2024010016', ioType:'盘盈入库', sourceNo:'PY2024010001', plate:'', unit:'北京朝阳店', variety:1, qty:6, amount:570.00, person:'张三', time:'2024-01-25 10:00:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:95.00, uom:'EA'},
-      {code:'P001017', name:'燃油滤清器', orderNo:'IO2024010017', ioType:'盘亏出库', sourceNo:'PK2024010001', plate:'', unit:'北京朝阳店', variety:1, qty:2, amount:76.00, person:'张三', time:'2024-01-25 11:20:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:38.00, uom:'EA'},
-      {code:'P001018', name:'氧传感器', orderNo:'IO2024020001', ioType:'主机厂采购入库', sourceNo:'PO2024020001', plate:'', unit:'奕境', variety:2, qty:60, amount:13200.00, person:'李四', time:'2024-02-01 09:45:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:220.00, uom:'EA'},
-      {code:'P001019', name:'正时皮带', orderNo:'IO2024020002', ioType:'维修出库', sourceNo:'RO2024020102', plate:'沪D22222', unit:'客户', variety:1, qty:1, amount:180.00, person:'王五', time:'2024-02-02 14:30:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:180.00, uom:'EA'},
-      {code:'P001020', name:'玻璃水', orderNo:'IO2024020003', ioType:'个销出库', sourceNo:'SO2024020102', plate:'粤E33333', unit:'客户', variety:3, qty:10, amount:150.00, person:'赵六', time:'2024-02-03 10:10:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:15.00, uom:'L'},
-      {code:'P001021', name:'灯泡', orderNo:'IO2024020004', ioType:'店销出库', sourceNo:'DS2024020503', plate:'粤F44444', unit:'深圳南山店', variety:2, qty:5, amount:140.00, person:'孙七', time:'2024-02-04 09:20:00', region:'西南区', district:'深圳区', storeName:'深圳南山店', storeCode:'SZ-NS-001', unitPrice:28.00, uom:'EA'},
-      {code:'P001022', name:'刹车油', orderNo:'IO2024020005', ioType:'外采入库', sourceNo:'EP2024020032', plate:'', unit:'外采供应商', variety:4, qty:80, amount:6000.00, person:'李四', time:'2024-02-05 15:40:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', unitPrice:75.00, uom:'L'},
-      {code:'P001023', name:'轮毂轴承', orderNo:'IO2024020006', ioType:'维修出库', sourceNo:'RO2024020103', plate:'京G55555', unit:'客户', variety:1, qty:2, amount:300.00, person:'王五', time:'2024-02-06 11:05:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:150.00, uom:'EA'},
-      {code:'P001024', name:'密封垫', orderNo:'IO2024020007', ioType:'店销入库', sourceNo:'DS2024020504', plate:'', unit:'北京朝阳店', variety:3, qty:9, amount:108.00, person:'周八', time:'2024-02-07 13:55:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', unitPrice:12.00, uom:'EA'},
-      {code:'P001025', name:'冷却液', orderNo:'IO2024020008', ioType:'盘亏出库', sourceNo:'PK2024020002', plate:'', unit:'上海浦东店', variety:1, qty:3, amount:165.00, person:'张三', time:'2024-02-08 16:15:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', unitPrice:55.00, uom:'L'}
+      {code:'P001001', name:'机油滤清器', orderNo:'IO2024010001', ioType:'主机厂采购入库', sourceNo:'PO2024010001', plate:'', unit:'奕境', variety:3, qty:200, amount:1050.00, person:'张三', time:'2024-01-15 09:30:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:5.25, uom:'EA'},
+      {code:'P001002', name:'空气滤清器', orderNo:'IO2024010002', ioType:'主机厂采购退货', sourceNo:'PO2023120088', plate:'', unit:'北京朝阳店', variety:2, qty:50, amount:225.00, person:'张三', time:'2024-01-16 14:10:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:4.50, uom:'EA'},
+      {code:'P001003', name:'刹车片', orderNo:'IO2024010003', ioType:'外采入库', sourceNo:'EP2024010031', plate:'', unit:'外采供应商', variety:5, qty:120, amount:15360.00, person:'李四', time:'2024-01-17 10:05:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', unitPrice:128.00, uom:'EA'},
+      {code:'P001004', name:'火花塞', orderNo:'IO2024010004', ioType:'外采退货', sourceNo:'EP2024010031', plate:'', unit:'上海浦东店', variety:1, qty:20, amount:500.00, person:'李四', time:'2024-01-18 16:20:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', unitPrice:25.00, uom:'EA'},
+      {code:'P001005', name:'雨刮器', orderNo:'IO2024010005', ioType:'维修出库', sourceNo:'RO2024010201', plate:'京A12345', unit:'客户', variety:1, qty:2, amount:136.00, person:'王五', time:'2024-01-19 11:40:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:68.00, uom:'EA'},
+      {code:'P001006', name:'机油', orderNo:'IO2024010006', ioType:'维修退料', sourceNo:'RO2024010201', plate:'京A12345', unit:'北京朝阳店', variety:1, qty:1, amount:85.00, person:'王五', time:'2024-01-19 15:00:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:85.00, uom:'L'},
+      {code:'P001007', name:'变速箱油', orderNo:'IO2024010007', ioType:'个销出库', sourceNo:'SO2024010101', plate:'沪B88888', unit:'客户', variety:2, qty:4, amount:480.00, person:'赵六', time:'2024-01-20 09:15:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', unitPrice:120.00, uom:'L'},
+      {code:'P001008', name:'减震器', orderNo:'IO2024010008', ioType:'个销退货', sourceNo:'SO2024010101', plate:'沪B88888', unit:'上海浦东店', variety:1, qty:2, amount:560.00, person:'赵六', time:'2024-01-20 13:30:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', unitPrice:280.00, uom:'EA'},
+      {code:'P001009', name:'轮胎', orderNo:'IO2024010009', ioType:'店销出库', sourceNo:'DS2024010501', plate:'粤C66666', unit:'上海浦东店', variety:4, qty:4, amount:1800.00, person:'孙七', time:'2024-01-21 10:50:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', unitPrice:450.00, uom:'EA'},
+      {code:'P001010', name:'电瓶', orderNo:'IO2024010010', ioType:'店销入库', sourceNo:'DS2024010501', plate:'', unit:'广州天河店', variety:3, qty:3, amount:1740.00, person:'孙七', time:'2024-01-21 14:25:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', unitPrice:580.00, uom:'EA'},
+      {code:'P001011', name:'空调滤芯', orderNo:'IO2024010011', ioType:'店销退货出库', sourceNo:'DS2024010502', plate:'粤C66666', unit:'广州天河店', variety:2, qty:2, amount:110.00, person:'周八', time:'2024-01-22 09:05:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', unitPrice:55.00, uom:'EA'},
+      {code:'P001012', name:'刹车盘', orderNo:'IO2024010012', ioType:'店销退货入库', sourceNo:'DS2024010502', plate:'', unit:'上海浦东店', variety:1, qty:1, amount:180.00, person:'周八', time:'2024-01-22 11:40:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', unitPrice:180.00, uom:'EA'},
+      {code:'P001013', name:'转向助力油', orderNo:'IO2024010013', ioType:'内部领用出库', sourceNo:'IL2024010001', plate:'', unit:'门店申请人', variety:1, qty:3, amount:195.00, person:'吴九', time:'2024-01-23 15:55:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:65.00, uom:'L'},
+      {code:'P001014', name:'离合器片', orderNo:'IO2024010014', ioType:'内部领用退还', sourceNo:'IL2024010001', plate:'', unit:'北京朝阳店', variety:1, qty:1, amount:320.00, person:'吴九', time:'2024-01-23 17:10:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:320.00, uom:'EA'},
+      {code:'P001015', name:'防冻液', orderNo:'IO2024010015', ioType:'报废出库', sourceNo:'SC2024010001', plate:'', unit:'门店申请人', variety:2, qty:5, amount:240.00, person:'郑十', time:'2024-01-24 08:30:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', unitPrice:48.00, uom:'L'},
+      {code:'P001016', name:'传动皮带', orderNo:'IO2024010016', ioType:'盘盈入库', sourceNo:'PY2024010001', plate:'', unit:'北京朝阳店', variety:1, qty:6, amount:570.00, person:'张三', time:'2024-01-25 10:00:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:95.00, uom:'EA'},
+      {code:'P001017', name:'燃油滤清器', orderNo:'IO2024010017', ioType:'盘亏出库', sourceNo:'PK2024010001', plate:'', unit:'北京朝阳店', variety:1, qty:2, amount:76.00, person:'张三', time:'2024-01-25 11:20:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:38.00, uom:'EA'},
+      {code:'P001018', name:'氧传感器', orderNo:'IO2024020001', ioType:'主机厂采购入库', sourceNo:'PO2024020001', plate:'', unit:'奕境', variety:2, qty:60, amount:13200.00, person:'李四', time:'2024-02-01 09:45:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', unitPrice:220.00, uom:'EA'},
+      {code:'P001019', name:'正时皮带', orderNo:'IO2024020002', ioType:'维修出库', sourceNo:'RO2024020102', plate:'沪D22222', unit:'客户', variety:1, qty:1, amount:180.00, person:'王五', time:'2024-02-02 14:30:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', unitPrice:180.00, uom:'EA'},
+      {code:'P001020', name:'玻璃水', orderNo:'IO2024020003', ioType:'个销出库', sourceNo:'SO2024020102', plate:'粤E33333', unit:'客户', variety:3, qty:10, amount:150.00, person:'赵六', time:'2024-02-03 10:10:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', unitPrice:15.00, uom:'L'},
+      {code:'P001021', name:'灯泡', orderNo:'IO2024020004', ioType:'店销出库', sourceNo:'DS2024020503', plate:'粤F44444', unit:'深圳南山店', variety:2, qty:5, amount:140.00, person:'孙七', time:'2024-02-04 09:20:00', region:'西南区', district:'深圳区', storeName:'深圳南山店', storeCode:'SZ001', unitPrice:28.00, uom:'EA'},
+      {code:'P001022', name:'刹车油', orderNo:'IO2024020005', ioType:'外采入库', sourceNo:'EP2024020032', plate:'', unit:'外采供应商', variety:4, qty:80, amount:6000.00, person:'李四', time:'2024-02-05 15:40:00', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', unitPrice:75.00, uom:'L'},
+      {code:'P001023', name:'轮毂轴承', orderNo:'IO2024020006', ioType:'维修出库', sourceNo:'RO2024020103', plate:'京G55555', unit:'客户', variety:1, qty:2, amount:300.00, person:'王五', time:'2024-02-06 11:05:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:150.00, uom:'EA'},
+      {code:'P001024', name:'密封垫', orderNo:'IO2024020007', ioType:'店销入库', sourceNo:'DS2024020504', plate:'', unit:'北京朝阳店', variety:3, qty:9, amount:108.00, person:'周八', time:'2024-02-07 13:55:00', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', unitPrice:12.00, uom:'EA'},
+      {code:'P001025', name:'冷却液', orderNo:'IO2024020008', ioType:'盘亏出库', sourceNo:'PK2024020002', plate:'', unit:'上海浦东店', variety:1, qty:3, amount:165.00, person:'张三', time:'2024-02-08 16:15:00', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', unitPrice:55.00, uom:'L'}
     ];
     var pioFilteredData = [];
     var pioCurrentPage = 1;
@@ -1425,31 +1427,31 @@
 
     // ===== 出入库单据查询 JS =====
     var piodAllData = [
-      {orderNo:'IO2024010001', ioType:'主机厂采购入库', sourceNo:'PO2024010001', unit:'奕境', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:3, qty:200, amount:1050.00, person:'张三', time:'2024-01-15 09:30:00'},
-      {orderNo:'IO2024010002', ioType:'主机厂采购退货', sourceNo:'PO2023120088', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:2, qty:50, amount:225.00, person:'张三', time:'2024-01-16 14:10:00'},
-      {orderNo:'IO2024010003', ioType:'外采入库', sourceNo:'EP2024010031', unit:'外采供应商', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:5, qty:120, amount:15360.00, person:'李四', time:'2024-01-17 10:05:00'},
-      {orderNo:'IO2024010004', ioType:'外采退货', sourceNo:'EP2024010031', unit:'上海浦东店', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:1, qty:20, amount:500.00, person:'李四', time:'2024-01-18 16:20:00'},
-      {orderNo:'IO2024010005', ioType:'维修出库', sourceNo:'RO2024010201', unit:'客户', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:2, amount:136.00, person:'王五', time:'2024-01-19 11:40:00'},
-      {orderNo:'IO2024010006', ioType:'维修退料', sourceNo:'RO2024010201', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:1, amount:85.00, person:'王五', time:'2024-01-19 15:00:00'},
-      {orderNo:'IO2024010007', ioType:'个销出库', sourceNo:'SO2024010101', unit:'客户', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:2, qty:4, amount:480.00, person:'赵六', time:'2024-01-20 09:15:00'},
-      {orderNo:'IO2024010008', ioType:'个销退货', sourceNo:'SO2024010101', unit:'上海浦东店', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:1, qty:2, amount:560.00, person:'赵六', time:'2024-01-20 13:30:00'},
-      {orderNo:'IO2024010009', ioType:'店销出库', sourceNo:'DS2024010501', unit:'上海浦东店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:4, qty:4, amount:1800.00, person:'孙七', time:'2024-01-21 10:50:00'},
-      {orderNo:'IO2024010010', ioType:'店销入库', sourceNo:'DS2024010501', unit:'广州天河店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:3, qty:3, amount:1740.00, person:'孙七', time:'2024-01-21 14:25:00'},
-      {orderNo:'IO2024010011', ioType:'店销退货出库', sourceNo:'DS2024010502', unit:'广州天河店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:2, qty:2, amount:110.00, person:'周八', time:'2024-01-22 09:05:00'},
-      {orderNo:'IO2024010012', ioType:'店销退货入库', sourceNo:'DS2024010502', unit:'上海浦东店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:1, qty:1, amount:180.00, person:'周八', time:'2024-01-22 11:40:00'},
-      {orderNo:'IO2024010013', ioType:'内部领用出库', sourceNo:'IL2024010001', unit:'门店申请人', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:3, amount:195.00, person:'吴九', time:'2024-01-23 15:55:00'},
-      {orderNo:'IO2024010014', ioType:'内部领用退还', sourceNo:'IL2024010001', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:1, amount:320.00, person:'吴九', time:'2024-01-23 17:10:00'},
-      {orderNo:'IO2024010015', ioType:'报废出库', sourceNo:'SC2024010001', unit:'门店申请人', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:2, qty:5, amount:240.00, person:'郑十', time:'2024-01-24 08:30:00'},
-      {orderNo:'IO2024010016', ioType:'盘盈入库', sourceNo:'PY2024010001', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:6, amount:570.00, person:'张三', time:'2024-01-25 10:00:00'},
-      {orderNo:'IO2024010017', ioType:'盘亏出库', sourceNo:'PK2024010001', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:2, amount:76.00, person:'张三', time:'2024-01-25 11:20:00'},
-      {orderNo:'IO2024020001', ioType:'主机厂采购入库', sourceNo:'PO2024020001', unit:'奕境', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:2, qty:60, amount:13200.00, person:'李四', time:'2024-02-01 09:45:00'},
-      {orderNo:'IO2024020002', ioType:'维修出库', sourceNo:'RO2024020102', unit:'客户', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:1, qty:1, amount:180.00, person:'王五', time:'2024-02-02 14:30:00'},
-      {orderNo:'IO2024020003', ioType:'个销出库', sourceNo:'SO2024020102', unit:'客户', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:3, qty:10, amount:150.00, person:'赵六', time:'2024-02-03 10:10:00'},
-      {orderNo:'IO2024020004', ioType:'店销出库', sourceNo:'DS2024020503', unit:'深圳南山店', region:'西南区', district:'深圳区', storeName:'深圳南山店', storeCode:'SZ-NS-001', variety:2, qty:5, amount:140.00, person:'孙七', time:'2024-02-04 09:20:00'},
-      {orderNo:'IO2024020005', ioType:'外采入库', sourceNo:'EP2024020032', unit:'外采供应商', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ-TH-001', variety:4, qty:80, amount:6000.00, person:'李四', time:'2024-02-05 15:40:00'},
-      {orderNo:'IO2024020006', ioType:'维修出库', sourceNo:'RO2024020103', unit:'客户', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:1, qty:2, amount:300.00, person:'王五', time:'2024-02-06 11:05:00'},
-      {orderNo:'IO2024020007', ioType:'店销入库', sourceNo:'DS2024020504', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ-CY-001', variety:3, qty:9, amount:108.00, person:'周八', time:'2024-02-07 13:55:00'},
-      {orderNo:'IO2024020008', ioType:'盘亏出库', sourceNo:'PK2024020002', unit:'上海浦东店', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH-PD-001', variety:1, qty:3, amount:165.00, person:'张三', time:'2024-02-08 16:15:00'}
+      {orderNo:'IO2024010001', ioType:'主机厂采购入库', sourceNo:'PO2024010001', unit:'奕境', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:3, qty:200, amount:1050.00, person:'张三', time:'2024-01-15 09:30:00'},
+      {orderNo:'IO2024010002', ioType:'主机厂采购退货', sourceNo:'PO2023120088', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:2, qty:50, amount:225.00, person:'张三', time:'2024-01-16 14:10:00'},
+      {orderNo:'IO2024010003', ioType:'外采入库', sourceNo:'EP2024010031', unit:'外采供应商', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', variety:5, qty:120, amount:15360.00, person:'李四', time:'2024-01-17 10:05:00'},
+      {orderNo:'IO2024010004', ioType:'外采退货', sourceNo:'EP2024010031', unit:'上海浦东店', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', variety:1, qty:20, amount:500.00, person:'李四', time:'2024-01-18 16:20:00'},
+      {orderNo:'IO2024010005', ioType:'维修出库', sourceNo:'RO2024010201', unit:'客户', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:1, qty:2, amount:136.00, person:'王五', time:'2024-01-19 11:40:00'},
+      {orderNo:'IO2024010006', ioType:'维修退料', sourceNo:'RO2024010201', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:1, qty:1, amount:85.00, person:'王五', time:'2024-01-19 15:00:00'},
+      {orderNo:'IO2024010007', ioType:'个销出库', sourceNo:'SO2024010101', unit:'客户', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', variety:2, qty:4, amount:480.00, person:'赵六', time:'2024-01-20 09:15:00'},
+      {orderNo:'IO2024010008', ioType:'个销退货', sourceNo:'SO2024010101', unit:'上海浦东店', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', variety:1, qty:2, amount:560.00, person:'赵六', time:'2024-01-20 13:30:00'},
+      {orderNo:'IO2024010009', ioType:'店销出库', sourceNo:'DS2024010501', unit:'上海浦东店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', variety:4, qty:4, amount:1800.00, person:'孙七', time:'2024-01-21 10:50:00'},
+      {orderNo:'IO2024010010', ioType:'店销入库', sourceNo:'DS2024010501', unit:'广州天河店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', variety:3, qty:3, amount:1740.00, person:'孙七', time:'2024-01-21 14:25:00'},
+      {orderNo:'IO2024010011', ioType:'店销退货出库', sourceNo:'DS2024010502', unit:'广州天河店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', variety:2, qty:2, amount:110.00, person:'周八', time:'2024-01-22 09:05:00'},
+      {orderNo:'IO2024010012', ioType:'店销退货入库', sourceNo:'DS2024010502', unit:'上海浦东店', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', variety:1, qty:1, amount:180.00, person:'周八', time:'2024-01-22 11:40:00'},
+      {orderNo:'IO2024010013', ioType:'内部领用出库', sourceNo:'IL2024010001', unit:'门店申请人', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:1, qty:3, amount:195.00, person:'吴九', time:'2024-01-23 15:55:00'},
+      {orderNo:'IO2024010014', ioType:'内部领用退还', sourceNo:'IL2024010001', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:1, qty:1, amount:320.00, person:'吴九', time:'2024-01-23 17:10:00'},
+      {orderNo:'IO2024010015', ioType:'报废出库', sourceNo:'SC2024010001', unit:'门店申请人', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', variety:2, qty:5, amount:240.00, person:'郑十', time:'2024-01-24 08:30:00'},
+      {orderNo:'IO2024010016', ioType:'盘盈入库', sourceNo:'PY2024010001', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:1, qty:6, amount:570.00, person:'张三', time:'2024-01-25 10:00:00'},
+      {orderNo:'IO2024010017', ioType:'盘亏出库', sourceNo:'PK2024010001', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:1, qty:2, amount:76.00, person:'张三', time:'2024-01-25 11:20:00'},
+      {orderNo:'IO2024020001', ioType:'主机厂采购入库', sourceNo:'PO2024020001', unit:'奕境', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', variety:2, qty:60, amount:13200.00, person:'李四', time:'2024-02-01 09:45:00'},
+      {orderNo:'IO2024020002', ioType:'维修出库', sourceNo:'RO2024020102', unit:'客户', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', variety:1, qty:1, amount:180.00, person:'王五', time:'2024-02-02 14:30:00'},
+      {orderNo:'IO2024020003', ioType:'个销出库', sourceNo:'SO2024020102', unit:'客户', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', variety:3, qty:10, amount:150.00, person:'赵六', time:'2024-02-03 10:10:00'},
+      {orderNo:'IO2024020004', ioType:'店销出库', sourceNo:'DS2024020503', unit:'深圳南山店', region:'西南区', district:'深圳区', storeName:'深圳南山店', storeCode:'SZ001', variety:2, qty:5, amount:140.00, person:'孙七', time:'2024-02-04 09:20:00'},
+      {orderNo:'IO2024020005', ioType:'外采入库', sourceNo:'EP2024020032', unit:'外采供应商', region:'华南区', district:'广州区', storeName:'广州天河店', storeCode:'GZ001', variety:4, qty:80, amount:6000.00, person:'李四', time:'2024-02-05 15:40:00'},
+      {orderNo:'IO2024020006', ioType:'维修出库', sourceNo:'RO2024020103', unit:'客户', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:1, qty:2, amount:300.00, person:'王五', time:'2024-02-06 11:05:00'},
+      {orderNo:'IO2024020007', ioType:'店销入库', sourceNo:'DS2024020504', unit:'北京朝阳店', region:'华北区', district:'北京区', storeName:'北京朝阳店', storeCode:'BJ001', variety:3, qty:9, amount:108.00, person:'周八', time:'2024-02-07 13:55:00'},
+      {orderNo:'IO2024020008', ioType:'盘亏出库', sourceNo:'PK2024020002', unit:'上海浦东店', region:'华东区', district:'上海区', storeName:'上海浦东店', storeCode:'SH001', variety:1, qty:3, amount:165.00, person:'张三', time:'2024-02-08 16:15:00'}
     ];
     var piodFilteredData = [];
     var piodCurrentPage = 1;
@@ -1661,7 +1663,7 @@
       var positions = ['A-01-01','A-01-02','B-02-01','B-02-02','C-03-01'];
       var stores = [
         {code:'BJ001',name:'北京朝阳店'},{code:'SH001',name:'上海浦东店'},
-        {code:'GZ001',name:'广州天河店'},{code:'WH001',name:'武汉洪山店'},
+        {code:'GZ001',name:'广州天河店'},{code:'WH001',name:'武汉光谷店'},
         {code:'SZ001',name:'深圳南山店'},{code:'HZ001',name:'杭州西湖店'}
       ];
 
@@ -1950,19 +1952,19 @@
       {saleNo:'XJ202505001', id:1, storeName:'北京朝阳店', storeCode:'BJ001', custCategory:'个人客户', custCode:'C1001', custName:'张先生', plate:'京A12345', vin:'LSVAA4180E2000001', ioNo:'RK202505001', ioType:'配件销售', code:'P001', name:'机油滤清器', ioQty:1, unitPrice:35.0, amount:35.0, costPrice:25.0, costTotal:25.0, ioTime:'2025-05-20 10:00', picker:'张三', warehouse:'中心仓', position:'A01-01', remark:''},
       {saleNo:'XJ202505002', id:2, storeName:'上海浦东店', storeCode:'SH001', custCategory:'企业客户', custCode:'C1002', custName:'李女士', plate:'沪B67890', vin:'LSVAA4180E2000002', ioNo:'RK202505002', ioType:'配件退货', code:'P002', name:'空气滤清器', ioQty:-2, unitPrice:45.0, amount:90.0, costPrice:32.0, costTotal:64.0, ioTime:'2025-05-21 11:15', picker:'李四', warehouse:'上海仓', position:'A02-02', remark:''},
       {saleNo:'XJ202505003', id:3, storeName:'广州天河店', storeCode:'GZ001', custCategory:'保险公司', custCode:'C1003', custName:'王先生', plate:'粤C11111', vin:'LSVAA4180E2000003', ioNo:'RK202505003', ioType:'配件销售', code:'P003', name:'刹车片', ioQty:3, unitPrice:150.0, amount:450.0, costPrice:110.0, costTotal:330.0, ioTime:'2025-05-22 12:30', picker:'王五', warehouse:'广州仓', position:'A03-03', remark:''},
-      {saleNo:'XJ202505004', id:4, storeName:'武汉洪山店', storeCode:'WH001', custCategory:'维修厂', custCode:'C1004', custName:'赵女士', plate:'鄂A22222', vin:'LSVAA4180E2000004', ioNo:'RK202505004', ioType:'配件退货', code:'P004', name:'火花塞', ioQty:-4, unitPrice:50.0, amount:200.0, costPrice:35.0, costTotal:140.0, ioTime:'2025-05-23 13:45', picker:'赵六', warehouse:'武汉仓', position:'A04-04', remark:''},
+      {saleNo:'XJ202505004', id:4, storeName:'武汉光谷店', storeCode:'WH001', custCategory:'维修厂', custCode:'C1004', custName:'赵女士', plate:'鄂A22222', vin:'LSVAA4180E2000004', ioNo:'RK202505004', ioType:'配件退货', code:'P004', name:'火花塞', ioQty:-4, unitPrice:50.0, amount:200.0, costPrice:35.0, costTotal:140.0, ioTime:'2025-05-23 13:45', picker:'赵六', warehouse:'武汉仓', position:'A04-04', remark:''},
       {saleNo:'XJ202505005', id:5, storeName:'深圳南山店', storeCode:'SZ001', custCategory:'个人客户', custCode:'C1005', custName:'刘先生', plate:'粤B33333', vin:'LSVAA4180E2000005', ioNo:'RK202505005', ioType:'配件销售', code:'P005', name:'雨刮器', ioQty:5, unitPrice:68.0, amount:340.0, costPrice:48.0, costTotal:240.0, ioTime:'2025-05-24 14:00', picker:'钱七', warehouse:'深圳仓', position:'A05-05', remark:''},
       {saleNo:'XJ202505006', id:6, storeName:'杭州西湖店', storeCode:'HZ001', custCategory:'企业客户', custCode:'C1006', custName:'陈女士', plate:'浙A44444', vin:'LSVAA4180E2000006', ioNo:'RK202505006', ioType:'配件退货', code:'P006', name:'机油', ioQty:-1, unitPrice:85.0, amount:85.0, costPrice:60.0, costTotal:60.0, ioTime:'2025-05-25 15:15', picker:'孙八', warehouse:'杭州仓', position:'A06-06', remark:''},
       {saleNo:'XJ202505007', id:7, storeName:'北京朝阳店', storeCode:'BJ001', custCategory:'保险公司', custCode:'C1001', custName:'张先生', plate:'京A12345', vin:'LSVAA4180E2000001', ioNo:'RK202505007', ioType:'配件销售', code:'P007', name:'变速箱油', ioQty:2, unitPrice:120.0, amount:240.0, costPrice:85.0, costTotal:170.0, ioTime:'2025-05-20 16:30', picker:'张三', warehouse:'中心仓', position:'A01-07', remark:''},
       {saleNo:'XJ202505008', id:8, storeName:'上海浦东店', storeCode:'SH001', custCategory:'维修厂', custCode:'C1002', custName:'李女士', plate:'沪B67890', vin:'LSVAA4180E2000002', ioNo:'RK202505008', ioType:'配件退货', code:'P008', name:'轮胎', ioQty:-3, unitPrice:450.0, amount:1350.0, costPrice:350.0, costTotal:1050.0, ioTime:'2025-05-21 17:45', picker:'李四', warehouse:'上海仓', position:'A02-08', remark:''},
       {saleNo:'XJ202505009', id:9, storeName:'广州天河店', storeCode:'GZ001', custCategory:'个人客户', custCode:'C1003', custName:'王先生', plate:'粤C11111', vin:'LSVAA4180E2000003', ioNo:'RK202505009', ioType:'配件销售', code:'P009', name:'减震器', ioQty:4, unitPrice:280.0, amount:1120.0, costPrice:200.0, costTotal:800.0, ioTime:'2025-05-22 18:00', picker:'王五', warehouse:'广州仓', position:'A03-09', remark:''},
-      {saleNo:'XJ202505010', id:10, storeName:'武汉洪山店', storeCode:'WH001', custCategory:'企业客户', custCode:'C1004', custName:'赵女士', plate:'鄂A22222', vin:'LSVAA4180E2000004', ioNo:'RK202505010', ioType:'配件退货', code:'P010', name:'空调滤清器', ioQty:-5, unitPrice:120.0, amount:600.0, costPrice:80.0, costTotal:400.0, ioTime:'2025-05-23 19:15', picker:'赵六', warehouse:'武汉仓', position:'A04-10', remark:''},
+      {saleNo:'XJ202505010', id:10, storeName:'武汉光谷店', storeCode:'WH001', custCategory:'企业客户', custCode:'C1004', custName:'赵女士', plate:'鄂A22222', vin:'LSVAA4180E2000004', ioNo:'RK202505010', ioType:'配件退货', code:'P010', name:'空调滤清器', ioQty:-5, unitPrice:120.0, amount:600.0, costPrice:80.0, costTotal:400.0, ioTime:'2025-05-23 19:15', picker:'赵六', warehouse:'武汉仓', position:'A04-10', remark:''},
       {saleNo:'XJ202505011', id:11, storeName:'深圳南山店', storeCode:'SZ001', custCategory:'保险公司', custCode:'C1005', custName:'刘先生', plate:'粤B33333', vin:'LSVAA4180E2000005', ioNo:'RK202505011', ioType:'配件销售', code:'P001', name:'机油滤清器', ioQty:1, unitPrice:35.0, amount:35.0, costPrice:25.0, costTotal:25.0, ioTime:'2025-05-24 10:30', picker:'钱七', warehouse:'深圳仓', position:'A05-01', remark:''},
       {saleNo:'XJ202505012', id:12, storeName:'杭州西湖店', storeCode:'HZ001', custCategory:'维修厂', custCode:'C1006', custName:'陈女士', plate:'浙A44444', vin:'LSVAA4180E2000006', ioNo:'RK202505012', ioType:'配件退货', code:'P002', name:'空气滤清器', ioQty:-2, unitPrice:45.0, amount:90.0, costPrice:32.0, costTotal:64.0, ioTime:'2025-05-25 11:45', picker:'孙八', warehouse:'杭州仓', position:'A06-02', remark:''},
       {saleNo:'XJ202505013', id:13, storeName:'北京朝阳店', storeCode:'BJ001', custCategory:'个人客户', custCode:'C1001', custName:'张先生', plate:'京A12345', vin:'LSVAA4180E2000001', ioNo:'RK202505013', ioType:'配件销售', code:'P003', name:'刹车片', ioQty:3, unitPrice:150.0, amount:450.0, costPrice:110.0, costTotal:330.0, ioTime:'2025-05-20 12:00', picker:'张三', warehouse:'中心仓', position:'A01-03', remark:''},
       {saleNo:'XJ202505014', id:14, storeName:'上海浦东店', storeCode:'SH001', custCategory:'企业客户', custCode:'C1002', custName:'李女士', plate:'沪B67890', vin:'LSVAA4180E2000002', ioNo:'RK202505014', ioType:'配件退货', code:'P004', name:'火花塞', ioQty:-4, unitPrice:50.0, amount:200.0, costPrice:35.0, costTotal:140.0, ioTime:'2025-05-21 13:15', picker:'李四', warehouse:'上海仓', position:'A02-04', remark:''},
       {saleNo:'XJ202505015', id:15, storeName:'广州天河店', storeCode:'GZ001', custCategory:'保险公司', custCode:'C1003', custName:'王先生', plate:'粤C11111', vin:'LSVAA4180E2000003', ioNo:'RK202505015', ioType:'配件销售', code:'P005', name:'雨刮器', ioQty:5, unitPrice:68.0, amount:340.0, costPrice:48.0, costTotal:240.0, ioTime:'2025-05-22 14:30', picker:'王五', warehouse:'广州仓', position:'A03-05', remark:''},
-      {saleNo:'XJ202505016', id:16, storeName:'武汉洪山店', storeCode:'WH001', custCategory:'维修厂', custCode:'C1004', custName:'赵女士', plate:'鄂A22222', vin:'LSVAA4180E2000004', ioNo:'RK202505016', ioType:'配件退货', code:'P006', name:'机油', ioQty:-1, unitPrice:85.0, amount:85.0, costPrice:60.0, costTotal:60.0, ioTime:'2025-05-23 15:45', picker:'赵六', warehouse:'武汉仓', position:'A04-06', remark:''},
+      {saleNo:'XJ202505016', id:16, storeName:'武汉光谷店', storeCode:'WH001', custCategory:'维修厂', custCode:'C1004', custName:'赵女士', plate:'鄂A22222', vin:'LSVAA4180E2000004', ioNo:'RK202505016', ioType:'配件退货', code:'P006', name:'机油', ioQty:-1, unitPrice:85.0, amount:85.0, costPrice:60.0, costTotal:60.0, ioTime:'2025-05-23 15:45', picker:'赵六', warehouse:'武汉仓', position:'A04-06', remark:''},
       {saleNo:'XJ202505017', id:17, storeName:'深圳南山店', storeCode:'SZ001', custCategory:'个人客户', custCode:'C1005', custName:'刘先生', plate:'粤B33333', vin:'LSVAA4180E2000005', ioNo:'RK202505017', ioType:'配件销售', code:'P007', name:'变速箱油', ioQty:2, unitPrice:120.0, amount:240.0, costPrice:85.0, costTotal:170.0, ioTime:'2025-05-24 16:00', picker:'钱七', warehouse:'深圳仓', position:'A05-07', remark:''},
       {saleNo:'XJ202505018', id:18, storeName:'杭州西湖店', storeCode:'HZ001', custCategory:'企业客户', custCode:'C1006', custName:'陈女士', plate:'浙A44444', vin:'LSVAA4180E2000006', ioNo:'RK202505018', ioType:'配件退货', code:'P008', name:'轮胎', ioQty:-3, unitPrice:450.0, amount:1350.0, costPrice:350.0, costTotal:1050.0, ioTime:'2025-05-25 17:15', picker:'孙八', warehouse:'杭州仓', position:'A06-08', remark:''},
       {saleNo:'XJ202505019', id:19, storeName:'北京朝阳店', storeCode:'BJ001', custCategory:'保险公司', custCode:'C1001', custName:'张先生', plate:'京A12345', vin:'LSVAA4180E2000001', ioNo:'RK202505019', ioType:'配件销售', code:'P009', name:'减震器', ioQty:4, unitPrice:280.0, amount:1120.0, costPrice:200.0, costTotal:800.0, ioTime:'2025-05-20 18:30', picker:'张三', warehouse:'中心仓', position:'A01-09', remark:''},
@@ -2250,25 +2252,25 @@
       {returnNo:'CG202505001', storeCode:'BJ001', storeName:'北京朝阳店', purchaseNo:'CG202505001A', supplier:'配件供应商A', returnDate:'2025-05-20', partCode:'P001', partName:'机油滤清器', qty:10, price:150.00, amount:1500.00, reason:'质量不合格', status:'已审核', handler:'张三', remark:'外观破损', costUnit:'个', costTotal:1500.00, warehouse:'配件仓库A', location:'A-01'},
       {returnNo:'CG202505002', storeCode:'SH001', storeName:'上海浦东店', purchaseNo:'CG202505001B', supplier:'配件供应商A', returnDate:'2025-05-20', partCode:'P002', partName:'刹车片', qty:8, price:150.00, amount:1200.00, reason:'型号错误', status:'已审核', handler:'李四', remark:'装错型号', costUnit:'个', costTotal:1200.00, warehouse:'配件仓库B', location:'B-02'},
       {returnNo:'CG202505003', storeCode:'GZ001', storeName:'广州天河店', purchaseNo:'CG202505002A', supplier:'配件供应商B', returnDate:'2025-05-21', partCode:'P003', partName:'空气滤清器', qty:15, price:80.00, amount:1200.00, reason:'质量不合格', status:'已审核', handler:'王五', remark:'过滤效果差', costUnit:'个', costTotal:1200.00, warehouse:'配件仓库C', location:'C-03'},
-      {returnNo:'CG202505004', storeCode:'WH001', storeName:'武汉洪山店', purchaseNo:'CG202505002B', supplier:'配件供应商B', returnDate:'2025-05-21', partCode:'P004', partName:'火花塞', qty:20, price:45.00, amount:900.00, reason:'数量错误', status:'已审核', handler:'张三', remark:'多发5个', costUnit:'个', costTotal:900.00, warehouse:'配件仓库A', location:'A-04'},
+      {returnNo:'CG202505004', storeCode:'WH001', storeName:'武汉光谷店', purchaseNo:'CG202505002B', supplier:'配件供应商B', returnDate:'2025-05-21', partCode:'P004', partName:'火花塞', qty:20, price:45.00, amount:900.00, reason:'数量错误', status:'已审核', handler:'张三', remark:'多发5个', costUnit:'个', costTotal:900.00, warehouse:'配件仓库A', location:'A-04'},
       {returnNo:'CG202505005', storeCode:'SZ001', storeName:'深圳南山店', purchaseNo:'CG202505003A', supplier:'配件供应商C', returnDate:'2025-05-22', partCode:'P005', partName:'雨刷片', qty:12, price:60.00, amount:720.00, reason:'质量不合格', status:'已审核', handler:'李四', remark:'刮水效果差', costUnit:'个', costTotal:720.00, warehouse:'配件仓库B', location:'B-05'},
       {returnNo:'CG202505006', storeCode:'HZ001', storeName:'杭州西湖店', purchaseNo:'CG202505003B', supplier:'配件供应商C', returnDate:'2025-05-22', partCode:'P006', partName:'灯泡', qty:25, price:25.00, amount:625.00, reason:'型号错误', status:'已审核', handler:'王五', remark:'功率不匹配', costUnit:'个', costTotal:625.00, warehouse:'配件仓库C', location:'C-06'},
       {returnNo:'CG202505007', storeCode:'BJ001', storeName:'北京朝阳店', purchaseNo:'CG202505004A', supplier:'配件供应商A', returnDate:'2025-05-23', partCode:'P007', partName:'机油', qty:6, price:180.00, amount:1080.00, reason:'质量问题', status:'已审核', handler:'张三', remark:'粘度异常', costUnit:'升', costTotal:1080.00, warehouse:'润滑油仓库A', location:'A-07'},
       {returnNo:'CG202505008', storeCode:'SH001', storeName:'上海浦东店', purchaseNo:'CG202505004B', supplier:'配件供应商A', returnDate:'2025-05-23', partCode:'P008', partName:'空调滤清器', qty:8, price:120.00, amount:960.00, reason:'外观破损', status:'已审核', handler:'李四', remark:'包装损坏', costUnit:'个', costTotal:960.00, warehouse:'配件仓库B', location:'B-08'},
       {returnNo:'CG202505009', storeCode:'GZ001', storeName:'广州天河店', purchaseNo:'CG202505005A', supplier:'配件供应商B', returnDate:'2025-05-24', partCode:'P009', partName:'刹车油', qty:4, price:120.00, amount:480.00, reason:'数量错误', status:'已审核', handler:'王五', remark:'少发2瓶', costUnit:'升', costTotal:480.00, warehouse:'润滑油仓库C', location:'C-09'},
-      {returnNo:'CG202505010', storeCode:'WH001', storeName:'武汉洪山店', purchaseNo:'CG202505005B', supplier:'配件供应商B', returnDate:'2025-05-24', partCode:'P010', partName:'电池', qty:3, price:380.00, amount:1140.00, reason:'质量问题', status:'已审核', handler:'张三', remark:'无法充电', costUnit:'个', costTotal:1140.00, warehouse:'电池仓库A', location:'A-10'},
+      {returnNo:'CG202505010', storeCode:'WH001', storeName:'武汉光谷店', purchaseNo:'CG202505005B', supplier:'配件供应商B', returnDate:'2025-05-24', partCode:'P010', partName:'电池', qty:3, price:380.00, amount:1140.00, reason:'质量问题', status:'已审核', handler:'张三', remark:'无法充电', costUnit:'个', costTotal:1140.00, warehouse:'电池仓库A', location:'A-10'},
       {returnNo:'CG202505011', storeCode:'SZ001', storeName:'深圳南山店', purchaseNo:'CG202505006A', supplier:'配件供应商C', returnDate:'2025-05-25', partCode:'P011', partName:'皮带', qty:5, price:90.00, amount:450.00, reason:'型号错误', status:'已审核', handler:'李四', remark:'长度不匹配', costUnit:'条', costTotal:450.00, warehouse:'传动系统仓库B', location:'B-11'},
       {returnNo:'CG202505012', storeCode:'HZ001', storeName:'杭州西湖店', purchaseNo:'CG202505006B', supplier:'配件供应商C', returnDate:'2025-05-25', partCode:'P012', partName:'离合器片', qty:2, price:350.00, amount:700.00, reason:'质量问题', status:'已审核', handler:'王五', remark:'材质不符', costUnit:'个', costTotal:700.00, warehouse:'传动系统仓库C', location:'C-12'},
       {returnNo:'CG202505013', storeCode:'BJ001', storeName:'北京朝阳店', purchaseNo:'CG202505007A', supplier:'配件供应商A', returnDate:'2025-05-25', partCode:'P013', partName:'变速箱油', qty:3, price:280.00, amount:840.00, reason:'外观破损', status:'已审核', handler:'张三', remark:'包装泄漏', costUnit:'升', costTotal:840.00, warehouse:'润滑油仓库A', location:'A-13'},
       {returnNo:'CG202505014', storeCode:'SH001', storeName:'上海浦东店', purchaseNo:'CG202505007B', supplier:'配件供应商A', returnDate:'2025-05-25', partCode:'P014', partName:'火花塞', qty:10, price:50.00, amount:500.00, reason:'数量错误', status:'已审核', handler:'李四', remark:'多发3个', costUnit:'个', costTotal:500.00, warehouse:'配件仓库B', location:'B-14'},
       {returnNo:'CG202505015', storeCode:'GZ001', storeName:'广州天河店', purchaseNo:'CG202505008A', supplier:'配件供应商B', returnDate:'2025-05-25', partCode:'P015', partName:'雨刷片', qty:6, price:80.00, amount:480.00, reason:'质量问题', status:'已审核', handler:'王五', remark:'刮水效果差', costUnit:'个', costTotal:480.00, warehouse:'配件仓库C', location:'C-15'},
-      {returnNo:'CG202505016', storeCode:'WH001', storeName:'武汉洪山店', purchaseNo:'CG202505008B', supplier:'配件供应商B', returnDate:'2025-05-25', partCode:'P016', partName:'灯泡', qty:12, price:25.00, amount:300.00, reason:'型号错误', status:'已审核', handler:'张三', remark:'色温不符', costUnit:'个', costTotal:300.00, warehouse:'照明仓库A', location:'A-16'},
+      {returnNo:'CG202505016', storeCode:'WH001', storeName:'武汉光谷店', purchaseNo:'CG202505008B', supplier:'配件供应商B', returnDate:'2025-05-25', partCode:'P016', partName:'灯泡', qty:12, price:25.00, amount:300.00, reason:'型号错误', status:'已审核', handler:'张三', remark:'色温不符', costUnit:'个', costTotal:300.00, warehouse:'照明仓库A', location:'A-16'},
       {returnNo:'CG202505017', storeCode:'SZ001', storeName:'深圳南山店', purchaseNo:'CG202505009A', supplier:'配件供应商C', returnDate:'2025-05-25', partCode:'P017', partName:'刹车片', qty:4, price:150.00, amount:600.00, reason:'质量问题', status:'已审核', handler:'李四', remark:'材质问题', costUnit:'个', costTotal:600.00, warehouse:'制动系统仓库B', location:'B-17'},
       {returnNo:'CG202505018', storeCode:'HZ001', storeName:'杭州西湖店', purchaseNo:'CG202505009B', supplier:'配件供应商C', returnDate:'2025-05-25', partCode:'P018', partName:'机油滤清器', qty:5, price:150.00, amount:750.00, reason:'外观破损', status:'已审核', handler:'王五', remark:'外壳破裂', costUnit:'个', costTotal:750.00, warehouse:'配件仓库C', location:'C-18'},
       {returnNo:'CG202505019', storeCode:'BJ001', storeName:'北京朝阳店', purchaseNo:'CG202505010A', supplier:'配件供应商A', returnDate:'2025-05-25', partCode:'P019', partName:'空调滤清器', qty:3, price:120.00, amount:360.00, reason:'数量错误', status:'已审核', handler:'张三', remark:'少发1个', costUnit:'个', costTotal:360.00, warehouse:'空调仓库A', location:'A-19'},
       {returnNo:'CG202505020', storeCode:'SH001', storeName:'上海浦东店', purchaseNo:'CG202505010B', supplier:'配件供应商A', returnDate:'2025-05-25', partCode:'P020', partName:'雨刷片', qty:8, price:60.00, amount:480.00, reason:'质量问题', status:'已审核', handler:'李四', remark:'刮水效果差', costUnit:'个', costTotal:480.00, warehouse:'配件仓库B', location:'B-20'},
       {returnNo:'CG202505021', storeCode:'GZ001', storeName:'广州天河店', purchaseNo:'CG202505011A', supplier:'配件供应商B', returnDate:'2025-05-25', partCode:'P021', partName:'蓄电池', qty:2, price:380.00, amount:760.00, reason:'型号错误', status:'已审核', handler:'王五', remark:'容量不符', costUnit:'个', costTotal:760.00, warehouse:'电池仓库C', location:'C-21'},
-      {returnNo:'CG202505022', storeCode:'WH001', storeName:'武汉洪山店', purchaseNo:'CG202505011B', supplier:'配件供应商B', returnDate:'2025-05-25', partCode:'P022', partName:'空滤', qty:4, price:60.00, amount:240.00, reason:'质量问题', status:'已审核', handler:'张三', remark:'过滤效果差', costUnit:'个', costTotal:240.00, warehouse:'空气滤清器仓库A', location:'A-22'},
+      {returnNo:'CG202505022', storeCode:'WH001', storeName:'武汉光谷店', purchaseNo:'CG202505011B', supplier:'配件供应商B', returnDate:'2025-05-25', partCode:'P022', partName:'空滤', qty:4, price:60.00, amount:240.00, reason:'质量问题', status:'已审核', handler:'张三', remark:'过滤效果差', costUnit:'个', costTotal:240.00, warehouse:'空气滤清器仓库A', location:'A-22'},
       {returnNo:'CG202505023', storeCode:'SZ001', storeName:'深圳南山店', purchaseNo:'CG202505012A', supplier:'配件供应商C', returnDate:'2025-05-25', partCode:'P023', partName:'刹车油', qty:2, price:120.00, amount:240.00, reason:'外观破损', status:'已审核', handler:'李四', remark:'包装泄漏', costUnit:'升', costTotal:240.00, warehouse:'润滑油仓库B', location:'B-23'},
       {returnNo:'CG202505024', storeCode:'HZ001', storeName:'杭州西湖店', purchaseNo:'CG202505012B', supplier:'配件供应商C', returnDate:'2025-05-25', partCode:'P024', partName:'灯泡', qty:6, price:25.00, amount:150.00, reason:'数量错误', status:'已审核', handler:'王五', remark:'多发1个', costUnit:'个', costTotal:150.00, warehouse:'照明仓库C', location:'C-24'},
       {returnNo:'CG202505025', storeCode:'BJ001', storeName:'北京朝阳店', purchaseNo:'CG202505013A', supplier:'配件供应商A', returnDate:'2025-05-25', partCode:'P025', partName:'皮带', qty:1, price:90.00, amount:90.00, reason:'质量问题', status:'已审核', handler:'张三', remark:'老化开裂', costUnit:'条', costTotal:90.00, warehouse:'传动系统仓库A', location:'A-25'}
@@ -2453,25 +2455,25 @@
       {usageNo:'LY202505001', storeName:'北京朝阳店', storeCode:'BJ001', dept:'维修部', applyPerson:'张三', reason:'维修更换', refNo:'RK202505001', type:'内部领用', partCode:'P001', partName:'机油滤清器', qty:2, price:150.00, amount:300.00, costPrice:85.00, costTotal:170.00, time:'2025-05-20 10:30:00', picker:'张三', warehouse:'配件仓库A', location:'A01-02', remark:''},
       {usageNo:'LY202505002', storeName:'上海浦东店', storeCode:'SH001', dept:'保养部', applyPerson:'李四', reason:'定期保养', refNo:'RK202505002', type:'内部领用', partCode:'P002', partName:'刹车片', qty:4, price:150.00, amount:600.00, costPrice:120.00, costTotal:480.00, time:'2025-05-21 14:20:00', picker:'李四', warehouse:'配件仓库B', location:'B02-01', remark:'急件'},
       {usageNo:'LY202505003', storeName:'广州天河店', storeCode:'GZ001', dept:'维修部', applyPerson:'王五', reason:'维修更换', refNo:'RK202505003', type:'内部退回', partCode:'P003', partName:'空气滤清器', qty:1, price:0.00, amount:0.00, costPrice:45.00, costTotal:45.00, time:'2025-05-22 09:15:00', picker:'王五', warehouse:'主仓库', location:'C01-03', remark:'退回入库'},
-      {usageNo:'LY202505004', storeName:'武汉洪山店', storeCode:'WH001', dept:'保养部', applyPerson:'张三', reason:'保养服务', refNo:'RK202505004', type:'内部领用', partCode:'P001', partName:'机油滤清器', qty:3, price:150.00, amount:450.00, costPrice:85.00, costTotal:255.00, time:'2025-05-23 11:40:00', picker:'张三', warehouse:'主仓库', location:'A01-01', remark:''},
+      {usageNo:'LY202505004', storeName:'武汉光谷店', storeCode:'WH001', dept:'保养部', applyPerson:'张三', reason:'保养服务', refNo:'RK202505004', type:'内部领用', partCode:'P001', partName:'机油滤清器', qty:3, price:150.00, amount:450.00, costPrice:85.00, costTotal:255.00, time:'2025-05-23 11:40:00', picker:'张三', warehouse:'主仓库', location:'A01-01', remark:''},
       {usageNo:'LY202505005', storeName:'深圳南山店', storeCode:'SZ001', dept:'配件部', applyPerson:'李四', reason:'配件领用', refNo:'RK202505005', type:'内部领用', partCode:'P004', partName:'火花塞', qty:8, price:50.00, amount:400.00, costPrice:35.00, costTotal:280.00, time:'2025-05-24 16:30:00', picker:'李四', warehouse:'配件仓库B', location:'B03-02', remark:'配件领用'},
       {usageNo:'LY202505006', storeName:'杭州西湖店', storeCode:'HZ001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505006', type:'内部领用', partCode:'P005', partName:'火花塞', qty:5, price:45.00, amount:225.00, costPrice:30.00, costTotal:150.00, time:'2025-05-25 09:15:00', picker:'赵六', warehouse:'配件仓库C', location:'C02-01', remark:'普通领用'},
       {usageNo:'LY202505007', storeName:'北京朝阳店', storeCode:'BJ001', dept:'保养部', applyPerson:'钱七', reason:'定期保养', refNo:'RK202505007', type:'内部领用', partCode:'P006', partName:'空调滤清器', qty:2, price:200.00, amount:400.00, costPrice:140.00, costTotal:280.00, time:'2025-05-25 10:45:00', picker:'钱七', warehouse:'配件仓库A', location:'A01-03', remark:'保养使用'},
       {usageNo:'LY202505008', storeName:'上海浦东店', storeCode:'SH001', dept:'维修部', applyPerson:'孙八', reason:'维修更换', refNo:'RK202505008', type:'内部领用', partCode:'P007', partName:'机油', qty:4, price:180.00, amount:720.00, costPrice:120.00, costTotal:480.00, time:'2025-05-25 11:20:00', picker:'孙八', warehouse:'配件仓库B', location:'B01-05', remark:'急件'},
       {usageNo:'LY202505009', storeName:'广州天河店', storeCode:'GZ001', dept:'配件部', applyPerson:'周九', reason:'配件领用', refNo:'RK202505009', type:'内部领用', partCode:'P008', partName:'雨刷片', qty:6, price:80.00, amount:480.00, costPrice:55.00, costTotal:330.00, time:'2025-05-25 13:30:00', picker:'周九', warehouse:'配件仓库C', location:'C03-02', remark:'普通领用'},
-      {usageNo:'LY202505010', storeName:'武汉洪山店', storeCode:'WH001', dept:'维修部', applyPerson:'吴十', reason:'维修更换', refNo:'RK202505010', type:'内部领用', partCode:'P009', partName:'电池', qty:1, price:450.00, amount:450.00, costPrice:320.00, costTotal:320.00, time:'2025-05-25 14:15:00', picker:'吴十', warehouse:'配件仓库A', location:'A02-01', remark:'维修使用'},
+      {usageNo:'LY202505010', storeName:'武汉光谷店', storeCode:'WH001', dept:'维修部', applyPerson:'吴十', reason:'维修更换', refNo:'RK202505010', type:'内部领用', partCode:'P009', partName:'电池', qty:1, price:450.00, amount:450.00, costPrice:320.00, costTotal:320.00, time:'2025-05-25 14:15:00', picker:'吴十', warehouse:'配件仓库A', location:'A02-01', remark:'维修使用'},
       {usageNo:'LY202505011', storeName:'深圳南山店', storeCode:'SZ001', dept:'保养部', applyPerson:'郑一', reason:'定期保养', refNo:'RK202505011', type:'内部领用', partCode:'P010', partName:'空滤', qty:3, price:60.00, amount:180.00, costPrice:40.00, costTotal:120.00, time:'2025-05-25 15:20:00', picker:'郑一', warehouse:'配件仓库B', location:'B02-03', remark:'保养更换'},
       {usageNo:'LY202505012', storeName:'杭州西湖店', storeCode:'HZ001', dept:'维修部', applyPerson:'王二', reason:'维修更换', refNo:'RK202505012', type:'内部领用', partCode:'P011', partName:'刹车油', qty:2, price:120.00, amount:240.00, costPrice:85.00, costTotal:170.00, time:'2025-05-25 16:05:00', picker:'王二', warehouse:'配件仓库C', location:'C01-05', remark:'维修使用'},
       {usageNo:'LY202505013', storeName:'北京朝阳店', storeCode:'BJ001', dept:'配件部', applyPerson:'李三', reason:'配件领用', refNo:'RK202505013', type:'内部领用', partCode:'P012', partName:'灯泡', qty:10, price:25.00, amount:250.00, costPrice:18.00, costTotal:180.00, time:'2025-05-25 16:50:00', picker:'李三', warehouse:'配件仓库A', location:'A03-01', remark:'照明设备'},
       {usageNo:'LY202505014', storeName:'上海浦东店', storeCode:'SH001', dept:'维修部', applyPerson:'张四', reason:'维修更换', refNo:'RK202505014', type:'内部领用', partCode:'P013', partName:'皮带', qty:2, price:90.00, amount:180.00, costPrice:65.00, costTotal:130.00, time:'2025-05-25 17:25:00', picker:'张四', warehouse:'配件仓库B', location:'B01-08', remark:'发动机维修'},
       {usageNo:'LY202505015', storeName:'广州天河店', storeCode:'GZ001', dept:'保养部', applyPerson:'王五', reason:'定期保养', refNo:'RK202505015', type:'内部领用', partCode:'P014', partName:'变速箱油', qty:1, price:280.00, amount:280.00, costPrice:200.00, costTotal:200.00, time:'2025-05-25 18:00:00', picker:'王五', warehouse:'配件仓库C', location:'C02-05', remark:'保养使用'},
-      {usageNo:'LY202505016', storeName:'武汉洪山店', storeCode:'WH001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505016', type:'内部领用', partCode:'P015', partName:'离合器片', qty:1, price:350.00, amount:350.00, costPrice:250.00, costTotal:250.00, time:'2025-05-25 18:30:00', picker:'赵六', warehouse:'配件仓库A', location:'A04-02', remark:'变速箱维修'},
+      {usageNo:'LY202505016', storeName:'武汉光谷店', storeCode:'WH001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505016', type:'内部领用', partCode:'P015', partName:'离合器片', qty:1, price:350.00, amount:350.00, costPrice:250.00, costTotal:250.00, time:'2025-05-25 18:30:00', picker:'赵六', warehouse:'配件仓库A', location:'A04-02', remark:'变速箱维修'},
       {usageNo:'LY202505017', storeName:'深圳南山店', storeCode:'SZ001', dept:'配件部', applyPerson:'钱七', reason:'配件领用', refNo:'RK202505017', type:'内部领用', partCode:'P016', partName:'火花塞', qty:4, price:50.00, amount:200.00, costPrice:35.00, costTotal:140.00, time:'2025-05-25 19:15:00', picker:'钱七', warehouse:'配件仓库B', location:'B03-04', remark:'发动机维修'},
       {usageNo:'LY202505018', storeName:'杭州西湖店', storeCode:'HZ001', dept:'维修部', applyPerson:'孙八', reason:'维修更换', refNo:'RK202505018', type:'内部领用', partCode:'P017', partName:'刹车片', qty:2, price:150.00, amount:300.00, costPrice:110.00, costTotal:220.00, time:'2025-05-25 20:00:00', picker:'孙八', warehouse:'配件仓库C', location:'C02-08', remark:'底盘维修'},
       {usageNo:'LY202505019', storeName:'北京朝阳店', storeCode:'BJ001', dept:'保养部', applyPerson:'周九', reason:'定期保养', refNo:'RK202505019', type:'内部领用', partCode:'P018', partName:'机油滤清器', qty:2, price:150.00, amount:300.00, costPrice:85.00, costTotal:170.00, time:'2025-05-25 20:45:00', picker:'周九', warehouse:'配件仓库A', location:'A01-04', remark:'保养更换'},
       {usageNo:'LY202505020', storeName:'上海浦东店', storeCode:'SH001', dept:'配件部', applyPerson:'吴十', reason:'配件领用', refNo:'RK202505020', type:'内部领用', partCode:'P019', partName:'雨刷片', qty:8, price:80.00, amount:640.00, costPrice:55.00, costTotal:440.00, time:'2025-05-25 21:30:00', picker:'吴十', warehouse:'配件仓库B', location:'B03-06', remark:'外观美容'},
       {usageNo:'LY202505021', storeName:'广州天河店', storeCode:'GZ001', dept:'维修部', applyPerson:'郑一', reason:'维修更换', refNo:'RK202505021', type:'内部领用', partCode:'P020', partName:'蓄电池', qty:1, price:380.00, amount:380.00, costPrice:270.00, costTotal:270.00, time:'2025-05-25 22:15:00', picker:'郑一', warehouse:'配件仓库C', location:'C04-01', remark:'电路维修'},
-      {usageNo:'LY202505022', storeName:'武汉洪山店', storeCode:'WH001', dept:'保养部', applyPerson:'李三', reason:'定期保养', refNo:'RK202505022', type:'内部领用', partCode:'P021', partName:'空滤', qty:1, price:60.00, amount:60.00, costPrice:40.00, costTotal:40.00, time:'2025-05-25 23:00:00', picker:'李三', warehouse:'配件仓库A', location:'A02-03', remark:'保养更换'},
+      {usageNo:'LY202505022', storeName:'武汉光谷店', storeCode:'WH001', dept:'保养部', applyPerson:'李三', reason:'定期保养', refNo:'RK202505022', type:'内部领用', partCode:'P021', partName:'空滤', qty:1, price:60.00, amount:60.00, costPrice:40.00, costTotal:40.00, time:'2025-05-25 23:00:00', picker:'李三', warehouse:'配件仓库A', location:'A02-03', remark:'保养更换'},
       {usageNo:'LY202505023', storeName:'深圳南山店', storeCode:'SZ001', dept:'维修部', applyPerson:'张四', reason:'维修更换', refNo:'RK202505023', type:'内部领用', partCode:'P022', partName:'刹车油', qty:3, price:120.00, amount:360.00, costPrice:85.00, costTotal:255.00, time:'2025-05-25 23:45:00', picker:'张四', warehouse:'配件仓库B', location:'B02-07', remark:'制动系统'},
       {usageNo:'LY202505024', storeName:'杭州西湖店', storeCode:'HZ001', dept:'配件部', applyPerson:'王五', reason:'配件领用', refNo:'RK202505024', type:'内部领用', partCode:'P023', partName:'灯泡', qty:5, price:25.00, amount:125.00, costPrice:18.00, costTotal:90.00, time:'2025-05-26 00:30:00', picker:'王五', warehouse:'配件仓库C', location:'C03-05', remark:'照明设备'},
       {usageNo:'LY202505025', storeName:'北京朝阳店', storeCode:'BJ001', dept:'维修部', applyPerson:'赵六', reason:'维修更换', refNo:'RK202505025', type:'内部领用', partCode:'P024', partName:'皮带', qty:1, price:90.00, amount:90.00, costPrice:65.00, costTotal:65.00, time:'2025-05-26 01:15:00', picker:'赵六', warehouse:'配件仓库A', location:'A04-04', remark:'发动机维修'},
@@ -2484,40 +2486,6 @@
     var intInitialized = false;
 
     function intToggleFilter() { intFilterExpanded = !intFilterExpanded; toggleFilterGrid('int-filterGrid', intFilterExpanded, INT_SHOW_COUNT); }
-
-    function intFilterCombobox(input) {
-      // 模拟输入框搜索
-      if (input.value) {
-        input.classList.add('active');
-      } else {
-        input.classList.remove('active');
-      }
-    }
-
-    function intShowCombobox(input) {
-      var datalist = input.nextElementSibling.nextElementSibling;
-      if (datalist) {
-        datalist.style.display = 'block';
-      }
-    }
-
-    function intToggleCombobox(span) {
-      var input = span.previousElementSibling;
-      var datalist = span.nextElementSibling;
-      if (datalist.style.display === 'block') {
-        datalist.style.display = 'none';
-      } else {
-        datalist.style.display = 'block';
-        intShowCombobox(input);
-      }
-    }
-
-    function intSelectCombobox(li) {
-      var input = li.parentElement.previousElementSibling.previousElementSibling;
-      input.value = li.textContent;
-      input.classList.add('active');
-      input.nextElementSibling.nextElementSibling.style.display = 'none';
-    }
 
     function intRenderTable() {
       var start = (intCurrentPage - 1) * intPageSize;
@@ -2674,7 +2642,7 @@
     }
   
     // ===== 盘盈盘亏明细 JS =====
-    var icdStores = [{code:'BJ001',name:'北京朝阳店'},{code:'SH001',name:'上海浦东店'},{code:'GZ001',name:'广州天河店'},{code:'WH001',name:'武汉洪山店'},{code:'SZ001',name:'深圳南山店'},{code:'HZ001',name:'杭州西湖店'}];
+    var icdStores = [{code:'BJ001',name:'北京朝阳店'},{code:'SH001',name:'上海浦东店'},{code:'GZ001',name:'广州天河店'},{code:'WH001',name:'武汉光谷店'},{code:'SZ001',name:'深圳南山店'},{code:'HZ001',name:'杭州西湖店'}];
     var icdAllData = [];
     for (var ii = 0; ii < 20; ii++) {
       var idx = ii % 10;
@@ -2934,8 +2902,8 @@
     (function initTsMockData() {
       // '已退回' 已废弃，不再使用
       var statuses = ['待提交','待提交','待技术援助答复','待技术援助答复','已关单','已关单','已作废'/*,'已退废弃'*/];
-      var stores = ['深圳福田店','广州天河店','上海浦东店','北京朝阳店','成都武侯店','武汉洪山店','杭州西湖店','南京鼓楼店'];
-      var storeCodes = ['SZFT001','GZTH002','SHPD003','BJCH004','CDWH005','WHHS006','HZXH007','NJGL008'];
+      var stores = ['深圳福田店','广州天河店','上海浦东店','北京朝阳店','成都锦江店','武汉光谷店','杭州西湖店','南京鼓楼店'];
+      var storeCodes = ['SZFT001','GZ001','SH001','BJ001','CD001','WH001','HZ001','NJGL008'];
       var provinces = ['广东','广东','上海','北京','四川','湖北','浙江','江苏'];
       var cities = ['深圳','广州','上海','北京','成都','武汉','杭州','南京'];
       var carSeries = ['秦PLUS','宋Pro','汉EV','唐DM-i','海豹','元PLUS','驱逐舰05','海豚'];
@@ -3442,16 +3410,35 @@
       }
     }
     function tsSavePanel() {
-      if (!tsCheckFaultCode()) return;
       alert('保存成功'); tsClosePanel();
     }
     function tsSaveAndSubmit() {
-      if (!tsCheckFaultCode()) return;
+      if (!tsCheckRequiredFields()) return;
       if (tsCurrentItem) { tsCurrentItem.status = '待技术援助答复'; }
       alert('提交成功'); tsClosePanel(); tsFilteredData = tsGetFiltered(); tsRenderTable();
     }
-    // 故障代码必填校验
-    function tsCheckFaultCode() {
+    // 必填字段校验（提交时统一校验：是否PDI问题/VIN/故障日期/故障里程/故障现象描述/故障发生条件/排查内容及结果/原因分析/意见或建议 + 故障码条件必填）
+    function tsCheckRequiredFields() {
+      var fields = [
+        ['ts-form-is-pdi','是否PDI问题','select'],
+        ['ts-form-vin','VIN',''],
+        ['ts-form-fault-date','故障日期',''],
+        ['ts-form-fault-mileage','故障里程(km)',''],
+        ['ts-form-customer-complaint','故障现象描述',''],
+        ['ts-form-fault-condition-full','故障发生条件',''],
+        ['ts-form-repair-solution','排查内容及结果',''],
+        ['ts-form-cause-analysis','原因分析',''],
+        ['ts-form-suggestion','意见或建议','']
+      ];
+      for (var i=0;i<fields.length;i++) {
+        var el = document.getElementById(fields[i][0]);
+        if (!el || !el.value.trim()) {
+          alert(fields[i][2] === 'select' ? '请选择' + fields[i][1] : '请填写' + fields[i][1]);
+          if (el) el.focus();
+          return false;
+        }
+      }
+      // 故障码条件必填：有无显示故障码=是 → 故障代码必填
       var hasCode = document.getElementById('ts-form-has-fault-code');
       var code = document.getElementById('ts-form-fault-code');
       if (hasCode && hasCode.value === '是' && code && !code.value.trim()) {
@@ -3814,17 +3801,17 @@
       ];
       fcFilteredData = fcAllData.slice();
       fcRenderFCTable();
-      fcRenderECUOptions();
+      fcInitEcuList();
       fcRenderSelected();
     }
 
-    function fcRenderECUOptions() {
-      var ecus = []; var seen = {};
-      fcAllData.forEach(function(d){ if(!seen[d.ecu]){ seen[d.ecu]=true; ecus.push(d.ecu); } });
-      var sel = document.getElementById('fc-search-ecu');
-      if (!sel) return;
-      sel.innerHTML = '<option value="">全部</option>';
-      ecus.forEach(function(e){ sel.innerHTML += '<option value="'+e+'">'+e+'</option>'; });
+    function fcInitEcuList() {
+      var ecuValues = ['IVI','OIB','TBOX','ACU','AEC','AKC','ALCM','AMP','AR','BAT','BMS','CASS','CBS','CMCS','COMP','CPM','CRF','CWPD','DKM','DLP','DRMLF','DRMLR','DRMRF','DRMRR','EMS','EPBM','EPBS','EPS','ESA','ETC','FLLR','FLRR','FUS','GCU','HCML','HCMR','HOD','IBC','ICD','ISC','ISD-L','ISD-R','MCUR','MFTS','MLMR','MTCULF','NFCAM','OBC','OPCF','OPCR','PDM-LF','PDM-LR','PDM-RF','PDM-RR','POT','PSM','RADP','RLS','RSBD','SCC','SSM','TPMS','WSMFL','WSMFR','WSMRL','WSMRR','WSM-MRR','ZCU','HAD'];
+      var el = document.getElementById('fc-ecu-list');
+      if (el) {
+        el.innerHTML = '<li data-val="" onclick="csComboboxSelect(this)">全部</li>' +
+          ecuValues.map(function(v){ return '<li data-val="'+v+'" onclick="csComboboxSelect(this)">'+v+'</li>'; }).join('');
+      }
     }
 
     function fcRenderFCTable() {
@@ -3959,8 +3946,8 @@
     (function initQrMockData() {
       // 质量报告状态：待提交 / 审核中 / 已退回 / 已驳回 / 审核通过
       var statuses = ['待提交','待提交','审核中','审核中','审核中','已退回','已驳回','审核通过','审核通过'];
-      var stores = ['深圳福田店','广州天河店','上海浦东店','北京朝阳店','成都武侯店','武汉洪山店','杭州西湖店','南京鼓楼店'];
-      var storeCodes = ['SZFT001','GZTH002','SHPD003','BJCH004','CDWH005','WHHS006','HZXH007','NJGL008'];
+      var stores = ['深圳福田店','广州天河店','上海浦东店','北京朝阳店','成都锦江店','武汉光谷店','杭州西湖店','南京鼓楼店'];
+      var storeCodes = ['SZFT001','GZ001','SH001','BJ001','CD001','WH001','HZ001','NJGL008'];
       var provinces = ['广东','广东','上海','北京','四川','湖北','浙江','江苏'];
       var cities = ['深圳','广州','上海','北京','成都','武汉','杭州','南京'];
       var carSeries = ['秦PLUS','宋Pro','汉EV','唐DM-i','海豹','元PLUS','驱逐舰05','海豚'];
@@ -4301,18 +4288,39 @@
       bottomDiv.innerHTML = bottomBtns;
     }
     function qrSavePanel() {
-      var faultPartCode = document.getElementById('qr-form-fault-part-code');
-      if (!faultPartCode || !faultPartCode.value.trim()) { alert('请填写主故障件编码'); if (faultPartCode) faultPartCode.focus(); return; }
       alert('保存成功'); qrClosePanel();
     }
     function qrSaveAndSubmit() {
-      var faultPartCode = document.getElementById('qr-form-fault-part-code');
-      if (!faultPartCode || !faultPartCode.value.trim()) { alert('请填写主故障件编码'); if (faultPartCode) faultPartCode.focus(); return; }
+      if (!qrCheckRequiredFields()) return;
       if (qrCurrentItem) qrCurrentItem.status = '审核中';
       alert('提交成功');
       qrClosePanel();
       qrFilteredData = qrGetFiltered();
       qrRenderTable();
+    }
+    // 必填字段校验（提交/重新提交时统一校验：是否PDI问题/VIN/故障日期/故障里程/主故障件编码/故障现象描述/故障发生条件/排查内容及结果/图片/附件）
+    function qrCheckRequiredFields() {
+      var fields = [
+        ['qr-form-is-pdi','是否PDI问题','select'],
+        ['qr-form-vin','VIN',''],
+        ['qr-form-fault-date','故障日期',''],
+        ['qr-form-fault-mileage','故障里程(km)',''],
+        ['qr-form-fault-part-code','主故障件编码',''],
+        ['qr-form-customer-complaint','故障现象描述',''],
+        ['qr-form-fault-condition-full','故障发生条件',''],
+        ['qr-form-repair-solution','排查内容及结果','']
+      ];
+      for (var i=0;i<fields.length;i++) {
+        var el = document.getElementById(fields[i][0]);
+        if (!el || !el.value.trim()) {
+          alert(fields[i][2] === 'select' ? '请选择' + fields[i][1] : '请填写' + fields[i][1]);
+          if (el) el.focus();
+          return false;
+        }
+      }
+      if (!qrUploadedImages || qrUploadedImages.length === 0) { alert('请上传图片'); return false; }
+      if (!qrUploadedFiles || qrUploadedFiles.length === 0) { alert('请上传附件'); return false; }
+      return true;
     }
     // 审核弹窗
     function qrOpenAuditModal() {
@@ -4391,13 +4399,12 @@
     }
     // 仅保存（不改变状态）
     function qrSavePanelOnly() {
-      var faultPartCode = document.getElementById('qr-form-fault-part-code');
-      if (!faultPartCode || !faultPartCode.value.trim()) { alert('请填写主故障件编码'); if (faultPartCode) faultPartCode.focus(); return; }
       alert('保存成功');
     }
     // 重新提交（已退回 → 审核中）
     function qrReSubmit() {
       if (!qrCurrentItem) return;
+      if (!qrCheckRequiredFields()) return;
       qrCurrentItem.status = '审核中';
       alert('重新提交成功');
       qrClosePanel();
@@ -4999,8 +5006,8 @@
 
     (function initQrhqMockData() {
       var statuses = ['待提交','审核中','审核中','已退回','已驳回','审核通过'];
-      var stores = ['深圳福田店','广州天河店','上海浦东店','北京朝阳店','成都武侯店'];
-      var storeCodes = ['SZFT001','GZTH002','SHPD003','BJCH004','CDWH005'];
+      var stores = ['深圳福田店','广州天河店','上海浦东店','北京朝阳店','成都锦江店'];
+      var storeCodes = ['SZFT001','GZ001','SH001','BJ001','CD001'];
       var provinces = ['广东','广东','上海','北京','四川'];
       var cities = ['深圳','广州','上海','北京','成都'];
       var carSeries = ['秦PLUS','宋Pro','汉EV','唐DM-i','海豹'];
@@ -6318,9 +6325,9 @@
 (function(){
   var spData = [
     {seq:1, code:'WG00001', shortName:'联友科技武汉', fullName:'联友科技武汉分公司', creditCode:'91420100MA4K2XYZ0A', store:'系统默认', storeCode:'-', contact:'王经理', phone:'13800001111', finContact:'赵会计', finPhone:'13800002222', finEmail:'zhao@lanyou.com', address:'湖北省武汉市东湖高新区XX路XX号', desc:'直营店外采默认供应商'},
-    {seq:2, code:'WG00002', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS1B', store:'广州风丽', storeCode:'BJ001', contact:'张三', phone:'15899886688', finContact:'张三', finPhone:'15899886688', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
-    {seq:3, code:'WG00003', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS2C', store:'广州风丽', storeCode:'SH001', contact:'李四', phone:'13148710520', finContact:'李四', finPhone:'13148710520', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
-    {seq:4, code:'WG00004', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS3D', store:'广州风丽', storeCode:'GZ001', contact:'刘美美', phone:'13148714521', finContact:'刘美美', finPhone:'13148714521', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
+    {seq:2, code:'WG00002', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS1B', store:'广州天河店', storeCode:'GZ001', contact:'张三', phone:'15899886688', finContact:'张三', finPhone:'15899886688', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
+    {seq:3, code:'WG00003', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS2C', store:'广州天河店', storeCode:'GZ001', contact:'李四', phone:'13148710520', finContact:'李四', finPhone:'13148710520', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
+    {seq:4, code:'WG00004', shortName:'XX科技', fullName:'XX科技XX有限公司', creditCode:'91440300MA5DPQRS3D', store:'广州天河店', storeCode:'GZ001', contact:'刘美美', phone:'13148714521', finContact:'刘美美', finPhone:'13148714521', finEmail:'', address:'广东省深圳市XXXXXXXXX', desc:''},
   ];
   var spFilterExpanded = false;
 
@@ -6468,18 +6475,18 @@
 var gUserRole = '门店';
 var ppAllData = [
   {seq:1,po:'PO202605001',type:'常规订单',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',edate:'2026-07-25',submitter:'—',stime:'—',sync:'—',recvName:'张丽',recvPhone:'13800001111',recvAddr:'上海市浦东新区张江路100号',auditLog:[],items:[{code:'PJ001',name:'刹车片（前）',taxNo:'',unit:'个',snp:1,price:380,shortQty:5,rel:'',qty:5,amount:1900,maxOrder:100,replace:'',stock:50,intransit:10}]},
-  {seq:2,po:'PO202605002',type:'油品订单',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',edate:'2026-07-28',submitter:'—',stime:'—',sync:'—',recvName:'陈刚',recvPhone:'13900002222',recvAddr:'广州市天河区珠江新城88号',auditLog:[],items:[]},
+  {seq:2,po:'PO202605002',type:'油品订单',region:'华南',district:'广州',store:'广州天河店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',edate:'2026-07-28',submitter:'—',stime:'—',sync:'—',recvName:'陈刚',recvPhone:'13900002222',recvAddr:'广州市天河区珠江新城88号',auditLog:[],items:[]},
   {seq:3,po:'PO202605003',type:'紧急订单',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:5,amount:'18,500.00',shortage:'DQ202605001',status:'门店审核中',source:'主机厂代下',remark:'—',edate:'2026-07-25',submitter:'王五',stime:'2026-07-20 09:00:00',sync:'—',recvName:'李娜',recvPhone:'13700003333',recvAddr:'北京市朝阳区建国路56号',auditLog:[{step:'门店保存提交',person:'王五',time:'2026-07-20 09:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
-  {seq:4,po:'PO202605004',type:'常规订单',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'门店审核中',source:'门店下单',remark:'—',edate:'2026-07-27',submitter:'赵六',stime:'2026-07-20 14:00:00',sync:'—',recvName:'赵静',recvPhone:'13600004444',recvAddr:'成都市武侯区人民南路120号',auditLog:[{step:'门店保存提交',person:'赵六',time:'2026-07-20 14:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
+  {seq:4,po:'PO202605004',type:'常规订单',region:'西南',district:'成都',store:'成都锦江店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'门店审核中',source:'门店下单',remark:'—',edate:'2026-07-27',submitter:'赵六',stime:'2026-07-20 14:00:00',sync:'—',recvName:'赵静',recvPhone:'13600004444',recvAddr:'成都市武侯区人民南路120号',auditLog:[{step:'门店保存提交',person:'赵六',time:'2026-07-20 14:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
   {seq:5,po:'PO202605005',type:'绿色通道',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:6,amount:'28,300.00',shortage:'—',status:'门店审核中',source:'主机厂代下',remark:'—',edate:'—',submitter:'孙七',stime:'2026-07-21 10:00:00',sync:'—',recvName:'孙伟',recvPhone:'13500005555',recvAddr:'沈阳市和平区南京北街66号',auditLog:[{step:'门店保存提交',person:'孙七',time:'2026-07-21 10:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
   {seq:6,po:'PO202606001',type:'常规订单',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:10,amount:'41,200.00',shortage:'—',status:'审核通过',source:'门店下单',remark:'—',edate:'2026-07-26',submitter:'周八',stime:'2026-07-21 14:00:00',sync:'—',recvName:'周琳',recvPhone:'13400006666',recvAddr:'杭州市西湖区文三路88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-21 15:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-21 17:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
   {seq:7,po:'PO202606002',type:'定制订单',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:3,amount:'62,100.00',shortage:'—',status:'审核通过',source:'门店下单',remark:'—',edate:'2026-07-29',submitter:'吴九',stime:'2026-07-22 09:00:00',sync:'2026-07-22 17:00',recvName:'吴敏',recvPhone:'13300007777',recvAddr:'武汉市光谷大道特1号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-22 11:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-22 15:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
-  {seq:8,po:'PO202606003',type:'油品订单',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:7,amount:'35,600.00',shortage:'DQ202606001',status:'审核通过',source:'主机厂代下',remark:'—',edate:'2026-07-28',submitter:'郑十',stime:'2026-07-22 13:00:00',sync:'—',recvName:'郑佳',recvPhone:'13200008888',recvAddr:'深圳市福田区深南大道200号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-22 14:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-22 16:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
+  {seq:8,po:'PO202606003',type:'油品订单',region:'华南',district:'深圳',store:'深圳南山店',scode:'SZ001',variety:7,amount:'35,600.00',shortage:'DQ202606001',status:'审核通过',source:'主机厂代下',remark:'—',edate:'2026-07-28',submitter:'郑十',stime:'2026-07-22 13:00:00',sync:'—',recvName:'郑佳',recvPhone:'13200008888',recvAddr:'深圳市福田区深南大道200号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-22 14:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-22 16:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
   {seq:9,po:'PO202606004',type:'常规订单',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',shortage:'—',status:'总部审核中',source:'门店下单',remark:'—',edate:'2026-07-30',submitter:'张三',stime:'2026-07-23 09:00:00',sync:'—',recvName:'张涛',recvPhone:'13100009999',recvAddr:'天津市和平区南京路88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-23 10:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
   {seq:10,po:'PO202606005',type:'紧急订单',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:4,amount:'22,800.00',shortage:'DQ202606002',status:'总部审核中',source:'主机厂代下',remark:'—',edate:'2026-07-26',submitter:'李四',stime:'2026-07-23 14:00:00',sync:'—',recvName:'李莉',recvPhone:'13000001010',recvAddr:'重庆市渝中区解放碑8号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-23 15:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
   {seq:11,po:'PO202606006',type:'常规订单',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'43,500.00',shortage:'—',status:'总部审核中',source:'门店下单',remark:'—',edate:'2026-07-30',submitter:'王五',stime:'2026-07-24 09:00:00',sync:'2026-07-24 17:00',recvName:'王芳',recvPhone:'13900002020',recvAddr:'南京市建邺区奥体大街99号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-24 11:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
-  {seq:12,po:'PO202606007',type:'绿色通道',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:13,amount:'51,200.00',shortage:'—',status:'审核不通过',source:'主机厂代下',remark:'超出预算额度',edate:'—',submitter:'赵六',stime:'2026-07-24 13:00:00',sync:'—',recvName:'赵琳',recvPhone:'13800003030',recvAddr:'广州市天河区天河北路233号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-25 09:00:00',result:'驳回',opinion:'超出预算额度',attach:''}],items:[]},
-  {seq:13,po:'PO202607001',type:'常规订单',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:6,amount:'26,400.00',shortage:'—',status:'审核不通过',source:'门店下单',remark:'配件编码不匹配',edate:'2026-07-30',submitter:'孙七',stime:'2026-07-25 08:00:00',sync:'2026-07-25 16:00',recvName:'孙明',recvPhone:'13700004040',recvAddr:'大连市中山区人民路50号',auditLog:[{step:'总部审核',person:'李明',time:'2026-07-26 09:00:00',result:'驳回',opinion:'配件编码不匹配',attach:''}],items:[]},
+  {seq:12,po:'PO202606007',type:'绿色通道',region:'华南',district:'广州',store:'广州天河店',scode:'GZ001',variety:13,amount:'51,200.00',shortage:'—',status:'审核不通过',source:'主机厂代下',remark:'超出预算额度',edate:'—',submitter:'赵六',stime:'2026-07-24 13:00:00',sync:'—',recvName:'赵琳',recvPhone:'13800003030',recvAddr:'广州市天河区天河北路233号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-25 09:00:00',result:'驳回',opinion:'超出预算额度',attach:''}],items:[]},
+  {seq:13,po:'PO202607001',type:'常规订单',region:'华东',district:'上海',store:'上海奕境汽车服务',scode:'DL001',variety:6,amount:'26,400.00',shortage:'—',status:'审核不通过',source:'门店下单',remark:'配件编码不匹配',edate:'2026-07-30',submitter:'孙七',stime:'2026-07-25 08:00:00',sync:'2026-07-25 16:00',recvName:'孙明',recvPhone:'13700004040',recvAddr:'大连市中山区人民路50号',auditLog:[{step:'总部审核',person:'李明',time:'2026-07-26 09:00:00',result:'驳回',opinion:'配件编码不匹配',attach:''}],items:[]},
   {seq:14,po:'PO202607002',type:'油品订单',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'33,700.00',shortage:'DQ202607001',status:'主机厂已审核',source:'门店下单',remark:'—',edate:'2026-07-30',submitter:'周八',stime:'2026-07-25 10:00:00',sync:'2026-07-30 10:00',recvName:'周丽',recvPhone:'13600005050',recvAddr:'长沙市岳麓区麓山南路100号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-25 12:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-25 14:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-30 10:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
   {seq:15,po:'PO202607003',type:'定制订单',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'55,000.00',shortage:'—',status:'主机厂已审核',source:'主机厂代下',remark:'—',edate:'2026-07-31',submitter:'吴九',stime:'2026-07-26 09:00:00',sync:'2026-07-31 09:00',recvName:'吴军',recvPhone:'13500006060',recvAddr:'苏州市工业园区现代大道88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-26 11:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-26 14:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-31 09:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
   {seq:16,po:'PO202607004',type:'常规订单',region:'华北',district:'石家庄',store:'石家庄长安店',scode:'SJZ001',variety:10,amount:'40,100.00',shortage:'—',status:'主机厂已审核',source:'门店下单',remark:'—',edate:'2026-08-02',submitter:'郑十',stime:'2026-07-26 14:00:00',sync:'2026-07-31 10:00',recvName:'郑伟',recvPhone:'13400007070',recvAddr:'石家庄市长安区中山东路88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-26 15:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-26 16:00:00',result:'通过',opinion:'同意',attach:''},{step:'主机厂审核',person:'主机厂',time:'2026-07-31 10:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
@@ -6643,21 +6650,21 @@ function initPp() {
 
 // ===== 配件采购明细 JS =====
 var ppdAllData = [
-  {seq:1,code:'PJ001',name:'刹车片（前）',region:'华东',district:'上海',store:'上海浦东店',po:'PO202605001',adate:'2026-05-20',oem:'OE202605001',dno:'DH202605001',pqty:50,dqty:50,uprice:'380.00',amount:'19,000.00'},
-  {seq:2,code:'PJ002',name:'机油滤清器',region:'华南',district:'广州',store:'广州风丽店',po:'PO202605002',adate:'2026-05-21',oem:'OE202605002',dno:'DH202605002',pqty:80,dqty:80,uprice:'85.00',amount:'6,800.00'},
-  {seq:3,code:'PJ003',name:'空气滤芯',region:'华北',district:'北京',store:'北京朝阳店',po:'PO202605003',adate:'2026-05-22',oem:'OE202605003',dno:'DH202605003',pqty:60,dqty:0,uprice:'120.00',amount:'7,200.00'},
-  {seq:4,code:'PJ004',name:'火花塞',region:'西南',district:'成都',store:'成都武侯店',po:'PO202605004',adate:'2026-05-23',oem:'OE202605004',dno:'DH202605004',pqty:40,dqty:40,uprice:'95.00',amount:'3,800.00'},
-  {seq:5,code:'PJ005',name:'刹车油',region:'东北',district:'沈阳',store:'沈阳和平店',po:'PO202605005',adate:'2026-05-24',oem:'OE202605005',dno:'DH202605005',pqty:30,dqty:30,uprice:'150.00',amount:'4,500.00'},
-  {seq:6,code:'PJ006',name:'空调滤芯',region:'华东',district:'杭州',store:'杭州西湖店',po:'PO202606001',adate:'2026-06-01',oem:'OE202606001',dno:'DH202606001',pqty:70,dqty:70,uprice:'90.00',amount:'6,300.00'},
-  {seq:7,code:'PJ001',name:'刹车片（前）',region:'华中',district:'武汉',store:'武汉光谷店',po:'PO202606002',adate:'2026-06-02',oem:'OE202606002',dno:'DH202606002',pqty:35,dqty:35,uprice:'380.00',amount:'13,300.00'},
-  {seq:8,code:'PJ007',name:'变速箱油',region:'华南',district:'深圳',store:'深圳福田店',po:'PO202606003',adate:'2026-06-03',oem:'OE202606003',dno:'DH202606003',pqty:25,dqty:0,uprice:'260.00',amount:'6,500.00'},
-  {seq:9,code:'PJ002',name:'机油滤清器',region:'华北',district:'天津',store:'天津和平店',po:'PO202606004',adate:'2026-06-05',oem:'OE202606004',dno:'DH202606004',pqty:90,dqty:90,uprice:'85.00',amount:'7,650.00'},
-  {seq:10,code:'PJ008',name:'雨刮器',region:'西南',district:'重庆',store:'重庆渝中店',po:'PO202606005',adate:'2026-06-06',oem:'OE202606005',dno:'DH202606005',pqty:45,dqty:0,uprice:'65.00',amount:'2,925.00'},
-  {seq:11,code:'PJ003',name:'空气滤芯',region:'华东',district:'南京',store:'南京建邺店',po:'PO202606006',adate:'2026-06-08',oem:'OE202606006',dno:'DH202606006',pqty:55,dqty:55,uprice:'120.00',amount:'6,600.00'},
-  {seq:12,code:'PJ004',name:'火花塞',region:'华南',district:'广州',store:'广州天河店',po:'PO202606007',adate:'2026-06-09',oem:'OE202606007',dno:'DH202606007',pqty:38,dqty:38,uprice:'95.00',amount:'3,610.00'},
-  {seq:13,code:'PJ005',name:'刹车油',region:'东北',district:'大连',store:'大连中山店',po:'PO202607001',adate:'2026-07-01',oem:'OE202607001',dno:'DH202607001',pqty:42,dqty:42,uprice:'150.00',amount:'6,300.00'},
-  {seq:14,code:'PJ006',name:'空调滤芯',region:'华中',district:'长沙',store:'长沙岳麓店',po:'PO202607002',adate:'2026-07-02',oem:'OE202607002',dno:'DH202607002',pqty:65,dqty:0,uprice:'90.00',amount:'5,850.00'},
-  {seq:15,code:'PJ001',name:'刹车片（前）',region:'华东',district:'苏州',store:'苏州园区店',po:'PO202607003',adate:'2026-07-03',oem:'OE202607003',dno:'DH202607003',pqty:28,dqty:0,uprice:'380.00',amount:'10,640.00'}
+  {seq:1,code:'PJ001',name:'刹车片（前）',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',po:'PO202605001',adate:'2026-05-20',oem:'OE202605001',dno:'DH202605001',pqty:50,dqty:50,uprice:'380.00',amount:'19,000.00'},
+  {seq:2,code:'PJ002',name:'机油滤清器',region:'华南',district:'广州',store:'广州天河店',scode:'GZ001',po:'PO202605002',adate:'2026-05-21',oem:'OE202605002',dno:'DH202605002',pqty:80,dqty:80,uprice:'85.00',amount:'6,800.00'},
+  {seq:3,code:'PJ003',name:'空气滤芯',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',po:'PO202605003',adate:'2026-05-22',oem:'OE202605003',dno:'DH202605003',pqty:60,dqty:0,uprice:'120.00',amount:'7,200.00'},
+  {seq:4,code:'PJ004',name:'火花塞',region:'西南',district:'成都',store:'成都锦江店',scode:'CD001',po:'PO202605004',adate:'2026-05-23',oem:'OE202605004',dno:'DH202605004',pqty:40,dqty:40,uprice:'95.00',amount:'3,800.00'},
+  {seq:5,code:'PJ005',name:'刹车油',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',po:'PO202605005',adate:'2026-05-24',oem:'OE202605005',dno:'DH202605005',pqty:30,dqty:30,uprice:'150.00',amount:'4,500.00'},
+  {seq:6,code:'PJ006',name:'空调滤芯',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',po:'PO202606001',adate:'2026-06-01',oem:'OE202606001',dno:'DH202606001',pqty:70,dqty:70,uprice:'90.00',amount:'6,300.00'},
+  {seq:7,code:'PJ001',name:'刹车片（前）',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',po:'PO202606002',adate:'2026-06-02',oem:'OE202606002',dno:'DH202606002',pqty:35,dqty:35,uprice:'380.00',amount:'13,300.00'},
+  {seq:8,code:'PJ007',name:'变速箱油',region:'华南',district:'深圳',store:'深圳南山店',scode:'SZ001',po:'PO202606003',adate:'2026-06-03',oem:'OE202606003',dno:'DH202606003',pqty:25,dqty:0,uprice:'260.00',amount:'6,500.00'},
+  {seq:9,code:'PJ002',name:'机油滤清器',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',po:'PO202606004',adate:'2026-06-05',oem:'OE202606004',dno:'DH202606004',pqty:90,dqty:90,uprice:'85.00',amount:'7,650.00'},
+  {seq:10,code:'PJ008',name:'雨刮器',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',po:'PO202606005',adate:'2026-06-06',oem:'OE202606005',dno:'DH202606005',pqty:45,dqty:0,uprice:'65.00',amount:'2,925.00'},
+  {seq:11,code:'PJ003',name:'空气滤芯',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',po:'PO202606006',adate:'2026-06-08',oem:'OE202606006',dno:'DH202606006',pqty:55,dqty:55,uprice:'120.00',amount:'6,600.00'},
+  {seq:12,code:'PJ004',name:'火花塞',region:'华南',district:'广州',store:'广州天河店',scode:'GZ001',po:'PO202606007',adate:'2026-06-09',oem:'OE202606007',dno:'DH202606007',pqty:38,dqty:38,uprice:'95.00',amount:'3,610.00'},
+  {seq:13,code:'PJ005',name:'刹车油',region:'华东',district:'上海',store:'上海奕境汽车服务',scode:'DL001',po:'PO202607001',adate:'2026-07-01',oem:'OE202607001',dno:'DH202607001',pqty:42,dqty:42,uprice:'150.00',amount:'6,300.00'},
+  {seq:14,code:'PJ006',name:'空调滤芯',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',po:'PO202607002',adate:'2026-07-02',oem:'OE202607002',dno:'DH202607002',pqty:65,dqty:0,uprice:'90.00',amount:'5,850.00'},
+  {seq:15,code:'PJ001',name:'刹车片（前）',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',po:'PO202607003',adate:'2026-07-03',oem:'OE202607003',dno:'DH202607003',pqty:28,dqty:0,uprice:'380.00',amount:'10,640.00'}
 ];
 var ppdFilteredData = [];
 var ppdCurrentPage = 1;
@@ -6787,15 +6794,15 @@ function initPpd() {
 // ===== 配件发货及交期 JS =====
 var pdsAllData = [
   {seq:1,po:'PO202605001',store:'上海浦东店',scode:'SH001',province:'上海',stime:'2026-05-18 10:00:00',hqno:'HQ202605001',hqtime:'2026-05-18 16:00:00',dno:'DH202605001',dtime:'2026-05-22 09:00:00',lno:'SF1234567890',ltime:'2026-05-23 14:00:00',lnode:'已到达上海分拨中心',est:'2026-05-25',signtime:'2026-05-25 15:30:00',pcode:'PJ001',pname:'刹车片（前）'},
-  {seq:2,po:'PO202605002',store:'广州风丽店',scode:'GZ001',province:'广东',stime:'2026-05-19 11:00:00',hqno:'HQ202605002',hqtime:'2026-05-19 17:30:00',dno:'DH202605002',dtime:'2026-05-23 10:00:00',lno:'YT9876543210',ltime:'2026-05-24 08:00:00',lnode:'已签收',est:'2026-05-26',signtime:'2026-05-26 10:00:00',pcode:'PJ002',pname:'机油滤清器'},
+  {seq:2,po:'PO202605002',store:'广州天河店',scode:'GZ001',province:'广东',stime:'2026-05-19 11:00:00',hqno:'HQ202605002',hqtime:'2026-05-19 17:30:00',dno:'DH202605002',dtime:'2026-05-23 10:00:00',lno:'YT9876543210',ltime:'2026-05-24 08:00:00',lnode:'已签收',est:'2026-05-26',signtime:'2026-05-26 10:00:00',pcode:'PJ002',pname:'机油滤清器'},
   {seq:3,po:'PO202605003',store:'北京朝阳店',scode:'BJ001',province:'北京',stime:'2026-05-20 08:30:00',hqno:'HQ202605003',hqtime:'2026-05-20 15:00:00',dno:'—',dtime:'—',lno:'—',ltime:'—',lnode:'待发货',est:'2026-06-10',signtime:'—',pcode:'PJ003',pname:'空气滤芯'},
   {seq:4,po:'PO202606001',store:'杭州西湖店',scode:'HZ001',province:'浙江',stime:'2026-05-30 09:00:00',hqno:'HQ202606001',hqtime:'2026-05-30 16:00:00',dno:'DH202606001',dtime:'2026-06-05 08:00:00',lno:'ZTO202606001',ltime:'2026-06-06 10:00:00',lnode:'运输中-已离开杭州',est:'2026-06-08',signtime:'2026-06-08 14:00:00',pcode:'PJ004',pname:'火花塞'},
   {seq:5,po:'PO202606002',store:'武汉光谷店',scode:'WH001',province:'湖北',stime:'2026-06-01 10:30:00',hqno:'HQ202606002',hqtime:'2026-06-01 17:00:00',dno:'DH202606002',dtime:'2026-06-06 09:00:00',lno:'SF202606002',ltime:'2026-06-07 11:00:00',lnode:'运输中-已到达武汉',est:'2026-06-08',signtime:'2026-06-08 16:00:00',pcode:'PJ001',pname:'刹车片（前）'},
-  {seq:6,po:'PO202606003',store:'深圳福田店',scode:'SZ001',province:'广东',stime:'2026-06-03 13:00:00',hqno:'HQ202606003',hqtime:'2026-06-03 18:00:00',dno:'DH202606003',dtime:'2026-06-08 10:00:00',lno:'YT202606003',ltime:'2026-06-09 09:00:00',lnode:'运输中-已到达深圳',est:'2026-06-10',signtime:'—',pcode:'PJ005',pname:'刹车油'},
+  {seq:6,po:'PO202606003',store:'深圳南山店',scode:'SZ001',province:'广东',stime:'2026-06-03 13:00:00',hqno:'HQ202606003',hqtime:'2026-06-03 18:00:00',dno:'DH202606003',dtime:'2026-06-08 10:00:00',lno:'YT202606003',ltime:'2026-06-09 09:00:00',lnode:'运输中-已到达深圳',est:'2026-06-10',signtime:'—',pcode:'PJ005',pname:'刹车油'},
   {seq:7,po:'PO202606004',store:'天津和平店',scode:'TJ001',province:'天津',stime:'2026-06-04 08:00:00',hqno:'HQ202606004',hqtime:'2026-06-04 15:00:00',dno:'DH202606004',dtime:'2026-06-09 11:00:00',lno:'ZTO202606004',ltime:'2026-06-10 08:00:00',lnode:'已签收',est:'2026-06-11',signtime:'2026-06-11 09:30:00',pcode:'PJ006',pname:'空调滤芯'},
   {seq:8,po:'PO202606005',store:'重庆渝中店',scode:'CQ001',province:'重庆',stime:'2026-06-06 15:00:00',hqno:'HQ202606005',hqtime:'2026-06-06 19:00:00',dno:'DH202606005',dtime:'2026-06-11 09:00:00',lno:'SF202606005',ltime:'2026-06-12 14:00:00',lnode:'待发货',est:'2026-06-20',signtime:'—',pcode:'PJ007',pname:'变速箱油'},
   {seq:9,po:'PO202606006',store:'南京建邺店',scode:'NJ001',province:'江苏',stime:'2026-06-07 09:30:00',hqno:'HQ202606006',hqtime:'2026-06-07 17:00:00',dno:'DH202606006',dtime:'2026-06-12 08:00:00',lno:'YT202606006',ltime:'2026-06-13 10:00:00',lnode:'已签收',est:'2026-06-14',signtime:'2026-06-14 15:00:00',pcode:'PJ008',pname:'雨刮器'},
-  {seq:10,po:'PO202607001',store:'大连中山店',scode:'DL001',province:'辽宁',stime:'2026-06-30 10:00:00',hqno:'HQ202607001',hqtime:'2026-06-30 17:30:00',dno:'DH202607001',dtime:'2026-07-03 09:00:00',lno:'SF202607001',ltime:'2026-07-03 14:00:00',lnode:'运输中',est:'2026-07-05',signtime:'—',pcode:'PJ002',pname:'机油滤清器'}
+  {seq:10,po:'PO202607001',store:'上海奕境汽车服务',scode:'DL001',province:'上海',stime:'2026-06-30 10:00:00',hqno:'HQ202607001',hqtime:'2026-06-30 17:30:00',dno:'DH202607001',dtime:'2026-07-03 09:00:00',lno:'SF202607001',ltime:'2026-07-03 14:00:00',lnode:'运输中',est:'2026-07-05',signtime:'—',pcode:'PJ002',pname:'机油滤清器'}
 ];
 var pdsFilteredData = [];
 var pdsCurrentPage = 1;
@@ -6938,17 +6945,17 @@ function initPds() {
 // ===== 厂端缺件查询 JS =====
 var fsqAllData = [
   {seq:1,name:'刹车片（前）',code:'PJ001',store:'上海浦东店',scode:'SH001',province:'上海',po:'PO202605003',type:'紧急',oem:'OE202605003',pqty:50,aqty:35,sqty:15,shours:'72',sync:'2026-05-18 15:00',oreply:'2026-05-19 14:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
-  {seq:2,name:'机油滤清器',code:'PJ002',store:'广州风丽店',scode:'GZ001',province:'广东',po:'PO202605004',type:'常规',oem:'OE202605004',pqty:80,aqty:60,sqty:20,shours:'48',sync:'2026-05-19 16:30',oreply:'2026-05-20 10:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
+  {seq:2,name:'机油滤清器',code:'PJ002',store:'广州天河店',scode:'GZ001',province:'广东',po:'PO202605004',type:'常规',oem:'OE202605004',pqty:80,aqty:60,sqty:20,shours:'48',sync:'2026-05-19 16:30',oreply:'2026-05-20 10:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
   {seq:3,name:'空气滤芯',code:'PJ003',store:'北京朝阳店',scode:'BJ001',province:'北京',po:'PO202605005',type:'绿色',oem:'OE202605005',pqty:60,aqty:60,sqty:0,shours:'0',sync:'2026-05-20 09:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'},
-  {seq:4,name:'火花塞',code:'PJ004',store:'成都武侯店',scode:'CD001',province:'四川',po:'PO202606001',type:'常规',oem:'OE202606001',pqty:40,aqty:25,sqty:15,shours:'96',sync:'2026-05-30 14:00',oreply:'2026-05-31 16:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
+  {seq:4,name:'火花塞',code:'PJ004',store:'成都锦江店',scode:'CD001',province:'四川',po:'PO202606001',type:'常规',oem:'OE202606001',pqty:40,aqty:25,sqty:15,shours:'96',sync:'2026-05-30 14:00',oreply:'2026-05-31 16:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
   {seq:5,name:'刹车油',code:'PJ005',store:'沈阳和平店',scode:'SY001',province:'辽宁',po:'PO202606005',type:'绿色',oem:'OE202606005',pqty:30,aqty:10,sqty:20,shours:'120',sync:'2026-06-06 15:30',oreply:'2026-06-08 09:00',capply:'2026-06-09',caudit:'2026-06-10 10:00',cstatus:'已取消',sstatus:'已发货'},
   {seq:6,name:'空调滤芯',code:'PJ006',store:'杭州西湖店',scode:'HZ001',province:'浙江',po:'PO202606002',type:'定制',oem:'OE202606002',pqty:70,aqty:70,sqty:0,shours:'0',sync:'2026-06-01 16:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'},
-  {seq:7,name:'变速箱油',code:'PJ007',store:'深圳福田店',scode:'SZ001',province:'广东',po:'PO202606007',type:'绿色',oem:'OE202606007',pqty:25,aqty:10,sqty:15,shours:'168',sync:'2026-06-09 10:00',oreply:'2026-06-12 11:00',capply:'2026-06-13',caudit:'—',cstatus:'审核驳回',sstatus:'已发货'},
+  {seq:7,name:'变速箱油',code:'PJ007',store:'深圳南山店',scode:'SZ001',province:'广东',po:'PO202606007',type:'绿色',oem:'OE202606007',pqty:25,aqty:10,sqty:15,shours:'168',sync:'2026-06-09 10:00',oreply:'2026-06-12 11:00',capply:'2026-06-13',caudit:'—',cstatus:'审核驳回',sstatus:'已发货'},
   {seq:8,name:'雨刮器',code:'PJ008',store:'天津和平店',scode:'TJ001',province:'天津',po:'PO202607001',type:'油品',oem:'OE202607001',pqty:45,aqty:45,sqty:0,shours:'0',sync:'2026-06-30 16:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'},
   {seq:9,name:'刹车片（后）',code:'PJ009',store:'重庆渝中店',scode:'CQ001',province:'重庆',po:'PO202607003',type:'定制',oem:'OE202607003',pqty:28,aqty:8,sqty:20,shours:'240',sync:'2026-07-02 15:00',oreply:'—',capply:'2026-07-03',caudit:'—',cstatus:'申请中',sstatus:'待处理'},
   {seq:10,name:'空调压缩机',code:'PJ010',store:'南京建邺店',scode:'NJ001',province:'江苏',po:'PO202607004',type:'紧急',oem:'OE202607004',pqty:10,aqty:5,sqty:5,shours:'36',sync:'2026-07-02 08:00',oreply:'2026-07-02 16:00',capply:'2026-07-02',caudit:'—',cstatus:'自动驳回',sstatus:'已发货'},
   {seq:11,name:'机油滤清器',code:'PJ002',store:'武汉光谷店',scode:'WH001',province:'湖北',po:'PO202607005',type:'油品',oem:'OE202607005',pqty:55,aqty:40,sqty:15,shours:'48',sync:'2026-07-03 09:00',oreply:'—',capply:'2026-07-01',caudit:'—',cstatus:'审核驳回',sstatus:'待处理'},
-  {seq:12,name:'空气滤芯',code:'PJ003',store:'大连中山店',scode:'DL001',province:'辽宁',po:'PO202607006',type:'绿色',oem:'OE202607006',pqty:38,aqty:38,sqty:0,shours:'0',sync:'2026-07-02 11:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'}
+  {seq:12,name:'空气滤芯',code:'PJ003',store:'上海奕境汽车服务',scode:'DL001',province:'上海',po:'PO202607006',type:'绿色',oem:'OE202607006',pqty:38,aqty:38,sqty:0,shours:'0',sync:'2026-07-02 11:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'}
 ];
 var fsqFilteredData = [];
 var fsqCurrentPage = 1;
@@ -7152,18 +7159,18 @@ function initFsq() {
 // ===== 配件外采 JS =====
 var epAllData = [
   {seq:1,orderNo:'WC202605001',supplier:'联友科技武汉',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:8,amount:'32,500.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-05-20 15:00:00',edate:'2026-06-12',submitter:'张三',stime:'2026-05-18 09:00:00',recvName:'张伟',recvPhone:'13800001234',recvAddr:'上海市浦东新区张江路 88 号',items:[{code:'290F60471R',name:'整车控制器',unit:'EA',snp:10,price:799.70,qty:30,amount:23991.00,maxOrder:999,replace:'无',stock:20,intransit:0},{code:'291A12345X',name:'电机控制模块',unit:'EA',snp:5,price:850.90,qty:10,amount:8509.00,maxOrder:500,replace:'无',stock:8,intransit:3}],auditLog:[{step:'门店审核',person:'李明',time:'2026-05-20 15:00:00',result:'通过',opinion:'同意',attach:''}]},
-  {seq:2,orderNo:'WC202605002',supplier:'XX科技',region:'华南',district:'广州',store:'广州风丽店',scode:'GZ001',variety:5,amount:'18,200.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-05-21 10:00:00',edate:'2026-06-15',submitter:'李四',stime:'2026-05-19 14:00:00',recvName:'李娜',recvPhone:'13800005678',recvAddr:'广州市天河区天河路 100 号',items:[{code:'292B22222Y',name:'前大灯总成',unit:'个',snp:1,price:680.00,qty:20,amount:13600.00,maxOrder:200,replace:'无',stock:15,intransit:5},{code:'292B33333Z',name:'后尾灯总成',unit:'个',snp:1,price:460.00,qty:10,amount:4600.00,maxOrder:200,replace:'无',stock:10,intransit:2}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-05-21 10:00:00',result:'通过',opinion:'同意',attach:''}]},
+  {seq:2,orderNo:'WC202605002',supplier:'XX科技',region:'华南',district:'广州',store:'广州天河店',scode:'GZ001',variety:5,amount:'18,200.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-05-21 10:00:00',edate:'2026-06-15',submitter:'李四',stime:'2026-05-19 14:00:00',recvName:'李娜',recvPhone:'13800005678',recvAddr:'广州市天河区天河路 100 号',items:[{code:'292B22222Y',name:'前大灯总成',unit:'个',snp:1,price:680.00,qty:20,amount:13600.00,maxOrder:200,replace:'无',stock:15,intransit:5},{code:'292B33333Z',name:'后尾灯总成',unit:'个',snp:1,price:460.00,qty:10,amount:4600.00,maxOrder:200,replace:'无',stock:10,intransit:2}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-05-21 10:00:00',result:'通过',opinion:'同意',attach:''}]},
   {seq:3,orderNo:'WC202605003',supplier:'联友科技武汉',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:3,amount:'28,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-22 11:00:00',recvName:'王强',recvPhone:'13800009012',recvAddr:'北京市朝阳区建国路 88 号',items:[{code:'293C11111A',name:'制动片套装',unit:'套',snp:4,price:520.00,qty:35,amount:18200.00,maxOrder:300,replace:'无',stock:25,intransit:0},{code:'293C22222B',name:'刹车盘',unit:'个',snp:2,price:520.00,qty:20,amount:10400.00,maxOrder:300,replace:'无',stock:12,intransit:4}],auditLog:[]},
-  {seq:4,orderNo:'WC202606001',supplier:'XX科技',region:'西南',district:'成都',store:'成都武侯店',scode:'CD001',variety:6,amount:'22,400.00',status:'已驳回',remark:'供应商资质过期',auditor:'李明',atime:'2026-06-02 09:30:00',edate:'—',submitter:'赵六',stime:'2026-06-01 08:00:00',recvName:'刘洋',recvPhone:'13800003456',recvAddr:'成都市武侯区人民南路 88 号',items:[{code:'294D11111C',name:'蓄电池',unit:'EA',snp:6,price:880.00,qty:20,amount:17600.00,maxOrder:400,replace:'无',stock:18,intransit:0},{code:'294D22222D',name:'发电机',unit:'EA',snp:3,price:480.00,qty:10,amount:4800.00,maxOrder:400,replace:'无',stock:6,intransit:2}],auditLog:[{step:'门店审核',person:'李明',time:'2026-06-02 09:30:00',result:'驳回',opinion:'供应商资质过期',attach:''}]},
+  {seq:4,orderNo:'WC202606001',supplier:'XX科技',region:'西南',district:'成都',store:'成都锦江店',scode:'CD001',variety:6,amount:'22,400.00',status:'已驳回',remark:'供应商资质过期',auditor:'李明',atime:'2026-06-02 09:30:00',edate:'—',submitter:'赵六',stime:'2026-06-01 08:00:00',recvName:'刘洋',recvPhone:'13800003456',recvAddr:'成都市武侯区人民南路 88 号',items:[{code:'294D11111C',name:'蓄电池',unit:'EA',snp:6,price:880.00,qty:20,amount:17600.00,maxOrder:400,replace:'无',stock:18,intransit:0},{code:'294D22222D',name:'发电机',unit:'EA',snp:3,price:480.00,qty:10,amount:4800.00,maxOrder:400,replace:'无',stock:6,intransit:2}],auditLog:[{step:'门店审核',person:'李明',time:'2026-06-02 09:30:00',result:'驳回',opinion:'供应商资质过期',attach:''}]},
   {seq:5,orderNo:'WC202606002',supplier:'联友科技武汉',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:10,amount:'45,800.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-06-05 14:00:00',edate:'2026-06-25',submitter:'孙七',stime:'2026-06-04 10:30:00',recvName:'陈静',recvPhone:'13800007890',recvAddr:'沈阳市和平区青年大街 200 号',items:[{code:'295E11111E',name:'中控显示屏',unit:'EA',snp:2,price:1290.00,qty:25,amount:32250.00,maxOrder:250,replace:'无',stock:9,intransit:1},{code:'295E22222F',name:'仪表盘总成',unit:'EA',snp:2,price:1355.00,qty:10,amount:13550.00,maxOrder:250,replace:'无',stock:5,intransit:0}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-06-05 14:00:00',result:'通过',opinion:'同意',attach:''}]},
   {seq:6,orderNo:'WC202606003',supplier:'XX科技',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:7,amount:'31,200.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-06-28',submitter:'周八',stime:'2026-06-08 15:00:00',recvName:'赵磊',recvPhone:'13800001122',recvAddr:'杭州市西湖区文三路 100 号',items:[{code:'296F11111G',name:'空调压缩机',unit:'EA',snp:4,price:760.00,qty:30,amount:22800.00,maxOrder:350,replace:'无',stock:14,intransit:3},{code:'296F22222H',name:'冷凝器',unit:'EA',snp:3,price:840.00,qty:10,amount:8400.00,maxOrder:350,replace:'无',stock:7,intransit:1}],auditLog:[]},
   {seq:7,orderNo:'WC202606004',supplier:'联友科技武汉',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:12,amount:'52,100.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-06-10 11:00:00',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-09 09:00:00',recvName:'孙琳',recvPhone:'13800003344',recvAddr:'武汉市洪山区光谷大道 88 号',items:[{code:'297G11111I',name:'动力电池模组',unit:'EA',snp:1,price:1999.00,qty:20,amount:39980.00,maxOrder:100,replace:'无',stock:4,intransit:2},{code:'297G22222J',name:'电池管理单元',unit:'EA',snp:1,price:1212.00,qty:10,amount:12120.00,maxOrder:100,replace:'无',stock:3,intransit:0}],auditLog:[{step:'门店审核',person:'李明',time:'2026-06-10 11:00:00',result:'通过',opinion:'同意',attach:''}]},
-  {seq:8,orderNo:'WC202606005',supplier:'XX科技',region:'华南',district:'深圳',store:'深圳福田店',scode:'SZ001',variety:4,amount:'15,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-30',submitter:'郑十',stime:'2026-06-12 16:00:00',recvName:'周涛',recvPhone:'13800005566',recvAddr:'深圳市福田区深南大道 100 号',items:[{code:'298H11111K',name:'雨刮电机',unit:'EA',snp:8,price:320.00,qty:30,amount:9600.00,maxOrder:600,replace:'无',stock:30,intransit:0},{code:'298H22222L',name:'喷水壶总成',unit:'EA',snp:5,price:600.00,qty:10,amount:6000.00,maxOrder:600,replace:'无',stock:12,intransit:5}],auditLog:[]},
+  {seq:8,orderNo:'WC202606005',supplier:'XX科技',region:'华南',district:'深圳',store:'深圳南山店',scode:'SZ001',variety:4,amount:'15,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-30',submitter:'郑十',stime:'2026-06-12 16:00:00',recvName:'周涛',recvPhone:'13800005566',recvAddr:'深圳市福田区深南大道 100 号',items:[{code:'298H11111K',name:'雨刮电机',unit:'EA',snp:8,price:320.00,qty:30,amount:9600.00,maxOrder:600,replace:'无',stock:30,intransit:0},{code:'298H22222L',name:'喷水壶总成',unit:'EA',snp:5,price:600.00,qty:10,amount:6000.00,maxOrder:600,replace:'无',stock:12,intransit:5}],auditLog:[]},
   {seq:9,orderNo:'WC202607001',supplier:'联友科技武汉',region:'华北',district:'天津',store:'天津和平店',scode:'TJ001',variety:9,amount:'38,900.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-01 10:30:00',edate:'2026-07-20',submitter:'张三',stime:'2026-06-30 08:00:00',recvName:'吴敏',recvPhone:'13800007788',recvAddr:'天津市和平区南京路 100 号',items:[{code:'299I11111M',name:'转向机总成',unit:'EA',snp:2,price:1290.00,qty:20,amount:25800.00,maxOrder:200,replace:'无',stock:8,intransit:1},{code:'299I22222N',name:'转向拉杆',unit:'EA',snp:2,price:1310.00,qty:10,amount:13100.00,maxOrder:200,replace:'无',stock:5,intransit:0}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-01 10:30:00',result:'通过',opinion:'同意',attach:''}]},
   {seq:10,orderNo:'WC202607002',supplier:'XX科技',region:'西南',district:'重庆',store:'重庆渝中店',scode:'CQ001',variety:5,amount:'19,700.00',status:'已取消',remark:'门店预算调整',auditor:'李明',atime:'2026-07-02 16:00:00',edate:'—',submitter:'李四',stime:'2026-07-01 13:00:00',recvName:'郑浩',recvPhone:'13800009900',recvAddr:'重庆市渝中区解放碑步行街 88 号',items:[{code:'300J11111O',name:'音响主机',unit:'EA',snp:4,price:690.00,qty:20,amount:13800.00,maxOrder:300,replace:'无',stock:16,intransit:0},{code:'300J22222P',name:'扬声器套装',unit:'套',snp:2,price:590.00,qty:10,amount:5900.00,maxOrder:300,replace:'无',stock:9,intransit:3}],auditLog:[{step:'门店审核',person:'李明',time:'2026-07-02 16:00:00',result:'通过',opinion:'门店取消',attach:''}]},
   {seq:11,orderNo:'WC202607003',supplier:'联友科技武汉',region:'华东',district:'南京',store:'南京建邺店',scode:'NJ001',variety:11,amount:'44,300.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-22',submitter:'王五',stime:'2026-07-02 10:00:00',recvName:'冯雪',recvPhone:'13800002233',recvAddr:'南京市建邺区江东中路 100 号',items:[{code:'301K11111Q',name:'前保险杠总成',unit:'EA',snp:2,price:880.00,qty:35,amount:30800.00,maxOrder:350,replace:'无',stock:11,intransit:2},{code:'301K22222R',name:'后保险杠总成',unit:'EA',snp:2,price:1350.00,qty:10,amount:13500.00,maxOrder:350,replace:'无',stock:6,intransit:0}],auditLog:[]},
-  {seq:12,orderNo:'WC202607004',supplier:'XX科技',region:'华南',district:'广州',store:'广州天河店',scode:'GZ002',variety:6,amount:'25,100.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-03 09:00:00',edate:'2026-07-25',submitter:'赵六',stime:'2026-07-02 14:00:00',recvName:'蒋勇',recvPhone:'13800004455',recvAddr:'广州市天河区天河路 200 号',items:[{code:'302L11111S',name:'天窗总成',unit:'EA',snp:1,price:1090.00,qty:15,amount:16350.00,maxOrder:150,replace:'无',stock:7,intransit:1},{code:'302L22222T',name:'天窗导轨',unit:'EA',snp:1,price:875.00,qty:10,amount:8750.00,maxOrder:150,replace:'无',stock:4,intransit:0}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-03 09:00:00',result:'通过',opinion:'同意',attach:''}]},
-  {seq:13,orderNo:'WC202607005',supplier:'联友科技武汉',region:'东北',district:'大连',store:'大连中山店',scode:'DL001',variety:3,amount:'12,800.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-07-15',submitter:'孙七',stime:'2026-07-03 09:30:00',recvName:'韩梅',recvPhone:'13800006677',recvAddr:'大连市中山区人民路 100 号',items:[{code:'303M11111U',name:'轮毂轴承',unit:'EA',snp:6,price:420.00,qty:20,amount:8400.00,maxOrder:500,replace:'无',stock:22,intransit:0},{code:'303M22222V',name:'半轴总成',unit:'EA',snp:3,price:440.00,qty:10,amount:4400.00,maxOrder:500,replace:'无',stock:10,intransit:4}],auditLog:[]},
+  {seq:12,orderNo:'WC202607004',supplier:'XX科技',region:'华南',district:'广州',store:'广州天河店',scode:'GZ001',variety:6,amount:'25,100.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-07-03 09:00:00',edate:'2026-07-25',submitter:'赵六',stime:'2026-07-02 14:00:00',recvName:'蒋勇',recvPhone:'13800004455',recvAddr:'广州市天河区天河路 200 号',items:[{code:'302L11111S',name:'天窗总成',unit:'EA',snp:1,price:1090.00,qty:15,amount:16350.00,maxOrder:150,replace:'无',stock:7,intransit:1},{code:'302L22222T',name:'天窗导轨',unit:'EA',snp:1,price:875.00,qty:10,amount:8750.00,maxOrder:150,replace:'无',stock:4,intransit:0}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-03 09:00:00',result:'通过',opinion:'同意',attach:''}]},
+  {seq:13,orderNo:'WC202607005',supplier:'联友科技武汉',region:'华东',district:'上海',store:'上海奕境汽车服务',scode:'DL001',variety:3,amount:'12,800.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-07-15',submitter:'孙七',stime:'2026-07-03 09:30:00',recvName:'韩梅',recvPhone:'13800006677',recvAddr:'大连市中山区人民路 100 号',items:[{code:'303M11111U',name:'轮毂轴承',unit:'EA',snp:6,price:420.00,qty:20,amount:8400.00,maxOrder:500,replace:'无',stock:22,intransit:0},{code:'303M22222V',name:'半轴总成',unit:'EA',snp:3,price:440.00,qty:10,amount:4400.00,maxOrder:500,replace:'无',stock:10,intransit:4}],auditLog:[]},
   {seq:14,orderNo:'WC202607006',supplier:'XX科技',region:'华中',district:'长沙',store:'长沙岳麓店',scode:'CS001',variety:8,amount:'35,200.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-07-03 14:00:00',edate:'2026-07-28',submitter:'周八',stime:'2026-07-03 08:00:00',recvName:'曹宇',recvPhone:'13800008899',recvAddr:'长沙市岳麓区麓谷大道 88 号',items:[{code:'304N11111W',name:'排气管总成',unit:'EA',snp:4,price:760.00,qty:30,amount:22800.00,maxOrder:400,replace:'无',stock:13,intransit:2},{code:'304N22222X',name:'消声器',unit:'EA',snp:3,price:1240.00,qty:10,amount:12400.00,maxOrder:400,replace:'无',stock:6,intransit:0}],auditLog:[{step:'门店审核',person:'李明',time:'2026-07-03 14:00:00',result:'通过',opinion:'同意',attach:''}]},
   {seq:15,orderNo:'WC202607007',supplier:'联友科技武汉',region:'华东',district:'苏州',store:'苏州园区店',scode:'SZJ001',variety:2,amount:'58,000.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-07-30',submitter:'吴九',stime:'2026-07-03 11:00:00',recvName:'邓超',recvPhone:'13800001010',recvAddr:'苏州市工业园区星湖街 100 号',items:[{code:'305O11111Y',name:'发动机ECU',unit:'EA',snp:1,price:1999.00,qty:20,amount:39980.00,maxOrder:100,replace:'无',stock:5,intransit:1},{code:'305O22222Z',name:'节气门体',unit:'EA',snp:1,price:1802.00,qty:10,amount:18020.00,maxOrder:100,replace:'无',stock:3,intransit:0}],auditLog:[]}
 ];
@@ -8016,10 +8023,10 @@ var ussPage = 1;
 var ussPageSize = 20;
 
 (function() {
-  var regions = ['华东','华东','华东','华南','华南','华北','华北','西南','西南','东北','东北','华中','华中'];
-  var districts = ['上海','上海','杭州','广州','深圳','北京','石家庄','成都','重庆','沈阳','大连','武汉','长沙'];
+  var regions = ['华东','华东','华东','华南','华南','华北','华北','西南','西南','东北','华东','华中','华中'];
+  var districts = ['上海','上海','杭州','广州','深圳','北京','石家庄','成都','重庆','沈阳','上海','武汉','长沙'];
   var storeCodes = ['SH001','SH002','HZ001','GZ001','SZ001','BJ001','SJZ01','CD001','CQ001','SY001','DL001','WH001','CS001'];
-  var storeNames = ['上海浦东店','上海徐汇店','杭州西湖店','广州天河店','深圳南山店','北京朝阳店','石家庄桥西店','成都锦江店','重庆渝中店','沈阳和平店','大连中山店','武汉江汉店','长沙岳麓店'];
+  var storeNames = ['上海浦东店','上海徐汇店','杭州西湖店','广州天河店','深圳南山店','北京朝阳店','石家庄桥西店','成都锦江店','重庆渝中店','沈阳和平店','上海奕境汽车服务','武汉光谷店','长沙岳麓店'];
   var plates = ['沪A88888','沪B12345','浙A66666','粤A99999','粤B55555','京A11111','冀A77777','川A33333','渝A22222','辽A44444','辽B88888','鄂A66666','湘A77777'];
   var custNames = ['张伟','李娜','王强','陈敏','刘洋','赵磊','孙丽','周杰','吴芳','郑宇','钱峰','马杰','朱琳'];
   var svcTypes = ['保养','一般维修','钣喷','保险理赔','保养','召回','索赔','事故维修','保养','一般维修','钣喷','保险理赔','索赔'];
@@ -8745,7 +8752,7 @@ applyMenuByRole(gUserRole);
 // ===== 维修统计查询（原：综合查询维修情况） =====
 var RSQ_FIELDS = ['seq','storeName','storeCode','orderNo','vin','plate','cust','custTel','carSeries','carModel','engineNo','color','mileage','inDate','doneDate','settleDate','repairType','repairItem','faultDesc','repairContent','receiver','advisor','mainTech','qc','groupLeader','dispatcher','pjNormal','gsNormal','fjNormal','pjNormalTotal','pjNormalRate','pjWarranty','gsWarranty','fjWarranty','pjWarrantyTotal','pjWarrantyRate','pjFree','gsFree','fjFree','pjFreeTotal','pjFreeRate','pjIns','gsIns','fjIns','pjInsTotal','pjInsRate','pjAgree','gsAgree','fjAgree','pjAgreeTotal','pjAgreeRate','pjInner','gsInner','fjInner','pjInnerTotal','pjInnerRate','pjPackage','gsPackage','othPackage','pjPackageTotal','pjPackageRate','pjYsTotal','gsYsTotal','fjYsTotal','ysTotal','grossRate','jszTotal','ssTotal','gdRate','orderTotal','isSettle','isPdi','createTime','updateTime'];
 var RSQ_SUM_ORDER = ['pjNormal','gsNormal','fjNormal','pjNormalTotal','pjWarranty','gsWarranty','fjWarranty','pjWarrantyTotal','pjFree','gsFree','fjFree','pjFreeTotal','pjIns','gsIns','fjIns','pjInsTotal','pjAgree','gsAgree','fjAgree','pjAgreeTotal','pjInner','gsInner','fjInner','pjInnerTotal','pjPackage','gsPackage','othPackage','pjPackageTotal','pjYsTotal','gsYsTotal','fjYsTotal','ysTotal','pjYsRate','gsYsRate','fjYsRate','jszTotal','ssTotal','gdRate','orderTotal','grossRate'];
-var RSQ_STORES = [['上海奕境汽车服务','SH001'],['北京奕境汽车服务','BJ001'],['广州奕境汽车服务','GZ001'],['成都奕境汽车服务','CD001']];
+var RSQ_STORES = [['上海奕境汽车服务','DL001'],['北京奕境汽车销售','DL003'],['广州奕境汽车有限公司','DL002'],['成都奕境汽车服务','DL004']];
 var RSQ_TYPES = ['普通维修','定保','保险','保养','专案','召回','服务活动','免费保养','PDI'];
 var rsqAllData = [];
 var rsqView = []; // 过滤后的展示数据（基准为 rsqAllData）
@@ -8889,7 +8896,7 @@ function initRepairStatsQuery(){
 }
 
 // ======= 维修工时查询 =======
-var RLH_STORES = [['BJ001','北京朝阳店'],['SH001','上海浦东店'],['GZ001','广州天河店'],['WH001','武汉洪山店'],['SZ001','深圳南山店'],['HZ001','杭州西湖店']];
+var RLH_STORES = [['BJ001','北京朝阳店'],['SH001','上海浦东店'],['GZ001','广州天河店'],['WH001','武汉光谷店'],['SZ001','深圳南山店'],['HZ001','杭州西湖店']];
 var RLH_TEAMS = [['机修一组','机电'],['机修二组','机电'],['钣喷组','钣喷'],['机电组','机电'],['保养组','保养'],['诊断组','机电']];
 var RLH_ENGINEERS = [['E001','张伟'],['E002','李娜'],['E003','王芳'],['E004','刘强'],['E005','陈静'],['E006','赵磊']];
 var RLH_ITEMS = ['常规保养','刹车片更换','钣金修复','发动机检修','空调保养','四轮定位','变速箱油更换','雨刮更换'];
@@ -9460,6 +9467,212 @@ function initMinOrderAmount(){
 function moSetDis(idx,v){ NP['min-order-amount'].allData[idx].disabled=v; NP['min-order-amount'].allData[idx].updateTime=npDateTime('mo-d',idx); }
 function moSetAmt(idx,v){ var n=parseFloat(v); if(isNaN(n)||n<=0){ npToast('采购最小金额需为>0正整数'); return; } NP['min-order-amount'].allData[idx].minAmount=v; NP['min-order-amount'].allData[idx].updateTime=npDateTime('mo-a',idx); }
 function moSaveAll(){ var cnt=0; document.querySelectorAll('.mo-chk:checked').forEach(function(c){ cnt++; }); npToast('已保存 '+cnt+' 行'); }
+
+/* ============ 模块：门店管理（系统设置） ============ */
+NP['store-manage'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
+(function(){
+  var a = [
+    { code:'BJ001', shortName:'北京朝阳店', name:'北京朝阳店', type:'用户中心', region:'华北', district:'北京', province:'北京', city:'北京', address:'北京市朝阳区建国路88号', status:'营业店', disabled:'启用' },
+    { code:'SH001', shortName:'上海浦东店', name:'上海浦东店', type:'用户中心', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市浦东新区张江路100号', status:'营业店', disabled:'启用' },
+    { code:'SH002', shortName:'上海徐汇店', name:'上海徐汇店', type:'商超店', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市徐汇区漕溪北路88号', status:'营业店', disabled:'启用' },
+    { code:'GZ001', shortName:'广州天河店', name:'广州天河店', type:'用户中心', region:'华南', district:'广州', province:'广东', city:'广州', address:'广州市天河区天河路100号', status:'营业店', disabled:'启用' },
+    { code:'SZ001', shortName:'深圳南山店', name:'深圳南山店', type:'商超店', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市南山区深南大道88号', status:'营业店', disabled:'启用' },
+    { code:'SZFT001', shortName:'深圳福田店', name:'深圳福田店', type:'商超店', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市福田区福华三路88号', status:'营业店', disabled:'启用' },
+    { code:'HZ001', shortName:'杭州西湖店', name:'杭州西湖店', type:'用户中心', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市西湖区文三路88号', status:'营业店', disabled:'启用' },
+    { code:'WH001', shortName:'武汉光谷店', name:'武汉光谷店', type:'用户中心', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'武汉市洪山区光谷大道88号', status:'营业店', disabled:'启用' },
+    { code:'CD001', shortName:'成都锦江店', name:'成都锦江店', type:'用户中心', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市锦江区人民南路120号', status:'营业店', disabled:'启用' },
+    { code:'CS001', shortName:'长沙岳麓店', name:'长沙岳麓店', type:'商超店', region:'华中', district:'长沙', province:'湖南', city:'长沙', address:'长沙市岳麓区麓山南路100号', status:'营业店', disabled:'启用' },
+    { code:'DL001', shortName:'上海奕境汽车服务', name:'上海奕境汽车服务', type:'城市展厅', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市闵行区申长路88号', status:'营业店', disabled:'启用' },
+    { code:'DL002', shortName:'广州奕境汽车有限公司', name:'广州奕境汽车有限公司', type:'城市展厅', region:'华南', district:'广州', province:'广东', city:'广州', address:'广州市白云区机场路88号', status:'营业店', disabled:'启用' },
+    { code:'DL003', shortName:'北京奕境汽车销售', name:'北京奕境汽车销售', type:'城市展厅', region:'华北', district:'北京', province:'北京', city:'北京', address:'北京市海淀区中关村大街88号', status:'营业店', disabled:'启用' },
+    { code:'DL004', shortName:'成都奕境汽车服务', name:'成都奕境汽车服务', type:'商超店', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市武侯区人民南路88号', status:'营业店', disabled:'启用' },
+    { code:'DL005', shortName:'沈阳奕境汽车有限公司', name:'沈阳奕境汽车有限公司', type:'城市展厅', region:'东北', district:'沈阳', province:'辽宁', city:'沈阳', address:'沈阳市和平区青年大街88号', status:'营业店', disabled:'启用' },
+    { code:'DL006', shortName:'杭州奕境汽车服务', name:'杭州奕境汽车服务', type:'POP展', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市滨江区江南大道88号', status:'营业店', disabled:'启用' },
+    { code:'DL007', shortName:'深圳奕境汽车销售', name:'深圳奕境汽车销售', type:'城市展厅', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市宝安区宝安大道88号', status:'营业店', disabled:'启用' },
+    { code:'DL008', shortName:'武汉奕境汽车有限公司', name:'武汉奕境汽车有限公司', type:'POP展', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'武汉市江汉区解放大道88号', status:'营业店', disabled:'启用' },
+    { code:'NJ001', shortName:'南京建邺店', name:'南京建邺店', type:'商超店', region:'华东', district:'南京', province:'江苏', city:'南京', address:'南京市建邺区江东中路88号', status:'营业店', disabled:'启用' },
+    { code:'NJGL008', shortName:'南京鼓楼店', name:'南京鼓楼店', type:'城市展厅', region:'华东', district:'南京', province:'江苏', city:'南京', address:'南京市鼓楼区中央路88号', status:'营业店', disabled:'启用' },
+    { code:'S001', shortName:'奕境经开店', name:'奕境经开店', type:'用户中心', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市嘉定区博园路88号', status:'营业店', disabled:'启用' },
+    { code:'S002', shortName:'奕境滨江店', name:'奕境滨江店', type:'POP展', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市滨江区滨盛路88号', status:'营业店', disabled:'启用' },
+    { code:'S003', shortName:'奕境高新店', name:'奕境高新店', type:'POP展', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市高新区天府大道88号', status:'营业店', disabled:'启用' },
+    { code:'S004', shortName:'奕境空港店', name:'奕境空港店', type:'城市展厅', region:'华北', district:'天津', province:'天津', city:'天津', address:'天津市东丽区机场大道88号', status:'营业店', disabled:'启用' },
+    { code:'TJ001', shortName:'天津和平店', name:'天津和平店', type:'商超店', region:'华北', district:'天津', province:'天津', city:'天津', address:'天津市和平区南京路88号', status:'营业店', disabled:'启用' },
+    { code:'CQ001', shortName:'重庆渝中店', name:'重庆渝中店', type:'商超店', region:'西南', district:'重庆', province:'重庆', city:'重庆', address:'重庆市渝中区解放碑88号', status:'营业店', disabled:'启用' },
+    { code:'SY001', shortName:'沈阳和平店', name:'沈阳和平店', type:'POP展', region:'东北', district:'沈阳', province:'辽宁', city:'沈阳', address:'沈阳市和平区太原街88号', status:'营业店', disabled:'启用' },
+    { code:'SJZ01', shortName:'石家庄桥西店', name:'石家庄桥西店', type:'商超店', region:'华北', district:'石家庄', province:'河北', city:'石家庄', address:'石家庄市桥西区中山西路88号', status:'营业店', disabled:'启用' },
+    { code:'SJZ001', shortName:'石家庄长安店', name:'石家庄长安店', type:'POP展', region:'华北', district:'石家庄', province:'河北', city:'石家庄', address:'石家庄市长安区中山东路88号', status:'营业店', disabled:'停用' },
+    { code:'SZJ001', shortName:'苏州园区店', name:'苏州园区店', type:'城市展厅', region:'华东', district:'苏州', province:'江苏', city:'苏州', address:'苏州市工业园区现代大道88号', status:'营业店', disabled:'启用' },
+    { code:'KM001', shortName:'昆明五华店', name:'昆明五华店', type:'POP展', region:'西南', district:'昆明', province:'云南', city:'昆明', address:'昆明市五华区人民中路88号', status:'营业店', disabled:'停用' },
+    { code:'XM001', shortName:'厦门思明店', name:'厦门思明店', type:'商超店', region:'华南', district:'厦门', province:'福建', city:'厦门', address:'厦门市思明区湖滨南路88号', status:'营业店', disabled:'启用' },
+    { code:'NB001', shortName:'宁波鄞州店', name:'宁波鄞州店', type:'商超店', region:'华东', district:'宁波', province:'浙江', city:'宁波', address:'宁波市鄞州区中山东路88号', status:'营业店', disabled:'启用' },
+    { code:'JN001', shortName:'济南历下店', name:'济南历下店', type:'商超店', region:'华北', district:'济南', province:'山东', city:'济南', address:'济南市历下区经十路88号', status:'营业店', disabled:'启用' }
+  ];
+  NP['store-manage'].allData = a;
+})();
+function initStoreManage(){
+  var K='store-manage'; var st=NP[K];
+  var filter = npFItem('门店编码','<input type="text" id="sm-f-code" placeholder="请输入">') +
+    npFItem('门店简称','<input type="text" id="sm-f-name" placeholder="请输入">') +
+    npComboMarkup('store-manage','sm-f-region','大区',['华东','华南','华北','西南','东北','华中']) +
+    npComboMarkup('store-manage','sm-f-district','小区',['北京','上海','广州','深圳','杭州','武汉','成都','长沙','南京','天津','重庆','沈阳','石家庄','苏州','昆明','厦门','宁波','济南']) +
+    npComboMarkup('store-manage','sm-f-province','省份',['北京','上海','广东','浙江','湖北','四川','湖南','江苏','天津','重庆','辽宁','河北','云南','福建','山东']) +
+    npComboMarkup('store-manage','sm-f-city','城市',['北京','上海','广州','深圳','杭州','武汉','成都','长沙','南京','天津','重庆','沈阳','石家庄','苏州','昆明','厦门','宁波','济南']) +
+    npSelect('门店类型','<select id="sm-f-type"><option value="">请选择</option><option>用户中心</option><option>商超店</option><option>POP展</option><option>城市展厅</option></select>') +
+    npSelect('营业状态','<select id="sm-f-status"><option value="">请选择</option><option>营业店</option><option>停用</option></select>');
+  var cols=[
+    {t:'序号',w:60,f:function(r,i){return i+1;}},
+    {t:'门店编码',w:100,f:function(r){return r.code;}},
+    {t:'门店简称',f:function(r){return npEscape(r.shortName);}},
+    {t:'门店名称',f:function(r){return npEscape(r.name);}},
+    {t:'门店类型',w:90,f:function(r){return r.type;}},
+    {t:'大区',w:70,f:function(r){return r.region;}},
+    {t:'小区',w:70,f:function(r){return r.district;}},
+    {t:'省份',w:70,f:function(r){return r.province;}},
+    {t:'城市',w:70,f:function(r){return r.city;}},
+    {t:'门店地址',f:function(r){return npEscape(r.address);}},
+    {t:'营业状态',w:90,f:function(r){return '<span class="lt-badge ok">'+r.status+'</span>';}},
+    {t:'是否停用',w:90,f:function(r){return r.disabled==='停用'?'<span class="lt-badge bad">停用</span>':'<span class="lt-badge ok">启用</span>';}}
+  ];
+  var root=document.getElementById('page-store-manage');
+  root.innerHTML = npShell(K, {l2:'系统设置',l3:'门店管理'}, filter, '', npTH(cols), 'sm-tbody', 'sm-pager');
+  initFilterGrid(K+'-filterGrid', 7); NP[K]._fShow=7; NP[K]._fExp=false;
+  st.query=function(){
+    function val(id){ var v=(document.getElementById(id)||{}).value||''; return v==='请选择'?'':v; }
+    var code=val('sm-f-code');
+    var name=val('sm-f-name');
+    var type=val('sm-f-type');
+    var region=val('sm-f-region');
+    var status=val('sm-f-status');
+    var province=val('sm-f-province');
+    var city=val('sm-f-city');
+    var district=val('sm-f-district');
+    st.filtered=st.allData.filter(function(r){
+      return (code===''||r.code.indexOf(code)>=0) &&
+        (name===''||r.shortName.indexOf(name)>=0) &&
+        (type===''||r.type===type) &&
+        (region===''||r.region===region) &&
+        (status===''||(status==='停用'?r.disabled==='停用':r.disabled==='启用')) &&
+        (province===''||r.province===province) &&
+        (city===''||r.city===city) &&
+        (district===''||r.district===district);
+    }); st.page=1; st.render();
+  };
+  st.reset=function(){
+    ['sm-f-code','sm-f-name','sm-f-type','sm-f-region','sm-f-status','sm-f-province','sm-f-city','sm-f-district'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';});
+    st.filtered=st.allData.slice(); st.page=1; st.render();
+  };
+  st.render=function(){ npRenderTable(K,'sm-tbody','sm-pager',cols,st.filtered,st); };
+  st.filtered=st.allData.slice(); st.page=1; st.render();
+}
+
+/* ============ 门店多选弹框 ============ */
+window.msStoreState = null;
+function msOpenStorePicker(inputId){
+  var input = document.getElementById(inputId);
+  var pre = input ? (input.value||'') : '';
+  var preNames = pre.split(/[,，、]/).map(function(s){ return s.trim(); }).filter(Boolean);
+  var all = NP['store-manage'].allData;
+  var selected = all.filter(function(s){ return preNames.indexOf(s.shortName)>=0 || preNames.indexOf(s.name)>=0; }).map(function(s){ return {code:s.code, shortName:s.shortName, name:s.name}; });
+  window.msStoreState = { inputId:inputId, page:1, pageSize:10, filtered: all.slice(), selected: selected, render: msStoreRender, query: msStoreFilter, reset: msStoreReset };
+  NP['msStore'] = window.msStoreState;
+  var html = '<div class="ms-store-body">' +
+    '<div class="ms-store-left">' +
+      '<div class="lt-filter-grid ms-store-filter">' +
+        npComboMarkup('msStore','ms-f-region','大区',['华东','华南','华北','西南','东北','华中']) +
+        npComboMarkup('msStore','ms-f-district','小区',['北京','上海','广州','深圳','杭州','武汉','成都','长沙','南京','天津','重庆','沈阳','石家庄','苏州','昆明','厦门','宁波','济南']) +
+        npComboMarkup('msStore','ms-f-province','省份',['北京','上海','广东','浙江','湖北','四川','湖南','江苏','天津','重庆','辽宁','河北','云南','福建','山东']) +
+        npComboMarkup('msStore','ms-f-city','城市',['北京','上海','广州','深圳','杭州','武汉','成都','长沙','南京','天津','重庆','沈阳','石家庄','苏州','昆明','厦门','宁波','济南']) +
+        npFItem('门店简称','<input type="text" id="ms-f-name" placeholder="请输入">') +
+        npFItem('门店编码','<input type="text" id="ms-f-code" placeholder="请输入">') +
+        npComboMarkup('msStore','ms-f-type','门店类型',['用户中心','商超店','POP展','城市展厅']) +
+        npSelect('停用','<select id="ms-f-disabled"><option value="">请选择</option><option>启用</option><option>停用</option></select>') +
+        '<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="msStoreFilter()">查询</button><button class="lt-btn lt-btn-default" onclick="msStoreReset()">重置</button></div>' +
+      '</div>' +
+      '<div class="ms-store-table-wrap"><table class="lt-table"><thead><tr><th style="width:40px;"><input type="checkbox" onclick="msStoreCheckAll(this)"></th><th style="width:60px;">序号</th><th style="width:110px;">门店编码</th><th>门店简称</th><th>门店名称</th><th>门店地址</th><th style="width:90px;">营业状态</th></tr></thead><tbody id="ms-tbody"></tbody></table></div>' +
+      '<div class="lt-pager" id="ms-pager"></div>' +
+    '</div>' +
+    '<div class="ms-store-right">' +
+      '<div class="ms-store-right-head">已选（<span id="ms-cnt">0</span>）<a href="javascript:void(0)" class="lt-btn-link" onclick="msStoreClear()">清空</a><button class="lt-btn lt-btn-default" onclick="msStoreRemoveSelected()">删除</button></div>' +
+      '<div class="ms-store-table-wrap"><table class="lt-table"><thead><tr><th style="width:40px;"><input type="checkbox" onclick="msStoreSelCheckAll(this)"></th><th style="width:60px;">序号</th><th style="width:110px;">门店编码</th><th>门店简称</th><th>门店名称</th></tr></thead><tbody id="ms-selected-body"></tbody></table></div>' +
+    '</div>' +
+  '</div>';
+  npOpenModal('门店选择', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="msStoreConfirm(\''+inputId+'\')">确定</button>', {width:1100});
+  msStoreRender();
+  msStoreRenderSelected();
+}
+function msStoreRender(){
+  var st = window.msStoreState; if(!st) return;
+  var cols = [
+    {t:'', w:40, f:function(r){ var sel=st.selected.some(function(s){return s.code===r.code;}); return '<input type="checkbox" '+(sel?'checked':'')+' onchange="msStoreToggle(\''+r.code+'\')">'; }},
+    {t:'序号', w:60, f:function(r,i){ return i+1; }},
+    {t:'门店编码', w:110, f:function(r){ return r.code; }},
+    {t:'门店简称', f:function(r){ return npEscape(r.shortName); }},
+    {t:'门店名称', f:function(r){ return npEscape(r.name); }},
+    {t:'门店地址', f:function(r){ return npEscape(r.address); }},
+    {t:'营业状态', w:90, f:function(r){ return r.status; }}
+  ];
+  npRenderTable('msStore','ms-tbody','ms-pager',cols,st.filtered,st);
+  var all=document.getElementById('ms-check-all');
+  if(all){ all.checked = st.filtered.length>0 && st.filtered.every(function(r){return st.selected.some(function(s){return s.code===r.code;});}); }
+}
+function msStoreRenderSelected(){
+  var st = window.msStoreState; if(!st) return;
+  var cnt=document.getElementById('ms-cnt'); if(cnt) cnt.textContent = st.selected.length;
+  var tb=document.getElementById('ms-selected-body'); if(!tb) return;
+  if(st.selected.length===0){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#999;padding:20px;">暂无选中门店</td></tr>'; return; }
+  tb.innerHTML = st.selected.map(function(s,i){ return '<tr><td><input type="checkbox" class="ms-sel-chk" data-code="'+s.code+'"></td><td>'+(i+1)+'</td><td>'+s.code+'</td><td>'+npEscape(s.shortName)+'</td><td>'+npEscape(s.name)+'</td></tr>'; }).join('');
+}
+function msStoreToggle(code){
+  var st=window.msStoreState; if(!st) return;
+  var idx=st.selected.findIndex(function(s){return s.code===code;});
+  if(idx>=0){ st.selected.splice(idx,1); } else { var r=st.filtered.find(function(x){return x.code===code;}); if(r) st.selected.push({code:r.code,shortName:r.shortName,name:r.name}); }
+  msStoreRender(); msStoreRenderSelected();
+}
+function msStoreCheckAll(cb){
+  var st=window.msStoreState; if(!st) return;
+  st.filtered.forEach(function(r){ var idx=st.selected.findIndex(function(s){return s.code===r.code;}); if(cb.checked&&idx<0){ st.selected.push({code:r.code,shortName:r.shortName,name:r.name}); } else if(!cb.checked&&idx>=0){ st.selected.splice(idx,1); } });
+  msStoreRender(); msStoreRenderSelected();
+}
+function msStoreSelCheckAll(cb){
+  document.querySelectorAll('#ms-selected-body .ms-sel-chk').forEach(function(c){ c.checked=cb.checked; });
+}
+function msStoreRemoveSelected(){
+  var st=window.msStoreState; if(!st) return;
+  var codes=[]; document.querySelectorAll('#ms-selected-body .ms-sel-chk:checked').forEach(function(c){ codes.push(c.getAttribute('data-code')); });
+  if(codes.length===0){ npToast('请先勾选要删除的门店'); return; }
+  st.selected=st.selected.filter(function(s){ return codes.indexOf(s.code)<0; });
+  msStoreRender(); msStoreRenderSelected();
+}
+function msStoreClear(){ var st=window.msStoreState; if(!st) return; st.selected=[]; msStoreRender(); msStoreRenderSelected(); }
+function msStoreFilter(){
+  var st=window.msStoreState; if(!st) return;
+  function val(id){ var v=(document.getElementById(id)||{}).value||''; return v==='请选择'?'':v; }
+  var region=val('ms-f-region'),district=val('ms-f-district'),province=val('ms-f-province'),city=val('ms-f-city');
+  var name=val('ms-f-name'),code=val('ms-f-code'),type=val('ms-f-type'),disabled=val('ms-f-disabled');
+  var all=NP['store-manage'].allData;
+  st.filtered=all.filter(function(r){
+    return (region===''||r.region===region)&&(district===''||r.district===district)&&(province===''||r.province===province)&&(city===''||r.city===city)&&
+      (name===''||r.shortName.indexOf(name)>=0)&&(code===''||r.code.indexOf(code)>=0)&&(type===''||r.type===type)&&(disabled===''||r.disabled===disabled);
+  });
+  st.page=1; msStoreRender();
+}
+function msStoreReset(){
+  var st=window.msStoreState; if(!st) return;
+  ['ms-f-region','ms-f-district','ms-f-province','ms-f-city','ms-f-name','ms-f-code','ms-f-type','ms-f-disabled'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';});
+  st.filtered=NP['store-manage'].allData.slice(); st.page=1; msStoreRender();
+}
+function msStoreConfirm(inputId){
+  var st=window.msStoreState; if(!st) return;
+  var names=st.selected.map(function(s){return s.shortName;});
+  var input=document.getElementById(inputId);
+  if(input){ input.value=names.join(','); }
+  var mod=inputId.replace(/-flt-store$/,'');
+  var fn=window[mod+'ApplyFilter'] || window[mod+'Query'];
+  if(typeof fn==='function'){ fn(); }
+  else if(inputId==='uss-store' && typeof window.ussApplyFilter==='function'){ window.ussApplyFilter(); }
+  else if(inputId==='lt-store' && typeof window.renderLeadTable==='function'){ window.renderLeadTable(); }
+  npCloseModal();
+}
 
 /* ============ 模块 5：集单日历设置（PRD 5.1.6） ============ */
 NP['order-calendar'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };

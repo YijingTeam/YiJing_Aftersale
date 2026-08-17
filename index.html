@@ -130,6 +130,7 @@
           <span class="nav-arrow"></span>
         </div>
         <div class="submenu">
+          <div class="submenu-item" onclick="showContent('store-manage')" data-module="store-manage">门店管理</div>
           <div class="submenu-item" onclick="showContent('user')">用户管理</div>
           <div class="submenu-item" onclick="showContent('role')">角色权限</div>
         </div>
@@ -326,9 +327,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="lt-store" placeholder="请输入" oninput="renderLeadTable()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="lt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('lt-store')">
               </div>
             </div>
             <div class="lt-filter-item">
@@ -551,9 +551,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" data-f="store" placeholder="请输入">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="rlh-flt-store" data-f="store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('rlh-flt-store')">
               </div>
             </div>
             <div class="lt-filter-item">
@@ -668,7 +667,7 @@
         <div class="lt-filter">
           <div class="lt-filter-grid" id="rsq-filterGrid">
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">接车日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span><input type="text" placeholder="请输入"><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span><input type="text" id="rsq-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('rsq-flt-store')"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">维修状态</span><select><option>请选择</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">维修项目类型</span><select><option>请选择</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">结算状态</span><select><option>请选择</option></select></div></div>
@@ -991,9 +990,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="uss-store" placeholder="请输入" oninput="ussApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="uss-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('uss-store')">
               </div>
             </div>
             <div class="lt-filter-footer">
@@ -1155,8 +1153,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap plain"><span class="lt-filter-prefix">门店</span>
-                <input type="text" id="ds-flt-store" placeholder="请输入" oninput="dsApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="ds-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('ds-flt-store')">
               </div>
             </div>
             <div class="lt-filter-item">
@@ -1513,9 +1511,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="pin-flt-store" placeholder="请输入" oninput="pinApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="pin-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('pin-flt-store')">
               </div>
             </div>
             <div class="lt-filter-footer">
@@ -1643,9 +1640,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="pio-flt-store" placeholder="请输入" oninput="pioApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="pio-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('pio-flt-store')">
               </div>
             </div>
             <div class="lt-filter-item">
@@ -1817,9 +1813,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="piod-flt-store" placeholder="请输入" oninput="piodApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="piod-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('piod-flt-store')">
               </div>
             </div>
             <div class="lt-filter-footer">
@@ -1991,9 +1986,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="psd-flt-store" placeholder="请输入" oninput="psdApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="psd-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('psd-flt-store')">
               </div>
             </div>
             <div class="lt-filter-footer">
@@ -2343,9 +2337,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="prd-flt-store" placeholder="请输入" oninput="prdApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="prd-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('prd-flt-store')">
               </div>
             </div>
             <div class="lt-filter-item">
@@ -2447,14 +2440,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">门店</span>
-                <input type="text" id="int-flt-store" placeholder="请选择" oninput="intFilterCombobox(this)" onfocus="intShowCombobox(this)">
-                <span class="cb-arrow" onclick="intToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="int-store-list">
-                  <li onclick="intSelectCombobox(this)">门店A</li>
-                  <li onclick="intSelectCombobox(this)">门店B</li>
-                  <li onclick="intSelectCombobox(this)">门店C</li>
-                </ul>
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="int-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('int-flt-store')">
               </div>
             </div>
             <div class="lt-filter-item">
@@ -2589,7 +2576,7 @@
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">出入库单号</span><input type="text" id="icd-flt-io-no" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="icd-flt-region" placeholder="请选择" oninput="icdFilterCombobox(this)" onfocus="icdShowCombobox(this)"><span class="cb-arrow" onclick="icdToggleCombobox(this)">▼</span><ul class="lt-datalist" id="icd-region-list"><li onclick="icdSelectCombobox(this)">华北区</li><li onclick="icdSelectCombobox(this)">华东区</li><li onclick="icdSelectCombobox(this)">华南区</li><li onclick="icdSelectCombobox(this)">西南区</li><li onclick="icdSelectCombobox(this)">西北区</li></ul></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="icd-flt-district" placeholder="请选择" oninput="icdFilterCombobox(this)" onfocus="icdShowCombobox(this)"><span class="cb-arrow" onclick="icdToggleCombobox(this)">▼</span><ul class="lt-datalist" id="icd-district-list"><li onclick="icdSelectCombobox(this)">北京区</li><li onclick="icdSelectCombobox(this)">上海区</li><li onclick="icdSelectCombobox(this)">广州区</li><li onclick="icdSelectCombobox(this)">成都区</li></ul></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="icd-flt-store" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span><input type="text" id="icd-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('icd-flt-store')"></div></div>
             <div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="icdApplyFilter()">查询</button><button class="lt-btn lt-btn-default" onclick="icdResetFilter()">重置</button><a href="javascript:void(0)" class="lt-filter-toggle" onclick="icdToggleFilter()">﹀ 展开</a></div>
           </div></div>
         <div class="lt-list-area">
@@ -2704,7 +2691,7 @@
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障性质</span><select id="thq-flt-fault-nature" onchange="thqApplyFilter()"><option value="">全部</option><option>产品质量</option><option>使用问题</option><option>维修导致</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="thq-flt-store" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span><input type="text" id="thq-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('thq-flt-store')"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">省份</span><input type="text" id="thq-flt-province" placeholder="请选择" oninput="thqFilterCombobox(this)" onfocus="thqShowCombobox(this)"><span class="cb-arrow" onclick="thqToggleCombobox(this)">▼</span><ul class="lt-datalist" id="thq-province-list"><li onclick="thqSelectCombobox(this)">北京</li><li onclick="thqSelectCombobox(this)">上海</li><li onclick="thqSelectCombobox(this)">广东</li><li onclick="thqSelectCombobox(this)">浙江</li><li onclick="thqSelectCombobox(this)">江苏</li><li onclick="thqSelectCombobox(this)">四川</li><li onclick="thqSelectCombobox(this)">湖北</li></ul></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">城市</span><input type="text" id="thq-flt-city" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">归档分类</span><select id="thq-flt-archive-category" onchange="thqApplyFilter()"><option value="">全部</option><option>发动机</option><option>变速箱</option><option>电气</option><option>底盘</option><option>车身</option></select></div></div>
@@ -2743,7 +2730,7 @@
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">故障性质</span><select id="qrhq-flt-fault-nature" onchange="qrhqApplyFilter()"><option value="">全部</option><option>产品质量</option><option>使用问题</option><option>维修导致</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qrhq-flt-store" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span><input type="text" id="qrhq-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('qrhq-flt-store')"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">省份</span><input type="text" id="qrhq-flt-province" placeholder="请选择" oninput="qrhqFilterCombobox(this)" onfocus="qrhqShowCombobox(this)"><span class="cb-arrow" onclick="qrhqToggleCombobox(this)">▼</span><ul class="lt-datalist" id="qrhq-province-list"><li onclick="qrhqSelectCombobox(this)">北京</li><li onclick="qrhqSelectCombobox(this)">上海</li><li onclick="qrhqSelectCombobox(this)">广东</li><li onclick="qrhqSelectCombobox(this)">浙江</li><li onclick="qrhqSelectCombobox(this)">江苏</li><li onclick="qrhqSelectCombobox(this)">四川</li><li onclick="qrhqSelectCombobox(this)">湖北</li></ul></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">城市</span><input type="text" id="qrhq-flt-city" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修工单</span><input type="text" id="qrhq-flt-repair-order" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
@@ -2815,7 +2802,7 @@
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">主故障件名称</span><input type="text" id="qrt-form-fault-part-name" placeholder="自动带出，可修改"></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">重要程度</span><select id="qrt-form-importance"><option value="">请选择</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">有无显示故障码</span><select id="qrt-form-has-fault-code" onchange="qrtToggleFaultCode()"><option value="">请选择</option><option>是</option><option>否</option></select></div>
-            <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="qrtOpenFaultCodeModal()"><span class="lt-filter-prefix">故障代码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qrt-form-fault-code" placeholder="请点击搜索" readonly onclick="event.stopPropagation();qrtOpenFaultCodeModal()" onfocus="this.blur()"></div>
+            <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="qrtOpenFaultCodeModal()"><span class="lt-filter-prefix">故障码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qrt-form-fault-code" placeholder="请点击搜索" readonly onclick="event.stopPropagation();qrtOpenFaultCodeModal()" onfocus="this.blur()"></div>
             <!-- 5. 故障现象描述 -->
             <div class="qr-form-item full"><label class="qr-form-label">故障现象描述</label><textarea id="qrt-form-customer-complaint" placeholder="基于用户的描述，同时向用户提出一些引导性的问题，综合来显现详细的故障现象" maxlength="1000"></textarea></div>
             <!-- 6. 故障发生条件 -->
@@ -3326,9 +3313,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="pp-flt-store" placeholder="请输入" oninput="ppApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="pp-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('pp-flt-store')">
               </div>
             </div>
             <div class="lt-filter-footer">
@@ -3387,9 +3373,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="ppd-flt-store" placeholder="请输入" oninput="ppdApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="ppd-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('ppd-flt-store')">
               </div>
             </div>
             <div class="lt-filter-footer">
@@ -3448,9 +3433,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="pds-flt-store" placeholder="请输入" oninput="pdsApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="pds-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('pds-flt-store')">
               </div>
             </div>
             <div class="lt-filter-item">
@@ -3529,9 +3513,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="fsq-flt-store" placeholder="请输入" oninput="fsqApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="fsq-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('fsq-flt-store')">
               </div>
             </div>
             <div class="lt-filter-footer">
@@ -3599,9 +3582,8 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap search"><span class="lt-filter-prefix">门店</span>
-                <svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <input type="text" id="ep-flt-store" placeholder="请输入" oninput="epApplyFilter()">
+              <div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span>
+                <input type="text" id="ep-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('ep-flt-store')">
               </div>
             </div>
             <div class="lt-filter-footer">
@@ -3638,6 +3620,7 @@
   <div id="page-order-calendar" class="page-content"></div>
   <div id="page-parts-return" class="page-content"></div>
   <div id="page-account-balance" class="page-content"></div>
+  <div id="page-store-manage" class="page-content"></div>
   <div id="page-shortage-order" class="page-content"></div>
   <div id="page-shortage-allocation" class="page-content"></div>
   <div id="page-shortage-allocation-history" class="page-content"></div>
@@ -3728,19 +3711,19 @@
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">主故障件名称</span><input type="text" id="ts-form-fault-part-reason" placeholder="自动带出，可修改"></div>
             <div class="ts-form-item-inline"><span class="ts-form-label-inline">重要程度</span><select id="ts-form-importance"><option value="">请选择</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
             <div class="ts-form-item-inline"><span class="ts-form-label-inline">有无显示故障码</span><select id="ts-form-has-fault-code" onchange="tsToggleFaultCode()"><option value="">请选择</option><option>是</option><option>否</option></select></div>
-            <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="tsOpenFaultCodeModal()"><span class="lt-filter-prefix">故障代码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="ts-form-fault-code" placeholder="请点击搜索" readonly onclick="event.stopPropagation();tsOpenFaultCodeModal()" onfocus="this.blur()"></div>
+            <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="tsOpenFaultCodeModal()"><span class="lt-filter-prefix">故障码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="ts-form-fault-code" placeholder="请点击搜索" readonly onclick="event.stopPropagation();tsOpenFaultCodeModal()" onfocus="this.blur()"></div>
             <div class="ts-form-item-inline"><span class="ts-form-label-inline">查询过维修案例</span><select id="ts-form-has-repair-case"><option value="">请选择</option><option>是</option><option>否</option></select></div>
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">维修案例号</span><input type="text" id="ts-form-repair-case-no" placeholder="请输入"></div>
             <!-- 6. 故障现象描述 -->
-            <div class="ts-form-item full"><label class="ts-form-label">故障现象描述</label><textarea id="ts-form-customer-complaint" placeholder="基于用户的描述，同时向用户提出一些引导性的问题，综合来显现详细的故障现象" maxlength="1000"></textarea></div>
+            <div class="ts-form-item full required"><label class="ts-form-label">故障现象描述</label><textarea id="ts-form-customer-complaint" placeholder="基于用户的描述，同时向用户提出一些引导性的问题，综合来显现详细的故障现象" maxlength="1000"></textarea></div>
             <!-- 7. 故障发生条件 -->
-            <div class="ts-form-item full"><label class="ts-form-label">故障发生条件</label><textarea id="ts-form-fault-condition-full" placeholder="故障发生的时间（尽可能精确到分钟）及故障发生的路况、环境等条件"></textarea></div>
+            <div class="ts-form-item full required"><label class="ts-form-label">故障发生条件</label><textarea id="ts-form-fault-condition-full" placeholder="故障发生的时间（尽可能精确到分钟）及故障发生的路况、环境等条件"></textarea></div>
             <!-- 8. 排查内容及结果 -->
-            <div class="ts-form-item full"><label class="ts-form-label">排查内容及结果</label><textarea id="ts-form-repair-solution" placeholder="根据故障所做的排查动作和结果"></textarea></div>
+            <div class="ts-form-item full required"><label class="ts-form-label">排查内容及结果</label><textarea id="ts-form-repair-solution" placeholder="根据故障所做的排查动作和结果"></textarea></div>
             <!-- 9. 原因分析 -->
-            <div class="ts-form-item full"><label class="ts-form-label">原因分析</label><textarea id="ts-form-cause-analysis" placeholder="导致故障的可能原因"></textarea></div>
+            <div class="ts-form-item full required"><label class="ts-form-label">原因分析</label><textarea id="ts-form-cause-analysis" placeholder="导致故障的可能原因"></textarea></div>
             <!-- 10. 意见或建议 -->
-            <div class="ts-form-item full"><label class="ts-form-label">意见或建议</label><textarea id="ts-form-suggestion" placeholder="描述处理该问题的建议或者需求的支持项"></textarea></div>
+            <div class="ts-form-item full required"><label class="ts-form-label">意见或建议</label><textarea id="ts-form-suggestion" placeholder="描述处理该问题的建议或者需求的支持项"></textarea></div>
             <!-- 11. 图片 -->
             <div class="ts-form-item full">
               <label class="ts-form-label">图片</label>
@@ -3931,15 +3914,15 @@
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">主故障件名称</span><input type="text" id="qr-form-fault-part-reason" placeholder="自动带出，可修改"></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">重要程度</span><select id="qr-form-importance"><option value="">请选择</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">有无显示故障码</span><select id="qr-form-has-fault-code" onchange="qrToggleFaultCode()"><option value="">请选择</option><option>是</option><option>否</option></select></div>
-            <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="qrOpenFaultCodeModal()"><span class="lt-filter-prefix">故障代码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qr-form-fault-code" placeholder="请点击搜索" readonly onclick="event.stopPropagation();qrOpenFaultCodeModal()" onfocus="this.blur()"></div>
+            <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="qrOpenFaultCodeModal()"><span class="lt-filter-prefix">故障码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qr-form-fault-code" placeholder="请点击搜索" readonly onclick="event.stopPropagation();qrOpenFaultCodeModal()" onfocus="this.blur()"></div>
             <!-- 6. 故障现象描述 -->
-            <div class="qr-form-item full"><label class="qr-form-label">故障现象描述</label><textarea id="qr-form-customer-complaint" placeholder="基于用户的描述，同时向用户提出一些引导性的问题，综合来显现详细的故障现象" maxlength="1000"></textarea></div>
+            <div class="qr-form-item full required"><label class="qr-form-label">故障现象描述</label><textarea id="qr-form-customer-complaint" placeholder="基于用户的描述，同时向用户提出一些引导性的问题，综合来显现详细的故障现象" maxlength="1000"></textarea></div>
             <!-- 7. 故障发生条件 -->
-            <div class="qr-form-item full"><label class="qr-form-label">故障发生条件</label><textarea id="qr-form-fault-condition-full" placeholder="故障发生的时间（尽可能精确到分钟）及故障发生的路况、环境等条件"></textarea></div>
+            <div class="qr-form-item full required"><label class="qr-form-label">故障发生条件</label><textarea id="qr-form-fault-condition-full" placeholder="故障发生的时间（尽可能精确到分钟）及故障发生的路况、环境等条件"></textarea></div>
             <!-- 8. 排查内容及结果 -->
-            <div class="qr-form-item full"><label class="qr-form-label">排查内容及结果</label><textarea id="qr-form-repair-solution" placeholder="根据故障所做的排查动作和结果"></textarea></div>
+            <div class="qr-form-item full required"><label class="qr-form-label">排查内容及结果</label><textarea id="qr-form-repair-solution" placeholder="根据故障所做的排查动作和结果"></textarea></div>
             <!-- 11. 图片 -->
-            <div class="qr-form-item full">
+            <div class="qr-form-item full required">
               <label class="qr-form-label">图片</label>
               <div class="qr-upload-area" id="qr-image-upload" onclick="document.getElementById('qr-image-input').click()">
                 <div class="upload-icon">📷</div>
@@ -3949,7 +3932,7 @@
               <div class="qr-upload-preview" id="qr-image-preview"></div>
             </div>
             <!-- 12. 附件 -->
-            <div class="qr-form-item full">
+            <div class="qr-form-item full required">
               <label class="qr-form-label">附件</label>
               <div class="qr-upload-area" id="qr-file-upload" onclick="document.getElementById('qr-file-input').click()">
                 <div class="upload-icon">📎</div>
@@ -4320,15 +4303,15 @@
         <div class="fc-left">
           <!-- 查询区 -->
           <div class="lt-filter-grid">
-            <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">ECU</span><select id="fc-search-ecu"><option value="">全部</option></select></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">ECU</span><input type="text" id="fc-search-ecu" placeholder="请选择或输入" onfocus="csComboboxShow(this)" oninput="csComboboxFilter(this)"><span class="cb-arrow" onclick="csComboboxToggle(this)">▼</span><ul class="lt-datalist" id="fc-ecu-list"></ul></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">故障码</span><input type="text" id="fc-search-dtc" placeholder="请输入"></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">显示码</span><input type="text" id="fc-search-display" placeholder="请输入"></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">DTC值</span><input type="text" id="fc-search-display" placeholder="请输入"></div></div>
             <div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="tsFaultCodeSearch()">查询</button><button class="lt-btn lt-btn-default" onclick="tsFaultCodeReset()">重置</button></div>
           </div>
           <!-- 列表区 -->
           <div class="fc-table-wrap">
             <table class="fc-table">
-              <thead><tr><th class="fc-th-chk"></th><th>序号</th><th>ECU</th><th>故障码</th><th>显示码</th><th>DTC名称</th><th>故障描述</th></tr></thead>
+              <thead><tr><th class="fc-th-chk"></th><th>序号</th><th>ECU</th><th>故障码</th><th>DTC值</th><th>DTC含义</th><th>故障可能原因</th></tr></thead>
               <tbody id="fc-table-body"></tbody>
             </table>
           </div>
@@ -4340,7 +4323,7 @@
             <button class="lt-btn lt-btn-primary" onclick="tsFaultCodeConfirm()">确认选择</button>
           </div>
           <table class="fc-selected-table">
-            <thead><tr><th>ECU</th><th>显示码</th><th style="width:40px"></th></tr></thead>
+            <thead><tr><th>ECU</th><th>故障码</th><th style="width:40px"></th></tr></thead>
             <tbody id="fc-selected-body"></tbody>
           </table>
         </div>
