@@ -50,10 +50,24 @@ var ARC_SEED = [
   ['其他', '', '']
 ];
 
-function arcSeedTime() {
-  // 种子创建/更新时间默认 2026-07-21（用户指定：创建=2026-07-21，更新≥2026-07-21）
+function arcSeedTime(idx) {
+  // 种子创建时间按节点错开（2026-07-21 当天，时分秒随序号变化，模拟人工逐条维护）
   function p(n){ return (n < 10 ? '0' : '') + n; }
-  return '2026-07-21 ' + p(9) + ':' + p(0) + ':' + p(0);
+  idx = idx || 0;
+  var h = 9 + (idx % 8);            // 09~16 点
+  var m = (idx * 7) % 60;           // 分钟错开
+  var s = (idx * 13) % 60;          // 秒错开
+  return '2026-07-21 ' + p(h) + ':' + p(m) + ':' + p(s);
+}
+function arcSeedUpdateTime(idx) {
+  // 更新时间在创建时间基础上 +1~4 天（仍 ≥ 创建时间）
+  function p(n){ return (n < 10 ? '0' : '') + n; }
+  idx = idx || 0;
+  var day = 21 + 1 + (idx % 4);     // 22~25 号
+  var h = 9 + ((idx + 3) % 8);
+  var m = (idx * 11) % 60;
+  var s = (idx * 17) % 60;
+  return '2026-07-' + p(day) + ' ' + p(h) + ':' + p(m) + ':' + p(s);
 }
 function arcNowStr() {
   var d = new Date();
@@ -70,7 +84,8 @@ function buildArcTreeFromSeed() {
   }
   ARC_SEED.forEach(function (row, ri) {
     var labels = [row[0], row[1], row[2]].filter(function (x) { return x && x !== ''; });
-    var t = arcSeedTime();
+    var t = arcSeedTime(ri);
+    var tu = arcSeedUpdateTime(ri);
     var parent = null;
     var level = 0;
     var arr = tree;
@@ -78,7 +93,7 @@ function buildArcTreeFromSeed() {
       level++;
       var node = findChild(arr, name);
       if (!node) {
-        node = { id: 'arc' + (idc++), name: name, parentId: parent ? parent.id : null, level: level, createdAt: t, updatedAt: t, children: [] };
+        node = { id: 'arc' + (idc++), name: name, parentId: parent ? parent.id : null, level: level, status: 'enable', createdAt: t, updatedAt: tu, children: [] };
         arr.push(node);
       }
       parent = node; arr = node.children;

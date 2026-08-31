@@ -102,7 +102,7 @@
           <div class="submenu submenu-nested open">
             <div class="submenu-item submenu-item-nested current" onclick="showContent('repair-daily-report')" data-module="repair-daily-report" data-roles="超级管理员">维修营业日报(备用)</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('lead-tracking')" data-module="lead-tracking" data-roles="超级管理员">用户线索跟踪情况(备用)</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('store-operation')" data-module="store-operation" data-roles="门店 总部 超级管理员">门店经营情况</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('store-operation')" data-module="store-operation">门店经营情况</div>
           </div>
           <div class="submenu-item" onclick="showContent('manage-report')" data-module="manage-report">管理报表</div>
           <div class="submenu submenu-nested open">
@@ -131,8 +131,9 @@
         </div>
         <div class="submenu">
           <div class="submenu-item" onclick="showContent('store-manage')" data-module="store-manage">门店管理</div>
-          <div class="submenu-item" onclick="showContent('user')">用户管理</div>
-          <div class="submenu-item" onclick="showContent('role')">角色权限</div>
+          <div class="submenu-item" onclick="showContent('user')" data-module="user">用户管理</div>
+          <div class="submenu-item" onclick="showContent('role')" data-module="role">角色权限</div>
+          <div class="submenu-item" onclick="showContent('announcement')" data-module="announcement">技术公告</div>
         </div>
       </div>
     </div>
@@ -176,8 +177,8 @@
         <input type="text" id="menuSearchInput" class="menu-search-input" placeholder="搜索菜单..." autocomplete="off">
         <div class="menu-search-dropdown" id="menuSearchDropdown"></div>
       </div>
-      <button class="lt-btn lt-btn-default">下载记录</button>
-      <button class="lt-btn lt-btn-primary">学习平台</button>
+      <button class="lt-btn lt-btn-default" onclick="npTopbarDemo('下载记录')">下载记录</button>
+      <button class="lt-btn lt-btn-primary" onclick="npTopbarDemo('学习平台')">学习平台</button>
       <div class="lt-user" id="lt-user" onclick="toggleRoleMenu(event)">
         <span class="lt-user-label" id="lt-user-label">门店</span>
         <span class="lt-user-caret">▾</span>
@@ -196,10 +197,6 @@
       <div class="welcome-card">
         <h2>欢迎使用奕境售后管理系统</h2>
         <p>请从左侧菜单选择功能模块</p>
-      </div>
-      <div style="margin-top: 30px;">
-        <button class="btn" onclick="alert('这是主题色按钮样式')">主要按钮</button>
-        <button class="btn btn-outline" style="margin-left: 10px;">次要按钮</button>
       </div>
     </div>
 
@@ -366,8 +363,8 @@
               </div>
             </div>
             <div class="lt-filter-footer">
-              <button class="lt-btn-filter primary" onclick="renderLeadTable()">查询</button>
-              <button class="lt-btn-filter default" onclick="ltResetFilter()">重置</button>
+              <button class="lt-btn lt-btn-primary" onclick="renderLeadTable()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="ltResetFilter()">重置</button>
             </div>
           </div>
         </div>
@@ -376,12 +373,12 @@
         <div class="lt-list-area">
           <div class="lt-toolbar">
             <div class="lt-toolbar-left">
-              <button class="lt-btn-filter default">导出</button>
-              <button class="lt-btn-filter default">导出明细</button>
-              <button class="lt-btn-filter warn">导出战败</button>
+              <button class="lt-btn lt-btn-default" onclick="ltExportData('all')">导出</button>
+              <button class="lt-btn lt-btn-default" onclick="ltExportData('detail')">导出明细</button>
+              <button class="lt-btn lt-btn-warn" onclick="ltExportData('defeat')">导出战败</button>
             </div>
             <div class="lt-toolbar-right">
-              <button class="lt-btn-filter link" onclick="ltOpenDescModal()">报表说明</button>
+              <button class="lt-btn-link" onclick="ltOpenDescModal()">报表说明</button>
             </div>
           </div>
 
@@ -532,12 +529,22 @@
           <div class="lt-filter-grid" id="rlh-filterGrid">
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">提交结算日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rlhQuery">
+                <div class="lt-date-range-drop">
+                  <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rlh-d-sub-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                  <span>—</span>
+                  <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rlh-d-sub-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                </div>
               </div>
             </div>
             <div class="lt-filter-item">
               <div class="lt-date-range"><span class="lt-filter-prefix">收款日期</span>
-                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期">
+                <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rlhQuery">
+                <div class="lt-date-range-drop">
+                  <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rlh-d-recv-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                  <span>—</span>
+                  <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rlh-d-recv-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                </div>
               </div>
             </div>
             <div class="lt-filter-item">
@@ -566,8 +573,8 @@
               </div>
             </div>
             <div class="lt-filter-footer">
-              <button class="lt-btn-filter primary" onclick="rlhQuery()">查询</button>
-              <button class="lt-btn-filter default" onclick="rlhReset()">重置</button>
+              <button class="lt-btn lt-btn-primary" onclick="rlhQuery()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="rlhReset()">重置</button>
               <a href="javascript:void(0)" class="lt-filter-toggle" id="rlh-toggle" onclick="rlhToggleFilter()">﹀ 展开</a>
             </div>
           </div>
@@ -590,7 +597,7 @@
                 <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>班组名称</th><th>班组类别</th><th>销售工时</th><th>派工工时</th><th>台次</th>
               </tr></thead><tbody id="rlh-teamLeft"></tbody><tfoot id="rlh-teamLeft-foot"></tfoot></table>
             </div>
-            <div class="lt-pager">
+            <div class="lt-pager" id="rlh-pager-1">
               <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
               <div class="lt-pager-right">
                 <button class="pg-prev" onclick="rlhGo('teamLeft',-1)">上一页</button>
@@ -607,7 +614,7 @@
                 <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>工程师编码</th><th>工程师名称</th><th>销售工时</th><th>派工工时</th><th>台次</th>
               </tr></thead><tbody id="rlh-teamRight"></tbody></table>
             </div>
-            <div class="lt-pager">
+            <div class="lt-pager" id="rlh-pager-2">
               <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
               <div class="lt-pager-right">
                 <button class="pg-prev" onclick="rlhGo('teamRight',-1)">上一页</button>
@@ -628,7 +635,7 @@
                 <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>工程师编码</th><th>工程师名称</th><th>销售工时</th><th>派工工时</th><th>台次</th>
               </tr></thead><tbody id="rlh-staffLeft"></tbody><tfoot id="rlh-staffLeft-foot"></tfoot></table>
             </div>
-            <div class="lt-pager">
+            <div class="lt-pager" id="rlh-pager-3">
               <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
               <div class="lt-pager-right">
                 <button class="pg-prev" onclick="rlhGo('staffLeft',-1)">上一页</button>
@@ -645,7 +652,7 @@
                 <th class="col-seq">序号</th><th>门店名称</th><th>门店编码</th><th>派工单号</th><th>工时编码</th><th>维修项目</th><th>维修时间</th><th>销售工时</th><th>派工工时</th><th>台次</th>
               </tr></thead><tbody id="rlh-staffRight"></tbody></table>
             </div>
-            <div class="lt-pager">
+            <div class="lt-pager" id="rlh-pager-4">
               <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
               <div class="lt-pager-right">
                 <button class="pg-prev" onclick="rlhGo('staffRight',-1)">上一页</button>
@@ -666,12 +673,26 @@
         <!-- 筛选区 -->
         <div class="lt-filter">
           <div class="lt-filter-grid" id="rsq-filterGrid">
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">接车日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">接车日期</span>
+              <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rsqApplyFilter">
+              <div class="lt-date-range-drop">
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-in-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                <span>—</span>
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-in-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+              </div>
+            </div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span><input type="text" id="rsq-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('rsq-flt-store')"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">维修状态</span><select><option>请选择</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">维修项目类型</span><select><option>请选择</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">结算状态</span><select><option>请选择</option></select></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">结算日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">结算日期</span>
+              <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rsqApplyFilter">
+              <div class="lt-date-range-drop">
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-settle-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                <span>—</span>
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-settle-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+              </div>
+            </div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">大区</span><input type="text" placeholder="请选择(下拉模糊搜索)"><span class="cb-arrow">▾</span></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative"><span class="lt-filter-prefix">小区</span><input type="text" placeholder="请选择(下拉模糊搜索)"><span class="cb-arrow">▾</span></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">VIN</span><input type="text" placeholder="请输入"></div></div>
@@ -686,9 +707,30 @@
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">维修类别</span><select><option>请选择</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修内容</span><input type="text" placeholder="请输入"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">配件编码</span><input type="text" placeholder="请输入"></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">创建日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">应结算日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
-            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交结算日期</span><input type="text" readonly class="lt-date-range-text" placeholder="开始日期~结束日期"></div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">创建日期</span>
+              <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rsqApplyFilter">
+              <div class="lt-date-range-drop">
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-create-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                <span>—</span>
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-create-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+              </div>
+            </div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">应结算日期</span>
+              <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rsqApplyFilter">
+              <div class="lt-date-range-drop">
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-due-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                <span>—</span>
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-due-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+              </div>
+            </div></div>
+            <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交结算日期</span>
+              <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="rsqApplyFilter">
+              <div class="lt-date-range-drop">
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-sub-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+                <span>—</span>
+                <input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="rsq-d-sub-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')">
+              </div>
+            </div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">收款单号</span><input type="text" placeholder="请输入"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">内返单</span><select><option value="">请选择</option><option value="1">是</option><option value="0">否</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">服务顾问</span><input type="text" id="rsq-flt-advisor" placeholder="请输入" oninput="rsqApplyFilter()"></div></div>
@@ -699,8 +741,8 @@
               <label><input type="checkbox"> 反结算过的单据</label>
             </div>
             <div class="lt-filter-footer">
-              <button class="lt-btn-filter default" onclick="rsqReset()">重置</button>
-              <button class="lt-btn-filter primary" onclick="rsqQuery()">查询</button>
+              <button class="lt-btn lt-btn-primary" onclick="rsqQuery()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="rsqReset()">重置</button>
               <a href="javascript:void(0)" class="lt-filter-toggle" onclick="rsqToggleFilter()">﹀ 展开</a>
             </div>
           </div>
@@ -709,11 +751,11 @@
         <!-- 工具条 -->
         <div class="lt-toolbar">
           <div class="lt-toolbar-left">
-            <button class="lt-btn-filter default" onclick="rsqExport()">离线导出</button>
-            <button class="lt-btn-filter default" onclick="rsqPrint()">打印</button>
+            <button class="lt-btn lt-btn-default" onclick="rsqExport()">离线导出</button>
+            <button class="lt-btn lt-btn-default" onclick="rsqPrint()">打印</button>
           </div>
           <div class="lt-toolbar-right">
-            <button class="lt-btn-filter link" onclick="rsqShowDesc()">报表说明</button>
+            <button class="lt-btn-link" onclick="rsqShowDesc()">报表说明</button>
           </div>
         </div>
         <!-- 数据列表 -->
@@ -721,23 +763,32 @@
           <table class="lt-table" id="rsq-table">
             <thead><tr>
               <th class="col-seq sticky">序号</th><th class="col-store-name sticky">门店名称</th><th class="col-store-code sticky">门店编码</th>
-              <th class="col-order-no sticky">维修工单号</th><th>VIN</th><th>车牌号</th><th>客户</th><th>客户电话</th><th>车系</th><th>公告车型</th><th>发动机号</th><th>颜色</th><th>行驶里程</th><th>进厂日期</th><th>完工时间</th><th>结算时间</th><th>维修类型</th><th>维修项目</th><th>故障描述</th><th>维修内容</th><th>接待人</th><th>服务顾问</th><th>主修人</th><th>质检人</th><th>班组长</th><th>调度员</th>
-              <th>普通配件费用</th><th>普通工时费用</th><th>普通附加费用</th><th class="sum">普通费用合计</th><th class="sum">费用占比</th>
-              <th>保修配件费用</th><th>保修工时费用</th><th>保修附加费用</th><th class="sum">保修费用合计</th><th class="sum">费用占比</th>
-              <th>免保配件费用</th><th>免保工时费用</th><th>免保附加费用</th><th class="sum">免保费用合计</th><th class="sum">费用占比</th>
-              <th>保险配件费用</th><th>保险工时费用</th><th>保险附加费用</th><th class="sum">保险费用合计</th><th class="sum">费用占比</th>
-              <th>协议配件费用</th><th>协议工时费用</th><th>协议附加费用</th><th class="sum">协议费用合计</th><th class="sum">费用占比</th>
-              <th>内部配件费用</th><th>内部工时费用</th><th>内部附加费用</th><th class="sum">内部费用合计</th><th class="sum">费用占比</th>
-              <th>保养套餐配件费用</th><th>保养套餐工时费用</th><th>保养套餐其他费用</th><th class="sum">保养套餐费用合计</th><th class="sum">费用占比</th>
-              <th>配件费用应收总计</th><th>工时费用应收总计</th><th>附加费用应收总计</th><th class="sum">应收总计</th><th class="sum">毛利率</th>
-              <th>结算折算费用总计</th><th>实收费总计</th><th>挂单率总统计</th><th class="sum">维修工单总数</th>
-              <th>是否已结清</th><th>是否PDI单</th><th>创建时间</th><th>更新时间</th>
+              <th class="col-order-no sticky">维修工单号</th><th class="col-vin">VIN</th><th class="col-plate">车牌号</th><th class="col-cust">客户</th><th class="col-cust-tel">客户电话</th><th class="col-series">车系</th><th class="col-model">公告车型</th><th class="col-engine-no">发动机号</th><th class="col-color">颜色</th><th class="col-mileage">行驶里程</th><th class="col-in-date">进厂日期</th><th class="col-done-time">完工时间</th><th class="col-settle-time">结算时间</th><th class="col-repair-type">维修类型</th><th class="col-repair-item">维修项目</th><th class="col-fault-desc">故障描述</th><th class="col-repair-content">维修内容</th><th class="col-receiver">接待人</th><th class="col-advisor">服务顾问</th><th class="col-main-tech">主修人</th><th class="col-qc">质检人</th><th class="col-group-leader">班组长</th><th class="col-dispatcher">调度员</th>
+              <th class="col-pj-normal">普通配件费用</th><th class="col-gs-normal">普通工时费用</th><th class="col-fj-normal">普通附加费用</th><th class="col-pj-normal-total sum">普通费用合计</th><th class="col-pj-normal-rate sum">费用占比</th>
+              <th class="col-pj-warranty">保修配件费用</th><th class="col-gs-warranty">保修工时费用</th><th class="col-fj-warranty">保修附加费用</th><th class="col-pj-warranty-total sum">保修费用合计</th><th class="col-pj-warranty-rate sum">费用占比</th>
+              <th class="col-pj-free">免保配件费用</th><th class="col-gs-free">免保工时费用</th><th class="col-fj-free">免保附加费用</th><th class="col-pj-free-total sum">免保费用合计</th><th class="col-pj-free-rate sum">费用占比</th>
+              <th class="col-pj-ins">保险配件费用</th><th class="col-gs-ins">保险工时费用</th><th class="col-fj-ins">保险附加费用</th><th class="col-pj-ins-total sum">保险费用合计</th><th class="col-pj-ins-rate sum">费用占比</th>
+              <th class="col-pj-agree">协议配件费用</th><th class="col-gs-agree">协议工时费用</th><th class="col-fj-agree">协议附加费用</th><th class="col-pj-agree-total sum">协议费用合计</th><th class="col-pj-agree-rate sum">费用占比</th>
+              <th class="col-pj-inner">内部配件费用</th><th class="col-gs-inner">内部工时费用</th><th class="col-fj-inner">内部附加费用</th><th class="col-pj-inner-total sum">内部费用合计</th><th class="col-pj-inner-rate sum">费用占比</th>
+              <th class="col-pj-package">保养套餐配件费用</th><th class="col-gs-package">保养套餐工时费用</th><th class="col-oth-package">保养套餐其他费用</th><th class="col-pj-package-total sum">保养套餐费用合计</th><th class="col-pj-package-rate sum">费用占比</th>
+              <th class="col-pj-ys-total">配件费用应收总计</th><th class="col-gs-ys-total">工时费用应收总计</th><th class="col-fj-ys-total">附加费用应收总计</th><th class="col-ys-total sum">应收总计</th><th class="col-gross-rate sum">毛利率</th>
+              <th class="col-jsz-total">结算折算费用总计</th><th class="col-ss-total">实收费总计</th><th class="col-gd-rate">挂单率总统计</th><th class="col-order-total sum">维修工单总数</th>
+              <th class="col-is-settle">是否已结清</th><th class="col-is-pdi">是否PDI单</th><th class="col-create-time">创建时间</th><th class="col-update-time">更新时间</th>
             </tr></thead>
             <tbody id="rsq-tbody"></tbody>
           </table>
         </div>
         <!-- 分页 -->
-        <div class="rs-pager" id="rsq-pager"></div>
+        <div class="lt-pager" id="rsq-pager">
+          <div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>
+          <div class="lt-pager-right">
+            <button class="pg-prev">上一页</button>
+            <span class="pg-pages"></span>
+            <button class="pg-next">下一页</button>
+            <span class="pager-goto">前往 <input type="text"> 页</span>
+            <select class="pager-size"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>
+          </div>
+        </div>
         <!-- 费用汇总 -->
         <div class="rs-summary">
           <h4>费用汇总</h4>
@@ -931,7 +982,7 @@
                 <input type="text" id="uss-score-text" placeholder="请选择或输入" onfocus="ussShowScoreDropdown()" oninput="ussFilterScore(this.value)">
                 <span class="cb-arrow" onclick="ussToggleScoreDropdown()">▼</span>
                 <ul class="lt-datalist" id="uss-score-list">
-                  <li data-val="" onclick="ussSelectScore(this)">全部</li>
+                  <li data-val="" onclick="ussSelectScore(this)">请选择</li>
                   <li data-val="10" onclick="ussSelectScore(this)">10分</li>
                   <li data-val="9" onclick="ussSelectScore(this)">9分</li>
                   <li data-val="8" onclick="ussSelectScore(this)">8分</li>
@@ -950,7 +1001,7 @@
                 <input type="text" id="uss-nps-text" placeholder="请选择或输入" onfocus="ussShowNpsDropdown()" oninput="ussFilterNps(this.value)">
                 <span class="cb-arrow" onclick="ussToggleNpsDropdown()">▼</span>
                 <ul class="lt-datalist" id="uss-nps-list">
-                  <li data-val="" onclick="ussSelectNps(this)">全部</li>
+                  <li data-val="" onclick="ussSelectNps(this)">请选择</li>
                   <li data-val="推荐者" onclick="ussSelectNps(this)">推荐者</li>
                   <li data-val="被动者" onclick="ussSelectNps(this)">被动者</li>
                   <li data-val="贬损者" onclick="ussSelectNps(this)">贬损者</li>
@@ -995,8 +1046,8 @@
               </div>
             </div>
             <div class="lt-filter-footer">
-              <button class="lt-btn-filter primary" onclick="ussApplyFilter()">查询</button>
-              <button class="lt-btn-filter default" onclick="ussResetFilter()">重置</button>
+              <button class="lt-btn lt-btn-primary" onclick="ussApplyFilter()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="ussResetFilter()">重置</button>
             </div>
           </div>
         </div>
@@ -1005,10 +1056,10 @@
         <div class="lt-list-area">
           <div class="lt-toolbar">
             <div class="lt-toolbar-left">
-              <button class="lt-btn-filter default">导出</button>
+              <button class="lt-btn lt-btn-default" onclick="ussExportData()">导出</button>
             </div>
             <div class="lt-toolbar-right">
-              <button class="lt-btn-filter link">报表说明</button>
+              <button class="lt-btn-link" onclick="togglePageDesc()">报表说明</button>
             </div>
           </div>
 
@@ -1045,9 +1096,9 @@
               <span class="pager-total" id="uss-pg-total">共 0 条</span>
             </div>
             <div class="lt-pager-right">
-              <button onclick="ussChangePage(-1)" id="uss-pg-prev">上一页</button>
+              <button class="pg-prev" onclick="ussChangePage(-1)" id="uss-pg-prev">上一页</button>
               <span id="uss-pg-pages" class="pg-pages"></span>
-              <button onclick="ussChangePage(1)" id="uss-pg-next">下一页</button>
+              <button class="pg-next" onclick="ussChangePage(1)" id="uss-pg-next">下一页</button>
               <span class="pager-goto">前往 <input type="text" id="uss-pg-goto" onkeydown="if(event.key==='Enter')ussGotoPage(this.value)"> 页</span>
               <select class="pager-size" id="uss-pg-size" onchange="ussChangePageSize(this.value)">
                 <option value="10">10条/页</option>
@@ -1107,7 +1158,7 @@
                 <input type="text" id="ds-flt-itemtype" placeholder="请选择或输入" onfocus="dsShowCombobox(this)" oninput="dsFilterCombobox(this)">
                 <span class="cb-arrow" onclick="dsToggleCombobox(this)">▼</span>
                 <ul class="lt-datalist">
-                  <li data-val="" onclick="dsSelectCombobox(this)">全部</li>
+                  <li data-val="" onclick="dsSelectCombobox(this)">请选择</li>
                   <li data-val="常规" onclick="dsSelectCombobox(this)">常规</li>
                   <li data-val="索赔" onclick="dsSelectCombobox(this)">索赔</li>
                   <li data-val="召回" onclick="dsSelectCombobox(this)">召回</li>
@@ -1120,7 +1171,7 @@
                 <input type="text" id="ds-flt-category" placeholder="请选择或输入" onfocus="dsShowCombobox(this)" oninput="dsFilterCombobox(this)">
                 <span class="cb-arrow" onclick="dsToggleCombobox(this)">▼</span>
                 <ul class="lt-datalist">
-                  <li data-val="" onclick="dsSelectCombobox(this)">全部</li>
+                  <li data-val="" onclick="dsSelectCombobox(this)">请选择</li>
                   <li data-val="机电" onclick="dsSelectCombobox(this)">机电</li>
                   <li data-val="钣喷" onclick="dsSelectCombobox(this)">钣喷</li>
                   <li data-val="养护" onclick="dsSelectCombobox(this)">养护</li>
@@ -1143,13 +1194,13 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="ds-flt-region" placeholder="请选择" oninput="dsFilterCombobox(this)" onfocus="dsShowCombobox(this)"><span class="cb-arrow" onclick="dsToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="ds-region-list"><li onclick="dsSelectCombobox(this)">华东</li><li onclick="dsSelectCombobox(this)">华南</li><li onclick="dsSelectCombobox(this)">华北</li><li onclick="dsSelectCombobox(this)">西南</li><li onclick="dsSelectCombobox(this)">东北</li><li onclick="dsSelectCombobox(this)">华中</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="dsApplyFilter"><span class="lt-filter-prefix">大区</span><input type="text" id="ds-flt-region" placeholder="请选择" oninput="dsFilterCombobox(this)" onfocus="dsShowCombobox(this)"><span class="cb-arrow" onclick="dsToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ds-region-list"><li data-val="" onclick="dsSelectCombobox(this)">请选择</li><li onclick="dsSelectCombobox(this)">华东</li><li onclick="dsSelectCombobox(this)">华南</li><li onclick="dsSelectCombobox(this)">华北</li><li onclick="dsSelectCombobox(this)">西南</li><li onclick="dsSelectCombobox(this)">东北</li><li onclick="dsSelectCombobox(this)">华中</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="ds-flt-district" placeholder="请选择" oninput="dsFilterCombobox(this)" onfocus="dsShowCombobox(this)"><span class="cb-arrow" onclick="dsToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="ds-district-list"><li onclick="dsSelectCombobox(this)">上海</li><li onclick="dsSelectCombobox(this)">广州</li><li onclick="dsSelectCombobox(this)">北京</li><li onclick="dsSelectCombobox(this)">深圳</li><li onclick="dsSelectCombobox(this)">成都</li><li onclick="dsSelectCombobox(this)">沈阳</li><li onclick="dsSelectCombobox(this)">杭州</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="dsApplyFilter"><span class="lt-filter-prefix">小区</span><input type="text" id="ds-flt-district" placeholder="请选择" oninput="dsFilterCombobox(this)" onfocus="dsShowCombobox(this)"><span class="cb-arrow" onclick="dsToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ds-district-list"><li data-val="" onclick="dsSelectCombobox(this)">请选择</li><li onclick="dsSelectCombobox(this)">上海</li><li onclick="dsSelectCombobox(this)">广州</li><li onclick="dsSelectCombobox(this)">北京</li><li onclick="dsSelectCombobox(this)">深圳</li><li onclick="dsSelectCombobox(this)">成都</li><li onclick="dsSelectCombobox(this)">沈阳</li><li onclick="dsSelectCombobox(this)">杭州</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
@@ -1163,8 +1214,8 @@
               </label>
             </div>
             <div class="lt-filter-footer">
-              <button class="lt-btn-filter primary" onclick="dsApplyFilter()">查询</button>
-              <button class="lt-btn-filter default" onclick="dsResetFilter()">重置</button>
+              <button class="lt-btn lt-btn-primary" onclick="dsApplyFilter()">查询</button>
+              <button class="lt-btn lt-btn-default" onclick="dsResetFilter()">重置</button>
               <a href="javascript:void(0)" class="lt-filter-toggle" onclick="dsToggleFilter()">﹀ 展开</a>
             </div>
           </div>
@@ -1174,10 +1225,10 @@
         <div class="lt-list-area">
           <div class="lt-toolbar">
             <div class="lt-toolbar-left">
-              <button class="lt-btn-filter default" onclick="dsExportData()">导出</button>
+              <button class="lt-btn lt-btn-default" onclick="dsExportData()">导出</button>
             </div>
             <div class="lt-toolbar-right">
-              <button class="lt-btn-filter link" onclick="dsShowDesc()">报表说明</button>
+              <button class="lt-btn-link" onclick="dsShowDesc()">报表说明</button>
             </div>
           </div>
           <div class="ds-body">
@@ -1485,28 +1536,26 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span>
+              <div class="lt-input-wrap combobox" data-apply="pinApplyFilter"><span class="lt-filter-prefix">大区</span>
                 <input type="text" id="pin-flt-region" placeholder="请选择" oninput="pinFilterCombobox(this)" onfocus="pinShowCombobox(this)">
                 <span class="cb-arrow" onclick="pinToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="pin-region-list">
-                  <li onclick="pinSelectCombobox(this)">华北区</li>
-                  <li onclick="pinSelectCombobox(this)">华东区</li>
-                  <li onclick="pinSelectCombobox(this)">华南区</li>
-                  <li onclick="pinSelectCombobox(this)">西南区</li>
+                <ul class="lt-datalist" id="pin-region-list"><li data-val="" onclick="pinSelectCombobox(this)">请选择</li><li onclick="pinSelectCombobox(this)">华北</li>
+                  <li onclick="pinSelectCombobox(this)">华东</li>
+                  <li onclick="pinSelectCombobox(this)">华南</li>
+                  <li onclick="pinSelectCombobox(this)">西南</li>
                 </ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span>
+              <div class="lt-input-wrap combobox" data-apply="pinApplyFilter"><span class="lt-filter-prefix">小区</span>
                 <input type="text" id="pin-flt-district" placeholder="请选择" oninput="pinFilterCombobox(this)" onfocus="pinShowCombobox(this)">
                 <span class="cb-arrow" onclick="pinToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="pin-district-list">
-                  <li onclick="pinSelectCombobox(this)">北京区</li>
-                  <li onclick="pinSelectCombobox(this)">天津区</li>
-                  <li onclick="pinSelectCombobox(this)">上海区</li>
-                  <li onclick="pinSelectCombobox(this)">杭州区</li>
-                  <li onclick="pinSelectCombobox(this)">广州区</li>
-                  <li onclick="pinSelectCombobox(this)">深圳区</li>
+                <ul class="lt-datalist" id="pin-district-list"><li data-val="" onclick="pinSelectCombobox(this)">请选择</li><li onclick="pinSelectCombobox(this)">北京</li>
+                  <li onclick="pinSelectCombobox(this)">天津</li>
+                  <li onclick="pinSelectCombobox(this)">上海</li>
+                  <li onclick="pinSelectCombobox(this)">杭州</li>
+                  <li onclick="pinSelectCombobox(this)">广州</li>
+                  <li onclick="pinSelectCombobox(this)">深圳</li>
                 </ul>
               </div>
             </div>
@@ -1554,12 +1603,12 @@
             </table>
           </div>
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="pin-pager">
             <div class="lt-pager-left"><span class="pager-total" id="pin-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button id="pin-pg-prev" onclick="pinChangePage(-1)">上一页</button>
+              <button class="pg-prev" id="pin-pg-prev" onclick="pinChangePage(-1)">上一页</button>
               <span id="pin-pg-pages" class="pg-pages"></span>
-              <button id="pin-pg-next" onclick="pinChangePage(1)">下一页</button>
+              <button class="pg-next" id="pin-pg-next" onclick="pinChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="pin-pg-goto" onkeydown="if(event.key==='Enter')pinGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="pin-pg-size" onchange="pinChangePageSize(this.value)">
                 <option value="10">10条/页</option>
@@ -1595,10 +1644,10 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">出入库类型</span>
+              <div class="lt-input-wrap combobox" data-apply="pioApplyFilter"><span class="lt-filter-prefix">出入库类型</span>
                 <input type="text" id="pio-flt-type" placeholder="请选择" oninput="pioFilterCombobox(this)" onfocus="pioShowCombobox(this)">
                 <span class="cb-arrow" onclick="pioToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="pio-type-list">
+                <ul class="lt-datalist" id="pio-type-list"><li data-val="" onclick="pioSelectCombobox(this)">请选择</li>
                   <li onclick="pioSelectCombobox(this)">主机厂采购入库</li>
                   <li onclick="pioSelectCombobox(this)">主机厂采购退货</li>
                   <li onclick="pioSelectCombobox(this)">外采入库</li>
@@ -1645,28 +1694,26 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span>
+              <div class="lt-input-wrap combobox" data-apply="pioApplyFilter"><span class="lt-filter-prefix">大区</span>
                 <input type="text" id="pio-flt-region" placeholder="请选择" oninput="pioFilterCombobox(this)" onfocus="pioShowCombobox(this)">
                 <span class="cb-arrow" onclick="pioToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="pio-region-list">
-                  <li onclick="pioSelectCombobox(this)">华北区</li>
-                  <li onclick="pioSelectCombobox(this)">华东区</li>
-                  <li onclick="pioSelectCombobox(this)">华南区</li>
-                  <li onclick="pioSelectCombobox(this)">西南区</li>
+                <ul class="lt-datalist" id="pio-region-list"><li data-val="" onclick="pioSelectCombobox(this)">请选择</li><li onclick="pioSelectCombobox(this)">华北</li>
+                  <li onclick="pioSelectCombobox(this)">华东</li>
+                  <li onclick="pioSelectCombobox(this)">华南</li>
+                  <li onclick="pioSelectCombobox(this)">西南</li>
                 </ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span>
+              <div class="lt-input-wrap combobox" data-apply="pioApplyFilter"><span class="lt-filter-prefix">小区</span>
                 <input type="text" id="pio-flt-district" placeholder="请选择" oninput="pioFilterCombobox(this)" onfocus="pioShowCombobox(this)">
                 <span class="cb-arrow" onclick="pioToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="pio-district-list">
-                  <li onclick="pioSelectCombobox(this)">北京区</li>
-                  <li onclick="pioSelectCombobox(this)">天津区</li>
-                  <li onclick="pioSelectCombobox(this)">上海区</li>
-                  <li onclick="pioSelectCombobox(this)">杭州区</li>
-                  <li onclick="pioSelectCombobox(this)">广州区</li>
-                  <li onclick="pioSelectCombobox(this)">深圳区</li>
+                <ul class="lt-datalist" id="pio-district-list"><li data-val="" onclick="pioSelectCombobox(this)">请选择</li><li onclick="pioSelectCombobox(this)">北京</li>
+                  <li onclick="pioSelectCombobox(this)">天津</li>
+                  <li onclick="pioSelectCombobox(this)">上海</li>
+                  <li onclick="pioSelectCombobox(this)">杭州</li>
+                  <li onclick="pioSelectCombobox(this)">广州</li>
+                  <li onclick="pioSelectCombobox(this)">深圳</li>
                 </ul>
               </div>
             </div>
@@ -1712,12 +1759,12 @@
             </table>
           </div>
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="pio-pager">
             <div class="lt-pager-left"><span class="pager-total" id="pio-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button id="pio-pg-prev" onclick="pioChangePage(-1)">上一页</button>
+              <button class="pg-prev" id="pio-pg-prev" onclick="pioChangePage(-1)">上一页</button>
               <span id="pio-pg-pages" class="pg-pages"></span>
-              <button id="pio-pg-next" onclick="pioChangePage(1)">下一页</button>
+              <button class="pg-next" id="pio-pg-next" onclick="pioChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="pio-pg-goto" onkeydown="if(event.key==='Enter')pioGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="pio-pg-size" onchange="pioChangePageSize(this.value)">
                 <option value="10">10条/页</option>
@@ -1742,10 +1789,10 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">出入库类型</span>
+              <div class="lt-input-wrap combobox" data-apply="piodApplyFilter"><span class="lt-filter-prefix">出入库类型</span>
                 <input type="text" id="piod-flt-type" placeholder="请选择" oninput="piodFilterCombobox(this)" onfocus="piodShowCombobox(this)">
                 <span class="cb-arrow" onclick="piodToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="piod-type-list">
+                <ul class="lt-datalist" id="piod-type-list"><li data-val="" onclick="piodSelectCombobox(this)">请选择</li>
                   <li onclick="piodSelectCombobox(this)">主机厂采购入库</li>
                   <li onclick="piodSelectCombobox(this)">主机厂采购退货</li>
                   <li onclick="piodSelectCombobox(this)">外采入库</li>
@@ -1787,28 +1834,26 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span>
+              <div class="lt-input-wrap combobox" data-apply="piodApplyFilter"><span class="lt-filter-prefix">大区</span>
                 <input type="text" id="piod-flt-region" placeholder="请选择" oninput="piodFilterCombobox(this)" onfocus="piodShowCombobox(this)">
                 <span class="cb-arrow" onclick="piodToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="piod-region-list">
-                  <li onclick="piodSelectCombobox(this)">华北区</li>
-                  <li onclick="piodSelectCombobox(this)">华东区</li>
-                  <li onclick="piodSelectCombobox(this)">华南区</li>
-                  <li onclick="piodSelectCombobox(this)">西南区</li>
+                <ul class="lt-datalist" id="piod-region-list"><li data-val="" onclick="piodSelectCombobox(this)">请选择</li><li onclick="piodSelectCombobox(this)">华北</li>
+                  <li onclick="piodSelectCombobox(this)">华东</li>
+                  <li onclick="piodSelectCombobox(this)">华南</li>
+                  <li onclick="piodSelectCombobox(this)">西南</li>
                 </ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span>
+              <div class="lt-input-wrap combobox" data-apply="piodApplyFilter"><span class="lt-filter-prefix">小区</span>
                 <input type="text" id="piod-flt-district" placeholder="请选择" oninput="piodFilterCombobox(this)" onfocus="piodShowCombobox(this)">
                 <span class="cb-arrow" onclick="piodToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="piod-district-list">
-                  <li onclick="piodSelectCombobox(this)">北京区</li>
-                  <li onclick="piodSelectCombobox(this)">天津区</li>
-                  <li onclick="piodSelectCombobox(this)">上海区</li>
-                  <li onclick="piodSelectCombobox(this)">杭州区</li>
-                  <li onclick="piodSelectCombobox(this)">广州区</li>
-                  <li onclick="piodSelectCombobox(this)">深圳区</li>
+                <ul class="lt-datalist" id="piod-district-list"><li data-val="" onclick="piodSelectCombobox(this)">请选择</li><li onclick="piodSelectCombobox(this)">北京</li>
+                  <li onclick="piodSelectCombobox(this)">天津</li>
+                  <li onclick="piodSelectCombobox(this)">上海</li>
+                  <li onclick="piodSelectCombobox(this)">杭州</li>
+                  <li onclick="piodSelectCombobox(this)">广州</li>
+                  <li onclick="piodSelectCombobox(this)">深圳</li>
                 </ul>
               </div>
             </div>
@@ -1855,12 +1900,12 @@
             </table>
           </div>
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="piod-pager">
             <div class="lt-pager-left"><span class="pager-total" id="piod-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button id="piod-pg-prev" onclick="piodChangePage(-1)">上一页</button>
+              <button class="pg-prev" id="piod-pg-prev" onclick="piodChangePage(-1)">上一页</button>
               <span id="piod-pg-pages" class="pg-pages"></span>
-              <button id="piod-pg-next" onclick="piodChangePage(1)">下一页</button>
+              <button class="pg-next" id="piod-pg-next" onclick="piodChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="piod-pg-goto" onkeydown="if(event.key==='Enter')piodGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="piod-pg-size" onchange="piodChangePageSize(this.value)">
                 <option value="10">10条/页</option>
@@ -1955,34 +2000,27 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span>
+              <div class="lt-input-wrap combobox" data-apply="psdApplyFilter"><span class="lt-filter-prefix">大区</span>
                 <input type="text" id="psd-flt-region" placeholder="请选择" oninput="psdFilterCombobox(this)" onfocus="psdShowCombobox(this)">
                 <span class="cb-arrow" onclick="psdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="psd-region-list">
-                  <li onclick="psdSelectCombobox(this)">华北区</li>
-                  <li onclick="psdSelectCombobox(this)">华东区</li>
-                  <li onclick="psdSelectCombobox(this)">华南区</li>
-                  <li onclick="psdSelectCombobox(this)">华中区</li>
-                  <li onclick="psdSelectCombobox(this)">西南区</li>
-                  <li onclick="psdSelectCombobox(this)">西北区</li>
-                  <li onclick="psdSelectCombobox(this)">东北区</li>
-                </ul>
+                <ul class="lt-datalist" id="psd-region-list"><li data-val="" onclick="psdSelectCombobox(this)">请选择</li><li onclick="psdSelectCombobox(this)">华北</li>
+                  <li onclick="psdSelectCombobox(this)">华东</li>
+                  <li onclick="psdSelectCombobox(this)">华南</li>
+                  <li onclick="psdSelectCombobox(this)">华中</li>
+                  </ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span>
+              <div class="lt-input-wrap combobox" data-apply="psdApplyFilter"><span class="lt-filter-prefix">小区</span>
                 <input type="text" id="psd-flt-district" placeholder="请选择" oninput="psdFilterCombobox(this)" onfocus="psdShowCombobox(this)">
                 <span class="cb-arrow" onclick="psdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="psd-district-list">
-                  <li onclick="psdSelectCombobox(this)">北京区</li>
-                  <li onclick="psdSelectCombobox(this)">上海区</li>
-                  <li onclick="psdSelectCombobox(this)">广州区</li>
-                  <li onclick="psdSelectCombobox(this)">深圳区</li>
-                  <li onclick="psdSelectCombobox(this)">杭州区</li>
-                  <li onclick="psdSelectCombobox(this)">成都区</li>
-                  <li onclick="psdSelectCombobox(this)">武汉区</li>
-                  <li onclick="psdSelectCombobox(this)">西安区</li>
-                </ul>
+                <ul class="lt-datalist" id="psd-district-list"><li data-val="" onclick="psdSelectCombobox(this)">请选择</li><li onclick="psdSelectCombobox(this)">北京</li>
+                  <li onclick="psdSelectCombobox(this)">上海</li>
+                  <li onclick="psdSelectCombobox(this)">广州</li>
+                  <li onclick="psdSelectCombobox(this)">深圳</li>
+                  <li onclick="psdSelectCombobox(this)">杭州</li>
+                  <li onclick="psdSelectCombobox(this)">武汉</li>
+                  </ul>
               </div>
             </div>
             <div class="lt-filter-item">
@@ -2039,12 +2077,12 @@
             </table>
           </div>
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="psd-pager">
             <div class="lt-pager-left"><span class="pager-total" id="psd-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button id="psd-pg-prev" onclick="psdChangePage(-1)">上一页</button>
+              <button class="pg-prev" id="psd-pg-prev" onclick="psdChangePage(-1)">上一页</button>
               <span id="psd-pg-pages" class="pg-pages"></span>
-              <button id="psd-pg-next" onclick="psdChangePage(1)">下一页</button>
+              <button class="pg-next" id="psd-pg-next" onclick="psdChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="psd-pg-goto" onkeydown="if(event.key==='Enter')psdGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="psd-pg-size" onchange="psdChangePageSize(this.value)">
                 <option value="10">10条/页</option><option value="20" selected>20条/页</option>
@@ -2097,10 +2135,10 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">维修项目类型</span>
+              <div class="lt-input-wrap combobox" data-apply="prdApplyFilter"><span class="lt-filter-prefix">维修项目类型</span>
                 <input type="text" id="rrd-flt-repair-type" placeholder="请选择" oninput="rrdFilterCombobox(this)" onfocus="rrdShowCombobox(this)">
                 <span class="cb-arrow" onclick="rrdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="rrd-repair-type-list">
+                <ul class="lt-datalist" id="rrd-repair-type-list"><li data-val="" onclick="rrdSelectCombobox(this)">请选择</li>
                   <li onclick="rrdSelectCombobox(this)">普通维修</li>
                   <li onclick="rrdSelectCombobox(this)">定保</li>
                   <li onclick="rrdSelectCombobox(this)">保险</li>
@@ -2111,10 +2149,10 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">维修类别</span>
+              <div class="lt-input-wrap combobox" data-apply="prdApplyFilter"><span class="lt-filter-prefix">维修类别</span>
                 <input type="text" id="rrd-flt-repair-cat" placeholder="请选择" oninput="rrdFilterCombobox(this)" onfocus="rrdShowCombobox(this)">
                 <span class="cb-arrow" onclick="rrdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="rrd-repair-cat-list">
+                <ul class="lt-datalist" id="rrd-repair-cat-list"><li data-val="" onclick="rrdSelectCombobox(this)">请选择</li>
                   <li onclick="rrdSelectCombobox(this)">钣金</li>
                   <li onclick="rrdSelectCombobox(this)">机修</li>
                   <li onclick="rrdSelectCombobox(this)">喷漆</li>
@@ -2126,10 +2164,10 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">付费性质</span>
+              <div class="lt-input-wrap combobox" data-apply="prdApplyFilter"><span class="lt-filter-prefix">付费性质</span>
                 <input type="text" id="rrd-flt-pay-type" placeholder="请选择" oninput="rrdFilterCombobox(this)" onfocus="rrdShowCombobox(this)">
                 <span class="cb-arrow" onclick="rrdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="rrd-pay-type-list">
+                <ul class="lt-datalist" id="rrd-pay-type-list"><li data-val="" onclick="rrdSelectCombobox(this)">请选择</li>
                   <li onclick="rrdSelectCombobox(this)">客户</li>
                   <li onclick="rrdSelectCombobox(this)">索赔（免保）</li>
                   <li onclick="rrdSelectCombobox(this)">索赔（保修）</li>
@@ -2165,10 +2203,10 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">车系</span>
+              <div class="lt-input-wrap combobox" data-apply="prdApplyFilter"><span class="lt-filter-prefix">车系</span>
                 <input type="text" id="rrd-flt-series" placeholder="请选择" oninput="rrdFilterCombobox(this)" onfocus="rrdShowCombobox(this)">
                 <span class="cb-arrow" onclick="rrdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="rrd-series-list">
+                <ul class="lt-datalist" id="rrd-series-list"><li data-val="" onclick="rrdSelectCombobox(this)">请选择</li>
                   <li onclick="rrdSelectCombobox(this)">奕境EV</li>
                   <li onclick="rrdSelectCombobox(this)">奕境PHEV</li>
                   <li onclick="rrdSelectCombobox(this)">奕境SUV</li>
@@ -2269,12 +2307,12 @@
             </table>
           </div>
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="rrd-pager">
             <div class="lt-pager-left"><span class="pager-total" id="rrd-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button id="rrd-pg-prev" onclick="rrdChangePage(-1)">上一页</button>
+              <button class="pg-prev" id="rrd-pg-prev" onclick="rrdChangePage(-1)">上一页</button>
               <span id="rrd-pg-pages" class="pg-pages"></span>
-              <button id="rrd-pg-next" onclick="rrdChangePage(1)">下一页</button>
+              <button class="pg-next" id="rrd-pg-next" onclick="rrdChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="rrd-pg-goto" onkeydown="if(event.key==='Enter')rrdGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="rrd-pg-size" onchange="rrdChangePageSize(this.value)">
                 <option value="10">10条/页</option><option value="20" selected>20条/页</option>
@@ -2342,27 +2380,23 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span>
+              <div class="lt-input-wrap combobox" data-apply="prdApplyFilter"><span class="lt-filter-prefix">大区</span>
                 <input type="text" id="prd-flt-region" placeholder="请选择" oninput="prdFilterCombobox(this)" onfocus="prdShowCombobox(this)">
                 <span class="cb-arrow" onclick="prdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="prd-region-list">
-                  <li onclick="prdSelectCombobox(this)">华北区</li>
-                  <li onclick="prdSelectCombobox(this)">华东区</li>
-                  <li onclick="prdSelectCombobox(this)">华南区</li>
-                  <li onclick="prdSelectCombobox(this)">西南区</li>
-                  <li onclick="prdSelectCombobox(this)">西北区</li>
-                </ul>
+                <ul class="lt-datalist" id="prd-region-list"><li data-val="" onclick="prdSelectCombobox(this)">请选择</li><li onclick="prdSelectCombobox(this)">华北</li>
+                  <li onclick="prdSelectCombobox(this)">华东</li>
+                  <li onclick="prdSelectCombobox(this)">华南</li>
+                  </ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span>
+              <div class="lt-input-wrap combobox" data-apply="prdApplyFilter"><span class="lt-filter-prefix">小区</span>
                 <input type="text" id="prd-flt-district" placeholder="请选择" oninput="prdFilterCombobox(this)" onfocus="prdShowCombobox(this)">
                 <span class="cb-arrow" onclick="prdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="prd-district-list">
-                  <li onclick="prdSelectCombobox(this)">北京小区</li>
-                  <li onclick="prdSelectCombobox(this)">上海小区</li>
-                  <li onclick="prdSelectCombobox(this)">广州小区</li>
-                  <li onclick="prdSelectCombobox(this)">成都小区</li>
+                <ul class="lt-datalist" id="prd-district-list"><li data-val="" onclick="prdSelectCombobox(this)">请选择</li><li onclick="prdSelectCombobox(this)">北京</li>
+                  <li onclick="prdSelectCombobox(this)">上海</li>
+                  <li onclick="prdSelectCombobox(this)">广州</li>
+                  <li onclick="prdSelectCombobox(this)">成都</li>
                 </ul>
               </div>
             </div>
@@ -2410,12 +2444,12 @@
             </table>
           </div>
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="prd-pager">
             <div class="lt-pager-left"><span class="pager-total" id="prd-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button id="prd-pg-prev" onclick="prdChangePage(-1)">上一页</button>
+              <button class="pg-prev" id="prd-pg-prev" onclick="prdChangePage(-1)">上一页</button>
               <span id="prd-pg-pages" class="pg-pages"></span>
-              <button id="prd-pg-next" onclick="prdChangePage(1)">下一页</button>
+              <button class="pg-next" id="prd-pg-next" onclick="prdChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="prd-pg-goto" onkeydown="if(event.key==='Enter')prdGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="prd-pg-size" onchange="prdChangePageSize(this.value)">
                 <option value="10">10条/页</option><option value="20" selected>20条/页</option>
@@ -2546,12 +2580,12 @@
             </table>
           </div>
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="int-pager">
             <div class="lt-pager-left"><span class="pager-total" id="int-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button id="int-pg-prev" onclick="intChangePage(-1)">上一页</button>
+              <button class="pg-prev" id="int-pg-prev" onclick="intChangePage(-1)">上一页</button>
               <span id="int-pg-pages" class="pg-pages"></span>
-              <button id="int-pg-next" onclick="intChangePage(1)">下一页</button>
+              <button class="pg-next" id="int-pg-next" onclick="intChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="int-pg-goto" onkeydown="if(event.key==='Enter')intGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="int-pg-size" onchange="intChangePageSize(this.value)">
                 <option value="10">10条/页</option>
@@ -2574,8 +2608,8 @@
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">出入库日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="icdApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="icd-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="icd-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">盘点单号</span><input type="text" id="icd-flt-check-no" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">出入库单号</span><input type="text" id="icd-flt-io-no" placeholder="请输入" oninput="icdApplyFilter()"></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="icd-flt-region" placeholder="请选择" oninput="icdFilterCombobox(this)" onfocus="icdShowCombobox(this)"><span class="cb-arrow" onclick="icdToggleCombobox(this)">▼</span><ul class="lt-datalist" id="icd-region-list"><li onclick="icdSelectCombobox(this)">华北区</li><li onclick="icdSelectCombobox(this)">华东区</li><li onclick="icdSelectCombobox(this)">华南区</li><li onclick="icdSelectCombobox(this)">西南区</li><li onclick="icdSelectCombobox(this)">西北区</li></ul></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="icd-flt-district" placeholder="请选择" oninput="icdFilterCombobox(this)" onfocus="icdShowCombobox(this)"><span class="cb-arrow" onclick="icdToggleCombobox(this)">▼</span><ul class="lt-datalist" id="icd-district-list"><li onclick="icdSelectCombobox(this)">北京区</li><li onclick="icdSelectCombobox(this)">上海区</li><li onclick="icdSelectCombobox(this)">广州区</li><li onclick="icdSelectCombobox(this)">成都区</li></ul></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" data-apply="icdApplyFilter"><span class="lt-filter-prefix">大区</span><input type="text" id="icd-flt-region" placeholder="请选择" oninput="icdFilterCombobox(this)" onfocus="icdShowCombobox(this)"><span class="cb-arrow" onclick="icdToggleCombobox(this)">▼</span><ul class="lt-datalist" id="icd-region-list"><li data-val="" onclick="icdSelectCombobox(this)">请选择</li><li onclick="icdSelectCombobox(this)">华东</li><li onclick="icdSelectCombobox(this)">华南</li><li onclick="icdSelectCombobox(this)">华北</li><li onclick="icdSelectCombobox(this)">西南</li><li onclick="icdSelectCombobox(this)">东北</li><li onclick="icdSelectCombobox(this)">华中</li></ul></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" data-apply="icdApplyFilter"><span class="lt-filter-prefix">小区</span><input type="text" id="icd-flt-district" placeholder="请选择" oninput="icdFilterCombobox(this)" onfocus="icdShowCombobox(this)"><span class="cb-arrow" onclick="icdToggleCombobox(this)">▼</span><ul class="lt-datalist" id="icd-district-list"><li data-val="" onclick="icdSelectCombobox(this)">请选择</li><li onclick="icdSelectCombobox(this)">北京</li><li onclick="icdSelectCombobox(this)">上海</li><li onclick="icdSelectCombobox(this)">广州</li><li onclick="icdSelectCombobox(this)">武汉</li><li onclick="icdSelectCombobox(this)">深圳</li><li onclick="icdSelectCombobox(this)">杭州</li></ul></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span><input type="text" id="icd-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('icd-flt-store')"></div></div>
             <div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="icdApplyFilter()">查询</button><button class="lt-btn lt-btn-default" onclick="icdResetFilter()">重置</button><a href="javascript:void(0)" class="lt-filter-toggle" onclick="icdToggleFilter()">﹀ 展开</a></div>
           </div></div>
@@ -2584,8 +2618,8 @@
           <div class="lt-table-wrap"><table class="lt-table">
               <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-check-no">盘点单号</th><th class="col-store-name">门店名称</th><th class="col-store-code">门店编码</th><th class="col-code">配件编码</th><th class="col-name">配件名称</th><th class="col-diff-qty">盈亏数量</th><th class="col-price">单价</th><th class="col-amount">金额</th><th class="col-io-time">出入库时间</th><th class="col-warehouse">仓库</th><th class="col-position">仓位</th><th class="col-remark">备注</th></tr></thead>
               <tbody id="icd-tbody"></tbody></table></div>
-          <div class="lt-pager"><div class="lt-pager-left"><span class="pager-total" id="icd-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="icd-pg-prev" onclick="icdChangePage(-1)">上一页</button><span id="icd-pg-pages" class="pg-pages"></span><button id="icd-pg-next" onclick="icdChangePage(1)">下一页</button>
+          <div class="lt-pager" id="icd-pager"><div class="lt-pager-left"><span class="pager-total" id="icd-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="icd-pg-prev" onclick="icdChangePage(-1)">上一页</button><span id="icd-pg-pages" class="pg-pages"></span><button class="pg-next" id="icd-pg-next" onclick="icdChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="icd-pg-goto" onkeydown="if(event.key==='Enter')icdGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="icd-pg-size" onchange="icdChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>
             </div></div></div></div>
@@ -2624,8 +2658,8 @@
           <div class="lt-table-wrap"><table class="lt-table">
               <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-order-no">单号</th><th class="sticky col-status">处理状态</th><th class="col-province">省份</th><th class="col-city">城市</th><th class="col-store-name">门店</th><th class="col-store-code">门店编码</th><th class="col-submit-date">提交日期</th><th class="col-car-series">车系</th><th class="col-subject">主题</th><th class="col-importance">重要程度</th><th class="col-repair-order">维修工单号</th><th class="col-complaint-order">客诉单号</th><th class="col-pdi-order">PDI单</th><th class="col-alarm-order">告警单</th><th class="col-archive-category">归档分类</th><th class="col-vin">VIN</th><th class="col-fault-date">故障日期</th><th class="col-fault-system">故障系统</th><th class="col-fault-nature">故障性质</th><th class="col-prod-date">生产日期</th><th class="sticky col-actions">操作</th></tr></thead>
               <tbody id="ts-tbody"></tbody></table></div>
-          <div class="lt-pager"><div class="lt-pager-left"><span class="pager-total" id="ts-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="ts-pg-prev" onclick="tsChangePage(-1)">上一页</button><span id="ts-pg-pages" class="pg-pages"></span><button id="ts-pg-next" onclick="tsChangePage(1)">下一页</button>
+          <div class="lt-pager" id="ts-pager"><div class="lt-pager-left"><span class="pager-total" id="ts-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="ts-pg-prev" onclick="tsChangePage(-1)">上一页</button><span id="ts-pg-pages" class="pg-pages"></span><button class="pg-next" id="ts-pg-next" onclick="tsChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="ts-pg-goto" onkeydown="if(event.key==='Enter')tsGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="ts-pg-size" onchange="tsChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>
             </div></div></div></div>
@@ -2663,8 +2697,8 @@
           <div class="lt-table-wrap"><table class="lt-table">
               <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-order-no">单号</th><th class="sticky col-status">处理状态</th><th class="col-province">省份</th><th class="col-city">城市</th><th class="col-store-name">门店</th><th class="col-store-code">门店编码</th><th class="col-submit-date">提交日期</th><th class="col-car-series">车系</th><th class="col-subject">主题</th><th class="col-importance">重要程度</th><th class="col-repair-order">维修工单号</th><th class="col-complaint-order">客诉单号</th><th class="col-pdi-order">PDI单</th><th class="col-alarm-order">告警单</th><th class="col-vin">VIN</th><th class="col-fault-date">故障日期</th><th class="col-fault-system">故障系统</th><th class="col-fault-nature">故障性质</th><th class="col-prod-date">生产日期</th><th class="sticky col-actions">操作</th></tr></thead>
               <tbody id="qr-tbody"></tbody></table></div>
-          <div class="lt-pager"><div class="lt-pager-left"><span class="pager-total" id="qr-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="qr-pg-prev" onclick="qrChangePage(-1)">上一页</button><span id="qr-pg-pages" class="pg-pages"></span><button id="qr-pg-next" onclick="qrChangePage(1)">下一页</button>
+          <div class="lt-pager" id="qr-pager"><div class="lt-pager-left"><span class="pager-total" id="qr-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="qr-pg-prev" onclick="qrChangePage(-1)">上一页</button><span id="qr-pg-pages" class="pg-pages"></span><button class="pg-next" id="qr-pg-next" onclick="qrChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="qr-pg-goto" onkeydown="if(event.key==='Enter')qrGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="qr-pg-size" onchange="qrChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>
             </div></div></div></div>
@@ -2692,7 +2726,7 @@
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="thqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="thq-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span><input type="text" id="thq-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('thq-flt-store')"></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">省份</span><input type="text" id="thq-flt-province" placeholder="请选择" oninput="thqFilterCombobox(this)" onfocus="thqShowCombobox(this)"><span class="cb-arrow" onclick="thqToggleCombobox(this)">▼</span><ul class="lt-datalist" id="thq-province-list"><li onclick="thqSelectCombobox(this)">北京</li><li onclick="thqSelectCombobox(this)">上海</li><li onclick="thqSelectCombobox(this)">广东</li><li onclick="thqSelectCombobox(this)">浙江</li><li onclick="thqSelectCombobox(this)">江苏</li><li onclick="thqSelectCombobox(this)">四川</li><li onclick="thqSelectCombobox(this)">湖北</li></ul></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" data-apply="ppApplyFilter"><span class="lt-filter-prefix">省份</span><input type="text" id="thq-flt-province" placeholder="请选择" oninput="thqFilterCombobox(this)" onfocus="thqShowCombobox(this)"><span class="cb-arrow" onclick="thqToggleCombobox(this)">▼</span><ul class="lt-datalist" id="thq-province-list"><li data-val="" onclick="thqSelectCombobox(this)">请选择</li><li onclick="thqSelectCombobox(this)">北京</li><li onclick="thqSelectCombobox(this)">上海</li><li onclick="thqSelectCombobox(this)">广东</li><li onclick="thqSelectCombobox(this)">浙江</li><li onclick="thqSelectCombobox(this)">江苏</li><li onclick="thqSelectCombobox(this)">四川</li><li onclick="thqSelectCombobox(this)">湖北</li></ul></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">城市</span><input type="text" id="thq-flt-city" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">归档分类</span><select id="thq-flt-archive-category" onchange="thqApplyFilter()"><option value="">全部</option><option>发动机</option><option>变速箱</option><option>电气</option><option>底盘</option><option>车身</option></select></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修工单</span><input type="text" id="thq-flt-repair-order" placeholder="请输入" oninput="thqApplyFilter()"></div></div>
@@ -2707,8 +2741,8 @@
           <div class="lt-table-wrap"><table class="lt-table">
               <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-order-no">单号</th><th class="sticky col-status">处理状态</th><th class="col-province">省份</th><th class="col-city">城市</th><th class="col-store-name">门店</th><th class="col-store-code">门店编码</th><th class="col-submit-date">提交日期</th><th class="col-car-series">车系</th><th class="col-subject">主题</th><th class="col-importance">重要程度</th><th class="col-repair-order">维修工单号</th><th class="col-complaint-order">客诉单号</th><th class="col-pdi-order">PDI单</th><th class="col-alarm-order">告警单</th><th class="col-archive-category">归档分类</th><th class="col-vin">VIN</th><th class="col-fault-date">故障日期</th><th class="col-fault-system">故障系统</th><th class="col-fault-nature">故障性质</th><th class="col-prod-date">生产日期</th><th class="sticky col-actions">操作</th></tr></thead>
               <tbody id="thq-tbody"></tbody></table></div>
-          <div class="lt-pager"><div class="lt-pager-left"><span class="pager-total" id="thq-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="thq-pg-prev" onclick="thqChangePage(-1)">上一页</button><span id="thq-pg-pages" class="pg-pages"></span><button id="thq-pg-next" onclick="thqChangePage(1)">下一页</button>
+          <div class="lt-pager" id="thq-pager"><div class="lt-pager-left"><span class="pager-total" id="thq-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="thq-pg-prev" onclick="thqChangePage(-1)">上一页</button><span id="thq-pg-pages" class="pg-pages"></span><button class="pg-next" id="thq-pg-next" onclick="thqChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="thq-pg-goto" onkeydown="if(event.key==='Enter')thqGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="thq-pg-size" onchange="thqChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>
             </div></div></div></div>
@@ -2731,7 +2765,7 @@
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">生产日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-prod-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-prod-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span><input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="qrhqApplyFilter"><div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-submit-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="qrhq-flt-submit-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span><input type="text" id="qrhq-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker('qrhq-flt-store')"></div></div>
-            <div class="lt-filter-item"><div class="lt-input-wrap combobox"><span class="lt-filter-prefix">省份</span><input type="text" id="qrhq-flt-province" placeholder="请选择" oninput="qrhqFilterCombobox(this)" onfocus="qrhqShowCombobox(this)"><span class="cb-arrow" onclick="qrhqToggleCombobox(this)">▼</span><ul class="lt-datalist" id="qrhq-province-list"><li onclick="qrhqSelectCombobox(this)">北京</li><li onclick="qrhqSelectCombobox(this)">上海</li><li onclick="qrhqSelectCombobox(this)">广东</li><li onclick="qrhqSelectCombobox(this)">浙江</li><li onclick="qrhqSelectCombobox(this)">江苏</li><li onclick="qrhqSelectCombobox(this)">四川</li><li onclick="qrhqSelectCombobox(this)">湖北</li></ul></div></div>
+            <div class="lt-filter-item"><div class="lt-input-wrap combobox" data-apply="ppApplyFilter"><span class="lt-filter-prefix">省份</span><input type="text" id="qrhq-flt-province" placeholder="请选择" oninput="qrhqFilterCombobox(this)" onfocus="qrhqShowCombobox(this)"><span class="cb-arrow" onclick="qrhqToggleCombobox(this)">▼</span><ul class="lt-datalist" id="qrhq-province-list"><li data-val="" onclick="qrhqSelectCombobox(this)">请选择</li><li onclick="qrhqSelectCombobox(this)">北京</li><li onclick="qrhqSelectCombobox(this)">上海</li><li onclick="qrhqSelectCombobox(this)">广东</li><li onclick="qrhqSelectCombobox(this)">浙江</li><li onclick="qrhqSelectCombobox(this)">江苏</li><li onclick="qrhqSelectCombobox(this)">四川</li><li onclick="qrhqSelectCombobox(this)">湖北</li></ul></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">城市</span><input type="text" id="qrhq-flt-city" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">维修工单</span><input type="text" id="qrhq-flt-repair-order" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
             <div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">客诉单</span><input type="text" id="qrhq-flt-complaint-order" placeholder="请输入" oninput="qrhqApplyFilter()"></div></div>
@@ -2745,8 +2779,8 @@
           <div class="lt-table-wrap"><table class="lt-table">
               <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-order-no">单号</th><th class="sticky col-status">处理状态</th><th class="col-province">省份</th><th class="col-city">城市</th><th class="col-store-name">门店</th><th class="col-store-code">门店编码</th><th class="col-submit-date">提交日期</th><th class="col-car-series">车系</th><th class="col-subject">主题</th><th class="col-importance">重要程度</th><th class="col-repair-order">维修工单号</th><th class="col-complaint-order">客诉单号</th><th class="col-pdi-order">PDI单</th><th class="col-alarm-order">告警单</th><th class="col-vin">VIN</th><th class="col-fault-date">故障日期</th><th class="col-fault-system">故障系统</th><th class="col-fault-nature">故障性质</th><th class="col-prod-date">生产日期</th><th class="sticky col-actions">操作</th></tr></thead>
               <tbody id="qrhq-tbody"></tbody></table></div>
-          <div class="lt-pager"><div class="lt-pager-left"><span class="pager-total" id="qrhq-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="qrhq-pg-prev" onclick="qrhqChangePage(-1)">上一页</button><span id="qrhq-pg-pages" class="pg-pages"></span><button id="qrhq-pg-next" onclick="qrhqChangePage(1)">下一页</button>
+          <div class="lt-pager" id="qrhq-pager"><div class="lt-pager-left"><span class="pager-total" id="qrhq-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="qrhq-pg-prev" onclick="qrhqChangePage(-1)">上一页</button><span id="qrhq-pg-pages" class="pg-pages"></span><button class="pg-next" id="qrhq-pg-next" onclick="qrhqChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="qrhq-pg-goto" onkeydown="if(event.key==='Enter')qrhqGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="qrhq-pg-size" onchange="qrhqChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>
             </div></div></div></div></div>
@@ -2765,8 +2799,8 @@
           <div class="lt-table-wrap"><table class="lt-table">
               <thead><tr><th class="sticky col-seq">序号</th><th class="col-template-name">模板名称</th><th class="col-fault-name">主故障件名称</th><th class="col-fault-code">主故障件编码</th><th class="col-importance">重要程度</th><th class="col-fault-system">故障系统</th><th class="col-status">状态</th><th class="col-operator">更新人</th><th class="col-time">最近更新时间</th><th class="sticky col-actions">操作</th></tr></thead>
               <tbody id="qrt-tbody"></tbody></table></div>
-          <div class="lt-pager"><div class="lt-pager-left"><span class="pager-total" id="qrt-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="qrt-pg-prev" onclick="qrtChangePage(-1)">上一页</button><span id="qrt-pg-pages" class="pg-pages"></span><button id="qrt-pg-next" onclick="qrtChangePage(1)">下一页</button>
+          <div class="lt-pager" id="qrt-pager"><div class="lt-pager-left"><span class="pager-total" id="qrt-pg-total">共 0 条</span></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="qrt-pg-prev" onclick="qrtChangePage(-1)">上一页</button><span id="qrt-pg-pages" class="pg-pages"></span><button class="pg-next" id="qrt-pg-next" onclick="qrtChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="qrt-pg-goto" onkeydown="if(event.key==='Enter')qrtGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="qrt-pg-size" onchange="qrtChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>
             </div></div></div>
@@ -2794,9 +2828,9 @@
         <div class="qr-section-body">
           <div class="qr-form-grid col4">
             <!-- 2. 故障描述（模糊搜索下拉） -->
-            <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障描述</span><input type="text" id="qrt-form-fault-description" placeholder="请选择或输入" onfocus="qrtShowCombobox(this,'qrt-fd-list')" oninput="qrtFilterCombobox(this)"><span class="cb-arrow" onclick="qrtToggleComboboxArrow('qrt-fd-list')">▼</span><ul class="lt-datalist" id="qrt-fd-list"><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">请选择</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P001-大屏无显示</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P002-大屏偶发无网络</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P003-音响无声音</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P004-空调不制冷</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P005-转向异响</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P006-刹车偏软</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P007-电机抖动</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-description','qrt-fd-list')">P008-充电缓慢</li></ul></div>
+            <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障描述</span><input type="text" id="qrt-form-fault-description" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist" id="qrt-fd-list"><li data-val="" onclick="gtComboboxSelect(this)">请选择</li><li onclick="gtComboboxSelect(this)">P001-大屏无显示</li><li onclick="gtComboboxSelect(this)">P002-大屏偶发无网络</li><li onclick="gtComboboxSelect(this)">P003-音响无声音</li><li onclick="gtComboboxSelect(this)">P004-空调不制冷</li><li onclick="gtComboboxSelect(this)">P005-转向异响</li><li onclick="gtComboboxSelect(this)">P006-刹车偏软</li><li onclick="gtComboboxSelect(this)">P007-电机抖动</li><li onclick="gtComboboxSelect(this)">P008-充电缓慢</li></ul></div>
             <!-- 3. 故障系统（模糊搜索下拉） -->
-            <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障系统</span><input type="text" id="qrt-form-fault-system" placeholder="请选择或输入" onfocus="qrtShowCombobox(this,'qrt-fs-list')" oninput="qrtFilterCombobox(this)"><span class="cb-arrow" onclick="qrtToggleComboboxArrow('qrt-fs-list')">▼</span><ul class="lt-datalist" id="qrt-fs-list"><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">请选择</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">安全系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">车身系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">电子电气系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">底盘系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">动力集成系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">高压动力系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">内饰系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">外饰系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">智能驾驶系统</li><li onclick="qrtSelectCombobox(this,'qrt-form-fault-system','qrt-fs-list')">其他</li></ul></div>
+            <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障系统</span><input type="text" id="qrt-form-fault-system" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist" id="qrt-fs-list"><li data-val="" onclick="gtComboboxSelect(this)">请选择</li><li onclick="gtComboboxSelect(this)">安全系统</li><li onclick="gtComboboxSelect(this)">车身系统</li><li onclick="gtComboboxSelect(this)">电子电气系统</li><li onclick="gtComboboxSelect(this)">底盘系统</li><li onclick="gtComboboxSelect(this)">动力集成系统</li><li onclick="gtComboboxSelect(this)">高压动力系统</li><li onclick="gtComboboxSelect(this)">内饰系统</li><li onclick="gtComboboxSelect(this)">外饰系统</li><li onclick="gtComboboxSelect(this)">智能驾驶系统</li><li onclick="gtComboboxSelect(this)">其他</li></ul></div>
             <!-- 4. 主故障件编码、主故障件名称、重要程度 -->
             <div class="lt-input-wrap search required" style="flex:1;min-width:0;cursor:pointer" onclick="qrtOpenPartCodeLookup()"><span class="lt-filter-prefix">主故障件编码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qrt-form-fault-part-code" placeholder="请输入或点击搜索" style="cursor:pointer" onclick="event.stopPropagation();qrtOpenPartCodeLookup()"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">主故障件名称</span><input type="text" id="qrt-form-fault-part-name" placeholder="自动带出，可修改"></div>
@@ -2931,7 +2965,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-input-wrap"><span class="lt-filter-prefix">配件状态</span>
-                <select id="pm-flt-status">
+                <select id="pm-flt-status" onchange="pmApplyFilter()">
                   <option value="可用" selected>可用</option>
                   <option value="不可用">不可用</option>
                   <option value="">全部</option>
@@ -2940,7 +2974,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-input-wrap"><span class="lt-filter-prefix">油品</span>
-                <select id="pm-flt-oil">
+                <select id="pm-flt-oil" onchange="pmApplyFilter()">
                   <option value="">请选择</option>
                   <option value="是">是</option>
                   <option value="否">否</option>
@@ -2959,7 +2993,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-input-wrap"><span class="lt-filter-prefix">可下紧急</span>
-                <select id="pm-flt-urgent">
+                <select id="pm-flt-urgent" onchange="pmApplyFilter()">
                   <option value="">请选择</option>
                   <option value="是">是</option>
                   <option value="否">否</option>
@@ -2968,7 +3002,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-input-wrap"><span class="lt-filter-prefix">直发件</span>
-                <select id="pm-flt-direct">
+                <select id="pm-flt-direct" onchange="pmApplyFilter()">
                   <option value="">请选择</option>
                   <option value="是">是</option>
                   <option value="否">否</option>
@@ -2977,7 +3011,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-input-wrap"><span class="lt-filter-prefix">直营外采件</span>
-                <select id="pm-flt-direct-purchase">
+                <select id="pm-flt-direct-purchase" onchange="pmApplyFilter()">
                   <option value="">请选择</option>
                   <option value="是">是</option>
                   <option value="否">否</option>
@@ -2986,7 +3020,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-input-wrap"><span class="lt-filter-prefix">允许个销</span>
-                <select id="pm-flt-allow-personal">
+                <select id="pm-flt-allow-personal" onchange="pmApplyFilter()">
                   <option value="">全部</option>
                   <option value="是">是</option>
                   <option value="否">否</option>
@@ -2996,7 +3030,7 @@
             <div class="lt-filter-footer">
               <button class="lt-btn lt-btn-primary" onclick="pmApplyFilter()">查询</button>
               <button class="lt-btn lt-btn-default" onclick="pmResetFilter()">重置</button>
-              <a href="javascript:void(0)" class="lt-filter-toggle" onclick="pmToggleFilter()">收起</a>
+              <a href="javascript:void(0)" class="lt-filter-toggle" onclick="pmToggleFilter()">﹀ 展开</a>
             </div>
           </div>
         </div>
@@ -3006,9 +3040,10 @@
           <div class="lt-toolbar">
             <div class="lt-toolbar-left">
               <button class="lt-btn lt-btn-primary" onclick="pmOpenAddModal()">新增</button>
-              <button class="lt-btn lt-btn-default">导入</button>
-              <button class="lt-btn lt-btn-default">导入销售价</button>
-              <button class="lt-btn lt-btn-default">导入出库SNP</button>
+              <button class="lt-btn lt-btn-default" onclick="pmImportExcel('base')">导入</button>
+              <button class="lt-btn lt-btn-default" onclick="pmImportExcel('price')">导入销售价</button>
+              <button class="lt-btn lt-btn-default" onclick="pmImportExcel('snp')">导入出库SNP</button>
+              <input type="file" id="pm-import-file" accept=".xlsx,.xls,.csv" style="display:none">
               <button class="lt-btn lt-btn-default" onclick="showContent('parts-price-history')">价格调整历史</button>
             </div>
             <div class="lt-toolbar-right"></div>
@@ -3051,12 +3086,12 @@
           </div>
 
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="pm-pager">
             <div class="lt-pager-left"><span class="pager-total" id="pm-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button id="pm-pg-prev" onclick="pmChangePage(-1)">上一页</button>
+              <button class="pg-prev" id="pm-pg-prev" onclick="pmChangePage(-1)">上一页</button>
               <span id="pm-pg-pages" class="pg-pages"></span>
-              <button id="pm-pg-next" onclick="pmChangePage(1)">下一页</button>
+              <button class="pg-next" id="pm-pg-next" onclick="pmChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="pm-pg-goto" onkeydown="if(event.key==='Enter')pmGotoPage(this.value)"> 页</div>
               <select class="pager-size" id="pm-pg-size" onchange="pmChangePageSize(this.value)">
                 <option value="10">10条/页</option>
@@ -3146,7 +3181,7 @@
         <div class="lt-list-area">
           <div class="lt-toolbar">
             <div class="lt-toolbar-left">
-              <button class="lt-btn lt-btn-default">导出</button>
+              <button class="lt-btn lt-btn-default" onclick="phExportData()">导出</button>
             </div>
           </div>
           <div class="lt-table-wrap">
@@ -3168,12 +3203,12 @@
             </table>
           </div>
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="ph-pager">
             <div class="lt-pager-left"><span class="pager-total" id="ph-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button onclick="phChangePage(-1)">上一页</button>
+              <button class="pg-prev" id="ph-pg-prev" onclick="phChangePage(-1)">上一页</button>
               <span id="ph-pg-pages" class="pg-pages"></span>
-              <button onclick="phChangePage(1)">下一页</button>
+              <button class="pg-next" id="ph-pg-next" onclick="phChangePage(1)">下一页</button>
               <div class="pager-goto">前往 <input id="ph-pg-goto" onkeydown="if(event.key==='Enter')phGotoPage(this.value)"> 页</div>
               <select class="pager-size" onchange="phChangePageSize(this.value)">
                 <option value="10">10条/页</option>
@@ -3225,7 +3260,7 @@
           <div class="lt-toolbar">
             <div class="lt-toolbar-left">
               <button class="lt-btn lt-btn-primary" onclick="spOpenAddPanel()">新增</button>
-              <button class="lt-btn lt-btn-default">导出</button>
+              <button class="lt-btn lt-btn-default" onclick="spExportData()">导出</button>
             </div>
           </div>
           <div class="lt-table-wrap">
@@ -3253,16 +3288,18 @@
             </table>
           </div>
           <!-- 分页 -->
-          <div class="lt-pager">
+          <div class="lt-pager" id="sp-pager">
             <div class="lt-pager-left"><span class="pager-total" id="sp-pg-total">共 0 条</span></div>
             <div class="lt-pager-right">
-              <button>上一页</button>
+              <button class="pg-prev">上一页</button>
               <span id="sp-pg-pages" class="pg-pages"></span>
-              <button>下一页</button>
-              <div class="pager-goto">前往 <input> 页</div>
+              <button class="pg-next">下一页</button>
+              <div class="pager-goto">前往 <input type="text"> 页</div>
               <select class="pager-size">
+                <option value="10">10条/页</option>
                 <option value="20" selected>20条/页</option>
                 <option value="50">50条/页</option>
+                <option value="100">100条/页</option>
               </select>
             </div>
           </div>
@@ -3303,13 +3340,13 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="pp-flt-region" placeholder="请选择" oninput="ppFilterCombobox(this)" onfocus="ppShowCombobox(this)"><span class="cb-arrow" onclick="ppToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="pp-region-list"><li onclick="ppSelectCombobox(this)">华东</li><li onclick="ppSelectCombobox(this)">华南</li><li onclick="ppSelectCombobox(this)">华北</li><li onclick="ppSelectCombobox(this)">西南</li><li onclick="ppSelectCombobox(this)">东北</li><li onclick="ppSelectCombobox(this)">华中</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="ppApplyFilter"><span class="lt-filter-prefix">大区</span><input type="text" id="pp-flt-region" placeholder="请选择" oninput="ppFilterCombobox(this)" onfocus="ppShowCombobox(this)"><span class="cb-arrow" onclick="ppToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="pp-region-list"><li data-val="" onclick="ppSelectCombobox(this)">请选择</li><li onclick="ppSelectCombobox(this)">华东</li><li onclick="ppSelectCombobox(this)">华南</li><li onclick="ppSelectCombobox(this)">华北</li><li onclick="ppSelectCombobox(this)">西南</li><li onclick="ppSelectCombobox(this)">东北</li><li onclick="ppSelectCombobox(this)">华中</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="pp-flt-district" placeholder="请选择" oninput="ppFilterCombobox(this)" onfocus="ppShowCombobox(this)"><span class="cb-arrow" onclick="ppToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="pp-district-list"><li onclick="ppSelectCombobox(this)">上海</li><li onclick="ppSelectCombobox(this)">广州</li><li onclick="ppSelectCombobox(this)">北京</li><li onclick="ppSelectCombobox(this)">成都</li><li onclick="ppSelectCombobox(this)">沈阳</li><li onclick="ppSelectCombobox(this)">杭州</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="ppApplyFilter"><span class="lt-filter-prefix">小区</span><input type="text" id="pp-flt-district" placeholder="请选择" oninput="ppFilterCombobox(this)" onfocus="ppShowCombobox(this)"><span class="cb-arrow" onclick="ppToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="pp-district-list"><li data-val="" onclick="ppSelectCombobox(this)">请选择</li><li onclick="ppSelectCombobox(this)">上海</li><li onclick="ppSelectCombobox(this)">广州</li><li onclick="ppSelectCombobox(this)">北京</li><li onclick="ppSelectCombobox(this)">成都</li><li onclick="ppSelectCombobox(this)">沈阳</li><li onclick="ppSelectCombobox(this)">杭州</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
@@ -3334,9 +3371,9 @@
               <tbody id="pp-tbody"></tbody>
             </table>
           </div>
-          <div class="lt-pager">
+          <div class="lt-pager" id="pp-pager">
             <div class="lt-pager-left"><span class="pager-total" id="pp-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="pp-pg-prev" onclick="ppChangePage(-1)">上一页</button><span id="pp-pg-pages" class="pg-pages"></span><button id="pp-pg-next" onclick="ppChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="pp-pg-goto" onkeydown="if(event.key==='Enter')ppGotoPage(this.value)"> 页</div><select class="pager-size" id="pp-pg-size" onchange="ppChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="pp-pg-prev" onclick="ppChangePage(-1)">上一页</button><span id="pp-pg-pages" class="pg-pages"></span><button class="pg-next" id="pp-pg-next" onclick="ppChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="pp-pg-goto" onkeydown="if(event.key==='Enter')ppGotoPage(this.value)"> 页</div><select class="pager-size" id="pp-pg-size" onchange="ppChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
           </div>
         </div>
       </div>
@@ -3363,13 +3400,13 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="ppd-flt-region" placeholder="请选择" oninput="ppdFilterCombobox(this)" onfocus="ppdShowCombobox(this)"><span class="cb-arrow" onclick="ppdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="ppd-region-list"><li onclick="ppdSelectCombobox(this)">华东</li><li onclick="ppdSelectCombobox(this)">华南</li><li onclick="ppdSelectCombobox(this)">华北</li><li onclick="ppdSelectCombobox(this)">西南</li><li onclick="ppdSelectCombobox(this)">东北</li><li onclick="ppdSelectCombobox(this)">华中</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="ppdApplyFilter"><span class="lt-filter-prefix">大区</span><input type="text" id="ppd-flt-region" placeholder="请选择" oninput="ppdFilterCombobox(this)" onfocus="ppdShowCombobox(this)"><span class="cb-arrow" onclick="ppdToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ppd-region-list"><li data-val="" onclick="ppdSelectCombobox(this)">请选择</li><li onclick="ppdSelectCombobox(this)">华东</li><li onclick="ppdSelectCombobox(this)">华南</li><li onclick="ppdSelectCombobox(this)">华北</li><li onclick="ppdSelectCombobox(this)">西南</li><li onclick="ppdSelectCombobox(this)">东北</li><li onclick="ppdSelectCombobox(this)">华中</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="ppd-flt-district" placeholder="请选择" oninput="ppdFilterCombobox(this)" onfocus="ppdShowCombobox(this)"><span class="cb-arrow" onclick="ppdToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="ppd-district-list"><li onclick="ppdSelectCombobox(this)">上海</li><li onclick="ppdSelectCombobox(this)">广州</li><li onclick="ppdSelectCombobox(this)">北京</li><li onclick="ppdSelectCombobox(this)">成都</li><li onclick="ppdSelectCombobox(this)">沈阳</li><li onclick="ppdSelectCombobox(this)">杭州</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="ppdApplyFilter"><span class="lt-filter-prefix">小区</span><input type="text" id="ppd-flt-district" placeholder="请选择" oninput="ppdFilterCombobox(this)" onfocus="ppdShowCombobox(this)"><span class="cb-arrow" onclick="ppdToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ppd-district-list"><li data-val="" onclick="ppdSelectCombobox(this)">请选择</li><li onclick="ppdSelectCombobox(this)">上海</li><li onclick="ppdSelectCombobox(this)">广州</li><li onclick="ppdSelectCombobox(this)">北京</li><li onclick="ppdSelectCombobox(this)">成都</li><li onclick="ppdSelectCombobox(this)">沈阳</li><li onclick="ppdSelectCombobox(this)">杭州</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
@@ -3393,9 +3430,9 @@
               <tbody id="ppd-tbody"></tbody>
             </table>
           </div>
-          <div class="lt-pager">
+          <div class="lt-pager" id="ppd-pager">
             <div class="lt-pager-left"><span class="pager-total" id="ppd-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="ppd-pg-prev" onclick="ppdChangePage(-1)">上一页</button><span id="ppd-pg-pages" class="pg-pages"></span><button id="ppd-pg-next" onclick="ppdChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="ppd-pg-goto" onkeydown="if(event.key==='Enter')ppdGotoPage(this.value)"> 页</div><select class="pager-size" id="ppd-pg-size" onchange="ppdChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="ppd-pg-prev" onclick="ppdChangePage(-1)">上一页</button><span id="ppd-pg-pages" class="pg-pages"></span><button class="pg-next" id="ppd-pg-next" onclick="ppdChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="ppd-pg-goto" onkeydown="if(event.key==='Enter')ppdGotoPage(this.value)"> 页</div><select class="pager-size" id="ppd-pg-size" onchange="ppdChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
           </div>
         </div>
       </div>
@@ -3438,13 +3475,13 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="pds-flt-region" placeholder="请选择" oninput="pdsFilterCombobox(this)" onfocus="pdsShowCombobox(this)"><span class="cb-arrow" onclick="pdsToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="pds-region-list"><li onclick="pdsSelectCombobox(this)">华东</li><li onclick="pdsSelectCombobox(this)">华南</li><li onclick="pdsSelectCombobox(this)">华北</li><li onclick="pdsSelectCombobox(this)">西南</li><li onclick="pdsSelectCombobox(this)">东北</li><li onclick="pdsSelectCombobox(this)">华中</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="pdsApplyFilter"><span class="lt-filter-prefix">大区</span><input type="text" id="pds-flt-region" placeholder="请选择" oninput="pdsFilterCombobox(this)" onfocus="pdsShowCombobox(this)"><span class="cb-arrow" onclick="pdsToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="pds-region-list"><li data-val="" onclick="pdsSelectCombobox(this)">请选择</li><li onclick="pdsSelectCombobox(this)">华东</li><li onclick="pdsSelectCombobox(this)">华南</li><li onclick="pdsSelectCombobox(this)">华北</li><li onclick="pdsSelectCombobox(this)">西南</li><li onclick="pdsSelectCombobox(this)">东北</li><li onclick="pdsSelectCombobox(this)">华中</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="pds-flt-district" placeholder="请选择" oninput="pdsFilterCombobox(this)" onfocus="pdsShowCombobox(this)"><span class="cb-arrow" onclick="pdsToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="pds-district-list"><li onclick="pdsSelectCombobox(this)">上海</li><li onclick="pdsSelectCombobox(this)">广州</li><li onclick="pdsSelectCombobox(this)">北京</li><li onclick="pdsSelectCombobox(this)">成都</li><li onclick="pdsSelectCombobox(this)">沈阳</li><li onclick="pdsSelectCombobox(this)">杭州</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="pdsApplyFilter"><span class="lt-filter-prefix">小区</span><input type="text" id="pds-flt-district" placeholder="请选择" oninput="pdsFilterCombobox(this)" onfocus="pdsShowCombobox(this)"><span class="cb-arrow" onclick="pdsToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="pds-district-list"><li data-val="" onclick="pdsSelectCombobox(this)">请选择</li><li onclick="pdsSelectCombobox(this)">上海</li><li onclick="pdsSelectCombobox(this)">广州</li><li onclick="pdsSelectCombobox(this)">北京</li><li onclick="pdsSelectCombobox(this)">成都</li><li onclick="pdsSelectCombobox(this)">沈阳</li><li onclick="pdsSelectCombobox(this)">杭州</li></ul>
               </div>
             </div>
             <div class="lt-filter-footer">
@@ -3464,9 +3501,9 @@
               <tbody id="pds-tbody"></tbody>
             </table>
           </div>
-          <div class="lt-pager">
+          <div class="lt-pager" id="pds-pager">
             <div class="lt-pager-left"><span class="pager-total" id="pds-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="pds-pg-prev" onclick="pdsChangePage(-1)">上一页</button><span id="pds-pg-pages" class="pg-pages"></span><button id="pds-pg-next" onclick="pdsChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="pds-pg-goto" onkeydown="if(event.key==='Enter')pdsGotoPage(this.value)"> 页</div><select class="pager-size" id="pds-pg-size" onchange="pdsChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="pds-pg-prev" onclick="pdsChangePage(-1)">上一页</button><span id="pds-pg-pages" class="pg-pages"></span><button class="pg-next" id="pds-pg-next" onclick="pdsChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="pds-pg-goto" onkeydown="if(event.key==='Enter')pdsGotoPage(this.value)"> 页</div><select class="pager-size" id="pds-pg-size" onchange="pdsChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
           </div>
         </div>
       </div>
@@ -3497,19 +3534,19 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-date-range"><span class="lt-filter-prefix">审核通过日期</span>
+              <div class="lt-date-range"><span class="lt-filter-prefix">同步厂端时间</span>
                 <input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="fsqApplyFilter">
                 <div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="fsq-flt-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" id="fsq-flt-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove('date-shim')"></div>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="fsq-flt-region" placeholder="请选择" oninput="fsqFilterCombobox(this)" onfocus="fsqShowCombobox(this)"><span class="cb-arrow" onclick="fsqToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="fsq-region-list"><li onclick="fsqSelectCombobox(this)">华东</li><li onclick="fsqSelectCombobox(this)">华南</li><li onclick="fsqSelectCombobox(this)">华北</li><li onclick="fsqSelectCombobox(this)">西南</li><li onclick="fsqSelectCombobox(this)">东北</li><li onclick="fsqSelectCombobox(this)">华中</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="fsqApplyFilter"><span class="lt-filter-prefix">大区</span><input type="text" id="fsq-flt-region" placeholder="请选择" oninput="fsqFilterCombobox(this)" onfocus="fsqShowCombobox(this)"><span class="cb-arrow" onclick="fsqToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="fsq-region-list"><li data-val="" onclick="fsqSelectCombobox(this)">请选择</li><li onclick="fsqSelectCombobox(this)">华东</li><li onclick="fsqSelectCombobox(this)">华南</li><li onclick="fsqSelectCombobox(this)">华北</li><li onclick="fsqSelectCombobox(this)">西南</li><li onclick="fsqSelectCombobox(this)">东北</li><li onclick="fsqSelectCombobox(this)">华中</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="fsq-flt-district" placeholder="请选择" oninput="fsqFilterCombobox(this)" onfocus="fsqShowCombobox(this)"><span class="cb-arrow" onclick="fsqToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="fsq-district-list"><li onclick="fsqSelectCombobox(this)">上海</li><li onclick="fsqSelectCombobox(this)">广州</li><li onclick="fsqSelectCombobox(this)">北京</li><li onclick="fsqSelectCombobox(this)">成都</li><li onclick="fsqSelectCombobox(this)">沈阳</li><li onclick="fsqSelectCombobox(this)">杭州</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="fsqApplyFilter"><span class="lt-filter-prefix">小区</span><input type="text" id="fsq-flt-district" placeholder="请选择" oninput="fsqFilterCombobox(this)" onfocus="fsqShowCombobox(this)"><span class="cb-arrow" onclick="fsqToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="fsq-district-list"><li data-val="" onclick="fsqSelectCombobox(this)">请选择</li><li onclick="fsqSelectCombobox(this)">上海</li><li onclick="fsqSelectCombobox(this)">广州</li><li onclick="fsqSelectCombobox(this)">北京</li><li onclick="fsqSelectCombobox(this)">成都</li><li onclick="fsqSelectCombobox(this)">沈阳</li><li onclick="fsqSelectCombobox(this)">杭州</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
@@ -3534,9 +3571,9 @@
               <tbody id="fsq-tbody"></tbody>
             </table>
           </div>
-          <div class="lt-pager">
+          <div class="lt-pager" id="fsq-pager">
             <div class="lt-pager-left"><span class="pager-total" id="fsq-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="fsq-pg-prev" onclick="fsqChangePage(-1)">上一页</button><span id="fsq-pg-pages" class="pg-pages"></span><button id="fsq-pg-next" onclick="fsqChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="fsq-pg-goto" onkeydown="if(event.key==='Enter')fsqGotoPage(this.value)"> 页</div><select class="pager-size" id="fsq-pg-size" onchange="fsqChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="fsq-pg-prev" onclick="fsqChangePage(-1)">上一页</button><span id="fsq-pg-pages" class="pg-pages"></span><button class="pg-next" id="fsq-pg-next" onclick="fsqChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="fsq-pg-goto" onkeydown="if(event.key==='Enter')fsqGotoPage(this.value)"> 页</div><select class="pager-size" id="fsq-pg-size" onchange="fsqChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
           </div>
         </div>
       </div>
@@ -3557,7 +3594,7 @@
             </div>
             <div class="lt-filter-item">
               <div class="lt-input-wrap"><span class="lt-filter-prefix">外采供应商</span>
-                <select id="ep-flt-supplier" onchange="epApplyFilter()"><option value="">请选择</option><option>联友科技武汉</option><option>XX科技</option></select>
+                <select id="ep-flt-supplier" onchange="epApplyFilter()"><option value="">请选择</option><option>联友科技武汉</option><option>华锐汽车配件</option><option>联恒机电设备</option><option>中晟零部件</option></select>
               </div>
             </div>
             <div class="lt-filter-item">
@@ -3572,13 +3609,13 @@
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">大区</span><input type="text" id="ep-flt-region" placeholder="请选择" oninput="epFilterCombobox(this)" onfocus="epShowCombobox(this)"><span class="cb-arrow" onclick="epToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="ep-region-list"><li onclick="epSelectCombobox(this)">华东</li><li onclick="epSelectCombobox(this)">华南</li><li onclick="epSelectCombobox(this)">华北</li><li onclick="epSelectCombobox(this)">西南</li><li onclick="epSelectCombobox(this)">东北</li><li onclick="epSelectCombobox(this)">华中</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="epApplyFilter"><span class="lt-filter-prefix">大区</span><input type="text" id="ep-flt-region" placeholder="请选择" oninput="epFilterCombobox(this)" onfocus="epShowCombobox(this)"><span class="cb-arrow" onclick="epToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ep-region-list"><li data-val="" onclick="epSelectCombobox(this)">请选择</li><li onclick="epSelectCombobox(this)">华东</li><li onclick="epSelectCombobox(this)">华南</li><li onclick="epSelectCombobox(this)">华北</li><li onclick="epSelectCombobox(this)">西南</li><li onclick="epSelectCombobox(this)">东北</li><li onclick="epSelectCombobox(this)">华中</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
-              <div class="lt-input-wrap combobox"><span class="lt-filter-prefix">小区</span><input type="text" id="ep-flt-district" placeholder="请选择" oninput="epFilterCombobox(this)" onfocus="epShowCombobox(this)"><span class="cb-arrow" onclick="epToggleCombobox(this)">▼</span>
-                <ul class="lt-datalist" id="ep-district-list"><li onclick="epSelectCombobox(this)">上海</li><li onclick="epSelectCombobox(this)">广州</li><li onclick="epSelectCombobox(this)">北京</li><li onclick="epSelectCombobox(this)">成都</li><li onclick="epSelectCombobox(this)">沈阳</li><li onclick="epSelectCombobox(this)">杭州</li></ul>
+              <div class="lt-input-wrap combobox" data-apply="epApplyFilter"><span class="lt-filter-prefix">小区</span><input type="text" id="ep-flt-district" placeholder="请选择" oninput="epFilterCombobox(this)" onfocus="epShowCombobox(this)"><span class="cb-arrow" onclick="epToggleCombobox(this)">▼</span>
+                <ul class="lt-datalist" id="ep-district-list"><li data-val="" onclick="epSelectCombobox(this)">请选择</li><li onclick="epSelectCombobox(this)">上海</li><li onclick="epSelectCombobox(this)">广州</li><li onclick="epSelectCombobox(this)">北京</li><li onclick="epSelectCombobox(this)">成都</li><li onclick="epSelectCombobox(this)">沈阳</li><li onclick="epSelectCombobox(this)">杭州</li></ul>
               </div>
             </div>
             <div class="lt-filter-item">
@@ -3603,9 +3640,9 @@
               <tbody id="ep-tbody"></tbody>
             </table>
           </div>
-          <div class="lt-pager">
+          <div class="lt-pager" id="ep-pager">
             <div class="lt-pager-left"><span class="pager-total" id="ep-pg-total">共 0 条</span></div>
-            <div class="lt-pager-right"><button id="ep-pg-prev" onclick="epChangePage(-1)">上一页</button><span id="ep-pg-pages" class="pg-pages"></span><button id="ep-pg-next" onclick="epChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="ep-pg-goto" onkeydown="if(event.key==='Enter')epGotoPage(this.value)"> 页</div><select class="pager-size" id="ep-pg-size" onchange="epChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
+            <div class="lt-pager-right"><button class="pg-prev" id="ep-pg-prev" onclick="epChangePage(-1)">上一页</button><span id="ep-pg-pages" class="pg-pages"></span><button class="pg-next" id="ep-pg-next" onclick="epChangePage(1)">下一页</button><div class="pager-goto">前往 <input id="ep-pg-goto" onkeydown="if(event.key==='Enter')epGotoPage(this.value)"> 页</div><select class="pager-size" id="ep-pg-size" onchange="epChangePageSize(this.value)"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div>
           </div>
         </div>
       </div>
@@ -3621,6 +3658,41 @@
   <div id="page-parts-return" class="page-content"></div>
   <div id="page-account-balance" class="page-content"></div>
   <div id="page-store-manage" class="page-content"></div>
+  <!-- 系统设置：用户管理（组织/角色/人员 主数据，动态构建于 js/user.js） -->
+  <div id="page-user" class="page-content"></div>
+  <!-- 系统设置：技术公告（动态构建于 js/announcement.js） -->
+  <div id="page-announcement" class="page-content"></div>
+  <!-- 系统设置：角色权限（占位页，B8 2026-08-18） -->
+  <div id="page-role" class="page-content">
+    <div class="lt-wrap">
+      <div class="pm-tip-warn" style="margin-bottom:14px;">占位页说明：角色权限完整功能（角色增删改查、菜单/按钮级权限分配等）需另立项开发，当前仅展示页面骨架与示意数据。</div>
+      <div class="lt-list-area">
+        <div class="lt-toolbar">
+          <div class="lt-toolbar-left">
+            <button class="lt-btn lt-btn-primary" onclick="alert('角色权限功能建设中（占位页）')">新增角色</button>
+            <button class="lt-btn lt-btn-default" onclick="alert('角色权限功能建设中（占位页）')">权限配置</button>
+          </div>
+        </div>
+        <div class="lt-table-wrap">
+          <table class="lt-table">
+            <thead><tr>
+              <th style="width:50px;min-width:50px">序号</th>
+              <th style="min-width:110px">角色编码</th>
+              <th style="min-width:90px">角色名称</th>
+              <th style="min-width:220px">权限范围</th>
+              <th style="min-width:100px">状态</th>
+              <th style="min-width:120px">创建时间</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>1</td><td>STORE</td><td>门店</td><td>门店经营、售后维修、配件管理等门店侧功能</td><td><span class="lt-badge ok">启用</span></td><td>2026-08-18 09:00</td></tr>
+              <tr><td>2</td><td>HQ</td><td>总部</td><td>总部技术支持处理、总部质量报告处理等总部侧功能</td><td><span class="lt-badge ok">启用</span></td><td>2026-08-18 09:00</td></tr>
+              <tr><td>3</td><td>ADMIN</td><td>超级管理员</td><td>全部菜单与功能权限</td><td><span class="lt-badge ok">启用</span></td><td>2026-08-18 09:00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="page-shortage-order" class="page-content"></div>
   <div id="page-shortage-allocation" class="page-content"></div>
   <div id="page-shortage-allocation-history" class="page-content"></div>
@@ -3699,13 +3771,13 @@
         <div class="ts-section-body">
           <div class="ts-form-grid col4">
             <!-- 1. 主题 -->
-            <div class="ts-form-item-inline full plain"><span class="ts-form-label-inline">主题（限50字）</span><input type="text" id="ts-form-subject" placeholder="门店简称 车型-VIN号后6位 故障现象简述，例如：武汉龙阳大道店X9-001888大屏偶发无网络" maxlength="50"></div>
+            <div class="ts-form-item-inline full plain"><span class="ts-form-label-inline">主题（限50字）</span><input type="text" id="ts-form-subject" placeholder="门店简称 车型-VIN号后6位 故障现象简述，例如：武汉光谷店X9-001888大屏偶发无网络" maxlength="50"></div>
             <!-- 2. 配件库存信息 -->
             <div class="ts-form-item-inline"><span class="ts-form-label-inline">配件库存信息</span><select id="ts-form-part-info"><option value="">请选择</option><option>有库存</option><option>无库存，已订件</option><option>无库存，未订件</option></select></div>
             <!-- 3. 故障描述（模糊搜索下拉） -->
-            <div class="ts-form-item-inline ts-combobox"><span class="ts-form-label-inline">故障描述</span><input type="text" id="ts-form-fault-description" placeholder="请选择或输入" onfocus="tsShowCombobox(this,'ts-fd-list')" oninput="tsFilterCombobox(this)"><span class="cb-arrow" onclick="tsToggleComboboxArrow('ts-fd-list')">▼</span><ul class="lt-datalist" id="ts-fd-list"><li onclick="tsSelectCombobox(this,'ts-form-fault-description','ts-fd-list')">请选择</li><li onclick="tsSelectCombobox(this,'ts-form-fault-description','ts-fd-list')">P001-大屏无显示</li><li onclick="tsSelectCombobox(this,'ts-form-fault-description','ts-fd-list')">P002-大屏偶发无网络</li><li onclick="tsSelectCombobox(this,'ts-form-fault-description','ts-fd-list')">P003-音响无声音</li><li onclick="tsSelectCombobox(this,'ts-form-fault-description','ts-fd-list')">P004-空调不制冷</li><li onclick="tsSelectCombobox(this,'ts-form-fault-description','ts-fd-list')">P005-转向异响</li><li onclick="tsSelectCombobox(this,'ts-form-fault-description','ts-fd-list')">P006-刹车偏软</li><li onclick="tsSelectCombobox(this,'ts-form-fault-description','ts-fd-list')">P007-电机抖动</li><li onclick="tsSelectCombobox(this,'ts-form-fault-description','ts-fd-list')">P008-充电缓慢</li></ul></div>
+            <div class="ts-form-item-inline ts-combobox"><span class="ts-form-label-inline">故障描述</span><input type="text" id="ts-form-fault-description" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist" id="ts-fd-list"><li data-val="" onclick="gtComboboxSelect(this)">请选择</li><li onclick="gtComboboxSelect(this)">P001-大屏无显示</li><li onclick="gtComboboxSelect(this)">P002-大屏偶发无网络</li><li onclick="gtComboboxSelect(this)">P003-音响无声音</li><li onclick="gtComboboxSelect(this)">P004-空调不制冷</li><li onclick="gtComboboxSelect(this)">P005-转向异响</li><li onclick="gtComboboxSelect(this)">P006-刹车偏软</li><li onclick="gtComboboxSelect(this)">P007-电机抖动</li><li onclick="gtComboboxSelect(this)">P008-充电缓慢</li></ul></div>
             <!-- 4. 故障系统（模糊搜索下拉） -->
-            <div class="ts-form-item-inline ts-combobox"><span class="ts-form-label-inline">故障系统</span><input type="text" id="ts-form-fault-system" placeholder="请选择或输入" onfocus="tsShowCombobox(this,'ts-fs-list')" oninput="tsFilterCombobox(this)"><span class="cb-arrow" onclick="tsToggleComboboxArrow('ts-fs-list')">▼</span><ul class="lt-datalist" id="ts-fs-list"><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">请选择</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">安全系统</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">车身系统</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">电子电气系统</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">底盘系统</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">动力集成系统</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">高压动力系统</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">内饰系统</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">外饰系统</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">智能驾驶系统</li><li onclick="tsSelectCombobox(this,'ts-form-fault-system','ts-fs-list')">其他</li></ul></div>
+            <div class="ts-form-item-inline ts-combobox"><span class="ts-form-label-inline">故障系统</span><input type="text" id="ts-form-fault-system" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist" id="ts-fs-list"><li data-val="" onclick="gtComboboxSelect(this)">请选择</li><li onclick="gtComboboxSelect(this)">安全系统</li><li onclick="gtComboboxSelect(this)">车身系统</li><li onclick="gtComboboxSelect(this)">电子电气系统</li><li onclick="gtComboboxSelect(this)">底盘系统</li><li onclick="gtComboboxSelect(this)">动力集成系统</li><li onclick="gtComboboxSelect(this)">高压动力系统</li><li onclick="gtComboboxSelect(this)">内饰系统</li><li onclick="gtComboboxSelect(this)">外饰系统</li><li onclick="gtComboboxSelect(this)">智能驾驶系统</li><li onclick="gtComboboxSelect(this)">其他</li></ul></div>
             <!-- 5. 主故障件编码、主故障件名称、重要程度 -->
             <div class="lt-input-wrap search" style="flex:1;min-width:0;cursor:pointer" onclick="tsOpenPartCodeLookup()"><span class="lt-filter-prefix">主故障件编码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="ts-form-fault-part-code" placeholder="请输入或点击搜索" style="cursor:pointer" onclick="event.stopPropagation();tsOpenPartCodeLookup()"></div>
             <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">主故障件名称</span><input type="text" id="ts-form-fault-part-reason" placeholder="自动带出，可修改"></div>
@@ -3902,13 +3974,13 @@
         <div class="qr-section-body">
           <div class="qr-form-grid col4">
             <!-- 0. 选择模版（新增/编辑时显示，详情时隐藏，占据4列） -->
-            <div class="qr-form-item-inline qr-combobox full" data-qr-hide-on="detail"><span class="qr-form-label-inline">选择模版</span><input type="text" id="qr-form-template-select" placeholder="请选择或输入模版名称模糊搜索" onfocus="qrRenderTemplateList();qrShowCombobox(this,'qr-tpl-list')" oninput="qrFilterTemplateSelect(this)"><span class="cb-arrow" onclick="qrToggleComboboxArrow('qr-tpl-list')">▼</span><ul class="lt-datalist" id="qr-tpl-list"></ul></div>
+            <div class="qr-form-item-inline qr-combobox full" data-qr-hide-on="detail"><span class="qr-form-label-inline">选择模版</span><input type="text" id="qr-form-template-select" placeholder="请选择或输入模版名称模糊搜索" onfocus="qrRenderTemplateList();gtComboboxShow(this)" oninput="qrFilterTemplateSelect(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist" id="qr-tpl-list"></ul></div>
             <!-- 1. 主题 -->
-            <div class="qr-form-item-inline full plain"><span class="qr-form-label-inline">主题（限50字）</span><input type="text" id="qr-form-subject" placeholder="门店简称 车型-VIN号后6位 故障现象简述，例如：武汉龙阳大道店X9-001888大屏偶发无网络" maxlength="50"></div>
+            <div class="qr-form-item-inline full plain"><span class="qr-form-label-inline">主题（限50字）</span><input type="text" id="qr-form-subject" placeholder="门店简称 车型-VIN号后6位 故障现象简述，例如：武汉光谷店X9-001888大屏偶发无网络" maxlength="50"></div>
             <!-- 3. 故障描述（模糊搜索下拉） -->
-            <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障描述</span><input type="text" id="qr-form-fault-description" placeholder="请选择或输入" onfocus="qrShowCombobox(this,'qr-fd-list')" oninput="qrFilterCombobox(this)"><span class="cb-arrow" onclick="qrToggleComboboxArrow('qr-fd-list')">▼</span><ul class="lt-datalist" id="qr-fd-list"><li onclick="qrSelectCombobox(this,'qr-form-fault-description','qr-fd-list')">请选择</li><li onclick="qrSelectCombobox(this,'qr-form-fault-description','qr-fd-list')">P001-大屏无显示</li><li onclick="qrSelectCombobox(this,'qr-form-fault-description','qr-fd-list')">P002-大屏偶发无网络</li><li onclick="qrSelectCombobox(this,'qr-form-fault-description','qr-fd-list')">P003-音响无声音</li><li onclick="qrSelectCombobox(this,'qr-form-fault-description','qr-fd-list')">P004-空调不制冷</li><li onclick="qrSelectCombobox(this,'qr-form-fault-description','qr-fd-list')">P005-转向异响</li><li onclick="qrSelectCombobox(this,'qr-form-fault-description','qr-fd-list')">P006-刹车偏软</li><li onclick="qrSelectCombobox(this,'qr-form-fault-description','qr-fd-list')">P007-电机抖动</li><li onclick="qrSelectCombobox(this,'qr-form-fault-description','qr-fd-list')">P008-充电缓慢</li></ul></div>
+            <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障描述</span><input type="text" id="qr-form-fault-description" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist" id="qr-fd-list"><li data-val="" onclick="gtComboboxSelect(this)">请选择</li><li onclick="gtComboboxSelect(this)">P001-大屏无显示</li><li onclick="gtComboboxSelect(this)">P002-大屏偶发无网络</li><li onclick="gtComboboxSelect(this)">P003-音响无声音</li><li onclick="gtComboboxSelect(this)">P004-空调不制冷</li><li onclick="gtComboboxSelect(this)">P005-转向异响</li><li onclick="gtComboboxSelect(this)">P006-刹车偏软</li><li onclick="gtComboboxSelect(this)">P007-电机抖动</li><li onclick="gtComboboxSelect(this)">P008-充电缓慢</li></ul></div>
             <!-- 4. 故障系统（模糊搜索下拉） -->
-            <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障系统</span><input type="text" id="qr-form-fault-system" placeholder="请选择或输入" onfocus="qrShowCombobox(this,'qr-fs-list')" oninput="qrFilterCombobox(this)"><span class="cb-arrow" onclick="qrToggleComboboxArrow('qr-fs-list')">▼</span><ul class="lt-datalist" id="qr-fs-list"><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">请选择</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">安全系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">车身系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">电子电气系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">底盘系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">动力集成系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">高压动力系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">内饰系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">外饰系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">智能驾驶系统</li><li onclick="qrSelectCombobox(this,'qr-form-fault-system','qr-fs-list')">其他</li></ul></div>
+            <div class="qr-form-item-inline qr-combobox"><span class="qr-form-label-inline">故障系统</span><input type="text" id="qr-form-fault-system" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist" id="qr-fs-list"><li data-val="" onclick="gtComboboxSelect(this)">请选择</li><li onclick="gtComboboxSelect(this)">安全系统</li><li onclick="gtComboboxSelect(this)">车身系统</li><li onclick="gtComboboxSelect(this)">电子电气系统</li><li onclick="gtComboboxSelect(this)">底盘系统</li><li onclick="gtComboboxSelect(this)">动力集成系统</li><li onclick="gtComboboxSelect(this)">高压动力系统</li><li onclick="gtComboboxSelect(this)">内饰系统</li><li onclick="gtComboboxSelect(this)">外饰系统</li><li onclick="gtComboboxSelect(this)">智能驾驶系统</li><li onclick="gtComboboxSelect(this)">其他</li></ul></div>
             <!-- 5. 主故障件编码、主故障件名称、重要程度 -->
             <div class="lt-input-wrap search required" style="flex:1;min-width:0;cursor:pointer" onclick="qrOpenPartCodeLookup()"><span class="lt-filter-prefix">主故障件编码</span><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg><input type="text" id="qr-form-fault-part-code" placeholder="请输入或点击搜索" style="cursor:pointer" onclick="event.stopPropagation();qrOpenPartCodeLookup()"></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">主故障件名称</span><input type="text" id="qr-form-fault-part-reason" placeholder="自动带出，可修改"></div>
@@ -4418,7 +4490,7 @@
     </div>
     <div class="pm-panel-footer">
       <button class="lt-btn lt-btn-default" onclick="spClosePanel()">取消</button>
-      <button class="lt-btn lt-btn-primary" onclick="spClosePanel()">确定</button>
+      <button class="lt-btn lt-btn-primary" onclick="spSave()">确定</button>
     </div>
   </div>
 
@@ -4597,196 +4669,6 @@
     </div>
   </div>
 
-  <!-- 以下为旧弹窗代码已废弃，保留注释标记 -->
-  <div style="display:none"><!-- 旧居中弹窗已替换为侧拉面板 -->
-    <div class="pm-modal" onclick="event.stopPropagation()">
-      <div class="pm-modal-header">
-        <span class="pm-modal-title">配件维护(奕境)</span>
-        <span class="pm-modal-close" onclick="pmCloseModal('pm-modal-edit-yj')">&times;</span>
-      </div>
-      <div class="pm-modal-body">
-        <div class="pm-section-title">基本属性</div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item"><label>配件编码</label><input type="text" id="yj-code" readonly class="pm-readonly"></div>
-          <div class="pm-form-item"><label>配件名称</label><input type="text" id="yj-name" readonly class="pm-readonly"></div>
-          <div class="pm-form-item"><label>配件状态</label>
-            <select id="yj-status"><option>可用</option><option>不可用</option></select>
-          </div>
-          <div class="pm-form-item"><label>配件销售属性</label>
-            <div class="lt-input-wrap combobox" style="position:relative;width:100%"><input type="text" id="yj-attribute" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist"><li data-val="关键配件" onclick="gtComboboxSelect(this)">关键配件</li><li data-val="自制件" onclick="gtComboboxSelect(this)">自制件</li><li data-val="沿用件" onclick="gtComboboxSelect(this)">沿用件</li><li data-val="保养件" onclick="gtComboboxSelect(this)">保养件</li><li data-val="车身件" onclick="gtComboboxSelect(this)">车身件</li><li data-val="发动机件" onclick="gtComboboxSelect(this)">发动机件</li><li data-val="变速箱件" onclick="gtComboboxSelect(this)">变速箱件</li><li data-val="电器" onclick="gtComboboxSelect(this)">电器</li><li data-val="空调及安全设备" onclick="gtComboboxSelect(this)">空调及安全设备</li><li data-val="化学类原辅材料" onclick="gtComboboxSelect(this)">化学类原辅材料</li><li data-val="精品" onclick="gtComboboxSelect(this)">精品</li><li data-val="随车工具" onclick="gtComboboxSelect(this)">随车工具</li></ul></div>
-          </div>
-          <div class="pm-form-item"><label>配件类别</label><input type="text" id="yj-category-pcc" readonly class="pm-readonly" value="事故件"></div>
-          <div class="pm-form-item"><label>物料组</label><input type="text" id="yj-category" readonly class="pm-readonly" value="事故件"></div>
-          <div class="pm-form-item"><label>计量单位</label><input type="text" id="yj-unit" readonly class="pm-readonly"></div>
-          <div class="pm-form-item"><label>适用车系</label><input type="text" id="yj-series" readonly class="pm-readonly"></div>
-          <div class="pm-form-item"><label>适用车型</label><input type="text" id="yj-model" readonly class="pm-readonly"></div>
-          <div class="pm-form-item"><label>直营外采件</label><input type="text" id="yj-direct-purchase" readonly class="pm-readonly" value="否"></div>
-          <div class="pm-form-item"><label>替换件编码</label><input type="text" id="yj-replace" placeholder="替换件编码"></div>
-        </div>
-
-        <div class="pm-section-title">采购相关</div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item"><label>采购开关</label>
-            <select id="yj-purchase-switch"><option>是</option><option>否</option></select>
-          </div>
-          <div class="pm-form-item"><label>正常采购价(含税)</label><input type="text" id="yj-price-normal" readonly class="pm-readonly"></div>
-          <div class="pm-form-item"><label>紧急采购价(含税)</label><input type="text" id="yj-price-urgent" readonly class="pm-readonly"></div>
-          <div class="pm-form-item"><label>采购SNP</label><input type="number" id="yj-snp" value="1"></div>
-          <div class="pm-form-item"><label>最小采购量</label><input type="number" id="yj-min-qty" value="10"></div>
-          <div class="pm-form-item"><label>最大订单量/次</label><input type="number" id="yj-max-qty" value="100"></div>
-        </div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item pm-checkbox-row">
-            <label><input type="checkbox" id="yj-oil"> 是否油品(可维护)</label>
-            <label><input type="checkbox" id="yj-no-urgent" checked> 不可下紧急订单</label>
-            <label><input type="checkbox" id="yj-direct"> 直发件</label>
-          </div>
-        </div>
-
-        <div class="pm-section-title">客户相关</div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="yj-out-snp" value="1.00"></div>
-          <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="yj-ref-price" readonly class="pm-readonly"></div>
-          <div class="pm-form-item"><label>销售价(含税)</label><input type="text" id="yj-sell-price" readonly class="pm-readonly"></div>
-        </div>
-      </div>
-      <div class="pm-modal-footer">
-        <button class="lt-btn lt-btn-default" onclick="pmCloseModal('pm-modal-edit-yj')">重置</button>
-        <button class="lt-btn lt-btn-primary" onclick="pmCloseModal('pm-modal-edit-yj')">保存</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== 新增配件(门店) 弹窗 ========== -->
-  <div class="pm-modal-overlay" id="pm-modal-add-store" onclick="pmCloseModal('pm-modal-add-store')">
-    <div class="pm-modal" onclick="event.stopPropagation()">
-      <div class="pm-modal-header">
-        <span class="pm-modal-title">新增配件(门店)</span>
-        <span class="pm-modal-close" onclick="pmCloseModal('pm-modal-add-store')">&times;</span>
-      </div>
-      <div class="pm-modal-body">
-        <div class="pm-tip-warn">外采件名称库不够，联系对应的备件订单人员进行维护</div>
-        <div class="pm-section-title">基本属性</div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item required"><label>配件编码</label><input type="text" id="add-store-code" value="WC+6位流水号自增" readonly class="pm-readonly"></div>
-          <div class="pm-form-item required"><label>配件名称</label><input type="text" id="add-store-name" placeholder="从外采名称库里选"></div>
-          <div class="pm-form-item"><label>外采件品牌</label><input type="text" id="add-store-brand" placeholder="请选择(从该外采品牌里选)"></div>
-          <div class="pm-form-item required"><label>配件类别</label>
-            <select id="add-store-category" disabled><option>辅料</option></select>
-          </div>
-          <div class="pm-form-item required"><label>配件销售属性</label>
-            <div class="lt-input-wrap combobox" style="position:relative;width:100%"><input type="text" id="add-store-attribute" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist"><li data-val="" onclick="gtComboboxSelect(this)">请选择</li><li data-val="关键配件" onclick="gtComboboxSelect(this)">关键配件</li><li data-val="自制件" onclick="gtComboboxSelect(this)">自制件</li><li data-val="沿用件" onclick="gtComboboxSelect(this)">沿用件</li><li data-val="保养件" onclick="gtComboboxSelect(this)">保养件</li><li data-val="车身件" onclick="gtComboboxSelect(this)">车身件</li><li data-val="发动机件" onclick="gtComboboxSelect(this)">发动机件</li><li data-val="变速箱件" onclick="gtComboboxSelect(this)">变速箱件</li><li data-val="电器" onclick="gtComboboxSelect(this)">电器</li><li data-val="空调及安全设备" onclick="gtComboboxSelect(this)">空调及安全设备</li><li data-val="化学类原辅材料" onclick="gtComboboxSelect(this)">化学类原辅材料</li><li data-val="精品" onclick="gtComboboxSelect(this)">精品</li><li data-val="随车工具" onclick="gtComboboxSelect(this)">随车工具</li></ul></div>
-          </div>
-          <div class="pm-form-item required"><label>计量单位</label>
-            <select id="add-store-unit"><option>EA</option><option>L</option></select>
-          </div>
-          <div class="pm-form-item"><label>适用车系</label><input type="text" id="add-store-series" placeholder="下拉模糊搜索，可多选"></div>
-          <div class="pm-form-item"><label>适用车型</label><input type="text" id="add-store-model" placeholder="选车型后自动填充车系"></div>
-          <div class="pm-form-item required"><label>配件状态</label>
-            <select id="add-store-status"><option>可用</option><option>不可用</option></select>
-          </div>
-        </div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item pm-upload-row">
-            <label>实物图</label>
-            <div class="pm-upload-area">
-              <span class="pm-upload-btn">上传文件</span>
-              <span class="pm-upload-hint">jpg, jpeg, png, ≤5张图片，单个文件≤10M</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="pm-section-title">采购相关</div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item required"><label>采购开关</label>
-            <select id="add-store-purchase"><option>是</option><option>否</option></select>
-          </div>
-          <div class="pm-form-item"><label>正常采购价(含税)</label><input type="number" id="add-store-price-normal" value="300.00"></div>
-          <div class="pm-form-item"><label>紧急采购价(含税)</label><input type="number" id="add-store-price-urgent" value="300.00"></div>
-          <div class="pm-form-item"><label>采购SNP</label><input type="number" id="add-store-snp" value="1"></div>
-          <div class="pm-form-item"><label>最小采购量</label><input type="number" id="add-store-min" value="10"></div>
-          <div class="pm-form-item"><label>最大订单量/次</label><input type="number" id="add-store-max" value="100"></div>
-        </div>
-
-        <div class="pm-section-title">客户相关</div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="add-store-out-snp" value="1.00"></div>
-          <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="add-store-ref-price" placeholder="请输入"></div>
-          <div class="pm-form-item required"><label>销售价(含税)</label><input type="number" id="add-store-sell-price" value="350.00"></div>
-        </div>
-      </div>
-      <div class="pm-modal-footer">
-        <button class="lt-btn lt-btn-default" onclick="pmCloseModal('pm-modal-add-store')">重置</button>
-        <button class="lt-btn lt-btn-primary" onclick="pmCloseModal('pm-modal-add-store')">保存</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== 配件维护(门店) 弹窗 ========== -->
-  <div class="pm-modal-overlay" id="pm-modal-edit-store" onclick="pmCloseModal('pm-modal-edit-store')">
-    <div class="pm-modal" onclick="event.stopPropagation()">
-      <div class="pm-modal-header">
-        <span class="pm-modal-title">配件维护(门店)</span>
-        <span class="pm-modal-close" onclick="pmCloseModal('pm-modal-edit-store')">&times;</span>
-      </div>
-      <div class="pm-modal-body">
-        <div class="pm-tip-warn">外采件名称库不够，联系对应的备件订单人员进行维护</div>
-        <div class="pm-section-title">基本属性</div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item required"><label>配件编码</label><input type="text" id="edit-store-code" readonly class="pm-readonly"></div>
-          <div class="pm-form-item required"><label>配件名称</label><input type="text" id="edit-store-name" readonly class="pm-readonly" value="外采件名称不可修改"></div>
-          <div class="pm-form-item"><label>外采件品牌</label><input type="text" id="edit-store-brand" readonly class="pm-readonly" value="外采件品牌不可修改"></div>
-          <div class="pm-form-item required"><label>配件类别</label>
-            <select id="edit-store-category" disabled><option>辅料</option></select>
-          </div>
-          <div class="pm-form-item required"><label>配件销售属性</label>
-            <div class="lt-input-wrap combobox" style="position:relative;width:100%"><input type="text" id="edit-store-attribute" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)"><span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span><ul class="lt-datalist"><li data-val="" onclick="gtComboboxSelect(this)">请选择</li><li data-val="关键配件" onclick="gtComboboxSelect(this)">关键配件</li><li data-val="自制件" onclick="gtComboboxSelect(this)">自制件</li><li data-val="沿用件" onclick="gtComboboxSelect(this)">沿用件</li><li data-val="保养件" onclick="gtComboboxSelect(this)">保养件</li><li data-val="车身件" onclick="gtComboboxSelect(this)">车身件</li><li data-val="发动机件" onclick="gtComboboxSelect(this)">发动机件</li><li data-val="变速箱件" onclick="gtComboboxSelect(this)">变速箱件</li><li data-val="电器" onclick="gtComboboxSelect(this)">电器</li><li data-val="空调及安全设备" onclick="gtComboboxSelect(this)">空调及安全设备</li><li data-val="化学类原辅材料" onclick="gtComboboxSelect(this)">化学类原辅材料</li><li data-val="精品" onclick="gtComboboxSelect(this)">精品</li><li data-val="随车工具" onclick="gtComboboxSelect(this)">随车工具</li></ul></div>
-          </div>
-          <div class="pm-form-item required"><label>计量单位</label>
-            <select id="edit-store-unit"><option>EA</option><option>L</option></select>
-          </div>
-          <div class="pm-form-item"><label>适用车系</label><input type="text" id="edit-store-series" placeholder="下拉模糊搜索，可多选"></div>
-          <div class="pm-form-item"><label>适用车型</label><input type="text" id="edit-store-model" placeholder="选车型后自动填充车系"></div>
-          <div class="pm-form-item required"><label>配件状态</label>
-            <select id="edit-store-status"><option>可用</option><option>不可用</option></select>
-          </div>
-        </div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item pm-upload-row">
-            <label>实物图</label>
-            <div class="pm-upload-area">
-              <span class="pm-upload-btn">上传文件</span>
-              <span class="pm-upload-file">附件1.png &times;</span>
-              <span class="pm-upload-hint">jpg, jpeg, png, ≤5张图片，单个文件≤10M。请遵守信息安全规范，不要上传与业务无关的文件!</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="pm-section-title">采购相关</div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item required"><label>采购开关</label>
-            <select id="edit-store-purchase"><option>是</option><option>否</option></select>
-          </div>
-          <div class="pm-form-item"><label>正常采购价(含税)</label><input type="number" id="edit-store-price-normal" value="300.00"></div>
-          <div class="pm-form-item"><label>紧急采购价(含税)</label><input type="number" id="edit-store-price-urgent" value="300.00"></div>
-          <div class="pm-form-item"><label>采购SNP</label><input type="number" id="edit-store-snp" value="1"></div>
-          <div class="pm-form-item"><label>最小采购量</label><input type="number" id="edit-store-min" value="10"></div>
-          <div class="pm-form-item"><label>最大订单量/次</label><input type="number" id="edit-store-max" value="100"></div>
-        </div>
-
-        <div class="pm-section-title">客户相关</div>
-        <div class="pm-form-grid">
-          <div class="pm-form-item required"><label>出库SNP</label><input type="number" id="edit-store-out-snp" value="1.00"></div>
-          <div class="pm-form-item"><label>参考销售价(含税)</label><input type="text" id="edit-store-ref-price" placeholder="请输入"></div>
-          <div class="pm-form-item required"><label>销售价(含税)</label><input type="number" id="edit-store-sell-price" value="350.00"></div>
-        </div>
-      </div>
-      <div class="pm-modal-footer">
-        <button class="lt-btn lt-btn-default" onclick="pmCloseModal('pm-modal-edit-store')">重置</button>
-        <button class="lt-btn lt-btn-primary" onclick="pmCloseModal('pm-modal-edit-store')">保存</button>
-      </div>
-    </div>
-  </div><!-- /display:none wrapping old modals -->
 
   <!-- ========== 配件采购 侧滑面板 ========== -->
   <div class="pm-panel-overlay" id="pp-panel-overlay" onclick="ppClosePanel()"></div>
@@ -4889,7 +4771,7 @@
       <div id="ep-order-info">
         <div class="pm-form-grid">
           <div class="pm-form-item"><label>采购方</label><input type="text" id="ep-form-purchaser" class="js-lock" readonly></div>
-          <div class="pm-form-item required"><label>外采供应商</label><select id="ep-form-supplier"><option value="">请选择</option><option>联友科技武汉</option><option>XX科技</option></select></div>
+          <div class="pm-form-item required"><label>外采供应商</label><select id="ep-form-supplier"><option value="">请选择</option><option>联友科技武汉</option><option>华锐汽车配件</option><option>联恒机电设备</option><option>中晟零部件</option></select></div>
           <div class="pm-form-item required"><label>期望到货日期</label><input type="text" id="ep-form-edate" placeholder="yyyy-mm-dd" onfocus="this.type='date';this.classList.add('date-shim')" onblur="if(!this.value){this.type='text';this.classList.remove('date-shim')}" onchange="this.classList.remove('date-shim')"></div>
           <div class="pm-form-item required"><label>收货联系人</label><input type="text" id="ep-form-recv-name" class="js-lock" readonly></div>
           <div class="pm-form-item required"><label>收货联系电话</label><input type="text" id="ep-form-recv-phone" class="js-lock" readonly></div>
@@ -4940,13 +4822,17 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- 2026-08-20 E2：图表/导出库由外网 CDN 改为本地携带（断网可用） -->
+  <script src="lib/chart.umd.js"></script>
+  <script src="lib/xlsx.full.min.js"></script>
   <script src="js/app.js"></script>
   <script src="js/archive-category.js"></script>
   <script src="js/archive-category2.js"></script>
   <script src="js/common-stock.js"></script>
   <script src="js/common-stock-maintain.js"></script>
+  <script src="js/org-master.js"></script>
+  <script src="js/user.js"></script>
+  <script src="js/announcement.js"></script>
 
 </body>
 </html>

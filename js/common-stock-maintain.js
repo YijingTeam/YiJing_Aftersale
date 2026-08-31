@@ -23,7 +23,7 @@ function csmSeed() {
     var hh = 8 + (i % 10);
     var mi = (i * 7) % 60;
     var ss = (i * 13) % 60;
-    var updateTime = '2025-' + (mm < 10 ? '0' + mm : mm) + '-' + (dd < 10 ? '0' + dd : dd) + ' ' + (hh < 10 ? '0' + hh : hh) + ':' + (mi < 10 ? '0' + mi : mi) + ':' + (ss < 10 ? '0' + ss : ss);
+    var updateTime = '2026-' + (mm < 10 ? '0' + mm : mm) + '-' + (dd < 10 ? '0' + dd : dd) + ' ' + (hh < 10 ? '0' + hh : hh) + ':' + (mi < 10 ? '0' + mi : mi) + ':' + (ss < 10 ? '0' + ss : ss);
     var suggest = 15 + (i % 5) * 5;
     var price = (20 + (i % 15) * 12.5).toFixed(2);
 
@@ -40,7 +40,7 @@ function csmSeed() {
           suggest: suggest - (j + 1) * 2,
           valid: j % 2 === 0 ? '有效' : '无效',
           operator: operators[(i + j) % operators.length],
-          time: '2025-' + (lm < 10 ? '0' + lm : lm) + '-' + (ld < 10 ? '0' + ld : ld) + ' 10:30:00'
+          time: '2026-' + (lm < 10 ? '0' + lm : lm) + '-' + (ld < 10 ? '0' + ld : ld) + ' 10:30:00'
         });
       }
       // 倒序：最新在前

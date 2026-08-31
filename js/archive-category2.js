@@ -1,6 +1,6 @@
 /* =========== 归档分类配置2（总部，仿故障树三列联列布局） =========== */
 /* 依赖 app.js 中的通用 helper：npOpenModal / npCloseModal / npEscape / npToast */
-/* 数据复用 archive-category.js 中的 ARC_SEED 与 buildArcTreeFromSeed() */
+/* 数据复用 archive-category.js 中的 ARC_SEED 与 buildArcTreeFromSeed()（唯一权威，此处不再抄副本） */
 
 var FT2 = {
   tree: [],
@@ -8,97 +8,6 @@ var FT2 = {
   search: '',
   matchIds: new Set()          // 搜索匹配的节点 id 集合
 };
-
-/* ---- 复用 archive-category.js 的种子数据与构建函数（若尚未定义则抄一份） ---- */
-if (typeof ARC_SEED === 'undefined') {
-  var ARC_SEED = [
-    ['无效工单', '', ''],
-    ['疑难案件', '软件偶发', ''],
-    ['疑难案件', '硬件偶发', ''],
-    ['疑难案件', '复杂案件', ''],
-    ['疑难案件', '无案例案例精确性不足', ''],
-    ['疑难案件', '无标准或标准不清晰', ''],
-    ['疑难案件', '符合参数要求但车辆异常', ''],
-    ['疑难案件', 'OTA异常', ''],
-    ['疑难案件', '保修判定', ''],
-    ['疑难案件', '辅助驾驶类案件定性', ''],
-    ['门店诊断能力', '未查阅维修案例或技术公告等', ''],
-    ['门店诊断能力', '门店排查工具不足', ''],
-    ['门店诊断能力', '人员诊断能力不足', ''],
-    ['门店诊断能力', '未完成基础排查', ''],
-    ['门店诊断能力', '门店配合度不足', ''],
-    ['专项', '电池', '电池压差（清单内）'],
-    ['专项', '电池', '电池弹窗'],
-    ['专项', '服务活动', ''],
-    ['专项', '异响专项', '底盘异响'],
-    ['专项', '异响专项', '内饰异响'],
-    ['专项', '异响专项', '传动转向异响'],
-    ['专项', '异响专项', '空调异响（出风口蒸发器）'],
-    ['专项', '异响专项', '车身钣金异响'],
-    ['专项', '异响专项', '减速器异响'],
-    ['专项', '异响专项', '电驱异响'],
-    ['专项', '异响专题', '扬声器异响'],
-    ['专项', '异响专项', '压缩机异响'],
-    ['专项', '异响专项', '其他'],
-    ['专项', '重大事件', '上报信息'],
-    ['流程咨询报备', '保修问题咨询', ''],
-    ['流程咨询报备', '亲善申请', ''],
-    ['流程咨询报备', '高风险案例报备', ''],
-    ['流程咨询报备', '申请外力鉴定报告', ''],
-    ['流程咨询报备', '质量包拉通维修（已经判断）', ''],
-    ['门店改善建议', '产品体验类', ''],
-    ['门店改善建议', '可维修性建议', ''],
-    ['门店改善建议', '电路图/维修手册错误/不完善', ''],
-    ['门店改善建议', '诊断仪软件bug', ''],
-    ['门店改善建议', '质量信息反馈', ''],
-    ['门店无权限（非能力问题）', '电池压差查询', ''],
-    ['门店无权限（非能力问题）', 'OTA升级（特殊问题修复&更换大屏主机推送OTA）', ''],
-    ['门店无权限（非能力问题）', '流量查询', ''],
-    ['门店无权限（非能力问题）', '维修模式进入调码', ''],
-    ['门店无权限（非能力问题）', '非技术支持类', ''],
-    ['其他', '', '']
-  ];
-}
-
-if (typeof buildArcTreeFromSeed === 'undefined') {
-  function buildArcTreeFromSeed() {
-    var tree = [];
-    var idc = 0;
-    function findChild(arr, name) {
-      for (var i = 0; i < arr.length; i++) { if (arr[i].name === name) return arr[i]; }
-      return null;
-    }
-    function seedTime() { return '2026-07-21 09:00:00'; }
-    ARC_SEED.forEach(function (row) {
-      var labels = [row[0], row[1], row[2]].filter(function (x) { return x && x !== ''; });
-      var t = seedTime();
-      var parent = null;
-      var level = 0;
-      var arr = tree;
-      labels.forEach(function (name) {
-        level++;
-        var node = findChild(arr, name);
-        if (!node) {
-          node = { id: 'ft2' + (idc++), name: name, parentId: parent ? parent.id : null, level: level, status: 'enable', createdAt: t, updatedAt: t, children: [] };
-          arr.push(node);
-        }
-        parent = node; arr = node.children;
-      });
-    });
-    return tree;
-  }
-}
-
-/* 复用 archive-category.js 的查找函数 */
-if (typeof arcFindById === 'undefined') {
-  function arcFindById(arr, id) {
-    for (var i = 0; i < arr.length; i++) {
-      if (arr[i].id === id) return arr[i];
-      var f = arcFindById(arr[i].children, id); if (f) return f;
-    }
-    return null;
-  }
-}
 
 function ft2NowStr() {
   var d = new Date();

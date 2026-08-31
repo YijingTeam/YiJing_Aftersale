@@ -74,7 +74,7 @@ function csSeed() {
     var hh = 8 + (i % 10);
     var mi = (i * 7) % 60;
     var ss = (i * 13) % 60;
-    var mdate = '2025-' + (mm < 10 ? '0' + mm : mm) + '-' + (dd < 10 ? '0' + dd : dd) + ' ' + (hh < 10 ? '0' + hh : hh) + ':' + (mi < 10 ? '0' + mi : mi) + ':' + (ss < 10 ? '0' + ss : ss);
+    var mdate = '2026-' + (mm < 10 ? '0' + mm : mm) + '-' + (dd < 10 ? '0' + dd : dd) + ' ' + (hh < 10 ? '0' + hh : hh) + ':' + (mi < 10 ? '0' + mi : mi) + ':' + (ss < 10 ? '0' + ss : ss);
     var si = i % stores.length;
     a.push({
       idx: i,
@@ -128,7 +128,7 @@ function csInitPanel(K, tb, pg, isPending) {
     csComboMarkup(K, K + '-f-region', '大区', CS_REGION_OPTS) +
     csComboMarkup(K, K + '-f-district', '小区', CS_DISTRICT_OPTS) +
     npFItem('门店', '<input type="text" id="' + K + '-f-store" placeholder="请输入">');
-  var toolbar = '<button class="lt-btn lt-btn-default" onclick="npToast(\'导出功能演示\')">导出</button>' +
+  var toolbar = '<button class="lt-btn lt-btn-default" onclick="csExportData(\'' + K + '\')">导出</button>' +
     (isPending ? '<span id="cs-pending-total" style="margin-left:auto;font-size:13px;color:#333">待建储总计：<b style="color:#185FA5;font-weight:700">0.00元</b></span>' : '');
   var cols = csCols();
   var root = document.getElementById('cs-panel-' + (isPending ? 'pending' : 'built'));
@@ -173,7 +173,7 @@ function initCommonStock() {
     '<button class="cs-tab" data-tab="pending" onclick="csSwitchTab(\'pending\')">待建储明细</button>' +
     '</div>' +
     '<div id="cs-panel-built" class="cs-panel"></div>' +
-    '<div id="cs-panel-pending" class="cs-panel" style="display:none"></div>';
+    '<div id="cs-panel-pending" class="cs-panel hidden"></div>';
   NP['common-stock-built'] = { page: 1, pageSize: 10, allData: CS_ALL.slice(), filtered: [], render: null, query: null, reset: null };
   NP['common-stock-pending'] = { page: 1, pageSize: 10, allData: CS_ALL.filter(function (r) { return r.pending > 0; }), filtered: [], render: null, query: null, reset: null };
   csInitPanel('common-stock-built', 'cs-built-tbody', 'cs-built-pager', false);
@@ -210,10 +210,26 @@ function csSwitchTab(tab) {
   var built = tab === 'built';
   var pb = document.getElementById('cs-panel-built');
   var pp = document.getElementById('cs-panel-pending');
-  if (pb) pb.style.display = built ? '' : 'none';
-  if (pp) pp.style.display = built ? 'none' : '';
+  if (pb) pb.classList.toggle('hidden', !built);
+  if (pp) pp.classList.toggle('hidden', built);
   var tabs = document.querySelectorAll('.cs-tab');
   if (tabs) tabs.forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-tab') === tab); });
   if (built) { if (NP['common-stock-built'].render) NP['common-stock-built'].render(); }
   else { if (NP['common-stock-pending'].render) NP['common-stock-pending'].render(); }
+}
+
+/* E9：常用件建储情况导出（当前筛选结果；built/pending 两个 Tab 各自导出） */
+function csExportData(K) {
+  var st = NP[K];
+  var data = (st && st.filtered) ? st.filtered : [];
+  if (!data.length) { npToast('当前没有可导出的数据'); return; }
+  var headers = ['序号', '配件编码', '配件名称', '配件类别', '配件销售属性', '是否有效', '大区', '小区', '门店', '门店编码', '待建储数量', '待建储总价', '最近更新时间'];
+  var rows = data.map(function (r, i) {
+    return [i + 1, r.code, r.name, r.cat, r.attr, r.valid, r.region, r.district, r.store, r.storeCode, r.pending, r.total, r.updateTime];
+  });
+  if (typeof npExportExcelRowsRaw === 'function') {
+    npExportExcelRowsRaw('常用件建储情况导出', headers, rows);
+  } else {
+    npToast('导出组件未加载，请刷新后重试');
+  }
 }
