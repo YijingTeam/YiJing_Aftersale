@@ -32,16 +32,24 @@
           <span class="nav-arrow"></span>
         </div>
         <div class="submenu">
+          <div class="submenu-item">参考系</div>
+          <div class="submenu submenu-nested">
+            <div class="submenu-item submenu-item-nested" onclick="showContent('fault-location')" data-module="fault-location" data-roles="总部 超级管理员">故障部位</div>
+          </div>
           <div class="submenu-item">技术支持&质量报告</div>
           <div class="submenu submenu-nested">
             <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support')" data-module="tech-support" data-roles="门店 超级管理员">技术支持</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support-hq')" data-module="tech-support-hq" data-roles="总部 超级管理员">总部技术支持处理</div>
-            <div class="submenu-item submenu-item-nested" onclick="showContent('tech-support-hq-828')" data-module="tech-support-hq-828" data-roles="总部 超级管理员">总部技术支持处理828</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('archive-category')" data-module="archive-category" data-roles="超级管理员">归档分类配置(备用)</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('archive-category2')" data-module="archive-category2" data-roles="总部 超级管理员">归档分类配置</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report')" data-module="quality-report" data-roles="门店 超级管理员">质量报告</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report-hq')" data-module="quality-report-hq" data-roles="总部 超级管理员">总部质量报告处理</div>
             <div class="submenu-item submenu-item-nested" onclick="showContent('quality-report-template')" data-module="quality-report-template" data-roles="总部 超级管理员">质量报告模板</div>
+          </div>
+          <div class="submenu-item">技术公告</div>
+          <div class="submenu submenu-nested">
+            <div class="submenu-item submenu-item-nested" onclick="showContent('tech-notice')" data-module="tech-notice">技术公告</div>
+            <div class="submenu-item submenu-item-nested" onclick="showContent('tech-notice-manage')" data-module="tech-notice-manage" data-roles="总部 超级管理员">技术公告发布</div>
           </div>
         </div>
       </div>
@@ -133,7 +141,7 @@
           <div class="submenu-item" onclick="showContent('store-manage')" data-module="store-manage">门店管理</div>
           <div class="submenu-item" onclick="showContent('user')" data-module="user">用户管理</div>
           <div class="submenu-item" onclick="showContent('role')" data-module="role">角色权限</div>
-          <div class="submenu-item" onclick="showContent('announcement')" data-module="announcement">技术公告</div>
+          <div class="submenu-item" onclick="showContent('announcement')" data-module="announcement">公告(备用)</div>
         </div>
       </div>
     </div>
@@ -2656,7 +2664,7 @@
         <div class="lt-list-area">
           <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-primary" onclick="tsOpenAdd()">新增</button><button class="lt-btn lt-btn-default" onclick="tsExportData()">导出</button></div><div class="lt-toolbar-right"></div></div>
           <div class="lt-table-wrap"><table class="lt-table">
-              <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-order-no">单号</th><th class="sticky col-status">处理状态</th><th class="col-province">省份</th><th class="col-city">城市</th><th class="col-store-name">门店</th><th class="col-store-code">门店编码</th><th class="col-submit-date">提交日期</th><th class="col-car-series">车系</th><th class="col-subject">主题</th><th class="col-importance">重要程度</th><th class="col-repair-order">维修工单号</th><th class="col-complaint-order">客诉单号</th><th class="col-pdi-order">PDI单</th><th class="col-alarm-order">告警单</th><th class="col-archive-category">归档分类</th><th class="col-vin">VIN</th><th class="col-fault-date">故障日期</th><th class="col-fault-system">故障系统</th><th class="col-fault-nature">故障性质</th><th class="col-prod-date">生产日期</th><th class="sticky col-actions">操作</th></tr></thead>
+              <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-order-no">单号</th><th class="sticky col-status">处理状态</th><th class="col-province">省份</th><th class="col-city">城市</th><th class="col-store-name">门店</th><th class="col-store-code">门店编码</th><th class="col-submit-date">提交日期</th><th class="col-car-series">车系</th><th class="col-subject">主题</th><th class="col-importance">重要程度</th><th class="col-repair-order">维修工单号</th><th class="col-complaint-order">客诉单号</th><th class="col-pdi-order">PDI单</th><th class="col-alarm-order">告警单</th><th class="col-archive-category">归档分类</th><th class="col-vin">VIN</th><th class="col-fault-date">故障日期</th><th class="col-fault-system">故障系统</th><th class="col-fault-nature">故障性质</th><th class="col-prod-date">生产日期</th><th class="col-eval">评价</th><th class="sticky col-actions">操作</th></tr></thead>
               <tbody id="ts-tbody"></tbody></table></div>
           <div class="lt-pager" id="ts-pager"><div class="lt-pager-left"><span class="pager-total" id="ts-pg-total">共 0 条</span></div>
             <div class="lt-pager-right"><button class="pg-prev" id="ts-pg-prev" onclick="tsChangePage(-1)">上一页</button><span id="ts-pg-pages" class="pg-pages"></span><button class="pg-next" id="ts-pg-next" onclick="tsChangePage(1)">下一页</button>
@@ -2739,7 +2747,7 @@
         <div class="lt-list-area">
           <div class="lt-toolbar"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-default" onclick="thqExportData()">导出</button></div><div class="lt-toolbar-right"></div></div>
           <div class="lt-table-wrap"><table class="lt-table">
-              <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-order-no">单号</th><th class="sticky col-status">处理状态</th><th class="col-province">省份</th><th class="col-city">城市</th><th class="col-store-name">门店</th><th class="col-store-code">门店编码</th><th class="col-submit-date">提交日期</th><th class="col-car-series">车系</th><th class="col-subject">主题</th><th class="col-importance">重要程度</th><th class="col-repair-order">维修工单号</th><th class="col-complaint-order">客诉单号</th><th class="col-pdi-order">PDI单</th><th class="col-alarm-order">告警单</th><th class="col-archive-category">归档分类</th><th class="col-vin">VIN</th><th class="col-fault-date">故障日期</th><th class="col-fault-system">故障系统</th><th class="col-fault-nature">故障性质</th><th class="col-prod-date">生产日期</th><th class="sticky col-actions">操作</th></tr></thead>
+              <thead><tr><th class="sticky col-seq">序号</th><th class="sticky col-order-no">单号</th><th class="sticky col-status">处理状态</th><th class="col-province">省份</th><th class="col-city">城市</th><th class="col-store-name">门店</th><th class="col-store-code">门店编码</th><th class="col-submit-date">提交日期</th><th class="col-car-series">车系</th><th class="col-subject">主题</th><th class="col-importance">重要程度</th><th class="col-repair-order">维修工单号</th><th class="col-complaint-order">客诉单号</th><th class="col-pdi-order">PDI单</th><th class="col-alarm-order">告警单</th><th class="col-archive-category">归档分类</th><th class="col-vin">VIN</th><th class="col-fault-date">故障日期</th><th class="col-fault-system">故障系统</th><th class="col-fault-nature">故障性质</th><th class="col-prod-date">生产日期</th><th class="col-eval">评价</th><th class="sticky col-actions">操作</th></tr></thead>
               <tbody id="thq-tbody"></tbody></table></div>
           <div class="lt-pager" id="thq-pager"><div class="lt-pager-left"><span class="pager-total" id="thq-pg-total">共 0 条</span></div>
             <div class="lt-pager-right"><button class="pg-prev" id="thq-pg-prev" onclick="thqChangePage(-1)">上一页</button><span id="thq-pg-pages" class="pg-pages"></span><button class="pg-next" id="thq-pg-next" onclick="thqChangePage(1)">下一页</button>
@@ -3043,6 +3051,7 @@
               <button class="lt-btn lt-btn-default" onclick="pmImportExcel('base')">导入</button>
               <button class="lt-btn lt-btn-default" onclick="pmImportExcel('price')">导入销售价</button>
               <button class="lt-btn lt-btn-default" onclick="pmImportExcel('snp')">导入出库SNP</button>
+              <button class="lt-btn lt-btn-default" onclick="pmImportAllowPersonal()">导入允许个销</button>
               <input type="file" id="pm-import-file" accept=".xlsx,.xls,.csv" style="display:none">
               <button class="lt-btn lt-btn-default" onclick="showContent('parts-price-history')">价格调整历史</button>
             </div>
@@ -3660,8 +3669,12 @@
   <div id="page-store-manage" class="page-content"></div>
   <!-- 系统设置：用户管理（组织/角色/人员 主数据，动态构建于 js/user.js） -->
   <div id="page-user" class="page-content"></div>
-  <!-- 系统设置：技术公告（动态构建于 js/announcement.js） -->
+  <!-- 系统设置：公告(备用)（动态构建于 js/announcement.js） -->
   <div id="page-announcement" class="page-content"></div>
+  <!-- 系统设置：技术公告 / 技术公告发布（动态构建于 js/tech-notice.js） -->
+  <div id="page-tech-notice" class="page-content"></div>
+  <!-- 售后管理：参考系-故障部位（动态构建于 js/fault-location.js） -->
+  <div id="page-fault-location" class="page-content"></div>
   <!-- 系统设置：角色权限（占位页，B8 2026-08-18） -->
   <div id="page-role" class="page-content">
     <div class="lt-wrap">
@@ -3838,7 +3851,7 @@
           </div>
         </div>
       </div>
-      <!-- 区块4：故障维修情况（仅 HQ 详情显示） -->
+      <!-- 区块4：故障维修情况（需求2026-09-04：技术支持不再展示/维护，代码隐藏保留；改由门店在提交「质量报告」时补充线下部分，详情只读） -->
       <div class="ts-section" id="ts-section-repair-status" style="display:none">
         <div class="ts-section-title" onclick="tsToggleSection('repair-status')"><span class="ts-section-toggle"></span>故障维修情况</div>
         <div class="ts-section-body">
@@ -3894,6 +3907,20 @@
           <div class="ts-repair-submit-area" id="ts-repair-submit-area" style="display:none;margin-top:12px;text-align:right;">
             <button class="lt-btn lt-btn-primary" onclick="tsSubmitRepairEdit()">提交</button>
             <button class="lt-btn lt-btn-default" onclick="tsCancelRepairEdit()">取消</button>
+          </div>
+        </div>
+      </div>
+      <!-- 区块：评价（门店评价总部方案，仅"已关单"详情显示） -->
+      <div class="ts-section" id="ts-section-evaluation" style="display:none">
+        <div class="ts-section-title" onclick="tsToggleSection('evaluation')"><span class="ts-section-toggle"></span>评价</div>
+        <div class="ts-section-body">
+          <div class="ts-form-grid col4">
+            <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">评价人</span><input type="text" id="ts-form-eval-user" readonly placeholder="自动带入"></div>
+            <div class="ts-form-item-inline plain"><span class="ts-form-label-inline">评价时间</span><input type="text" id="ts-form-eval-time" readonly placeholder="自动带入"></div>
+            <div class="ts-form-item-inline span2"><span class="ts-form-label-inline">评价</span><select id="ts-form-eval-result" onchange="this.title=this.value" title=""><option value="">请选择</option><option>用户认可/方案准确</option><option>用户不认可-方案清晰，但客户不满意</option><option>用户不认可-方案不清晰/方案错误</option></select></div>
+          </div>
+          <div id="ts-eval-submit-area" style="display:none;margin-top:12px;text-align:right;">
+            <button class="lt-btn lt-btn-primary" onclick="tsSubmitEvaluation()">提交评价</button>
           </div>
         </div>
       </div>
@@ -4035,12 +4062,12 @@
           </div>
         </div>
       </div>
-      <!-- 区块4：故障维修情况（仅 HQ 详情显示） -->
+      <!-- 区块4：故障维修情况（需求2026-09-04：质量报告需要，门店在提交时完善补充【线下维修部分】，新增/编辑可填、详情只读；无线上/OTA内容） -->
       <div class="qr-section" id="qr-section-repair-status" style="display:none">
         <div class="qr-section-title" onclick="qrToggleSection('repair-status')"><span class="qr-section-toggle"></span>故障维修情况</div>
         <div class="qr-section-body">
           <div class="qr-form-grid col4">
-            <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">维修工单</span><input type="text" id="qr-form-repair-status-order" placeholder="请输入维修工单号"></div>
+            <div class="qr-form-item-inline plain qr-form-search"><span class="qr-form-label-inline">维修工单</span><input type="text" id="qr-form-repair-status-order" placeholder="请输入或搜索" onkeydown="if(event.key==='Enter'){event.preventDefault();qrTryLinkRepairOrder(this);}"><svg class="qr-form-search-icon" viewBox="0 0 16 16" fill="none" onclick="qrOpenRepairOrderPick()"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>
             <div class="qr-form-item-inline"><span class="qr-form-label-inline">工单当前状态</span><select id="qr-form-repair-status-state" onchange="qrOnRepairStatusChange()"><option value="">请选择</option><option>接待完毕</option><option>维修进行中</option><option>质检完毕</option><option>结算进行中</option><option>已结算</option></select></div>
             <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">质检时间</span><input type="text" id="qr-form-quality-check-time" readonly placeholder="年月日 时分秒" style="background:#f5f5f5;color:#999"></div>
             <div></div>
@@ -4055,6 +4082,15 @@
                 <tr><td colspan="8" style="text-align:center;color:#999;padding:20px">暂无数据</td></tr>
               </tbody>
             </table>
+          </div>
+          <!-- 车辆处理时间（门店提交质量报告时补充；样式同技术支持 ts-form-vehicle-handle-time） -->
+          <div class="qr-form-grid col4" style="margin-top:12px">
+            <div class="qr-form-item-inline plain"><span class="qr-form-label-inline">车辆处理时间</span><input type="text" placeholder="年月日 时分秒" onfocus="this.type='datetime-local';this.step='1'" onblur="if(!this.value)this.type='text'" id="qr-form-vehicle-handle-time"></div>
+            <div></div><div></div><div></div>
+            <!-- 线下维修情况说明（门店提交质量报告时补充；样式同技术支持 ts-form-other-note） -->
+            <div class="qr-form-item full" style="margin-top:12px">
+              <textarea id="qr-form-other-note" placeholder="请输入线下维修情况说明"></textarea>
+            </div>
           </div>
         </div>
       </div>
@@ -4833,6 +4869,8 @@
   <script src="js/org-master.js"></script>
   <script src="js/user.js"></script>
   <script src="js/announcement.js"></script>
+  <script src="js/fault-location.js"></script>
+  <script src="js/tech-notice.js"></script>
 
 </body>
 </html>

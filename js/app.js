@@ -83,10 +83,10 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
 
     // 显示内容
     function showContent(module) {
-      // 828 alias: 总部技术支持处理828 指向同一页面（页面重定向，但菜单高亮/面包屑仍按点击的"828"）
-      window._isThq828 = (module === 'tech-support-hq-828');
       var navModule = module;
-      if (module === 'tech-support-hq-828') module = 'tech-support-hq';
+      // 技术公告发布 → 技术公告（同一页面；发布态=tech-notice-manage，查看态=tech-notice）
+      window._isTechNoticeManage = (module === 'tech-notice-manage');
+      if (module === 'tech-notice-manage') module = 'tech-notice';
       // 隐藏所有页面
       document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
 
@@ -2545,6 +2545,10 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     var tsPanelRole = 'store'; // store / hq
     var tsStatuses = ['待提交', '待技术援助答复', '已关单', '已作废'];
     var tsCurrentItem = null;
+    // 需求(2026-09-04 用户拍板)：技术支持（含「总部技术支持处理」）不再展示/维护"故障维修情况"——
+    // 门店线下维修与总部线上处理(OTA)记录均取消；该内容改由门店在提交「质量报告」时补充（仅线下部分）。
+    // 按用户要求：区块与"维护故障维修情况"入口用代码隐藏（HTML/函数保留），如需恢复把本开关改为 false。
+    var TS_REPAIR_STATUS_HIDDEN = true;
     var tsArchiveData = {
       '专项': {
         '异响专项': ['空调异响（出风口蒸发器）', '电机异响（前驱电机）', '减速器异响'],
@@ -2688,6 +2692,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         tsAllData.push({
           id:i+1, orderNo:'TS2026' + String(i+1).padStart(4,'0'), status:statuses[i%statuses.length],
           province:provinces[idx], city:cities[idx], storeName:stores[idx], storeCode:storeCodes[idx],
+          submitter: ['张伟','李娜','王强'][i%3],
           submitDate:ds, carSeries:carSeries[idx], subject:stores[idx] + ' ' + carModels[i % 4] + '-' + vins[idx].substring(11) + ' ' + faultDescriptions[idx],
           archiveCategory:archiveCategories[i%5], vin:vins[idx],
           faultDate:ds, faultSystem:faultSystems[i%7], faultNature:faultNatures[i%3],
@@ -2698,6 +2703,9 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
           repairParts: tsGenerateRepairParts(i%3!==0 ? 'RO2026'+String(i+1).padStart(4,'0') : ''),
           repairStatusState: i%3!==0 ? ['接待完毕','维修进行中','质检完毕','结算进行中','已结算'][i%5] : '',
           qualityCheckTime: (i%3!==0 && i%5 >= 2) ? '2026-06-'+String((i%28)+1).padStart(2,'0')+' 10:30:00' : '',
+          // 门店手工补充的示例（车辆处理时间/线下维修情况说明：工单本身不带，由门店填）
+          vehicleHandleTime: (i%3!==0 && i%7===3) ? '2026-06-'+String((i%28)+1).padStart(2,'0')+' 14:10:00' : '',
+          otherNote: (i%3!==0 && i%7===3) ? '已按总部技术方案完成线下维修：更换主故障件并复检通过，车辆留观3天无异常。' : '',
           complaintOrder: i%5!==0 ? 'CO2026'+String(i+1).padStart(4,'0') : '',
           warningOrder: i%4!==0 ? 'WO2026'+String(i+1).padStart(4,'0') : '',
           // 已关单的数据加关单信息
@@ -2707,6 +2715,10 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
           archiveCat2: (statuses[i%statuses.length] === '已关单') ? ['异响专项','保养类','批量问题'][i%3] : '',
           archiveCat3: (statuses[i%statuses.length] === '已关单') ? ['空调异响（出风口蒸发器）','首保','批量异响'][i%3] : '',
           conclusion: (statuses[i%statuses.length] === '已关单') ? '已处理完成，故障已排除。' : '',
+          // 评价（门店评价总部方案）：仅"已关单"工单，部分已评价（每2条关单取1条有评价）
+          evalUser: (statuses[i%statuses.length] === '已关单' && i % 2 === 0) ? ['张伟','李娜','王强'][i%3] : '',
+          evalTime: (statuses[i%statuses.length] === '已关单' && i % 2 === 0) ? '2026-06-' + String((i%28)+1).padStart(2,'0') + ' 16:20:00' : '',
+          evalResult: (statuses[i%statuses.length] === '已关单' && i % 2 === 0) ? ['用户认可/方案准确','用户不认可-方案清晰，但客户不满意','用户不认可-方案不清晰/方案错误'][i%3] : '',
           pdiOrder: i%6!==0 ? 'PDI2026'+String(i+1).padStart(4,'0') : '',
           isPdi: i%7===0 ? '是' : '否',
           vehicleVersion: 'V'+(i%3+1)+'.0.'+(i%10)+'.'+(i*17%1000).toString().padStart(3,'0'),
@@ -2796,7 +2808,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         if (r.status === '待提交') ops = ['<a href="javascript:void(0)" onclick="tsOpenEdit('+r.id+')">修改</a>','<a href="javascript:void(0)" onclick="tsCancelOrder('+r.id+')">作废</a>','<a href="javascript:void(0)" onclick="tsSubmitOrder('+r.id+')">提交</a>','<a href="javascript:void(0)" onclick="tsOpenDetail('+r.id+')">详情</a>'];
         else ops = ['<a href="javascript:void(0)" onclick="tsOpenDetail('+r.id+')">详情</a>'];
         ops = npRenderActions(ops);
-        h += '<tr><td class="sticky col-seq">'+idx+'</td><td class="sticky col-order-no">'+(r.orderNo||'')+'</td><td class="sticky col-status">'+(r.status||'')+'</td><td class="col-province">'+(r.province||'')+'</td><td class="col-city">'+(r.city||'')+'</td><td class="col-store-name">'+(r.storeName||'')+'</td><td class="col-store-code">'+(r.storeCode||'')+'</td><td class="col-submit-date">'+(r.submitDate||'')+'</td><td class="col-car-series">'+(r.carSeries||'')+'</td><td class="col-subject">'+(r.subject||'')+'</td><td class="col-importance">'+(r.importance||'')+'</td><td class="col-repair-order">'+(r.repairOrder||'')+'</td><td class="col-complaint-order">'+(r.complaintOrder||'')+'</td><td class="col-pdi-order">'+(r.pdiOrder||'')+'</td><td class="col-alarm-order">'+(r.alarmOrder||'')+'</td><td class="col-archive-category">'+(r.archiveCategory||'')+'</td><td class="col-vin">'+(r.vin||'')+'</td><td class="col-fault-date">'+(r.faultDate||'')+'</td><td class="col-fault-system">'+(r.faultSystem||'')+'</td><td class="col-fault-nature">'+(r.faultNature||'')+'</td><td class="col-prod-date">'+(r.prodDate||'')+'</td><td class="sticky col-actions"><div class="op-links">'+ops+'</div></td></tr>';
+        h += '<tr><td class="sticky col-seq">'+idx+'</td><td class="sticky col-order-no">'+(r.orderNo||'')+'</td><td class="sticky col-status">'+(r.status||'')+'</td><td class="col-province">'+(r.province||'')+'</td><td class="col-city">'+(r.city||'')+'</td><td class="col-store-name">'+(r.storeName||'')+'</td><td class="col-store-code">'+(r.storeCode||'')+'</td><td class="col-submit-date">'+(r.submitDate||'')+'</td><td class="col-car-series">'+(r.carSeries||'')+'</td><td class="col-subject">'+(r.subject||'')+'</td><td class="col-importance">'+(r.importance||'')+'</td><td class="col-repair-order">'+(r.repairOrder||'')+'</td><td class="col-complaint-order">'+(r.complaintOrder||'')+'</td><td class="col-pdi-order">'+(r.pdiOrder||'')+'</td><td class="col-alarm-order">'+(r.alarmOrder||'')+'</td><td class="col-archive-category">'+(r.archiveCategory||'')+'</td><td class="col-vin">'+(r.vin||'')+'</td><td class="col-fault-date">'+(r.faultDate||'')+'</td><td class="col-fault-system">'+(r.faultSystem||'')+'</td><td class="col-fault-nature">'+(r.faultNature||'')+'</td><td class="col-prod-date">'+(r.prodDate||'')+'</td><td class="col-eval">'+(r.evalResult||'—')+'</td><td class="sticky col-actions"><div class="op-links">'+ops+'</div></td></tr>';
       }
       tbody.innerHTML = h;
       tsRenderPager();
@@ -2816,7 +2828,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     function tsExportData() {
   var data = tsFilteredData || [];
   if (!data.length) { alert('当前没有可导出的数据'); return; }
-  npExportExcelRows('技术支持导出', ["序号","单号","处理状态","省份","城市","门店","门店编码","提交日期","车系","主题","重要程度","维修工单号","客诉单号","PDI单","告警单","归档分类","VIN","故障日期","故障系统","故障性质","生产日期"], ["id","orderNo","status","province","city","storeName","storeCode","submitDate","carSeries","subject","importance","repairOrder","complaintOrder","pdiOrder","alarmOrder","archiveCategory","vin","faultDate","faultSystem","faultNature","prodDate"], data);
+  npExportExcelRows('技术支持导出', ["序号","单号","处理状态","省份","城市","门店","门店编码","提交日期","车系","主题","重要程度","维修工单号","客诉单号","PDI单","告警单","归档分类","VIN","故障日期","故障系统","故障性质","生产日期","评价"], ["id","orderNo","status","province","city","storeName","storeCode","submitDate","carSeries","subject","importance","repairOrder","complaintOrder","pdiOrder","alarmOrder","archiveCategory","vin","faultDate","faultSystem","faultNature","prodDate","evalResult"], data);
 }
     function tsToggleFilter() { tsFilterExpanded = !tsFilterExpanded; toggleFilterGrid('ts-filterGrid', tsFilterExpanded, TS_SHOW_COUNT); }
 
@@ -2938,9 +2950,9 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       if (closeTime) closeTime.value = '';
       if (conc) conc.value = '';
       document.getElementById('ts-form-archive-cat').value = '';
-      var ids = ['ts-form-order-no','ts-form-submit-date','ts-form-store-name','ts-form-store-code','ts-form-city','ts-form-submitter','ts-form-contact-phone','ts-form-repair-order','ts-form-complaint-order','ts-form-warning-order','ts-form-pdi-order','ts-form-vin','ts-form-car-series','ts-form-car-model','ts-form-body-color','ts-form-engine-no','ts-form-front-motor-no','ts-form-rear-motor-no','ts-form-front-motor-sn','ts-form-rear-motor-sn','ts-form-battery-model','ts-form-battery-sn','ts-form-vehicle-version','ts-form-latest-ota-time','ts-form-customer-name','ts-form-customer-phone','ts-form-prod-date','ts-form-delivery-date','ts-form-fault-date','ts-form-fault-mileage','ts-form-fault-part-code','ts-form-fault-part-reason','ts-form-subject','ts-form-fault-description','ts-form-fault-system','ts-form-customer-complaint','ts-form-fault-condition-full','ts-form-repair-solution','ts-form-cause-analysis','ts-form-suggestion','ts-form-fault-code','ts-form-repair-case-no','ts-form-image-desc','ts-form-repair-status-order','ts-form-quality-check-time'];
+      var ids = ['ts-form-order-no','ts-form-submit-date','ts-form-store-name','ts-form-store-code','ts-form-city','ts-form-submitter','ts-form-contact-phone','ts-form-repair-order','ts-form-complaint-order','ts-form-warning-order','ts-form-pdi-order','ts-form-vin','ts-form-car-series','ts-form-car-model','ts-form-body-color','ts-form-engine-no','ts-form-front-motor-no','ts-form-rear-motor-no','ts-form-front-motor-sn','ts-form-rear-motor-sn','ts-form-battery-model','ts-form-battery-sn','ts-form-vehicle-version','ts-form-latest-ota-time','ts-form-customer-name','ts-form-customer-phone','ts-form-prod-date','ts-form-delivery-date','ts-form-fault-date','ts-form-fault-mileage','ts-form-fault-part-code','ts-form-fault-part-reason','ts-form-subject','ts-form-fault-description','ts-form-fault-system','ts-form-customer-complaint','ts-form-fault-condition-full','ts-form-repair-solution','ts-form-cause-analysis','ts-form-suggestion','ts-form-fault-code','ts-form-repair-case-no','ts-form-image-desc','ts-form-repair-status-order','ts-form-quality-check-time','ts-form-eval-user','ts-form-eval-time'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el){if(el.tagName==='SELECT')el.value='';else el.value='';} });
-      var selIds = ['ts-form-importance','ts-form-part-info','ts-form-is-pdi','ts-form-repair-status-state','ts-form-has-fault-code','ts-form-has-repair-case'];
+      var selIds = ['ts-form-importance','ts-form-part-info','ts-form-is-pdi','ts-form-repair-status-state','ts-form-has-fault-code','ts-form-has-repair-case','ts-form-eval-result'];
       // 清空图片和附件
       tsUploadedImages = [];
       tsUploadedFiles = [];
@@ -2955,6 +2967,11 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       // 清空头部左侧主题容器（仅详情模式填入，新增/编辑模式保持空）
       var headSub = document.getElementById('ts-panel-header-subject');
       if (headSub) headSub.innerHTML = '';
+      // 隐藏评价区块并复位提交按钮
+      var evalSec = document.getElementById('ts-section-evaluation');
+      if (evalSec) evalSec.style.display = 'none';
+      var evalSubmit = document.getElementById('ts-eval-submit-area');
+      if (evalSubmit) evalSubmit.style.display = 'none';
     }
     function tsFillPanelForm(item) {
       if (!item) return;
@@ -2963,6 +2980,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       document.getElementById('ts-form-store-name').value = item.storeName || '';
       document.getElementById('ts-form-store-code').value = item.storeCode || '';
       document.getElementById('ts-form-city').value = item.city || '';
+      if (document.getElementById('ts-form-submitter')) document.getElementById('ts-form-submitter').value = item.submitter || '';
       document.getElementById('ts-form-vin').value = item.vin || '';
       document.getElementById('ts-form-car-series').value = item.carSeries || '';
       document.getElementById('ts-form-car-model').value = item.carModel || '';
@@ -3017,12 +3035,19 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       if (conc) conc.value = item.conclusion || '';
       // 回填归档分类
       document.getElementById('ts-form-archive-cat').value = item.archiveCat3 || '';
+      // 回填评价区块
+      var evalUser = document.getElementById('ts-form-eval-user');
+      var evalTime = document.getElementById('ts-form-eval-time');
+      var evalResult = document.getElementById('ts-form-eval-result');
+      if (evalUser) evalUser.value = item.evalUser || '';
+      if (evalTime) evalTime.value = item.evalTime || '';
+      if (evalResult) { evalResult.value = item.evalResult || ''; evalResult.title = item.evalResult || ''; }
       tsToggleFaultCode();
     }
     function tsSetPanelReadonly(readonly) {
       var panel = document.getElementById('ts-panel');
       var inputs = panel.querySelectorAll('input:not([type="button"]), select, textarea');
-      var fixedReadonlyIds = ['ts-form-order-no','ts-form-submit-date','ts-form-store-name','ts-form-store-code','ts-form-city','ts-form-submitter','ts-form-car-series','ts-form-car-model','ts-form-body-color','ts-form-engine-no','ts-form-battery-model','ts-form-battery-sn','ts-form-front-motor-no','ts-form-rear-motor-no','ts-form-front-motor-sn','ts-form-rear-motor-sn','ts-form-vehicle-version','ts-form-latest-ota-time','ts-form-customer-name','ts-form-customer-phone','ts-form-prod-date','ts-form-delivery-date'];
+      var fixedReadonlyIds = ['ts-form-order-no','ts-form-submit-date','ts-form-store-name','ts-form-store-code','ts-form-city','ts-form-submitter','ts-form-car-series','ts-form-car-model','ts-form-body-color','ts-form-engine-no','ts-form-battery-model','ts-form-battery-sn','ts-form-front-motor-no','ts-form-rear-motor-no','ts-form-front-motor-sn','ts-form-rear-motor-sn','ts-form-vehicle-version','ts-form-latest-ota-time','ts-form-customer-name','ts-form-customer-phone','ts-form-prod-date','ts-form-delivery-date','ts-form-eval-user','ts-form-eval-time'];
       for (var i = 0; i < inputs.length; i++) {
         if (!readonly) {
           if (inputs[i].id === 'ts-form-contact-phone' && tsPanelMode==='detail') continue;
@@ -3034,11 +3059,52 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       // 详情模式隐藏"选择模版"行；新增/编辑保留
       var hideItems = panel.querySelectorAll('[data-ts-hide-on="detail"]');
       hideItems.forEach(function(el){ el.style.display = (tsPanelMode === 'detail') ? 'none' : ''; });
-      // "故障件维修情况"仅 HQ 详情显示；其他 5 种模式隐藏
+      // 需求(2026-09-04 用户拍板)："故障维修情况"在技术支持（含「总部技术支持处理」）中不再展示——
+      // 门店线下维修与总部线上处理(OTA)均取消，改由门店在提交「质量报告」时补充（仅线下部分）。
+      // 按用户要求区块用代码隐藏（HTML/函数保留），恢复展示时把 TS_REPAIR_STATUS_HIDDEN 改为 false。
       var repairSec = document.getElementById('ts-section-repair-status');
       if (repairSec) {
-        repairSec.style.display = (tsPanelMode === 'detail') ? '' : 'none';
+        repairSec.style.display = 'none';
       }
+      // 评价区块：显隐 + 可编辑状态
+      tsSetupEvaluation();
+    }
+    // 评价区块显隐与可编辑状态（仅"已关单"详情显示；门店未评价时可填，总部只读查看）
+    function tsSetupEvaluation() {
+      var sec = document.getElementById('ts-section-evaluation');
+      if (!sec) return;
+      var isDetail = tsPanelMode === 'detail';
+      var status = (tsCurrentItem && tsCurrentItem.status) || '';
+      var isClosed = status === '已关单';
+      if (!(isDetail && isClosed)) { sec.style.display = 'none'; return; }
+      sec.style.display = '';
+      var userEl = document.getElementById('ts-form-eval-user');
+      var timeEl = document.getElementById('ts-form-eval-time');
+      var resultEl = document.getElementById('ts-form-eval-result');
+      var submitArea = document.getElementById('ts-eval-submit-area');
+      var isEvaluated = !!(tsCurrentItem && tsCurrentItem.evalResult);
+      var editable = (tsPanelRole === 'store') && !isEvaluated;
+      if (editable) {
+        if (userEl && !userEl.value) userEl.value = (tsCurrentItem && tsCurrentItem.submitter) || '张伟';
+        if (timeEl && !timeEl.value) timeEl.value = npNowLocal();
+      }
+      if (resultEl) { resultEl.disabled = !editable; resultEl.title = resultEl.value || ''; }
+      if (submitArea) submitArea.style.display = editable ? 'block' : 'none';
+    }
+    function tsSubmitEvaluation() {
+      var resultEl = document.getElementById('ts-form-eval-result');
+      if (!resultEl || !resultEl.value) { npToast('请选择评价'); return; }
+      var userEl = document.getElementById('ts-form-eval-user');
+      var timeEl = document.getElementById('ts-form-eval-time');
+      if (tsCurrentItem) {
+        tsCurrentItem.evalUser = userEl ? userEl.value : '';
+        tsCurrentItem.evalTime = timeEl ? timeEl.value : '';
+        tsCurrentItem.evalResult = resultEl.value;
+        var idx = tsAllData.findIndex(function(r) { return r.id === tsCurrentItem.id; });
+        if (idx !== -1) tsAllData[idx] = tsCurrentItem;
+      }
+      tsSetupEvaluation();
+      npToast('评价已提交');
     }
     function tsUpdatePanelButtons() {
       var topDiv = document.getElementById('ts-panel-actions');
@@ -3060,11 +3126,13 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         if (isHq) {
           if (status === '待技术援助答复') {
             topBtns = '<button class="lt-btn" style="background:#861B2F;color:#fff" onclick="tsHqClose()">关单</button>';
-            if (!window._thq828RepairEditing) {
+            // 需求(2026-09-04 用户拍板)：技术支持不再提供"维护故障维修情况"入口（含总部线上/OTA）——
+            // 该内容改由门店在提交「质量报告」时补充；恢复时把 TS_REPAIR_STATUS_HIDDEN 改为 false。
+            if (!TS_REPAIR_STATUS_HIDDEN && !window._thq828RepairEditing) {
               topBtns += '<button class="lt-btn lt-btn-primary" onclick="tsStartRepairEdit()">维护故障维修情况</button>';
             }
           } else if (status === '已关单') {
-            if (!window._thq828RepairEditing) {
+            if (!TS_REPAIR_STATUS_HIDDEN && !window._thq828RepairEditing) {
               topBtns = '<button class="lt-btn lt-btn-primary" onclick="tsStartRepairEdit()">维护故障维修情况</button>';
             }
           }
@@ -3073,12 +3141,13 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
             topBtns = '<button class="lt-btn lt-btn-primary" onclick="tsSaveAndSubmit()">提交</button><button class="lt-btn lt-btn-default" onclick="tsOpenEdit(tsCurrentItem.id);tsClosePanel()">修改</button><button class="lt-btn lt-btn-default" onclick="tsCancelOrder(tsCurrentItem.id);tsClosePanel()">作废</button><button class="lt-btn lt-btn-default" onclick="alert(\'维修历史\')">维修历史</button>';
           } else if (status === '待技术援助答复') {
             topBtns = '<button class="lt-btn lt-btn-default" onclick="alert(\'维修开单\')">维修开单</button><button class="lt-btn lt-btn-default" onclick="alert(\'维修历史\')">维修历史</button>';
-            if (!window._thq828RepairEditing) {
+            // 需求(2026-09-04 用户拍板)：门店技术支持不再维护"故障维修情况"（线下部分改到「质量报告」提交时补充）
+            if (!TS_REPAIR_STATUS_HIDDEN && !window._thq828RepairEditing) {
               topBtns += '<button class="lt-btn lt-btn-primary" onclick="tsStartRepairEdit()">维护故障维修情况</button>';
             }
           } else if (status === '已关单') {
             topBtns = '<button class="lt-btn lt-btn-default" onclick="alert(\'维修开单\')">维修开单</button><button class="lt-btn lt-btn-default" onclick="alert(\'维修历史\')">维修历史</button><button class="lt-btn lt-btn-primary" onclick="tsConvertToReport()">转质量报告</button>';
-            if (!window._thq828RepairEditing) {
+            if (!TS_REPAIR_STATUS_HIDDEN && !window._thq828RepairEditing) {
               topBtns += '<button class="lt-btn lt-btn-primary" onclick="tsStartRepairEdit()">维护故障维修情况</button>';
             }
             bottomBtns = '';
@@ -3095,7 +3164,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       document.getElementById('ts-panel-actions').innerHTML = '';
       var sec = document.getElementById('ts-section-repair-status');
       if (!sec) return;
-      var isThq = window._isThq828;
+      var isThq = (tsPanelRole === 'hq');
       function unlock(el) {
         el.disabled = false;
         if (el.tagName === 'INPUT' && el.type === 'text') el.readOnly = false;
@@ -3276,6 +3345,11 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         problemDesc: src.customerComplaint || '',
         causeAnalysis: src.faultCondition || '',
         suggestion: src.repairSolution || '',
+        // 关联维修工单（若该技术支持单带维修工单）：转质量报告后自动带出该工单的故障维修情况
+        repairOrder: src.repairOrder || src.repairStatusOrder || '',
+        'repair-state': src.repairStatusState || '',
+        'repair-qc': src.qualityCheckTime || '',
+        repairParts: (src.repairParts || []).slice(),
         'ts-order-no': src.orderNo || '',
         'ts-create-time': src.submitDate || ''
       };
@@ -3707,6 +3781,18 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         var d = new Date();
         d.setDate(d.getDate() - i * 3);
         var ds = d.toISOString().split('T')[0];
+        // 审核记录演示数据：按状态给对应审批记录（时间=提交当日，门店提交早于总部审核，与状态自洽）
+        var curStatus = statuses[i % statuses.length];
+        var auditLogData = [];
+        if (curStatus === '审核中') {
+          auditLogData = [{ step:'门店保存提交', person:['张三','李四','王五','赵六','钱七'][i%5], time: ds + ' 09:30:00', result:'提交', opinion:'请总部审核' }];
+        } else if (curStatus === '已退回') {
+          auditLogData = [{ step:'总部审核', person:'张审核员', time: ds + ' 16:30:00', result:'退回', opinion:'请补充线下维修情况说明与车辆处理时间后再提交' }];
+        } else if (curStatus === '已驳回') {
+          auditLogData = [{ step:'总部审核', person:'张审核员', time: ds + ' 16:30:00', result:'驳回', opinion:'该问题不在质量报告受理范围，请核实后走其它处理流程' }];
+        } else if (curStatus === '审核通过') {
+          auditLogData = [{ step:'总部审核', person:'张审核员', time: ds + ' 16:30:00', result:'通过', opinion:'同意，归档处理' }];
+        }
         qrAllData.push({
           id:i+1, orderNo:'QR2026' + String(i+1).padStart(4,'0'), status:statuses[i%statuses.length],
           province:provinces[idx], city:cities[idx], storeName:stores[idx], storeCode:storeCodes[idx],
@@ -3728,6 +3814,11 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
           hasRepairCase: i%4===0?'是':'否',
           repairCaseNo: i%4===0?'RC2026'+String(i+1).padStart(4,'0') : '',
           repairOrder: i%3!==0 ? 'RO2026'+String(i+1).padStart(4,'0') : '',
+          // 关联维修工单的故障维修情况（与技术支持下同号单同状态/质检；车辆处理时间、线下维修情况说明为门店手工补充示例）
+          repairStatusState: i%3!==0 ? ['接待完毕','维修进行中','质检完毕','结算进行中','已结算'][i%5] : '',
+          qualityCheckTime: (i%3!==0 && i%5 >= 2) ? '2026-06-'+String((i%28)+1).padStart(2,'0')+' 10:30:00' : '',
+          vehicleHandleTime: (i%3!==0 && i%7===3) ? '2026-06-'+String((i%28)+1).padStart(2,'0')+' 14:10:00' : '',
+          otherNote: (i%3!==0 && i%7===3) ? '已按总部技术方案完成线下维修：更换主故障件并复检通过，车辆留观3天无异常。' : '',
           complaintOrder: i%5!==0 ? 'CO2026'+String(i+1).padStart(4,'0') : '',
           bodyColor: ['白色','黑色','灰色','蓝色','红色'][i%5],
           engineNo: 'EN' + String(100000+i).padStart(6,'0'),
@@ -3742,7 +3833,8 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
           deliveryDate: '2024-' + String((i%12)+1).padStart(2,'0') + '-' + String((i%28)+1).padStart(2,'0'),
           faultMileage: (i*1234) % 50000,
           tsOrderNo: i%4!==0 ? 'TS2026'+String(i+1).padStart(4,'0') : '',
-          tsCreateTime: i%4!==0 ? (function(){ var t=new Date(d); t.setDate(t.getDate()-2); return t.toISOString().split('T')[0]+' 09:'+String(i%60).padStart(2,'0')+':00'; })() : ''
+          tsCreateTime: i%4!==0 ? (function(){ var t=new Date(d); t.setDate(t.getDate()-2); return t.toISOString().split('T')[0]+' 09:'+String(i%60).padStart(2,'0')+':00'; })() : '',
+          auditLog: auditLogData
         });
       }
       qrFilteredData = qrAllData.slice();
@@ -3876,6 +3968,14 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         if (prefill.sourceOrderNo) {
           var remark = document.getElementById('qr-form-problem-desc');
           if (remark && !remark.value) remark.value = '来源技术支持单：' + prefill.sourceOrderNo + '\n';
+        }
+        // 维修工单关联：来源单据（技术支持等）带有关联维修工单时，自动带出其故障维修情况（可修改）
+        if (prefill.repairOrder) {
+          qrApplyRepairOrder(prefill.repairOrder, {
+            state: prefill['repair-state'] || '',
+            qualityCheckTime: prefill['repair-qc'] || '',
+            parts: (prefill.repairParts && prefill.repairParts.length) ? prefill.repairParts : null
+          });
         }
       }
       qrUpdatePanelButtons();
@@ -4186,10 +4286,13 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       document.getElementById('qr-form-latest-ota-time').value = item.latestOtaTime || '';
       if (document.getElementById('qr-form-fault-system')) document.getElementById('qr-form-fault-system').value = item.faultSystem || '';
       if (document.getElementById('qr-form-fault-description')) document.getElementById('qr-form-fault-description').value = item.faultDescription || '';
-      document.getElementById('qr-form-repair-status-order').value = item.repairStatusOrder || '';
-      qrRenderRepairParts(item.repairStatusOrder || item.repairOrder || '');
+      var roNo = item.repairStatusOrder || item.repairOrder || '';
+      document.getElementById('qr-form-repair-status-order').value = roNo;
       document.getElementById('qr-form-repair-status-state').value = item.repairStatusState || '';
       document.getElementById('qr-form-quality-check-time').value = item.qualityCheckTime || '';
+      qrRenderRepairParts(roNo);
+      if (document.getElementById('qr-form-vehicle-handle-time')) document.getElementById('qr-form-vehicle-handle-time').value = item.vehicleHandleTime || '';
+      if (document.getElementById('qr-form-other-note')) document.getElementById('qr-form-other-note').value = item.otherNote || '';
       // 回填故障现象描述、故障发生条件、排查内容及结果
       if (document.getElementById('qr-form-customer-complaint')) document.getElementById('qr-form-customer-complaint').value = item.customerComplaint || '';
       if (document.getElementById('qr-form-fault-condition-full')) document.getElementById('qr-form-fault-condition-full').value = item.faultCondition || '';
@@ -4249,7 +4352,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       if (closeTime) closeTime.value = '';
       if (conc) conc.value = '';
       document.getElementById('qr-form-archive-cat').value = '';
-      var ids = ['qr-form-template-select','qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-ts-order-no','qr-form-ts-create-time','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time'];
+      var ids = ['qr-form-template-select','qr-form-order-no','qr-form-submit-date','qr-form-store-name','qr-form-store-code','qr-form-city','qr-form-submitter','qr-form-contact-phone','qr-form-repair-order','qr-form-complaint-order','qr-form-warning-order','qr-form-pdi-order','qr-form-ts-order-no','qr-form-ts-create-time','qr-form-vin','qr-form-car-series','qr-form-car-model','qr-form-body-color','qr-form-engine-no','qr-form-front-motor-no','qr-form-rear-motor-no','qr-form-front-motor-sn','qr-form-rear-motor-sn','qr-form-battery-model','qr-form-battery-sn','qr-form-vehicle-version','qr-form-latest-ota-time','qr-form-customer-name','qr-form-customer-phone','qr-form-prod-date','qr-form-delivery-date','qr-form-fault-date','qr-form-fault-mileage','qr-form-fault-part-code','qr-form-fault-part-reason','qr-form-subject','qr-form-fault-description','qr-form-fault-system','qr-form-customer-complaint','qr-form-fault-condition-full','qr-form-repair-solution','qr-form-fault-code','qr-form-image-desc','qr-form-repair-status-order','qr-form-quality-check-time','qr-form-vehicle-handle-time','qr-form-other-note'];
       ids.forEach(function(id){ var el=document.getElementById(id); if(el){if(el.tagName==='SELECT')el.value='';else el.value='';} });
       var selIds = ['qr-form-importance','qr-form-is-pdi','qr-form-repair-status-state','qr-form-has-fault-code'];
       // 清空图片和附件
@@ -4561,6 +4664,139 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       });
     }
 
+    // ===== 维修工单关联：手动选择/输入 → 自动带出该工单的故障维修情况（可修改） =====
+    var QR_REPAIR_STATES = ['接待完毕','维修进行中','质检完毕','结算进行中','已结算'];
+    // 由维修工单号确定性推导"工单当前状态/质检时间"（演示：同一工单号在任何页面结果一致）
+    function qrRepairOrderStatus(orderNo) {
+      var s = { state: '', qualityCheckTime: '' };
+      if (!orderNo) return s;
+      var seed = orderNo.charCodeAt(orderNo.length - 1) || 0;
+      s.state = QR_REPAIR_STATES[seed % 5];
+      if (s.state === '质检完毕' || s.state === '结算进行中' || s.state === '已结算') {
+        var day = 1 + (seed % 27);
+        var hh = String(8 + (seed % 9)).padStart(2, '0');
+        s.qualityCheckTime = '2026-06-' + String(day).padStart(2, '0') + ' ' + hh + ':30:00';
+      }
+      return s;
+    }
+    // 可选的维修工单池：直接取 技术支持/质量报告 现有数据里带维修工单号的记录（去重），不另建数据源
+    function qrRepairOrderPool() {
+      var map = {};
+      (tsAllData || []).forEach(function(r) { if (r.repairOrder) map[r.repairOrder] = r; });
+      (qrAllData || []).forEach(function(r) { if (r.repairOrder && !map[r.repairOrder]) map[r.repairOrder] = r; });
+      var out = [];
+      Object.keys(map).sort().forEach(function(no) {
+        var r = map[no];
+        var st = qrRepairOrderStatus(no);
+        out.push({
+          orderNo: no,
+          storeName: r.storeName || '',
+          storeCode: r.storeCode || '',
+          vin: r.vin || '',
+          carSeries: r.carSeries || '',
+          state: r.repairStatusState || st.state,
+          qualityCheckTime: r.qualityCheckTime || st.qualityCheckTime
+        });
+      });
+      return out;
+    }
+    // 自动带出：把某维修工单的故障维修情况填进「故障维修情况」区块（状态/质检时间/配件自动带，可修改）
+    function qrApplyRepairOrder(orderNo, opt) {
+      opt = opt || {};
+      if (!orderNo) return;
+      var info = qrRepairOrderStatus(orderNo);
+      var state = opt.state || info.state;
+      var qc = opt.qualityCheckTime || info.qualityCheckTime;
+      qrRepairPartsMap[orderNo] = opt.parts || qrGenerateRepairParts(orderNo);
+      var orderEl = document.getElementById('qr-form-repair-status-order');
+      var basicEl = document.getElementById('qr-form-repair-order');
+      var stateEl = document.getElementById('qr-form-repair-status-state');
+      var qcEl = document.getElementById('qr-form-quality-check-time');
+      if (orderEl) orderEl.value = orderNo;
+      if (basicEl) basicEl.value = orderNo;   // 与基本信息区"维修工单"保持同一关联
+      if (stateEl) stateEl.value = state;
+      if (qcEl) qcEl.value = qc;
+      qrRenderRepairParts(orderNo);
+    }
+    // 直接输入工单号回车：匹配则自动带出，未匹配给出提示
+    function qrTryLinkRepairOrder(input) {
+      var no = (input && input.value || '').trim();
+      if (!no) return;
+      var hit = qrRepairOrderPool().filter(function(o) { return o.orderNo.toLowerCase() === no.toLowerCase(); })[0];
+      if (!hit) { npToast('未找到该维修工单：' + no); return; }
+      qrApplyRepairOrder(hit.orderNo);
+    }
+    // 手动关联弹窗（单选 radio + 查询/重置 + 取消/确定，样式参照全站既有单选弹框）
+    var qrRepairPickFull = [];
+    function qrOpenRepairOrderPick() {
+      qrRepairPickFull = qrRepairOrderPool();
+      window._qrPickOrderNo = null;
+      var filterHtml = '<div class="lt-filter-grid" style="grid-template-columns:repeat(4,1fr);">' +
+        npFItem('维修工单号', '<input class="np-input" id="qr-pick-f-no" placeholder="输入">') +
+        npFItem('门店', '<input class="np-input" id="qr-pick-f-store" placeholder="输入">') +
+        npFItem('VIN', '<input class="np-input" id="qr-pick-f-vin" placeholder="输入">') +
+        '<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="qrRepairPickQuery()">查询</button><button class="lt-btn lt-btn-default" onclick="qrRepairPickReset()">重置</button></div></div>';
+      var bodyHtml = filterHtml + qrRepairPickTableHtml(qrRepairPickFull);
+      npOpenModal('选择维修工单', bodyHtml,
+        '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="qrConfirmRepairOrderPick()">确定</button>',
+        { width: 940 });
+    }
+    function qrRepairPickTableHtml(rows) {
+      var body = rows.length
+        ? rows.map(function(o) {
+            return '<tr>' +
+              '<td><input type="radio" name="qr-ro" value="' + o.orderNo + '" onchange="window._qrPickOrderNo=\'' + o.orderNo + '\'"></td>' +
+              '<td>' + o.orderNo + '</td>' +
+              '<td>' + npEscape(o.storeName) + '</td>' +
+              '<td>' + npEscape(o.vin) + '</td>' +
+              '<td>' + (o.state || '') + '</td>' +
+              '<td>' + (o.qualityCheckTime || '') + '</td></tr>';
+          }).join('')
+        : '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">无匹配维修工单</td></tr>';
+      return '<div class="lt-table-wrap"><table class="lt-table"><thead><tr>' +
+        npTH([{ t: '', w: 40 }, { t: '维修工单号' }, { t: '门店' }, { t: 'VIN' }, { t: '工单当前状态' }, { t: '质检时间' }]) +
+        '</tr></thead><tbody id="qr-pick-tbody">' + body + '</tbody></table></div>';
+    }
+    function qrRepairPickRender(rows) {
+      var tb = document.getElementById('qr-pick-tbody');
+      if (!tb) return;
+      tb.innerHTML = rows.length
+        ? rows.map(function(o) {
+            return '<tr>' +
+              '<td><input type="radio" name="qr-ro" value="' + o.orderNo + '" onchange="window._qrPickOrderNo=\'' + o.orderNo + '\'"></td>' +
+              '<td>' + o.orderNo + '</td>' +
+              '<td>' + npEscape(o.storeName) + '</td>' +
+              '<td>' + npEscape(o.vin) + '</td>' +
+              '<td>' + (o.state || '') + '</td>' +
+              '<td>' + (o.qualityCheckTime || '') + '</td></tr>';
+          }).join('')
+        : '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">无匹配维修工单</td></tr>';
+    }
+    function qrRepairPickQuery() {
+      var fno = (document.getElementById('qr-pick-f-no') || {}).value || '';
+      var fstore = (document.getElementById('qr-pick-f-store') || {}).value || '';
+      var fvin = (document.getElementById('qr-pick-f-vin') || {}).value || '';
+      var rows = qrRepairPickFull.filter(function(o) {
+        return (!fno || o.orderNo.toLowerCase().indexOf(fno.toLowerCase()) >= 0) &&
+               (!fstore || (o.storeName || '').indexOf(fstore) >= 0) &&
+               (!fvin || (o.vin || '').toLowerCase().indexOf(fvin.toLowerCase()) >= 0);
+      });
+      qrRepairPickRender(rows);
+    }
+    function qrRepairPickReset() {
+      ['qr-pick-f-no', 'qr-pick-f-store', 'qr-pick-f-vin'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      qrRepairPickRender(qrRepairPickFull);
+    }
+    function qrConfirmRepairOrderPick() {
+      var no = window._qrPickOrderNo;
+      if (!no) { npToast('请选择维修工单'); return; }
+      qrApplyRepairOrder(no);
+      npCloseModal();
+    }
+
     // qr-combobox 点击外部关闭
     document.addEventListener('click', function(e){
       if (!e.target.closest('.qr-combobox')) {
@@ -4641,7 +4877,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       for (var i = 0; i < page.length; i++) {
         var r = page[i], idx = start + i + 1;
         var opsHq = npRenderActions(['<a href="javascript:void(0)" onclick="tsOpenDetail('+r.id+',\'hq\')">详情</a>']);
-        h += '<tr><td class="sticky col-seq">'+idx+'</td><td class="sticky col-order-no">'+(r.orderNo||'')+'</td><td class="sticky col-status">'+(r.status||'')+'</td><td class="col-province">'+(r.province||'')+'</td><td class="col-city">'+(r.city||'')+'</td><td class="col-store-name">'+(r.storeName||'')+'</td><td class="col-store-code">'+(r.storeCode||'')+'</td><td class="col-submit-date">'+(r.submitDate||'')+'</td><td class="col-car-series">'+(r.carSeries||'')+'</td><td class="col-subject">'+(r.subject||'')+'</td><td class="col-importance">'+(r.importance||'')+'</td><td class="col-repair-order">'+(r.repairOrder||'')+'</td><td class="col-complaint-order">'+(r.complaintOrder||'')+'</td><td class="col-pdi-order">'+(r.pdiOrder||'')+'</td><td class="col-alarm-order">'+(r.alarmOrder||'')+'</td><td class="col-archive-category">'+(r.archiveCategory||'')+'</td><td class="col-vin">'+(r.vin||'')+'</td><td class="col-fault-date">'+(r.faultDate||'')+'</td><td class="col-fault-system">'+(r.faultSystem||'')+'</td><td class="col-fault-nature">'+(r.faultNature||'')+'</td><td class="col-prod-date">'+(r.prodDate||'')+'</td><td class="sticky col-actions"><div class="op-links">'+opsHq+'</div></td></tr>';
+        h += '<tr><td class="sticky col-seq">'+idx+'</td><td class="sticky col-order-no">'+(r.orderNo||'')+'</td><td class="sticky col-status">'+(r.status||'')+'</td><td class="col-province">'+(r.province||'')+'</td><td class="col-city">'+(r.city||'')+'</td><td class="col-store-name">'+(r.storeName||'')+'</td><td class="col-store-code">'+(r.storeCode||'')+'</td><td class="col-submit-date">'+(r.submitDate||'')+'</td><td class="col-car-series">'+(r.carSeries||'')+'</td><td class="col-subject">'+(r.subject||'')+'</td><td class="col-importance">'+(r.importance||'')+'</td><td class="col-repair-order">'+(r.repairOrder||'')+'</td><td class="col-complaint-order">'+(r.complaintOrder||'')+'</td><td class="col-pdi-order">'+(r.pdiOrder||'')+'</td><td class="col-alarm-order">'+(r.alarmOrder||'')+'</td><td class="col-archive-category">'+(r.archiveCategory||'')+'</td><td class="col-vin">'+(r.vin||'')+'</td><td class="col-fault-date">'+(r.faultDate||'')+'</td><td class="col-fault-system">'+(r.faultSystem||'')+'</td><td class="col-fault-nature">'+(r.faultNature||'')+'</td><td class="col-prod-date">'+(r.prodDate||'')+'</td><td class="col-eval">'+(r.evalResult||'—')+'</td><td class="sticky col-actions"><div class="op-links">'+opsHq+'</div></td></tr>';
       }
       tbody.innerHTML = h;
       thqRenderPager();
@@ -4661,7 +4897,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     function thqExportData() {
   var data = thqFilteredData || [];
   if (!data.length) { alert('当前没有可导出的数据'); return; }
-  npExportExcelRows('总部技术支持处理导出', ["序号","单号","处理状态","省份","城市","门店","门店编码","提交日期","车系","主题","重要程度","维修工单号","客诉单号","PDI单","告警单","归档分类","VIN","故障日期","故障系统","故障性质","生产日期"], ["id","orderNo","status","province","city","storeName","storeCode","submitDate","carSeries","subject","importance","repairOrder","complaintOrder","pdiOrder","alarmOrder","archiveCategory","vin","faultDate","faultSystem","faultNature","prodDate"], data);
+  npExportExcelRows('总部技术支持处理导出', ["序号","单号","处理状态","省份","城市","门店","门店编码","提交日期","车系","主题","重要程度","维修工单号","客诉单号","PDI单","告警单","归档分类","VIN","故障日期","故障系统","故障性质","生产日期","评价"], ["id","orderNo","status","province","city","storeName","storeCode","submitDate","carSeries","subject","importance","repairOrder","complaintOrder","pdiOrder","alarmOrder","archiveCategory","vin","faultDate","faultSystem","faultNature","prodDate","evalResult"], data);
 }
     function thqToggleFilter() { thqFilterExpanded = !thqFilterExpanded; toggleFilterGrid('thq-filterGrid', thqFilterExpanded, THQ_SHOW_COUNT); }
     function thqFilterCombobox(input) { gtComboboxFilter(input); }
@@ -4742,6 +4978,14 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         });
       }
       qrhqFilteredData = qrhqAllData.slice();
+    })();
+
+    // 需求(2026-09-04 用户拍板·方案X)：总部质量报告处理与「质量报告」共用同一份数据（qrAllData），
+    // 做法仿「总部技术支持处理」与「技术支持」共用 tsAllData（见上方注释）。
+    // 原 initQrhqMockData 独立生成的 30 条种子从此不再被使用（保留代码仅为避免破坏既有引用，勿再当作总部数据源）。
+    (function(){
+      qrhqAllData = qrAllData;
+      qrhqFilteredData = qrAllData.slice();
     })();
 
     function initQrhq() { qrhqFilteredData = qrhqAllData.slice(); qrhqCurrentPage = 1; qrhqRenderTable(); initFilterGrid('qrhq-filterGrid', QRHQ_SHOW_COUNT); var st = document.getElementById('qrhq-flt-status'); if (st) st.value = '审核中'; }
@@ -5790,6 +6034,104 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     };
     fileInput.click();
   };
+
+  // 导入允许个销：下载模板（表头：配件编码* / 配件名称 / 允许个销*；* 为必填）
+  window.pmApDownloadTemplate = function() {
+    var header = ['配件编码*', '配件名称', '允许个销*'];
+    var ws = XLSX.utils.aoa_to_sheet([header]);
+    ws['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 14 }];
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '导入模板');
+    XLSX.writeFile(wb, '配件主数据_允许个销_导入模板.xlsx');
+  };
+
+  // 导入允许个销：标准导入弹窗（复刻 常用件建储维护/归档分类 的批量导入交互）
+  window.pmImportAllowPersonal = function() {
+    var body = '<div style="padding:4px 0">' +
+      '<p style="margin:0 0 10px"><a href="javascript:void(0)" style="color:#861B2F;font-size:13px;text-decoration:underline" onclick="pmApDownloadTemplate()">下载导入模板</a></p>' +
+      '<div id="pm-ap-drop-zone" style="border:2px dashed #d9d9d9;border-radius:6px;padding:40px 20px;text-align:center;cursor:pointer;color:#999;transition:border-color .2s,background .2s">' +
+      '<p style="margin:0 0 8px;font-size:14px;color:#666">将文件拖到此处，或<span style="color:#861B2F;text-decoration:underline">点击选择文件</span></p>' +
+      '<p style="margin:0;font-size:12px;color:#bbb">支持 .xlsx / .xls 格式</p>' +
+      '<input type="file" id="pm-ap-import-file" accept=".xlsx,.xls" style="display:none">' +
+      '</div>' +
+      '<p style="margin:10px 0 0;font-size:12px;color:#999">≤1000条；按配件编码匹配更新"允许个销"；"配件编码""允许个销"必填，值为 是/否</p>' +
+      '</div>';
+    npOpenModal('导入数据', body, '', { width: 560 });
+
+    // 绑定拖拽事件
+    setTimeout(function() {
+      var zone = document.getElementById('pm-ap-drop-zone');
+      var input = document.getElementById('pm-ap-import-file');
+      if (!zone || !input) return;
+      zone.addEventListener('click', function() { input.click(); });
+      input.addEventListener('change', function() { pmApDoImport(input.files[0]); });
+      zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor = '#861B2F'; zone.style.background = '#fdf5f6'; });
+      zone.addEventListener('dragleave', function(e) { e.preventDefault(); zone.style.borderColor = '#d9d9d9'; zone.style.background = ''; });
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        zone.style.borderColor = '#d9d9d9'; zone.style.background = '';
+        pmApDoImport(e.dataTransfer.files[0]);
+      });
+    }, 50);
+  };
+
+  // 导入允许个销：解析文件，按 配件编码 精确匹配更新 pmData（不新增；未匹配/值非法计入失败）
+  function pmApDoImport(file) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        if (!rows || rows.length < 2) { npToast('文件无数据行'); return; }
+        // 表头按列名识别（兼容带/不带必填 * 与多余空格），必须含 配件编码、允许个销
+        var head = rows[0];
+        var col = { code: -1, name: -1, ap: -1 };
+        for (var i = 0; i < head.length; i++) {
+          var h = String(head[i] || '').replace(/\s+/g, '').replace(/\*+$/, '');
+          if (h === '配件编码') col.code = i;
+          else if (h === '配件名称') col.name = i;
+          else if (h === '允许个销') col.ap = i;
+        }
+        if (col.code < 0 || col.ap < 0) { npToast('模板格式不正确，表头应为：配件编码 / 配件名称 / 允许个销'); return; }
+        var succ = 0, fail = 0, failCodes = [];
+        var now = new Date();
+        function p2(n) { return (n < 10 ? '0' : '') + n; }
+        var timeStr = now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate()) + ' ' + p2(now.getHours()) + ':' + p2(now.getMinutes()) + ':' + p2(now.getSeconds());
+        for (var r = 1; r < rows.length; r++) {
+          var row = rows[r];
+          if (!row) continue;
+          var codeCell = row[col.code];
+          if (codeCell === null || codeCell === undefined || String(codeCell).trim() === '') continue;
+          var code = String(codeCell).trim();
+          var name = (col.name >= 0 && row[col.name] !== null && row[col.name] !== undefined) ? String(row[col.name]).trim() : '';
+          var apCell = col.ap >= 0 ? row[col.ap] : null;
+          var apVal = (apCell === null || apCell === undefined) ? '' : String(apCell).trim();
+          if (apVal !== '是' && apVal !== '否') { fail++; failCodes.push(code + (name ? ' ' + name : '') + '(允许个销应为是/否)'); continue; }
+          var found = null;
+          for (var d = 0; d < pmData.length; d++) {
+            if (pmData[d].code === code) { found = pmData[d]; break; }
+          }
+          if (!found) { fail++; failCodes.push(code + (name ? ' ' + name : '') + '(未匹配)'); continue; }
+          found.allowPersonalSale = apVal;
+          found.updateTime = timeStr;
+          succ++;
+        }
+        pmPage = 1;
+        pmRenderTable();
+        npCloseModal();
+        var msg = '成功更新 ' + succ + ' 条';
+        if (fail > 0) {
+          msg += '，失败 ' + fail + ' 条';
+          if (failCodes.length <= 3) msg += '（' + failCodes.join('、') + '）';
+          else msg += '（' + failCodes.slice(0, 3).join('、') + ' 等）';
+        }
+        npToast(msg);
+      } catch (err) { npToast('导入失败：' + err.message); }
+    };
+    reader.readAsArrayBuffer(file);
+  }
 
   // 筛选逻辑
   function pmGetFilteredData() {
@@ -10156,7 +10498,7 @@ function prRenderStep2(rec, prefilled){
     '</div>'+
     '<div class="np-field" style="margin:8px 0;"><label class="np-req">原发票号</label><input id="pr2-invoice" class="np-input" placeholder="请输入原发票号"></div>'+
     '<div class="np-field" style="margin:8px 0;"><label class="np-req">退货原因</label><select id="pr2-reason" class="np-input" onchange="pr2ReasonChg(this)"><option>物流异常</option><option>配件目录错误</option><option>门店订货错误</option><option>总部铺货退货</option><option>其他</option></select><input id="pr2-reason-other" class="np-input" style="margin-top:6px;display:none;" placeholder="请输入退货原因"><div class="np-hint">物流异常：收货48小时内提交退货索赔</div></div>'+
-    '<div class="np-sub-table-wrap"><div class="np-upload">其它退货证据：<button class="lt-btn lt-btn-default" onclick="npToast(\'上传文件（演示）\')">上传文件</button> <span class="np-hint">支持 jpg/png/pdf，单个≤10MB</span></div><table class="lt-table"><thead><tr>'+npTH([{t:'选',w:40},{t:'签收入库单号'},{t:'配件编码'},{t:'配件名称'},{t:'单位'},{t:'单价'},{t:'发货数量'},{t:'签收数量'},{t:'已退货数量'},{t:'可退数量'},{t:'退货数量',w:90},{t:'退货金额'},{t:'金额(现金)'},{t:'金额(返利)'}])+'</tr></thead><tbody>'+pr2RowsHtml()+'</tbody></table></div>'+
+    '<div class="np-sub-table-wrap"><div class="np-upload">其它退货证据：<button class="lt-btn lt-btn-default" onclick="npToast(\'上传文件（演示）\')">上传文件</button> <span class="np-hint">支持 jpg/png/pdf，单个≤10MB</span></div><table class="lt-table"><thead><tr>'+'<th style="width:40px;min-width:40px;"><input type="checkbox" id="pr2-check-all" onclick="pr2ToggleAll(this)"></th>'+npTH([{t:'签收入库单号'},{t:'配件编码'},{t:'配件名称'},{t:'单位'},{t:'单价'},{t:'发货数量'},{t:'签收数量'},{t:'已退货数量'},{t:'可退数量'},{t:'退货数量',w:90},{t:'退货金额'},{t:'金额(现金)'},{t:'金额(返利)'}])+'</tr></thead><tbody>'+pr2RowsHtml()+'</tbody></table></div>'+
     '<div class="np-total">预估现金合计(含税)：<span class="np-money" id="pr2-cash">0.00</span> &nbsp; 预估返利合计(含税)：<span class="np-money" id="pr2-rebate">0.00</span> &nbsp; 预估金额合计(含税)：<span class="np-money" id="pr2-total">0.00</span></div>';
   npOpenModal('退货', html, '<button class="lt-btn lt-btn-default" onclick="pr2Save()">暂存</button><button class="lt-btn lt-btn-primary" onclick="pr2Submit()">保存提交</button>', {width:1100});
   pr2Calc();
@@ -10178,13 +10520,27 @@ function pr2RetInput(i){
   if(v>avail){ v=avail; inp.value=v||''; }
   l.ret=v;
   var chk=document.querySelector('.pr2-chk[data-i="'+i+'"]');
-  if(chk){ if(v>0&&!chk.checked){ chk.checked=true; } if(v===0&&chk.checked){ chk.checked=false; } }
+  if(chk){ if(v>0&&!chk.checked){ chk.checked=true; } if(v===0&&chk.checked){ chk.checked=false; } } pr2SyncAll();
   pr2Calc();
 }
 function pr2Chk(i){
   var chk=document.querySelector('.pr2-chk[data-i="'+i+'"]');
   var l=window.pr2Rows[i]; var inp=document.getElementById('pr2-ret-'+i);
   if(chk&&!chk.checked){ l.ret=0; if(inp){ inp.value=''; } pr2Calc(); }
+  pr2SyncAll();
+}
+function pr2SyncAll(){
+  var els=Array.prototype.slice.call(document.querySelectorAll('.pr2-chk')).filter(function(r){ return !r.disabled; });
+  var h=document.getElementById('pr2-check-all');
+  if(h) h.checked = els.length>0 && els.every(function(r){ return r.checked; });
+}
+function pr2ToggleAll(ck){
+  Array.prototype.slice.call(document.querySelectorAll('.pr2-chk')).forEach(function(r){
+    if(r.disabled) return;
+    r.checked=ck.checked;
+    if(!ck.checked){ pr2Chk(parseInt(r.getAttribute('data-i'),10)||0); }
+  });
+  pr2SyncAll();
 }
 function pr2Calc(){
   var c=0,r=0,t=0;
@@ -10338,7 +10694,7 @@ function soOpenRegister(idx){
     '<div class="np-field"><label>VIN</label><input id="so-r-vin" class="np-input" value="'+(rec?rec.vin:'')+'"></div>'+
     '<div class="np-field" style="grid-column:1/3;"><label>备注(<20字)</label><input id="so-r-memo" class="np-input" value="'+(rec?npEscape(rec.memo):'')+'" maxlength="20"></div></div>'+
     '<div class="lt-toolbar" style="margin:8px 0;"><div class="lt-toolbar-left"><button class="lt-btn lt-btn-default" onclick="soAddPart()">添加配件</button><button class="lt-btn lt-btn-default" onclick="soDelPart()">删除配件</button><button class="lt-btn lt-btn-default" onclick="npToast(\'重置（演示）\')">重置</button></div></div>'+
-    '<div class="np-sub-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'选',w:40},{t:'配件编码'},{t:'配件名称'},{t:'单位'},{t:'缺件数量',w:90},{t:'库存数'},{t:'在途数'},{t:'单价(含税)',w:100},{t:'金额(含税)'}])+'</tr></thead><tbody id="so-parts"></tbody></table></div>'+
+    '<div class="np-sub-table-wrap"><table class="lt-table"><thead><tr>'+'<th style="width:40px;min-width:40px;"><input type="checkbox" id="so-check-all" onclick="soToggleAll(this)"></th>'+npTH([{t:'配件编码'},{t:'配件名称'},{t:'单位'},{t:'缺件数量',w:90},{t:'库存数'},{t:'在途数'},{t:'单价(含税)',w:100},{t:'金额(含税)'}])+'</tr></thead><tbody id="so-parts"></tbody></table></div>'+
     '<div class="np-total">预估金额合计(含税)：<span class="np-money" id="so-total">0.00</span></div>';
   npOpenModal('缺件登记', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-default" onclick="npToast(\'已暂存（演示）\')">暂存</button><button class="lt-btn lt-btn-primary" onclick="soSave('+(idx>=0?idx:-1)+')">保存提交</button>', {width:960});
   function renderLines(){ var tb=document.getElementById('so-parts'); if(!tb)return; tb.innerHTML=lines.map(function(l,i){return '<tr><td><input type="checkbox" class="so-part-chk"></td><td>'+l.pcode+'</td><td>'+npEscape(l.pname)+'</td><td>'+l.unit+'</td><td><input id="so-qty-'+i+'" class="np-input" style="width:70px;" value="'+l.qty+'" oninput="soAmt('+i+')"></td><td>'+l.stock+'</td><td>'+l.transit+'</td><td>'+l.price+'</td><td id="so-amt-'+i+'">'+l.amt+'</td></tr>';}).join('')||'<tr><td colspan="9" style="text-align:center;color:#999;">请添加配件</td></tr>'; }
@@ -10348,9 +10704,12 @@ function soOpenRegister(idx){
   function soRecalc(){ var t=0; lines.forEach(function(l,i){ t+=parseFloat(l.amt||(l.price*(parseFloat(l.qty)||0))); }); var el=document.getElementById('so-total'); if(el)el.textContent=t.toFixed(2); }
   renderLines(); soRecalc();
 }
+function soToggleAll(ck){
+  Array.prototype.slice.call(document.querySelectorAll('.so-part-chk')).forEach(function(b){ b.checked=ck.checked; });
+}
 function soOpenPickSale(){
   var pools=[]; for(var i=0;i<8;i++){ pools.push({ saleNo:'XS'+String(7000+i), cust:'客户'+(i+1), plate:'沪A'+String(npRandStr('sop',i,10000,99999)), vin:'LV'+String(npRandStr('sopv',i,100000,999999)), saleDate:npDate('sopd',i), variety:npRandStr('sopv2',i,1,6), recv:npPick('sopr',i,['已收款','未收款']), out:npPick('sopo',i,['已出库','未出库']), submit:npDateTime('sops',i) }); }
-  var html='<div class="lt-filter-grid" style="grid-template-columns:repeat(3,1fr);">'+npFItem('销售单号','<input class="np-input" placeholder="输入">')+npFItem('客户','<input class="np-input" placeholder="输入">')+npFItem('车牌号','<input class="np-input" placeholder="输入">')+'<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="npToast(\'查询（演示）\')">查询</button></div></div><div class="lt-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'选',w:40},{t:'销售单号'},{t:'客户'},{t:'车牌号'},{t:'VIN'},{t:'销售日期'},{t:'合计品种'},{t:'收款登记'},{t:'出库状态'},{t:'提交时间'}])+'</tr></thead><tbody>'+pools.map(function(p,i){return '<tr><td><input type="radio" name="sop" value="'+p.saleNo+'" onchange="window.soPickSale=\''+p.saleNo+'\'"></td><td>'+p.saleNo+'</td><td>'+p.cust+'</td><td>'+p.plate+'</td><td>'+p.vin+'</td><td>'+p.saleDate+'</td><td>'+p.variety+'</td><td>'+p.recv+'</td><td>'+p.out+'</td><td>'+p.submit+'</td></tr>';}).join('')+'</tbody></table></div>';
+  var html='<div class="lt-filter-grid" style="grid-template-columns:repeat(3,1fr);">'+npFItem('销售单号','<input class="np-input" placeholder="输入">')+npFItem('客户','<input class="np-input" placeholder="输入">')+npFItem('车牌号','<input class="np-input" placeholder="输入">')+'<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="npToast(\'查询（演示）\')">查询</button></div></div><div class="lt-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'',w:40},{t:'销售单号'},{t:'客户'},{t:'车牌号'},{t:'VIN'},{t:'销售日期'},{t:'合计品种'},{t:'收款登记'},{t:'出库状态'},{t:'提交时间'}])+'</tr></thead><tbody>'+pools.map(function(p,i){return '<tr><td><input type="radio" name="sop" value="'+p.saleNo+'" onchange="window.soPickSale=\''+p.saleNo+'\'"></td><td>'+p.saleNo+'</td><td>'+p.cust+'</td><td>'+p.plate+'</td><td>'+p.vin+'</td><td>'+p.saleDate+'</td><td>'+p.variety+'</td><td>'+p.recv+'</td><td>'+p.out+'</td><td>'+p.submit+'</td></tr>';}).join('')+'</tbody></table></div>';
   npOpenModal('选择销货单', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="soConfirmSale()">确定</button>', {width:940});
 }
 function soConfirmSale(){ var v=window.soPickSale; if(!v){ npToast('请选择销售单'); return; } var e=document.getElementById('so-r-rel'); if(e)e.value=v; npCloseModal(); npToast('已关联 '+v); }
@@ -10429,12 +10788,15 @@ function saOpenAlloc(idx){
     '<div class="np-field"><label>配件名称</label><input class="np-input" value="'+npEscape(r.pname)+'" readonly></div>'+
     '<div class="np-field"><label>良品库存</label><input class="np-input" value="'+r.goodStock+'" readonly></div></div>'+
     '<div class="np-field" style="margin-bottom:8px;"><label><input type="checkbox" id="sa-auto" onchange="saAutoFill()"> 自动填充分配数量（对勾选行）</label></div>'+
-    '<div class="np-sub-table-wrap"><table class="lt-table"><thead><tr>'+npTH([{t:'选',w:40},{t:'本次分配数',w:110},{t:'本次取消数',w:110},{t:'缺件单号'},{t:'期望到货日期'},{t:'缺件数量'},{t:'预留数量'},{t:'登记人'},{t:'登记时间'}])+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div class="np-sub-table-wrap"><table class="lt-table"><thead><tr>'+'<th style="width:40px;min-width:40px;"><input type="checkbox" id="sa-check-all" onclick="saToggleAll(this)"></th>'+npTH([{t:'本次分配数',w:110},{t:'本次取消数',w:110},{t:'缺件单号'},{t:'期望到货日期'},{t:'缺件数量'},{t:'预留数量'},{t:'登记人'},{t:'登记时间'}])+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+
     '<div class="np-hint">规则：本次取消≤已分配数量；本次分配≤未分配数量；良品库存−已预留合计≥本次分配合计−本次取消合计；同行不可既分配又取消。可勾选同一配件的多个缺件单一次性分配。</div>';
   npOpenModal('缺件分配（'+group.length+' 张缺件单）', html, '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="saSubmit()">确定</button>', {width:920});
 }
 function saAllocIn(idx){ var c=document.getElementById('sa-cancel-'+idx); if(c){ c.value=''; } document.querySelector('.sa-chk[data-i="'+idx+'"]').checked=true; }
 function saCancelIn(idx){ var a=document.getElementById('sa-alloc-'+idx); if(a){ a.value=''; a.disabled=true; } document.querySelector('.sa-chk[data-i="'+idx+'"]').checked=true; }
+function saToggleAll(ck){
+  Array.prototype.slice.call(document.querySelectorAll('.sa-chk')).forEach(function(b){ b.checked=ck.checked; });
+}
 function saSubmit(){
   var st=NP['shortage-allocation'];
   var chks=document.querySelectorAll('.sa-chk:checked');
