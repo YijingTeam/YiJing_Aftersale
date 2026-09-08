@@ -271,9 +271,9 @@
   // ===== 状态动作（按 6.4：发布 / 取消发布） =====
   window.tnPublish = function (id) {
     var a = findAnn(id); if (!a) return;
-    // 曾发布过（取消发布产物）→ 重新发布 = 「已更新」
-    if (a.publishedBefore) a.updated = true;
-    a.status = '已发布'; a.publishTime = npNowLocal();
+    // 9.8 口径：列表「发布」＝直接上线为「已发布」（不带「已更新」）；
+    // 「已更新」只在「编辑 → 保存并发布」时标记（见 tnSave 的 republishNow）。
+    a.status = '已发布'; a.publishTime = npNowLocal(); a.updated = false;
     tnQuery(); npToast('已发布');
   };
   // 取消发布（原「下架」），二次确认；取消后回到 未发布(曾发布过)
@@ -282,6 +282,7 @@
     var a = findAnn(id); if (!a) return;
     if (a.status === '已发布') a.publishedBefore = true;
     a.status = '未发布';
+    a.updated = false; // 9.8 口径：取消发布本身不保留「更新过」；再次列表发布不带「已更新」
     tnQuery(); npToast('已取消发布');
   };
 
@@ -1072,8 +1073,10 @@
     tnInitTargetPanel(a);
     formAttachments = a && a.attachments ? a.attachments.slice() : [];
     // 编号不预览：新建未提交不产生编号，提交保存时在 tnSave 中生成
+    // 未发布-曾发布过（取消发布产物）→ 按钮「保存并发布」；未曾发布（草稿/新建）→ 「保存」
+    var pubNow = !!(a && a.publishedBefore);
     var foot = '<button class="lt-btn lt-btn-default" onclick="tnClosePanel()">取消</button>' +
-      '<button class="lt-btn lt-btn-primary" onclick="tnSave()">保存</button>';
+      '<button class="lt-btn lt-btn-primary" onclick="tnSave(' + (pubNow ? 'true' : '') + ')">' + (pubNow ? '保存并发布' : '保存') + '</button>';
     tnOpenPanel(id ? '编辑技术公告' : '新建技术公告', id ? '编辑' : '新增', id ? 'edit' : 'add', tnFormHtml(a), foot, { width: 1050 });
     tnRenderTargetTree();
     tnStoreModeRender();
@@ -1084,7 +1087,7 @@
   }
   window.tnOpenForm = tnOpenFormPanel;
 
-  window.tnSave = function () {
+  window.tnSave = function (publishNow) {
     function v(id) { return ((document.getElementById(id) || {}).value || ''); }
     var title = v('tn-fm-title').trim(), type = v('tn-fm-type'), subtype = v('tn-fm-subtype'), series = v('tn-fm-series'), fl = v('tn-fm-fl');
     if (!title) { alert('请填写公告标题'); return; }
@@ -1096,9 +1099,11 @@
     if (!bodyText) { alert('请填写正文'); return; }
     var a = editingId ? findAnn(editingId) : null;
     var newCode = a ? a.code : genCode(); // 编号不预览：保存时才生成并占用（当天流水）
-    // 只有「未发布」可编辑：编辑保存后仍为「未发布」（已发布不可直接编辑，须先取消发布）
+    // 只有「未发布」可编辑。曾发布过（取消发布产物）→「保存并发布」＝保存即重新发布为「已发布+已更新」；
+    // 未曾发布（草稿/新建）→「保存」＝保存后仍为「未发布」，不打「已更新」（首次发布也不带）。
     var status = '未发布';
     var publishedBefore = a ? !!a.publishedBefore : false;
+    var republishNow = !!(publishNow && a && a.publishedBefore);
     // 发布对象 = 门店(店×角色) + 总部(树勾选) 并集；发布/保存不生成接收人快照，阅读情况按发布对象实时解析
     var tgtKeys = tnCurrentKeys();
     var tgtInfo = tnTargetInfoOf({ target: { keys: tgtKeys } });
@@ -1125,9 +1130,10 @@
     };
     if (a) { var idx = -1; for (var i = 0; i < NP[K].allData.length; i++) if (NP[K].allData[i].id === editingId) idx = i; if (idx >= 0) NP[K].allData[idx] = data; }
     else { NP[K].allData.unshift(data); }
+    if (republishNow) { data.status = '已发布'; data.publishTime = npNowLocal(); data.updated = true; }
     tnClosePanel();
     tnQuery();
-    npToast('已保存');
+    npToast(republishNow ? '已保存并发布' : '已保存');
   };
 
   function resolveTargetPersons() { return tnResolveTreeIds(); }
