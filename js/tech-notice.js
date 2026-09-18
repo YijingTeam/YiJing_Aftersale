@@ -3,7 +3,7 @@
 // 查看态 = tech-notice；管理态 = tech-notice-manage（showContent 别名 + _isTechNoticeManage）。
 // 编号：TI + YYMMDD + 3位流水（当天重置）。
 // 状态：未发布 / 已发布（按在线 PRD 6.4：无「已下架」；已发布「取消发布」→未发布(曾发布过)，重新发布→已发布+「已更新」细字标记）。
-// 发布对象：总部/门店(可同选) + 角色/人员(多选下拉)，默认门店。
+// 发布对象：总部/门店(可同选) + 角色（粒度止于角色，2026-09-18 用户拍板：无需精确到个人），默认门店。
 // =====================================================================
 (function () {
   var K = 'tech-notice';
@@ -71,7 +71,7 @@
         series: series, model: model, faultLocation: fl, fdesc1: '', fdesc2: '', fdesc3: '', fdesc4: '', fdesc5: '',
         prodStart: '', prodEnd: '', summary: '', mainPartCode: '', mainPartName: '', faultCondition: '', repairPlan: '',
         bodyHtml: '<p>' + title + '</p>', attachments: [],
-        target: { orgs: ['门店', '总部'], roles: [], persons: [] },
+        target: { orgs: ['门店', '总部'], roles: [] },
         status: status, publishTime: publishTime || '', publisher: '总部管理员',
         updated: !!updated, publishedBefore: !!publishedBefore, readByMe: false, downloadedByMe: false,
         reads: demoReads(allIds, code, publishTime)
@@ -81,7 +81,7 @@
     NP[K].allData = [
       mk('TI260801001', '关于奕境X9刹车系统制动力不足的技术公告', 'TSI', '召回', '奕境X9', '纯电版', '刹车系统', '已发布', '2026-08-01 09:00:00', false, false),
       mk('TI260815001', '奕境L7空调系统制冷不良维修指导', 'TMI', '技术指导', '奕境L7', 'PHEV', '空调系统', '已发布', '2026-08-15 10:30:00', true, true),
-      mk('TI260828001', '奕境S 2024款动力电池主动检测活动（草稿·只勾人员示例）', 'TSI', '主动活动', '奕境S 2024款', '', '动力电池', '未发布', '', false, false),
+      mk('TI260828001', '奕境S 2024款动力电池主动检测活动（草稿·指定门店×角色示例）', 'TSI', '主动活动', '奕境S 2024款', '', '动力电池', '未发布', '', false, false),
       mk('TI260820001', '奕境X9整车保养活动方案调整说明（曾发布过·已取消发布）', 'TSI', '主动活动', '奕境X9', '纯电版', '电控系统', '未发布', '', false, true),
       mk('TI260812001', '奕境L7高压电池检测活动（草稿示例）', 'TSI', '主动活动', '奕境L7', 'PHEV', '动力电池', '未发布', '', false, false)
     ];
@@ -344,29 +344,30 @@
     }).join('');
   }
 
-  // ===== 发布对象（组织树，参照 公告(备用)：门店 → 大区 → 门店 → 角色 → 人员；门店在前、支持展开/收起） =====
+  // ===== 发布对象（门店范围×角色 + 总部树；粒度止于角色） =====
   var tnTree = [];            // 组织树（构建于打开面板时）
   var tnTreeChecked = {};     // 勾选节点 key 集
   var tnTreeOpen = {};        // 展开状态覆盖（key → false=收起；缺省按类型默认）
   var tnTreeQ = '';           // 树搜索关键字
 
-  function tnNodeDefaultOpen(type) { return type !== 'role' && type !== 'person'; } // 缺省：大区/门店展开、角色/人员收起
+  function tnNodeDefaultOpen(type) { return type !== 'role'; } // 缺省：总部节点展开；角色节点（无子节点）不影响
   function tnNodeOpenState(n) { return tnTreeOpen[n.key] === undefined ? tnNodeDefaultOpen(n.type) : tnTreeOpen[n.key]; }
 
   function tnBuildTargetTree() {
     var o = org();
-    function personNode(p) { return { key: 'P-' + p.personId, type: 'person', label: p.name + '(' + p.personId + ')', personId: p.personId }; }
+    // 发布对象粒度 = 角色为止（2026-09-18 用户拍板：无需精确到个人）→ 总部树 = 整个总部 → 总部角色，无人员节点
     function roleNodesFor(scopePersons, prefix) {
       var out = [];
       o.roles.forEach(function (role) {
         var ps = scopePersons.filter(function (p) { return p.roleId === role.id; });
-        if (ps.length) out.push({ key: prefix + role.id, type: 'role', label: role.name + '(' + role.id + ')', children: ps.map(personNode) });
+        if (ps.length) out.push({ key: prefix + role.id, type: 'role', label: role.name + '(' + role.id + ')' });
       });
       return out;
     }
     var hqPersons = o.persons.filter(function (p) { return p.orgType === '总部'; });
-    // 门店侧不走树（另用「店多选 × 角色多选」控件）；总部树 = 整个总部 → 总部角色 → 人员
-    return [{ key: 'ORG-HQ', type: 'org', label: '总部', children: roleNodesFor(hqPersons, 'HQ-ROLE-') }];
+    // 门店侧不走树（另用「门店范围 × 角色多选」控件）；总部侧只有总部角色行
+    // 2026-09-18 二次拍板：删掉「总部」根行 —— 与门店侧一致，不选角色 = 该侧全员（不选 = 总部全员）
+    return roleNodesFor(hqPersons, 'HQ-ROLE-');
   }
 
   function tnSubtreeState(node) {
@@ -418,16 +419,16 @@
     return out;
   }
 
-  // 发布对象区域 HTML（新建/编辑，2026-09-05 A 方案拍板）：门店范围 = 全部门店(动态，含以后新增) / 指定门店(固定清单) 互斥单选；角色多选对门店范围整体生效（不进单店）；总部=树(可到人)；下方实时预览
+  // 发布对象区域 HTML（新建/编辑，2026-09-05 A 方案拍板）：门店范围 = 全部门店(动态，含以后新增) / 指定门店(固定清单) 互斥单选；角色多选对门店范围整体生效（不进单店）；总部=树(只到总部角色)；下方实时预览
   var tnStoreMode = '';    // 'all' = 全部门店（动态，含以后新增）| 'part' = 指定门店（固定清单）| '' = 未选
   var tnSelStores = {};    // 指定门店模式：已选店 code → 1
-  var tnSelRoles = {};     // 已选门店角色 id → 1（空 = 整店全员）
+  var tnSelRoles = {};     // 已选门店角色 id → 1（空 = 整店全员：该范围内全员）
 
   function targetPanelHtml() {
     return '<div class="ts-form-item-inline plain tn-objrow"><span class="ts-form-label-inline">发布对象<i class="tn-req">*</i></span>' +
       '<div class="ann-target tn-target-new">' +
       '<div class="tn-tt-sec">' +
-      '<div class="tn-tt-head"><b>门店</b>：「全部门店」＝所有门店（含以后新增）；「指定门店」＝所选门店清单。「指定角色」＝所选角色（不选＝整店全员）</div>' +
+      '<div class="tn-tt-head"><b>门店</b>：「全部门店」＝所有门店（含以后新增）；「指定门店」＝所选门店清单。「指定角色」＝所选角色（不选＝全员）</div>' +
       '<div class="tn-tt-storemode"><label class="tn-radio"><input type="radio" name="tn-store-mode" value="all" onchange="tnStoreModeSet(\'all\')"><span>全部门店（含以后新增）</span></label>' +
       '<label class="tn-radio"><input type="radio" name="tn-store-mode" value="part" onchange="tnStoreModeSet(\'part\')"><span>指定门店</span></label></div>' +
       '<div class="tn-tt-part" id="tn-store-part">' +
@@ -436,12 +437,12 @@
       '<span class="tn-tt-storequick"><a href="javascript:void(0)" onclick="tnPartClear()">清除</a></span></div>' +
       '<div class="tn-tt-part-hint" id="tn-store-part-hint"></div>' +
       '</div>' +
-      '<div class="ann-target-search"><input type="text" id="tn-role-q" placeholder="搜索角色（不勾 = 整店全员）…" oninput="tnRoleRender()"></div>' +
+      '<div class="ann-target-search"><input type="text" id="tn-role-q" placeholder="搜索角色(支持模糊)…" oninput="tnRoleRender()"></div>' +
       '<div class="tn-tt-roles" id="tn-role-box"></div>' +
       '</div>' +
       '<div class="tn-tt-sec">' +
-      '<div class="tn-tt-head"><b>总部</b></div>' +
-      '<div class="ann-target-search"><input type="text" id="tn-target-search" placeholder="搜索总部角色/人员…" oninput="tnTreeSearch(this.value)"></div>' +
+      '<div class="tn-tt-head"><b>总部</b>：「指定角色」＝所选角色（不选＝全员）</div>' +
+      '<div class="ann-target-search"><input type="text" id="tn-target-search" placeholder="搜索角色(支持模糊)…" oninput="tnTreeSearch(this.value)"></div>' +
       '<div class="ann-tree-box" id="tn-tree-box"></div>' +
       '</div>' +
       '<div class="tn-tt-preview" id="tn-tt-preview">尚未选择发布对象</div>' +
@@ -501,43 +502,19 @@
     tnRoleRender();
     tnRefreshTarget();
   };
-  // —— 门店侧角色 = 范围 → 角色 → 具体人员（与总部同粒度；可展开勾/剔个人，人员标注所属门店）——
-  var tnRoleExcl = {};   // 门店侧：被剔除的具体人员 personId → 1（在所选范围内排除，不进入单店层级）
-  var tnRoleOpen = {};   // 角色行展开态（其下人员列表显隐）
-  function tnScopeStorePersons() {
-    return org().persons.filter(function (p) { return p.orgType === '门店' && (tnStoreMode === 'all' || tnSelStores[p.storeCode]); });
-  }
-  function tnRolePersons(rid) { return tnScopeStorePersons().filter(function (p) { return p.roleId === rid; }); }
-  function tnStorePersonLabel(p) {
-    var s = org().storeByCode ? org().storeByCode(p.storeCode) : null;
-    var sn = s ? (s.shortName || s.name) : p.storeCode;
-    return p.name + '（' + sn + '）';
-  }
+  // —— 门店侧角色 = 门店范围 → 角色（粒度止于角色；2026-09-18 用户拍板：无需精确到个人）——
+  // 2026-09-18 二次拍板：删掉多余的「范围内全部角色」行 —— 勾谁发谁，一个都不选 = 该范围内全员
+  function tnStoreRoles() { return org().roles.filter(function (r) { return r.scope === '门店'; }); }
   window.tnRoleTick = function (rid, on) {
     if (panelRo) return;
-    if (on) tnSelRoles[rid] = 1;
-    else if (!Object.keys(tnSelRoles).length) {
-      // 当前是"全部角色"（隐式全选）：点掉一个角色 = 转为显式选择其余角色
-      tnSelRoles = {};
-      org().roles.filter(function (r) { return r.scope === '门店' && r.id !== rid; }).forEach(function (r) { tnSelRoles[r.id] = 1; });
+    if (on) {
+      tnSelRoles[rid] = 1;
+      // 全部角色都选上 = 一个都不选（都表示"整店全员"），不写一堆 RF- 键
+      if (Object.keys(tnSelRoles).length >= tnStoreRoles().length) tnSelRoles = {};
     } else delete tnSelRoles[rid];
     tnRoleRender();
     tnRefreshTarget();
   };
-  window.tnRoleFold = function (rid) { tnRoleOpen[rid] = !tnRoleOpen[rid]; tnRoleRender(); };
-  window.tnPersonTick = function (pid, on) {
-    if (panelRo) return;
-    if (on) delete tnRoleExcl[pid]; else tnRoleExcl[pid] = 1;
-    tnRoleRender();
-    tnRefreshTarget();
-  };
-  window.tnRoleAll = function () { // 全部角色（整店全员）：等于不指定角色
-    if (panelRo) return;
-    tnSelRoles = {}; tnRoleExcl = {};
-    tnRoleRender();
-    tnRefreshTarget();
-  };
-  window.tnRoleClear = window.tnRoleAll;
   function tnRoleRender() {
     var box = document.getElementById('tn-role-box'); if (!box) return;
     var hasScope = tnStoreMode === 'all' || Object.keys(tnSelStores).length > 0;
@@ -545,55 +522,38 @@
     var qInp = document.getElementById('tn-role-q');
     var q = qInp ? (qInp.value || '').trim().toLowerCase() : '';
     var roles = org().roles.filter(function (r) { return r.scope === '门店'; });
-    var list = q ? roles.filter(function (r) { return (r.name || '').toLowerCase().indexOf(q) >= 0; }) : roles;
-    var fullAll = !Object.keys(tnSelRoles).length; // 未指定角色 = 范围内所有角色（可再展开剔个人）
-    var onRoles = Object.keys(tnSelRoles).length;
-    var html = '<div class="tn-role-actions"><span class="tn-tt-rolehint">' +
-      (onRoles ? '已指定 ' + onRoles + ' 个角色（点「范围内全部角色」可回到整店全员）' : '整店全员（可展开角色勾/剔具体人员）') +
-      '</span><a href="javascript:void(0)" onclick="tnRoleAll()">范围内全部角色</a></div>' +
-      '<div class="ann-tnode tn-role-row" style="--lv:0"><label class="ann-tlabel"><input type="checkbox"' + (fullAll ? ' checked' : '') +
-      ' onchange="if(this.checked)tnRoleAll()"><span class="ann-tlabel-txt"><b>范围内全部角色</b>（不指定 = 所辖人员全发）</span></label></div>';
+    var list = q ? roles.filter(function (r) { return ((r.name || '') + ' ' + (r.id || '')).toLowerCase().indexOf(q) >= 0; }) : roles;
+    var html = '';
     list.forEach(function (r) {
-      var effOn = fullAll || !!tnSelRoles[r.id];
-      var pers = tnRolePersons(r.id);
-      var open = !!tnRoleOpen[r.id];
-      var exclN = pers.filter(function (p) { return tnRoleExcl[p.personId]; }).length;
-      html += '<div class="ann-tnode tn-role-row" style="--lv:1">' +
-        (pers.length ? '<span class="tn-tree-caret' + (open ? ' open' : '') + '" onclick="tnRoleFold(\'' + r.id + '\')"></span>' : '<span class="tn-tree-caret tn-caret-none"></span>') +
+      var effOn = !!tnSelRoles[r.id];
+      html += '<div class="ann-tnode tn-role-row" style="--lv:0">' +
         '<label class="ann-tlabel"><input type="checkbox"' + (effOn ? ' checked' : '') +
-        ' onchange="tnRoleTick(\'' + r.id + '\', this.checked)"><span class="ann-tlabel-txt">' + npEscape(r.name) +
-        (exclN ? '（已剔除 ' + exclN + ' 人）' : '') + '</span></label></div>';
-      if (open && effOn) {
-        pers.forEach(function (p) {
-          var on = !tnRoleExcl[p.personId];
-          html += '<div class="ann-tnode tn-role-row tn-role-person" style="--lv:2"><label class="ann-tlabel"><input type="checkbox"' + (on ? ' checked' : '') +
-            ' onchange="tnPersonTick(\'' + p.personId + '\', this.checked)"><span class="ann-tlabel-txt">' + npEscape(tnStorePersonLabel(p)) + '</span></label></div>';
-        });
-      }
+        ' onchange="tnRoleTick(\'' + r.id + '\', this.checked)"><span class="ann-tlabel-txt">' + npEscape(r.name + '(' + r.id + ')') +
+        '</span></label></div>';
     });
     if (!list.length) html += '<div class="tn-tt-empty">没有匹配的角色</div>';
     box.innerHTML = html;
   }
+  window.tnRoleRender = tnRoleRender;   // 行内 oninput="tnRoleRender()" 只能调全局函数（2026-09-18 补齐：此前未挂 window → 门店角色搜索框输入即 ReferenceError、列表不筛选）
+
   // —— 实时预览：发布对象文案 + 人数 ——
   function tnCurrentKeys() {
     var keys = [];
-    // 门店：全部门店(动态)=ORG-STORES 语义；指定门店=固定 STORE-* 清单；可带 RF-* 角色收窄、SX-* 剔除个人
+    // 门店：全部门店(动态)=ORG-STORES 语义；指定门店=固定 STORE-* 清单；可带 RF-* 角色收窄（粒度止于角色，不到人）
     if (tnStoreMode === 'all') {
       keys.push('ORG-STORES');
       Object.keys(tnSelRoles).forEach(function (rid) { keys.push('RF-' + rid); });
-      Object.keys(tnRoleExcl).forEach(function (pid) { keys.push('SX-' + pid); });
     } else if (tnStoreMode === 'part') {
       var codes = Object.keys(tnSelStores);
       if (codes.length) {
         codes.forEach(function (c) { keys.push('STORE-' + c); });
         Object.keys(tnSelRoles).forEach(function (rid) { keys.push('RF-' + rid); });
-        Object.keys(tnRoleExcl).forEach(function (pid) { keys.push('SX-' + pid); });
       }
     }
-    // 总部：勾「总部」即以 ORG-HQ 为准（不落角色/人员子键），避免文案变长
-    var treeKeys = Object.keys(tnTreeChecked);
-    if (treeKeys.indexOf('ORG-HQ') >= 0) keys.push('ORG-HQ');
-    else treeKeys.forEach(function (k) { keys.push(k); });
+    // 总部：一个总部角色都不选 = 总部全员（ORG-HQ，动态覆盖以后新增的总部角色）；选了 = 只发所选总部角色
+    var hqRoleKeys = Object.keys(tnTreeChecked).filter(function (k) { return k !== 'ORG-HQ'; });
+    if (!hqRoleKeys.length) keys.push('ORG-HQ');
+    else hqRoleKeys.forEach(function (k) { keys.push(k); });
     return keys;
   }
   window.tnRefreshTarget = function () {
@@ -645,25 +605,13 @@
         } else if (n.children) { setInd(n.children); }
       });
     })(tree);
-    tnUpdateTreeSummary();
-  }
-  function tnUpdateTreeSummary() {
-    var el = document.getElementById('tn-tree-summary');
-    if (!el) return;
-    var ids = tnResolveTreeIds();
-    el.textContent = '已选人员：' + ids.length + ' 人';
   }
   function tnResolveTreeIds() {
-    var ids = [];
-    (function walk(nodes) {
-      nodes.forEach(function (n) {
-        if (n.type === 'person') { if (tnTreeChecked[n.key]) ids.push(n.personId); }
-        else if (n.children) walk(n.children);
-      });
-    })(tnTree);
-    return ids;
+    // 发布对象粒度只到角色：树只用于「总部 / 总部角色」勾选，返回勾选的总部角色键（不再有人员节点）
+    return Object.keys(tnTreeChecked);
   }
-  // 由 target（keys / 旧结构 orgs/roles/persons 兼容）回填：门店选择、门店角色选择、总部树勾选
+  // 由 target（keys / 旧结构 orgs/roles 兼容）回填：门店选择、门店角色选择、总部树勾选
+  // 注：旧数据里的到人键（SX-/P-）不再回填——发布对象粒度止于角色，重新保存时自然收敛为角色级
   function tnRoleScope(rid) {
     var r = org().roleById ? org().roleById(rid) : null;
     if (r && r.scope) return r.scope;
@@ -673,7 +621,6 @@
   function tnInitCheckedFromTarget(target) {
     tnTreeChecked = {};
     tnSelStores = {}; tnSelRoles = {};
-    tnRoleExcl = {}; tnRoleOpen = {};
     tnStoreMode = '';
     if (!target) return;
     function markHq(key) {
@@ -684,7 +631,6 @@
     var keys = (target.keys || []).slice();
     (target.orgs || []).forEach(function (nm) { keys.push(nm === '总部' ? 'ORG-HQ' : 'ORG-STORES'); });
     (target.roles || []).forEach(function (rid) { keys.push('ROLE-' + rid); });
-    (target.persons || []).forEach(function (pid) { keys.push('P-' + pid); });
     // 判定门店范围模式：ORG-STORES 或旧"全门店角色"(ST-ROLE/ROLE→门店侧) = 全部门店；显式 STORE-* = 指定门店
     var wholeKey = false, partKey = false;
     keys.forEach(function (k) {
@@ -702,111 +648,15 @@
       if ((m = /^STORE-(.+)$/.exec(k))) { if (tnStoreMode === 'part' && org().storeByCode(m[1])) tnSelStores[m[1]] = 1; return; }
       if ((m = /^RF-(.+)$/.exec(k))) { tnSelRoles[m[1]] = 1; return; }
       if ((m = /^ST-ROLE-(.+)$/.exec(k))) { tnSelRoles[m[1]] = 1; return; }
-      if ((m = /^SX-(.+)$/.exec(k))) { if (org().personById(m[1])) tnRoleExcl[m[1]] = 1; return; }
       if ((m = /^ROLE-(.+)$/.exec(k))) { if (tnRoleScope(m[1]) === '总部') markHq('HQ-ROLE-' + m[1]); return; }
-      if (k === 'ORG-HQ') { markHq('ORG-HQ'); return; }
+      if (k === 'ORG-HQ') { return; } // 总部全员 = 不选任何总部角色（总部树里已没有「总部」根行）
       if ((m = /^HQ-ROLE-(.+)$/.exec(k))) { markHq('HQ-ROLE-' + m[1]); return; }
-      if (k.indexOf('P-') === 0) {
-        var pp = org().personById(k.slice(2));
-        if (pp && pp.orgType === '总部') tnTreeChecked[k] = 1;
-        // 门店个别人员（旧数据）：忽略——新口径按「门店范围×角色」表达
-        return;
-      }
     });
   }
 
-  // 发布对象实时解析（不依赖存储的接收人快照）：
-  // 按公告 target（新 target.keys / 旧 orgs+roles+persons 兼容）从 ORG_MASTER 解析人员，
-  // 返回 { persons:[{personId,name,orgType,storeCode,storeName,roleId,roleName,orgLabel}...], text:发布对象展示文案 }
-  // 文案规则（用户拍板 2026-09-20）：
-  //   只勾到组织层（整侧，ORG-STORES/ORG-HQ）→ 显示侧名本身："门店，总部"（不带人数）；
-  //   勾到角色层 → "门店（角色1，角色2…），总部（角色1，角色2…）"（括号内列所选角色名，同侧多角色用顿号）；
-  //   角色 + 额外勾选的人员 → "门店（角色1，角色2…）+X人，总部（…）+X人"，X = 额外勾选人员数
-  //    （未勾角色、仅额外勾了人员的：括号内列这些人所在角色，+X人 即所选人数）。
-  function tnTargetInfoOf(a) {
-    var o = org();
-    var t = (a && a.target) || {};
-    var key = {};
-    (t.keys || []).forEach(function (k) { key[k] = 1; });
-    (t.orgs || []).forEach(function (nm) { key[nm === '总部' ? 'ORG-HQ' : 'ORG-STORES'] = 1; });
-    (t.roles || []).forEach(function (rid) { key['ROLE-' + rid] = 1; });
-    (t.persons || []).forEach(function (pid) { key['P-' + pid] = 1; });
-    var sel = {};
-    function add(p) { if (p) sel[p.personId] = p; }
-    Object.keys(key).forEach(function (k) {
-      if (k === 'ORG-STORES') { o.persons.forEach(function (p) { if (p.orgType === '门店') add(p); }); return; }
-      if (k === 'ORG-HQ') { o.persons.forEach(function (p) { if (p.orgType === '总部') add(p); }); return; }
-      var m;
-      if ((m = /^ST-ROLE-(.+)$/.exec(k))) { o.persons.forEach(function (p) { if (p.orgType === '门店' && p.roleId === m[1]) add(p); }); return; }
-      if ((m = /^HQ-ROLE-(.+)$/.exec(k))) { o.persons.forEach(function (p) { if (p.orgType === '总部' && p.roleId === m[1]) add(p); }); return; }
-      if ((m = /^ROLE-(.+)$/.exec(k))) { o.persons.forEach(function (p) { if (p.roleId === m[1]) add(p); }); return; }
-      if (k.indexOf('P-') === 0) { var pp = o.personById(k.slice(2)); if (pp) add(pp); }
-    });
-    var persons = Object.keys(sel).map(function (pid) {
-      var p = sel[pid];
-      var role = o.roleById ? o.roleById(p.roleId) : null;
-      var storeName = p.orgType === '总部' ? '总部'
-        : (((o.storeByCode ? o.storeByCode(p.storeCode) : null) || {}).name) || p.storeCode;
-      return {
-        personId: p.personId, name: p.name, orgType: p.orgType, storeCode: p.storeCode,
-        storeName: storeName, roleId: p.roleId, roleName: role ? role.name : '',
-        orgLabel: p.orgType === '总部' ? '总部' : storeName + '(' + p.storeCode + ')'
-      };
-    });
-    persons.sort(function (x, y) {
-      if (x.orgType !== y.orgType) return x.orgType === '门店' ? -1 : 1;
-      if (x.roleName !== y.roleName) return x.roleName < y.roleName ? -1 : 1;
-      return x.name < y.name ? -1 : 1;
-    });
-    // —— 展示文案：按"勾选粒度"组织 ——
-    function sideOfRole(rid) {
-      for (var i = 0; i < o.persons.length; i++) if (o.persons[i].roleId === rid) return o.persons[i].orgType;
-      return null;
-    }
-    function roleOrderIdx(rid) {
-      for (var i = 0; i < o.roles.length; i++) if (o.roles[i].id === rid) return i;
-      return 999;
-    }
-    function roleName(rid) {
-      var r = o.roleById ? o.roleById(rid) : null;
-      return r ? r.name : rid;
-    }
-    function orderedNames(idset) {
-      return Object.keys(idset).sort(function (x, y) { return roleOrderIdx(x) - roleOrderIdx(y); }).map(roleName);
-    }
-    // 各侧 显式勾选的角色 / 额外勾选的人员 / 整侧组织层
-    var stOrg = !!key['ORG-STORES'];
-    var hqOrg = !!key['ORG-HQ'];
-    var stRoles = {}, hqRoles = {}, stPersons = [], hqPersons = [];
-    Object.keys(key).forEach(function (k) {
-      var m;
-      if ((m = /^ST-ROLE-(.+)$/.exec(k))) { stRoles[m[1]] = 1; return; }
-      if ((m = /^HQ-ROLE-(.+)$/.exec(k))) { hqRoles[m[1]] = 1; return; }
-      if ((m = /^ROLE-(.+)$/.exec(k))) { var st = sideOfRole(m[1]); if (st === '门店') stRoles[m[1]] = 1; else if (st === '总部') hqRoles[m[1]] = 1; return; }
-      if (k.indexOf('P-') === 0) {
-        var pp = o.personById(k.slice(2));
-        if (pp && pp.orgType === '门店') stPersons.push(pp); else if (pp && pp.orgType === '总部') hqPersons.push(pp);
-      }
-    });
-    var segs = [];
-    function sideSeg(orgChecked, roleIds, extraPersons, pfx) {
-      var hasAny = orgChecked || Object.keys(roleIds).length || extraPersons.length;
-      if (!hasAny) return;
-      if (orgChecked) { segs.push(pfx); return; } // 组织层：只显示侧名，不带人数
-      // 没勾角色、只勾了人员 → 门店X人，总部X人（6.4 第4条：不加括号）
-      if (!Object.keys(roleIds).length && extraPersons.length) { segs.push(pfx + extraPersons.length + '人'); return; }
-      // 勾到角色（含角色 + 额外勾选人员）：括号=涉及角色并集；+X人 只计额外人数
-      var extra = extraPersons.filter(function (p) { return !roleIds[p.roleId]; });
-      extra.forEach(function (p) { roleIds[p.roleId] = 1; });
-      var roles = orderedNames(roleIds);
-      var seg = pfx + (roles.length ? '（' + roles.join('，') + '）' : '');
-      if (extra.length) seg += '+' + extra.length + '人';
-      segs.push(seg);
-    }
-    sideSeg(stOrg, stRoles, stPersons, '门店');
-    sideSeg(hqOrg, hqRoles, hqPersons, '总部');
-    return { persons: persons, text: segs.length ? segs.join('，') : '—' };
-  }
+  // 【2026-09-18 删除】此处原有 09-05 遗留的被覆盖同名解析函数（旧口径：可勾到具体人员、可剔人），
+  // 属"改口径时只追加新实现、没删旧址"的死代码（不可达）。发布对象解析只保留文件末尾那一份，
+  // 且粒度已收敛为「门店范围 × 角色 / 总部角色」——不再支持到人。
 
   // 打开发布对象（新建/编辑/详情共用：构建总部树 + 回填 门店/角色/总部 勾选）
   function tnInitTargetPanel(a) {
@@ -1104,7 +954,7 @@
     var status = '未发布';
     var publishedBefore = a ? !!a.publishedBefore : false;
     var republishNow = !!(publishNow && a && a.publishedBefore);
-    // 发布对象 = 门店(店×角色) + 总部(树勾选) 并集；发布/保存不生成接收人快照，阅读情况按发布对象实时解析
+    // 发布对象 = 门店(范围×角色) + 总部(总部全员/总部角色) 并集；粒度止于角色；发布/保存不生成接收人快照，阅读情况按发布对象实时解析
     var tgtKeys = tnCurrentKeys();
     var tgtInfo = tnTargetInfoOf({ target: { keys: tgtKeys } });
     if (!tgtInfo.persons.length) { alert('请选择发布对象（至少勾选门店/门店角色，或总部）'); return; }
@@ -1136,7 +986,8 @@
     npToast(republishNow ? '已保存并发布' : '已保存');
   };
 
-  function resolveTargetPersons() { return tnResolveTreeIds(); }
+  // 当前面板已选发布对象 → 解析出的接收人（粒度止于角色，人员由「门店范围×角色 / 总部角色」展开而来）
+  function resolveTargetPersons() { return tnTargetInfoOf({ target: { keys: tnCurrentKeys() } }).persons; }
 
   // ===== 详情（同一侧滑面板只读态：字段与新建/编辑一致，全部只读置灰） =====
   window.tnOpenDetail = function (id) {
@@ -1268,10 +1119,12 @@
     tnQuery();
   };
 
-  // ===== 发布对象（2026-09-05 用户拍板新口径，覆盖上面的旧版实现）=====
-  // 门店 = 店清单 × 角色筛选：target.keys 用 STORE-<店code>（选了哪些店）+ RF-<角色id>（仅发这些角色；无 RF=整店全员）。
-  // 总部 = 整总部 / 总部角色 / 个别人员：ORG-HQ（整个总部）、HQ-ROLE-<角色id>、P-<人员id>。
-  // 兼容旧键：ORG-STORES、ST-ROLE-*/ROLE-*（门店侧=全部门店×该角色）、ORG-HQ、HQ-ROLE-*、P-*（总部人员）。
+  // ===== 发布对象（2026-09-05 新口径；2026-09-18 用户拍板：粒度只到角色，不再到人）=====
+  // 门店 = 门店范围 × 角色：ORG-STORES（全部门店，动态含以后新增）或 STORE-<店code>（指定门店固定清单），
+  //        可选 RF-<角色id> 收窄（无 RF = 该范围内全员）。
+  // 总部 = ORG-HQ（整个总部）或 HQ-ROLE-<角色id>（总部角色）。
+  // 兼容旧键：ST-ROLE-*/ROLE-*（门店侧=全部门店×该角色）、orgs/roles 旧结构。
+  // 不再支持：SX-<人员id>（门店剔人）、P-<人员id>（到人）——发布对象粒度止于角色。
   function tnTargetInfoOf(a) {
     var o = org();
     var t = (a && a.target) || {};
@@ -1279,21 +1132,17 @@
     (t.keys || []).forEach(function (k) { key[k] = 1; });
     (t.orgs || []).forEach(function (nm) { key[nm === '总部' ? 'ORG-HQ' : 'ORG-STORES'] = 1; });
     (t.roles || []).forEach(function (rid) { key['ROLE-' + rid] = 1; });
-    (t.persons || []).forEach(function (pid) { key['P-' + pid] = 1; });
     var REGION_ORDER = ['华东', '华南', '华北', '西南', '东北', '华中'];
     function storeOf(code) { for (var i = 0; i < o.stores.length; i++) if (o.stores[i].code === code) return o.stores[i]; return null; }
     function roleIdx(rid) { for (var i = 0; i < o.roles.length; i++) if (o.roles[i].id === rid) return i; return 999; }
-    function roleName(rid) { var r = o.roleById ? o.roleById(rid) : null; return r ? r.name : rid; }
+    function roleName(rid) { var r = o.roleById ? o.roleById(rid) : null; return r ? r.name + '(' + r.id + ')' : rid; }  // 文案里的角色一律带角色ID（2026-09-18 用户要求，与勾选区/阅读情况口径一致）
 
-    // —— 键分类 ——
+    // —— 键分类：只有「门店范围 / 角色 / 总部」，没有人员键 ——
     var storeWhole = !!key['ORG-STORES'];
     var storeCodes = [];
     var roleF = {};
     var hqWhole = !!key['ORG-HQ'];
     var hqRoles = {};
-    var hqPers = [];
-    var stPers = [];
-    var exclS = {}; // SX-<personId>：门店侧被剔除的具体人员
     Object.keys(key).forEach(function (k) {
       var m;
       if ((m = /^STORE-(.+)$/.exec(k))) { var s0 = storeOf(m[1]); if (s0 && storeCodes.indexOf(s0.code) < 0) storeCodes.push(s0.code); return; }
@@ -1305,35 +1154,25 @@
         if (st === '门店') { roleF[m[1]] = 1; storeWhole = true; } else if (st === '总部') { hqRoles[m[1]] = 1; }
         return;
       }
-      if ((m = /^SX-(.+)$/.exec(k))) { exclS[m[1]] = 1; return; }
-      if (k.indexOf('P-') === 0) {
-        var pp = o.personById(k.slice(2));
-        if (pp && pp.orgType === '总部') hqPers.push(pp);
-        else if (pp && pp.orgType === '门店') stPers.push(pp); // 旧数据：门店个别人员
-      }
     });
     var roleFIds = Object.keys(roleF).sort(function (x, y) { return roleIdx(x) - roleIdx(y); });
 
-    // —— 门店人员（店×角色，扣除被剔除个人）——
+    // —— 门店人员：由「门店范围 × 角色」展开，仅用于人数统计与阅读情况（不是选择粒度）——
     var stPersons = [];
-    var storeActive = storeWhole || storeCodes.length || stPers.length;
+    var storeActive = storeWhole || storeCodes.length;
     if (storeActive) {
       if (storeWhole) stPersons = o.persons.filter(function (p) { return p.orgType === '门店'; });
       else stPersons = o.persons.filter(function (p) { return p.orgType === '门店' && storeCodes.indexOf(p.storeCode) >= 0; });
       if (roleFIds.length) stPersons = stPersons.filter(function (p) { return roleF[p.roleId]; });
-      stPersons = stPersons.concat(stPers);
     }
-    var stExclN = stPersons.filter(function (p) { return exclS[p.personId]; }).length;
-    stPersons = stPersons.filter(function (p) { return !exclS[p.personId]; });
-    // —— 总部人员 ——
+    // —— 总部人员：由「整个总部 / 总部角色」展开 ——
     var hqSet = {};
     function addHq(p) { if (p && p.orgType === '总部') hqSet[p.personId] = p; }
     if (hqWhole) { o.persons.forEach(function (p) { addHq(p); }); }
     Object.keys(hqRoles).forEach(function (rid) { o.persons.forEach(function (p) { if (p.roleId === rid) addHq(p); }); });
-    hqPers.forEach(function (p) { addHq(p); });
     var hqPersons = Object.keys(hqSet).map(function (pid) { return hqSet[pid]; });
 
-    // —— 文案 ——
+    // —— 文案：整侧 / 门店清单 / 门店×角色 / 总部角色（不含按人粒度的档位）——
     var segs = [];
     if (storeActive) {
       var storeTxt;
@@ -1348,23 +1187,16 @@
           if (otherN) rp.push('其他' + otherN + '家');
           storeTxt = rp.join('、') + '，共' + storeCodes.length + '家';
         }
-      } else storeTxt = '人员' + stPers.length + '人';
+      } else storeTxt = '全部';
       var roleTxt = roleFIds.length ? roleFIds.map(roleName).join('、') : '';
-      var exclTxt = stExclN ? '（剔除' + stExclN + '人）' : '';
-      if (roleTxt) segs.push('门店（' + storeTxt + '）·角色：' + roleTxt + exclTxt);
-      else segs.push((storeWhole ? '门店' : '门店（' + storeTxt + '）') + exclTxt);
+      if (roleTxt) segs.push('门店（' + storeTxt + '）·角色：' + roleTxt);
+      else segs.push(storeWhole ? '门店' : '门店（' + storeTxt + '）');
     }
     if (hqWhole) {
       segs.push('总部');
-    } else if (Object.keys(hqRoles).length || hqPers.length) {
-      var roleIds = {};
-      Object.keys(hqRoles).forEach(function (rid) { roleIds[rid] = 1; });
-      hqPersons.forEach(function (p) { roleIds[p.roleId] = 1; });
-      var extras = hqPersons.filter(function (p) { return !hqRoles[p.roleId]; });
-      var names = Object.keys(roleIds).sort(function (x, y) { return roleIdx(x) - roleIdx(y); }).map(roleName);
-      var seg2 = '总部（' + names.join('、') + '）';
-      if (extras.length) seg2 += '+' + extras.length + '人';
-      segs.push(seg2);
+    } else if (Object.keys(hqRoles).length) {
+      var names = Object.keys(hqRoles).sort(function (x, y) { return roleIdx(x) - roleIdx(y); }).map(roleName);
+      segs.push('总部（' + names.join('、') + '）');
     }
 
     var seen = {}, persons = stPersons.concat(hqPersons).filter(function (p) { if (seen[p.personId]) return false; seen[p.personId] = 1; return true; });
