@@ -2292,6 +2292,7 @@ input[readonly][placeholder="点击选择门店"] { cursor: pointer; }
 .tn-color { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #555; cursor: pointer; }
 .tn-color input[type=color] { width: 22px; height: 22px; border: none; background: none; cursor: pointer; padding: 0; }
 .tn-editor-body { min-height: 180px; max-height: 280px; overflow: auto; padding: 10px; font-size: 13px; color: #333; line-height: 1.7; outline: none; }
+.tn-editor-body.is-empty::before { content: attr(data-ph); color: #bbb; }
 .tn-editor-body table, .tn-detail-body table { border-collapse: collapse; margin: 6px 0; }
 .tn-editor-body th, .tn-editor-body td, .tn-detail-body th, .tn-detail-body td { border: 1px solid #bbb; padding: 4px 8px; font-size: 12px; }
 .tn-editor-body a, .tn-detail-body a { color: #185FA5; text-decoration: underline; }

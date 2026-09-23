@@ -365,9 +365,9 @@
       return out;
     }
     var hqPersons = o.persons.filter(function (p) { return p.orgType === '总部'; });
-    // 门店侧不走树（另用「门店范围 × 角色多选」控件）；总部侧只有总部角色行
-    // 2026-09-18 二次拍板：删掉「总部」根行 —— 与门店侧一致，不选角色 = 该侧全员（不选 = 总部全员）
-    return roleNodesFor(hqPersons, 'HQ-ROLE-');
+    // 门店侧不走树（另用「门店范围 × 角色多选」控件）；总部侧 = 「总部」根行（要不要发给总部）+ 总部角色行
+    // 2026-09-18 三次拍板：恢复「总部」根行 —— 根行不选 = 不发总部（总部是可选的一侧；门店侧要不要发由「门店范围」单选决定）
+    return [{ key: 'ORG-HQ', type: 'org', label: '总部', children: roleNodesFor(hqPersons, 'HQ-ROLE-') }];
   }
 
   function tnSubtreeState(node) {
@@ -387,6 +387,12 @@
       if (nodes[i].children) { var f = tnFindNode(nodes[i].children, key); if (f) return f; }
     }
     return null;
+  }
+  // 某节点下的全部子孙键（不含自身）
+  function tnChildKeys(key) {
+    var n = tnFindNode(tnTree, key); if (!n || !n.children || !n.children.length) return [];
+    var acc = {}; n.children.forEach(function (c) { tnTreeNodeKeys(c, acc); });
+    return Object.keys(acc);
   }
   window.tnTreeToggle = function (key, on) {
     if (panelRo) return;
@@ -422,7 +428,8 @@
   // 发布对象区域 HTML（新建/编辑，2026-09-05 A 方案拍板）：门店范围 = 全部门店(动态，含以后新增) / 指定门店(固定清单) 互斥单选；角色多选对门店范围整体生效（不进单店）；总部=树(只到总部角色)；下方实时预览
   var tnStoreMode = '';    // 'all' = 全部门店（动态，含以后新增）| 'part' = 指定门店（固定清单）| '' = 未选
   var tnSelStores = {};    // 指定门店模式：已选店 code → 1
-  var tnSelRoles = {};     // 已选门店角色 id → 1（空 = 整店全员：该范围内全员）
+  var tnSelRoles = {};     // 已选门店角色 id → 1（空 = 该范围内全员）
+  var tnRoleNone = false;  // 仅影响展示：主动取消「全部角色」后角色行全部不选（发布对象仍是该范围内全员）
 
   function targetPanelHtml() {
     return '<div class="ts-form-item-inline plain tn-objrow"><span class="ts-form-label-inline">发布对象<i class="tn-req">*</i></span>' +
@@ -503,15 +510,31 @@
     tnRefreshTarget();
   };
   // —— 门店侧角色 = 门店范围 → 角色（粒度止于角色；2026-09-18 用户拍板：无需精确到个人）——
-  // 2026-09-18 二次拍板：删掉多余的「范围内全部角色」行 —— 勾谁发谁，一个都不选 = 该范围内全员
+  // 2026-09-18 三次拍板：角色行上方恢复「全部角色」行（全选更方便）——
+  //   选上 = 该范围内全部角色；取消 = 角色行全部不选（按说明「指定角色」＝所选角色（不选＝全员），发布对象仍是该范围内全员）
   function tnStoreRoles() { return org().roles.filter(function (r) { return r.scope === '门店'; }); }
+  // "未指定角色" = 该范围内全员（界面按"全部选上"展示，与预览、区块说明一致）
+  function tnRoleAllOn() { return !Object.keys(tnSelRoles).length && !tnRoleNone; }
   window.tnRoleTick = function (rid, on) {
     if (panelRo) return;
+    var wasAllOn = tnRoleAllOn();
+    tnRoleNone = false;
     if (on) {
       tnSelRoles[rid] = 1;
-      // 全部角色都选上 = 一个都不选（都表示"整店全员"），不写一堆 RF- 键
+      // 全部角色都选上 = 一个都不选（都表示"该范围内全员"），不写一堆 RF- 键
       if (Object.keys(tnSelRoles).length >= tnStoreRoles().length) tnSelRoles = {};
+    } else if (wasAllOn) {
+      // 当前是"未指定角色"（展示为全部选上）：取消一个角色 = 改为显式选择其余角色
+      tnSelRoles = {};
+      tnStoreRoles().filter(function (r) { return r.id !== rid; }).forEach(function (r) { tnSelRoles[r.id] = 1; });
     } else delete tnSelRoles[rid];
+    tnRoleRender();
+    tnRefreshTarget();
+  };
+  // 「全部角色」行（与总部树的「总部」根行同一形态：勾选框 + 部分选中显示半选）
+  window.tnRoleToggleAll = function (on) {
+    if (panelRo) return;
+    tnSelRoles = {}; tnRoleNone = !on;
     tnRoleRender();
     tnRefreshTarget();
   };
@@ -523,16 +546,24 @@
     var q = qInp ? (qInp.value || '').trim().toLowerCase() : '';
     var roles = org().roles.filter(function (r) { return r.scope === '门店'; });
     var list = q ? roles.filter(function (r) { return ((r.name || '') + ' ' + (r.id || '')).toLowerCase().indexOf(q) >= 0; }) : roles;
-    var html = '';
+    var allOn = tnRoleAllOn();
+    var nOn = Object.keys(tnSelRoles).length;
+    // 占位箭头：让这行与总部「总部」根行左对齐（本行不可展开，故用隐藏占位）
+    var html = '<div class="ann-tnode tn-role-row" style="--lv:0">' +
+      '<span class="tn-tree-caret tn-caret-none"></span>' +
+      '<label class="ann-tlabel"><input type="checkbox" id="tnck-all-roles"' + (allOn ? ' checked' : '') +
+      ' onchange="tnRoleToggleAll(this.checked)"><span class="ann-tlabel-txt"><b>全部角色</b></span></label></div>';
     list.forEach(function (r) {
-      var effOn = !!tnSelRoles[r.id];
-      html += '<div class="ann-tnode tn-role-row" style="--lv:0">' +
+      var effOn = allOn || !!tnSelRoles[r.id];
+      html += '<div class="ann-tnode tn-role-row" style="--lv:1">' +
         '<label class="ann-tlabel"><input type="checkbox"' + (effOn ? ' checked' : '') +
         ' onchange="tnRoleTick(\'' + r.id + '\', this.checked)"><span class="ann-tlabel-txt">' + npEscape(r.name + '(' + r.id + ')') +
         '</span></label></div>';
     });
     if (!list.length) html += '<div class="tn-tt-empty">没有匹配的角色</div>';
     box.innerHTML = html;
+    var cbAll = document.getElementById('tnck-all-roles');
+    if (cbAll && !allOn && nOn) cbAll.indeterminate = true;   // 选了部分角色 → 半选（与总部树口径一致）
   }
   window.tnRoleRender = tnRoleRender;   // 行内 oninput="tnRoleRender()" 只能调全局函数（2026-09-18 补齐：此前未挂 window → 门店角色搜索框输入即 ReferenceError、列表不筛选）
 
@@ -550,9 +581,12 @@
         Object.keys(tnSelRoles).forEach(function (rid) { keys.push('RF-' + rid); });
       }
     }
-    // 总部：一个总部角色都不选 = 总部全员（ORG-HQ，动态覆盖以后新增的总部角色）；选了 = 只发所选总部角色
+    // 总部：「总部」根行选上 = 整个总部（ORG-HQ，动态覆盖以后新增的总部角色）；只选部分总部角色 = 那些角色；
+    //       根行不选 = 不发总部（总部是可选的一侧 —— 2026-09-18 三次拍板）
     var hqRoleKeys = Object.keys(tnTreeChecked).filter(function (k) { return k !== 'ORG-HQ'; });
-    if (!hqRoleKeys.length) keys.push('ORG-HQ');
+    var hqAllKeys = tnChildKeys('ORG-HQ');
+    if (!hqRoleKeys.length) { /* 不发总部：不产生任何总部键 */ }
+    else if (hqAllKeys.length && hqRoleKeys.length >= hqAllKeys.length) keys.push('ORG-HQ');
     else hqRoleKeys.forEach(function (k) { keys.push(k); });
     return keys;
   }
@@ -620,7 +654,7 @@
   }
   function tnInitCheckedFromTarget(target) {
     tnTreeChecked = {};
-    tnSelStores = {}; tnSelRoles = {};
+    tnSelStores = {}; tnSelRoles = {}; tnRoleNone = false;
     tnStoreMode = '';
     if (!target) return;
     function markHq(key) {
@@ -649,7 +683,7 @@
       if ((m = /^RF-(.+)$/.exec(k))) { tnSelRoles[m[1]] = 1; return; }
       if ((m = /^ST-ROLE-(.+)$/.exec(k))) { tnSelRoles[m[1]] = 1; return; }
       if ((m = /^ROLE-(.+)$/.exec(k))) { if (tnRoleScope(m[1]) === '总部') markHq('HQ-ROLE-' + m[1]); return; }
-      if (k === 'ORG-HQ') { return; } // 总部全员 = 不选任何总部角色（总部树里已没有「总部」根行）
+      if (k === 'ORG-HQ') { markHq('ORG-HQ'); return; } // 整个总部 = 选上「总部」根行（= 总部角色全选）
       if ((m = /^HQ-ROLE-(.+)$/.exec(k))) { markHq('HQ-ROLE-' + m[1]); return; }
     });
   }
@@ -675,20 +709,29 @@
   function tnField(label, id, val, opt) {
     opt = opt || {};
     var inp = '<input id="' + id + '" type="' + (opt.type || 'text') + '" value="' + (val !== undefined && val !== null ? npEscape(val) : '') + '"' +
-      (opt.ph ? ' placeholder="' + npEscape(opt.ph) + '"' : '') +
+      (opt.ph && !panelRo ? ' placeholder="' + npEscape(opt.ph) + '"' : '') +
       (opt.maxlen ? ' maxlength="' + opt.maxlen + '"' : '') +
       (panelRo ? ' readonly' : '') + '>';
     return '<div class="ts-form-item-inline plain' + (opt.required ? ' required' : '') + '"><span class="ts-form-label-inline">' + npEscape(label) + '</span>' + inp + '</div>';
   }
   // 行内同框文本域（全行，标签上、文本域在框外下——与技术面板 ts-form-item.full 一致）
-  function tnTextarea(label, id, val) {
+  // opt: { ph: 空值灰字提示语, maxlen: 输入上限，超限不再接受输入 }
+  function tnTextarea(label, id, val, opt) {
+    opt = opt || {};
     return '<div class="ts-form-item full"><label class="ts-form-label">' + npEscape(label) + '</label>' +
-      '<textarea id="' + id + '"' + (panelRo ? ' readonly' : '') + '>' + (val !== undefined && val !== null ? npEscape(val) : '') + '</textarea></div>';
+      '<textarea id="' + id + '"' +
+      (opt.ph && !panelRo ? ' placeholder="' + npEscape(opt.ph) + '"' : '') +
+      (opt.maxlen ? ' maxlength="' + opt.maxlen + '"' : '') +
+      (panelRo ? ' readonly' : '') + '>' + (val !== undefined && val !== null ? npEscape(val) : '') + '</textarea></div>';
   }
   // 单行同框字段（文字嵌框内；公告摘要用：默认占整行，传 span 参数可改为占指定列数，如 'span 3' 与「公告说明」同排）
-  function tnSummaryField(label, id, val, span) {
+  function tnSummaryField(label, id, val, span, opt) {
+    opt = opt || {};
     return '<div class="ts-form-item-inline plain" style="grid-column:' + (span || '1/-1') + '"><span class="ts-form-label-inline">' + npEscape(label) + '</span>' +
-      '<input id="' + id + '" type="text" value="' + (val !== undefined && val !== null ? npEscape(val) : '') + '"' + (panelRo ? ' readonly' : '') + '></div>';
+      '<input id="' + id + '" type="text" value="' + (val !== undefined && val !== null ? npEscape(val) : '') + '"' +
+      (opt.ph && !panelRo ? ' placeholder="' + npEscape(opt.ph) + '"' : '') +
+      (opt.maxlen ? ' maxlength="' + opt.maxlen + '"' : '') +
+      (panelRo ? ' readonly' : '') + '></div>';
   }
   // 行内同框模糊下拉（选项数组 = 值/文案同义，首项"请选择" data-val=""）
   function tnCombo(label, id, opts, val, opt) {
@@ -751,6 +794,32 @@
     var panel = document.getElementById('tn-panel'); if (panel) panel.classList.remove('show');
   };
 
+  // ============ 正文富文本：空值灰字提示 + ≤10000 字符（约500字）上限 ============
+  // 超限口径＝"直接不让再输入"：回滚到上一次合法内容，不弹提示、不改成必填。
+  var TN_BODY_MAX = 10000;
+  function tnBodyLen(el) { return ((el.innerText || el.textContent || '').replace(/\u00a0/g, ' ')).length; }
+  // 空态判定：无文本且无图片/表格等非文本元素 → 显示灰字占位（取 data-ph）
+  function tnEditorSyncEmpty(el) {
+    var hasBlock = !!el.querySelector('img,table,hr,iframe');
+    el.classList.toggle('is-empty', !hasBlock && !(el.textContent || '').trim());
+  }
+  window.tnEditorGuard = function (el) {
+    if (!el || el.getAttribute('contenteditable') !== 'true') return;
+    if (tnBodyLen(el) > TN_BODY_MAX) { el.innerHTML = el._tnLastHtml || ''; tnEditorSyncEmpty(el); return; }
+    el._tnLastHtml = el.innerHTML;
+    tnEditorSyncEmpty(el);
+  };
+  // 面板打开后绑定（新建/编辑用；详情只读不绑、也不显示占位）
+  function tnBindEditorGuard() {
+    var el = document.getElementById('tn-editor');
+    if (!el || el.getAttribute('contenteditable') !== 'true') return;
+    el._tnLastHtml = el.innerHTML;
+    tnEditorSyncEmpty(el);
+    el.addEventListener('input', function () { tnEditorGuard(el); });
+    el.addEventListener('paste', function () { setTimeout(function () { tnEditorGuard(el); }, 0); });
+    el.addEventListener('blur', function () { tnEditorSyncEmpty(el); });
+  }
+
   // 新建/编辑共用的表单体（编辑时 a 传入；新增时 a=null；详情走 tnOpenDetail 只读重建）
   function tnFormHtml(a) {
     var typeOpts = ['TSI', 'TMI'];
@@ -772,9 +841,10 @@
       tnCombo('车系', 'tn-fm-series', serOpts, a ? a.series : '', { required: true }) +
       tnCombo('车型', 'tn-fm-model', modOpts, a ? a.model : '') +
       tnFlField(a) +
-      tnField('故障描述1', 'tn-fm-d1', a ? a.fdesc1 : '') + tnField('故障描述2', 'tn-fm-d2', a ? a.fdesc2 : '') +
-      tnField('故障描述3', 'tn-fm-d3', a ? a.fdesc3 : '') + tnField('故障描述4', 'tn-fm-d4', a ? a.fdesc4 : '') +
-      tnField('故障描述5', 'tn-fm-d5', a ? a.fdesc5 : '') +
+      // 故障描述1~5：空值灰字提示「≤50字」，输入上限 50 字
+      tnField('故障描述1', 'tn-fm-d1', a ? a.fdesc1 : '', { ph: '≤50字', maxlen: 50 }) + tnField('故障描述2', 'tn-fm-d2', a ? a.fdesc2 : '', { ph: '≤50字', maxlen: 50 }) +
+      tnField('故障描述3', 'tn-fm-d3', a ? a.fdesc3 : '', { ph: '≤50字', maxlen: 50 }) + tnField('故障描述4', 'tn-fm-d4', a ? a.fdesc4 : '', { ph: '≤50字', maxlen: 50 }) +
+      tnField('故障描述5', 'tn-fm-d5', a ? a.fdesc5 : '', { ph: '≤50字', maxlen: 50 }) +
       tnField('生产日期开始', 'tn-fm-prod-start', a ? a.prodStart : '', { type: 'date' }) +
       tnField('生产日期结束', 'tn-fm-prod-end', a ? a.prodEnd : '', { type: 'date' }) +
       tnMainPartCodeField(a) +
@@ -784,16 +854,17 @@
       // —— 长文本组：公告说明(下拉，非必填，放前面) 与 公告摘要(单行占3列) 同排；故障条件/维修方案 仍为多行文本域 ——
       '<div class="ts-form-grid col4">' +
       tnCombo('公告说明', 'tn-fm-note', NOTE_TYPES, a ? a.noticeDesc : '') +
-      tnSummaryField('公告摘要', 'tn-fm-summary', a ? a.summary : '', 'span 3') +
-      tnTextarea('故障条件及现象', 'tn-fm-fcond', a ? a.faultCondition : '') +
-      tnTextarea('检查过程及维修方案', 'tn-fm-repair', a ? a.repairPlan : '') +
+      tnSummaryField('公告摘要', 'tn-fm-summary', a ? a.summary : '', 'span 3', { ph: '≤100字', maxlen: 100 }) +
+      tnTextarea('故障条件及现象', 'tn-fm-fcond', a ? a.faultCondition : '', { ph: '≤100字', maxlen: 100 }) +
+      tnTextarea('检查过程及维修方案', 'tn-fm-repair', a ? a.repairPlan : '', { ph: '≤100字', maxlen: 100 }) +
       '</div>' +
       // —— 发布对象组织树（定时发布已移除；正文与附件在最后）——
       (panelRo ? targetPanelRoHtml(a) : targetPanelHtml()) +
       // —— 正文（必填）与附件 ——
       '<div class="ts-form-item full' + (panelRo ? '' : ' required') + ' tn-body-block"><label class="ts-form-label">正文</label>' +
       '<div class="tn-editor">' + (panelRo ? '' : editorToolbarHtml()) +
-      '<div class="tn-editor-body" id="tn-editor"' + (panelRo ? '' : ' contenteditable="true"') + '>' + (a ? a.bodyHtml : '') + '</div></div></div>' +
+      '<div class="tn-editor-body' + (panelRo ? '' : (a && a.bodyHtml ? '' : ' is-empty')) + '" id="tn-editor"' +
+      (panelRo ? '' : ' contenteditable="true" data-ph="≤10000字符（约500字）"') + '>' + (a ? a.bodyHtml : '') + '</div></div></div>' +
       '<div class="tn-attach">' + (panelRo ? '' : '<button class="lt-btn lt-btn-default" onclick="document.getElementById(\'tn-file-input\').click()">上传附件</button>') +
       '<input type="file" id="tn-file-input" multiple style="display:none" onchange="tnHandleFiles(this.files)"><div class="tn-attach-list" id="tn-attach-list"></div></div>' +
       '</div>';
@@ -933,6 +1004,7 @@
     tnSyncStoreInput();
     tnRoleRender();
     tnRefreshTarget();
+    tnBindEditorGuard();
     renderAttach();
   }
   window.tnOpenForm = tnOpenFormPanel;
