@@ -896,6 +896,8 @@
       position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
       width: 14px; height: 14px; color: #999; pointer-events: none;
     }
+    /* 门店选择框：只读但白底可点（选择类控件，非禁输字段，故不套用 readonly 灰底） */
+    .lt-input-wrap.store-pick input[readonly] { background:#fff; color:#333; cursor:pointer; }
     /* 用户线索跟踪冻结列*/
     #page-lead-tracking .lt-table th.col-seq, #page-lead-tracking .lt-table td.col-seq { left: 0; width: 40px; min-width: 40px; max-width: 40px; overflow: hidden; }
     #page-lead-tracking .lt-table th.col-store-code, #page-lead-tracking .lt-table td.col-store-code { left: 40px; width: 80px; min-width: 80px; max-width: 80px; overflow: hidden; }

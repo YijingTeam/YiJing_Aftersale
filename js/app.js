@@ -6776,6 +6776,7 @@ var ppdAllData = [
 var ppdFilteredData = [];
 var ppdCurrentPage = 1;
 var ppdPageSize = NP_DEFAULT_PAGE_SIZE;
+var ppdFilterExpanded = false;
 var ppdInitialized = false;
 
 function ppdRenderTable() {
@@ -6821,6 +6822,8 @@ function ppdApplyFilter() {
   var qCode = (document.getElementById('ppd-flt-code')?.value || '').toLowerCase();
   var qName = (document.getElementById('ppd-flt-name')?.value || '').toLowerCase();
   var qPo = (document.getElementById('ppd-flt-po-no')?.value || '').toLowerCase();
+  var qOem = (document.getElementById('ppd-flt-oem')?.value || '').toLowerCase();
+  var qDno = (document.getElementById('ppd-flt-dno')?.value || '').toLowerCase();
   var qRegion = (document.getElementById('ppd-flt-region')?.value || '').toLowerCase();
   var qDistrict = (document.getElementById('ppd-flt-district')?.value || '').toLowerCase();
   var qStore = (document.getElementById('ppd-flt-store')?.value || '').toLowerCase();
@@ -6830,6 +6833,8 @@ function ppdApplyFilter() {
     if (qCode && r.code.toLowerCase().indexOf(qCode) === -1) return false;
     if (qName && r.name.toLowerCase().indexOf(qName) === -1) return false;
     if (qPo && r.po.toLowerCase().indexOf(qPo) === -1) return false;
+    if (qOem && r.oem.toLowerCase().indexOf(qOem) === -1) return false;
+    if (qDno && r.dno.toLowerCase().indexOf(qDno) === -1) return false;
     if (qRegion && r.region.toLowerCase().indexOf(qRegion) === -1) return false;
     if (qDistrict && r.district.toLowerCase().indexOf(qDistrict) === -1) return false;
     if (qStore && r.store.toLowerCase().indexOf(qStore) === -1) return false;
@@ -6841,7 +6846,7 @@ function ppdApplyFilter() {
   ppdRenderTable();
 }
 function ppdResetFilter() {
-  ['ppd-flt-code','ppd-flt-name','ppd-flt-po-no','ppd-flt-region','ppd-flt-district','ppd-flt-store'].forEach(function(id) {
+  ['ppd-flt-code','ppd-flt-name','ppd-flt-po-no','ppd-flt-oem','ppd-flt-dno','ppd-flt-region','ppd-flt-district','ppd-flt-store'].forEach(function(id) {
     var el = document.getElementById(id); if (el) el.value = '';
   });
   var dtext = document.querySelector('#page-parts-procurement-detail .lt-date-range-text');
@@ -6850,6 +6855,8 @@ function ppdResetFilter() {
   document.getElementById('ppd-flt-date-end') && (document.getElementById('ppd-flt-date-end').value = '');
   ppdFilteredData = [].concat(ppdAllData);
   ppdCurrentPage = 1;
+  ppdFilterExpanded = false;
+  initFilterGrid('ppd-filterGrid', 7);
   ppdRenderTable();
 }
 function ppdExportData() {
@@ -6880,20 +6887,21 @@ function initPpd() {
   }
   ppdFilteredData = [].concat(ppdAllData);
   ppdRenderTable();
+  initFilterGrid('ppd-filterGrid', 7);
 }
 
 // ===== 配件发货及交期 JS =====
 var pdsAllData = [
-  {seq:1,po:'PO202605001',store:'上海浦东店',scode:'SH001',province:'上海',region:'华东',district:'上海',stime:'2026-05-18 10:00:00',hqno:'HQ202605001',hqtime:'2026-05-18 16:00:00',dno:'DH202605001',dtime:'2026-05-22 09:00:00',lno:'SF1234567890',ltime:'2026-05-23 14:00:00',lnode:'已到达上海分拨中心',est:'2026-05-25',signtime:'2026-05-25 15:30:00',pcode:'PJ001',pname:'刹车片（前）'},
-  {seq:2,po:'PO202605002',store:'广州天河店',scode:'GZ001',province:'广东',region:'华南',district:'广州',stime:'2026-05-19 11:00:00',hqno:'HQ202605002',hqtime:'2026-05-19 17:30:00',dno:'DH202605002',dtime:'2026-05-23 10:00:00',lno:'YT9876543210',ltime:'2026-05-24 08:00:00',lnode:'已签收',est:'2026-05-26',signtime:'2026-05-26 10:00:00',pcode:'PJ002',pname:'机油滤清器'},
-  {seq:3,po:'PO202605003',store:'北京朝阳店',scode:'BJ001',province:'北京',region:'华北',district:'北京',stime:'2026-05-20 08:30:00',hqno:'HQ202605003',hqtime:'2026-05-20 15:00:00',dno:'—',dtime:'—',lno:'—',ltime:'—',lnode:'待发货',est:'2026-06-10',signtime:'—',pcode:'PJ003',pname:'空气滤芯'},
-  {seq:4,po:'PO202606001',store:'杭州西湖店',scode:'HZ001',province:'浙江',region:'华东',district:'杭州',stime:'2026-05-30 09:00:00',hqno:'HQ202606001',hqtime:'2026-05-30 16:00:00',dno:'DH202606001',dtime:'2026-06-05 08:00:00',lno:'ZTO202606001',ltime:'2026-06-06 10:00:00',lnode:'运输中-已离开杭州',est:'2026-06-08',signtime:'2026-06-08 14:00:00',pcode:'PJ004',pname:'火花塞'},
-  {seq:5,po:'PO202606002',store:'武汉光谷店',scode:'WH001',province:'湖北',region:'华中',district:'武汉',stime:'2026-06-01 10:30:00',hqno:'HQ202606002',hqtime:'2026-06-01 17:00:00',dno:'DH202606002',dtime:'2026-06-06 09:00:00',lno:'SF202606002',ltime:'2026-06-07 11:00:00',lnode:'运输中-已到达武汉',est:'2026-06-08',signtime:'2026-06-08 16:00:00',pcode:'PJ001',pname:'刹车片（前）'},
-  {seq:6,po:'PO202606003',store:'深圳南山店',scode:'SZ001',province:'广东',region:'华南',district:'深圳',stime:'2026-06-03 13:00:00',hqno:'HQ202606003',hqtime:'2026-06-03 18:00:00',dno:'DH202606003',dtime:'2026-06-08 10:00:00',lno:'YT202606003',ltime:'2026-06-09 09:00:00',lnode:'运输中-已到达深圳',est:'2026-06-10',signtime:'—',pcode:'PJ005',pname:'刹车油'},
-  {seq:7,po:'PO202606004',store:'天津和平店',scode:'TJ001',province:'天津',region:'华北',district:'天津',stime:'2026-06-04 08:00:00',hqno:'HQ202606004',hqtime:'2026-06-04 15:00:00',dno:'DH202606004',dtime:'2026-06-09 11:00:00',lno:'ZTO202606004',ltime:'2026-06-10 08:00:00',lnode:'已签收',est:'2026-06-11',signtime:'2026-06-11 09:30:00',pcode:'PJ006',pname:'空调滤芯'},
-  {seq:8,po:'PO202606005',store:'重庆渝中店',scode:'CQ001',province:'重庆',region:'西南',district:'重庆',stime:'2026-06-06 15:00:00',hqno:'HQ202606005',hqtime:'2026-06-06 19:00:00',dno:'DH202606005',dtime:'2026-06-11 09:00:00',lno:'SF202606005',ltime:'2026-06-12 14:00:00',lnode:'待发货',est:'2026-06-20',signtime:'—',pcode:'PJ007',pname:'变速箱油'},
-  {seq:9,po:'PO202606006',store:'南京建邺店',scode:'NJ001',province:'江苏',region:'华东',district:'南京',stime:'2026-06-07 09:30:00',hqno:'HQ202606006',hqtime:'2026-06-07 17:00:00',dno:'DH202606006',dtime:'2026-06-12 08:00:00',lno:'YT202606006',ltime:'2026-06-13 10:00:00',lnode:'已签收',est:'2026-06-14',signtime:'2026-06-14 15:00:00',pcode:'PJ008',pname:'雨刮器'},
-  {seq:10,po:'PO202607001',store:'上海奕境汽车服务',scode:'DL001',province:'上海',region:'华东',district:'上海',stime:'2026-06-30 10:00:00',hqno:'HQ202607001',hqtime:'2026-06-30 17:30:00',dno:'DH202607001',dtime:'2026-07-03 09:00:00',lno:'SF202607001',ltime:'2026-07-03 14:00:00',lnode:'运输中',est:'2026-07-05',signtime:'—',pcode:'PJ002',pname:'机油滤清器'}
+  {seq:1,po:'PO202605001',store:'上海浦东店',scode:'SH001',province:'上海',region:'华东',district:'上海',stime:'2026-05-18 10:00:00',oem:'OE202605001',hqtime:'2026-05-18 16:00:00',dno:'DH202605001',dtime:'2026-05-22 09:00:00',lno:'SF1234567890',ltime:'2026-05-23 14:00:00',lnode:'已到达上海分拨中心',est:'2026-05-25',signtime:'2026-05-25 15:30:00',pcode:'PJ001',pname:'刹车片（前）'},
+  {seq:2,po:'PO202605002',store:'广州天河店',scode:'GZ001',province:'广东',region:'华南',district:'广州',stime:'2026-05-19 11:00:00',oem:'OE202605002',hqtime:'2026-05-19 17:30:00',dno:'DH202605002',dtime:'2026-05-23 10:00:00',lno:'YT9876543210',ltime:'2026-05-24 08:00:00',lnode:'已签收',est:'2026-05-26',signtime:'2026-05-26 10:00:00',pcode:'PJ002',pname:'机油滤清器'},
+  {seq:3,po:'PO202605003',store:'北京朝阳店',scode:'BJ001',province:'北京',region:'华北',district:'北京',stime:'2026-05-20 08:30:00',oem:'OE202605003',hqtime:'2026-05-20 15:00:00',dno:'—',dtime:'—',lno:'—',ltime:'—',lnode:'待发货',est:'2026-06-10',signtime:'—',pcode:'PJ003',pname:'空气滤芯'},
+  {seq:4,po:'PO202606001',store:'杭州西湖店',scode:'HZ001',province:'浙江',region:'华东',district:'杭州',stime:'2026-05-30 09:00:00',oem:'OE202606001',hqtime:'2026-05-30 16:00:00',dno:'DH202606001',dtime:'2026-06-05 08:00:00',lno:'ZTO202606001',ltime:'2026-06-06 10:00:00',lnode:'运输中-已离开杭州',est:'2026-06-08',signtime:'2026-06-08 14:00:00',pcode:'PJ004',pname:'火花塞'},
+  {seq:5,po:'PO202606002',store:'武汉光谷店',scode:'WH001',province:'湖北',region:'华中',district:'武汉',stime:'2026-06-01 10:30:00',oem:'OE202606002',hqtime:'2026-06-01 17:00:00',dno:'DH202606002',dtime:'2026-06-06 09:00:00',lno:'SF202606002',ltime:'2026-06-07 11:00:00',lnode:'运输中-已到达武汉',est:'2026-06-08',signtime:'2026-06-08 16:00:00',pcode:'PJ001',pname:'刹车片（前）'},
+  {seq:6,po:'PO202606003',store:'深圳南山店',scode:'SZ001',province:'广东',region:'华南',district:'深圳',stime:'2026-06-03 13:00:00',oem:'OE202606003',hqtime:'2026-06-03 18:00:00',dno:'DH202606003',dtime:'2026-06-08 10:00:00',lno:'YT202606003',ltime:'2026-06-09 09:00:00',lnode:'运输中-已到达深圳',est:'2026-06-10',signtime:'—',pcode:'PJ005',pname:'刹车油'},
+  {seq:7,po:'PO202606004',store:'天津和平店',scode:'TJ001',province:'天津',region:'华北',district:'天津',stime:'2026-06-04 08:00:00',oem:'OE202606004',hqtime:'2026-06-04 15:00:00',dno:'DH202606004',dtime:'2026-06-09 11:00:00',lno:'ZTO202606004',ltime:'2026-06-10 08:00:00',lnode:'已签收',est:'2026-06-11',signtime:'2026-06-11 09:30:00',pcode:'PJ006',pname:'空调滤芯'},
+  {seq:8,po:'PO202606005',store:'重庆渝中店',scode:'CQ001',province:'重庆',region:'西南',district:'重庆',stime:'2026-06-06 15:00:00',oem:'OE202606005',hqtime:'2026-06-06 19:00:00',dno:'DH202606005',dtime:'2026-06-11 09:00:00',lno:'SF202606005',ltime:'2026-06-12 14:00:00',lnode:'待发货',est:'2026-06-20',signtime:'—',pcode:'PJ007',pname:'变速箱油'},
+  {seq:9,po:'PO202606006',store:'南京建邺店',scode:'NJ001',province:'江苏',region:'华东',district:'南京',stime:'2026-06-07 09:30:00',oem:'OE202606006',hqtime:'2026-06-07 17:00:00',dno:'DH202606006',dtime:'2026-06-12 08:00:00',lno:'YT202606006',ltime:'2026-06-13 10:00:00',lnode:'已签收',est:'2026-06-14',signtime:'2026-06-14 15:00:00',pcode:'PJ008',pname:'雨刮器'},
+  {seq:10,po:'PO202607001',store:'上海奕境汽车服务',scode:'DL001',province:'上海',region:'华东',district:'上海',stime:'2026-06-30 10:00:00',oem:'OE202607001',hqtime:'2026-06-30 17:30:00',dno:'DH202607001',dtime:'2026-07-03 09:00:00',lno:'SF202607001',ltime:'2026-07-03 14:00:00',lnode:'运输中',est:'2026-07-05',signtime:'—',pcode:'PJ002',pname:'机油滤清器'}
 ];
 rebaseDates(pdsAllData, ['stime','hqtime','dtime','ltime','est','signtime'], 1);
 var pdsFilteredData = [];
@@ -6915,7 +6923,7 @@ function pdsRenderTable() {
       + '<td class="col-store-code">'+r.scode+'</td>'
       + '<td class="col-province">'+r.province+'</td>'
       + '<td class="col-submit-time">'+r.stime+'</td>'
-      + '<td class="col-hq-order-no">'+r.hqno+'</td>'
+      + '<td class="col-oem-order-no">'+r.oem+'</td>'
       + '<td class="col-hq-receive-time">'+r.hqtime+'</td>'
       + '<td class="col-delivery-no">'+r.dno+'</td>'
       + '<td class="col-delivery-time">'+r.dtime+'</td>'
@@ -6946,6 +6954,7 @@ function pdsApplyFilter() {
   var qPo = (document.getElementById('pds-flt-po-no')?.value || '').toLowerCase();
   var qCode = (document.getElementById('pds-flt-code')?.value || '').toLowerCase();
   var qName = (document.getElementById('pds-flt-name')?.value || '').toLowerCase();
+  var qOem = (document.getElementById('pds-flt-oem')?.value || '').toLowerCase();
   var qDno = (document.getElementById('pds-flt-delivery')?.value || '').toLowerCase();
   var qLno = (document.getElementById('pds-flt-logistics')?.value || '').toLowerCase();
   var qSigned = document.getElementById('pds-flt-signed')?.value || '';
@@ -6958,6 +6967,7 @@ function pdsApplyFilter() {
     if (qPo && r.po.toLowerCase().indexOf(qPo) === -1) return false;
     if (qCode && r.pcode.toLowerCase().indexOf(qCode) === -1) return false;
     if (qName && r.pname.toLowerCase().indexOf(qName) === -1) return false;
+    if (qOem && r.oem.toLowerCase().indexOf(qOem) === -1) return false;
     if (qDno && r.dno.toLowerCase().indexOf(qDno) === -1) return false;
     if (qLno && r.lno.toLowerCase().indexOf(qLno) === -1) return false;
     if (qSigned) { var signed = r.signtime !== '—'; if (qSigned === '是' && !signed) return false; if (qSigned === '否' && signed) return false; }
@@ -6972,7 +6982,7 @@ function pdsApplyFilter() {
   pdsRenderTable();
 }
 function pdsResetFilter() {
-  ['pds-flt-po-no','pds-flt-code','pds-flt-name','pds-flt-delivery','pds-flt-logistics','pds-flt-region','pds-flt-district','pds-flt-store'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  ['pds-flt-po-no','pds-flt-code','pds-flt-name','pds-flt-oem','pds-flt-delivery','pds-flt-logistics','pds-flt-region','pds-flt-district','pds-flt-store'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('pds-flt-signed') && (document.getElementById('pds-flt-signed').value = '');
   var dtext = document.querySelector('#page-parts-delivery-schedule .lt-date-range-text');
   if (dtext) dtext.value = '';
@@ -6985,7 +6995,7 @@ function pdsResetFilter() {
 function pdsExportData() {
   var data = pdsFilteredData || [];
   if (!data.length) { alert('当前没有可导出的数据'); return; }
-  npExportExcelRows('配件发货及交期导出', ["序号","采购单号","门店名称","门店编码","省份","单据提交时间","总部订单号","总部接收时间","发货单号","发货单时间","物流单号","物流单时间","物流节点","预计到货时间","签收入库时间"], ["seq","po","store","scode","province","stime","hqno","hqtime","dno","dtime","lno","ltime","lnode","est","signtime"], data);
+  npExportExcelRows('配件发货及交期导出', ["序号","采购单号","门店名称","门店编码","省份","单据提交时间","主机厂订单号","总部接收时间","发货单号","发货单时间","物流单号","物流单时间","物流节点","预计到货时间","签收入库时间"], ["seq","po","store","scode","province","stime","oem","hqtime","dno","dtime","lno","ltime","lnode","est","signtime"], data);
 }
 function pdsToggleFilter() {
   pdsFilterExpanded = !pdsFilterExpanded;
@@ -10276,7 +10286,7 @@ function initOrderCalendar(){
     npFItem('日历名称','<input type="text" id="oc-f-name" placeholder="请输入">') +
     npComboMarkup('order-calendar','oc-f-year','日历年份',['2025','2026']) +
     npSelect('状态','<select id="oc-f-status"><option value="">请选择</option><option>启用</option></select>') +
-    '<div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">门店</span><input type="text" id="oc-flt-store" placeholder="点击选择门店" readonly onclick="msOpenStorePicker(\'oc-flt-store\')"></div></div>';
+    '<div class="lt-filter-item"><div class="lt-input-wrap search store-pick"><span class="lt-filter-prefix">门店</span><input type="text" id="oc-flt-store" placeholder="请选择" readonly onclick="msOpenStorePicker(\'oc-flt-store\')"><svg class="search-icon" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div></div>';
   var toolbar='<button class="lt-btn lt-btn-primary" onclick="ocOpenEdit(-1)">新增</button>';
   var cols=[{t:'序号',w:60,f:function(r,i){return i+1;}},{t:'日历名称',f:function(r){return npEscape(r.name);}},{t:'订单类型',f:function(r){return r.type;}},{t:'日历年份',w:90,f:function(r){return r.year;}},{t:'门店数量',w:90,f:function(r){return '<a href="javascript:void(0)" class="lt-btn-link" onclick="npToast(\'日历视图（演示）：'+r.stores.length+' 家门店，集单时间 '+r.times.join('、')+'\')">'+r.stores.length+'</a>';}},{t:'最近更新时间',w:150,f:function(r){return r.updateTime;}},{t:'状态',w:80,f:function(r){return '<span class="lt-badge ok">启用</span>';}},{t:'操作',w:90,cls:'col-actions sticky',f:function(r){return npRenderActions(['<a href="javascript:void(0)" class="lt-btn-link" onclick="ocOpenEdit('+r.idx+')">编辑</a>']);}}];
   var root=document.getElementById('page-order-calendar');
