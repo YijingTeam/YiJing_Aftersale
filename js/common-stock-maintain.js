@@ -264,7 +264,7 @@ function initCommonStockMaintain() {
   /* 筛选区 */
   var filter = npFItem('配件编码', '<input type="text" id="' + K + '-f-code" placeholder="请输入">') +
     npFItem('配件名称', '<input type="text" id="' + K + '-f-name" placeholder="请输入">') +
-    '<div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">是否有效</span><select id="' + K + '-f-valid"><option value="">全部</option><option value="有效" selected>有效</option><option value="无效">无效</option></select></div></div>' +
+    '<div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">是否有效</span><select id="' + K + '-f-valid"><option value="">请选择</option><option value="有效" selected>有效</option><option value="无效">无效</option></select></div></div>' +
     csComboMarkup(K, K + '-f-car', '适用车系', CSM_CAR_OPTS);
 
   /* 工具栏 */

@@ -124,7 +124,7 @@
       opts.map(function (o) { return '<li data-val="' + npEscape(o) + '" onclick="npComboboxSelect(this)">' + npEscape(o) + '</li>'; }).join('');
     return '<div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative" data-k="tech-notice" data-apply="tnQuery">' +
       '<span class="lt-filter-prefix">' + npEscape(prefix) + '</span>' +
-      '<input type="text" id="' + fieldId + '" placeholder="请选择或输入" onfocus="npComboboxShow(this)" oninput="npComboboxFilter(this)">' +
+      '<input type="text" id="' + fieldId + '" placeholder="请选择" onfocus="npComboboxShow(this)" oninput="npComboboxFilter(this)">' +
       '<span class="cb-arrow" onclick="npComboboxToggle(this)">▼</span>' +
       '<ul class="lt-datalist">' + lis + '</ul></div></div>';
   }
@@ -133,8 +133,7 @@
     var tail = isManage()
       ? tnCmb('tn-f-status', '状态', ['未发布', '已发布'])
       : (tnCmb('tn-f-read', '是否已读', ['已读', '未读']) + tnCmb('tn-f-down', '是否已下载', ['已下载', '未下载']));
-    return '<div class="lt-filter"><div class="lt-filter-grid" id="tech-notice-filterGrid">' +
-      npFItem('公告编号', '<input type="text" id="tn-f-code" placeholder="编号">') +
+    return npFItem('公告编号', '<input type="text" id="tn-f-code" placeholder="编号">') +
       npFItem('公告标题', '<input type="text" id="tn-f-title" placeholder="标题">') +
       tnCmb('tn-f-type', '公告类型', TYPES) +
       tnCmb('tn-f-subtype', '公告子类', SUBTYPES) +
@@ -142,34 +141,60 @@
       npFItem('车型', '<input type="text" id="tn-f-model" placeholder="车型关键字">') +
       tnCmb('tn-f-fl', '故障部位', flNames) +
       tnCmb('tn-f-note', '公告说明', NOTE_TYPES) +
-      tail +
-      '<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="tnQuery()">查询</button><button class="lt-btn lt-btn-default" onclick="tnReset()">重置</button><a href="javascript:void(0)" class="lt-filter-toggle" onclick="npToggleFilter(\'tech-notice\')">﹀ 展开</a></div>' +
-      '</div></div>';
+      tail;
   }
 
   function listToolbarHtml() {
     return (isManage() ? '<button class="lt-btn lt-btn-primary" onclick="tnOpenForm()">新建</button>' : '');
   }
 
+  // 列定义（查看态/发布态列不同）；冻结列靠 cls，宽度由 npTH/npRenderTable 统一输出
+  function tnCols() {
+    var cols = [
+      { t: '序号', w: 50, cls: 'sticky col-seq', f: function (a, i) { return i + 1; } },
+      { t: '公告编号', w: 130, cls: 'sticky col-code', f: function (a) { return npEscape(a.code); } },
+      { t: '公告标题', w: 200, cls: 'sticky col-title', f: function (a) { return npEscape(a.title); } },
+      { t: '公告类型', w: 80, f: function (a) { return npEscape(a.type); } },
+      { t: '公告子类', w: 90, f: function (a) { return npEscape(a.subtype); } },
+      { t: '公告说明', f: function (a) { return npEscape(a.noticeDesc || '—'); } },
+      { t: '车系', w: 90, f: function (a) { return npEscape(a.series); } },
+      { t: '车型', w: 80, f: function (a) { return npEscape(a.model || '—'); } },
+      { t: '故障部位', w: 90, f: function (a) { return npEscape(a.faultLocation); } },
+      { t: '发布人', w: 90, f: function (a) { return npEscape(a.publisher); } },
+      { t: '发布时间', w: 150, f: function (a) { return (a.publishTime || '—'); } }
+    ];
+    if (isManage()) {
+      cols.push({ t: '状态', w: 120, f: function (a) { return tnStatusHtml(a); } });
+    } else {
+      cols.push({ t: '是否已读', w: 70, f: function (a) { return a.readByMe ? '<span class="lt-badge ok">已读</span>' : '<span class="lt-badge off">未读</span>'; } });
+      cols.push({ t: '是否已下载', w: 80, f: function (a) { return a.downloadedByMe ? '<span class="lt-badge ok">已下载</span>' : '<span class="lt-badge off">未下载</span>'; } });
+    }
+    cols.push({ t: '操作', w: 150, cls: 'col-actions', f: function (a) { return npRenderActions(tnRowOps(a)); } });
+    return cols;
+  }
+
+  // 行操作按「单据状态 × 页面态」决定（不渲染灰按钮：不能做的直接不出现）
+  function tnRowOps(a) {
+    var ops = [];
+    if (!isManage()) {
+      ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnOpenDetail(\'' + a.id + '\')">查看</a>');
+    } else if (a.status === '未发布') {
+      ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnOpenForm(\'' + a.id + '\')">编辑</a>');
+      ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnPublish(\'' + a.id + '\')">发布</a>');
+      ops.push('<a href="javascript:void(0)" class="lt-link np-red" onclick="tnDelete(\'' + a.id + '\')">删除</a>');
+    } else if (a.status === '已发布') {
+      ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnOpenDetail(\'' + a.id + '\')">查看</a>');
+      ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnCancelPublish(\'' + a.id + '\')">取消发布</a>');
+      ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnOpenRead(\'' + a.id + '\')">阅读情况</a>');
+    }
+    return ops;
+  }
+
+  // 外壳由 npShell 统一生成（查询区 / 工具栏 / 表格 / 分页 / 展开）
   function buildShell() {
     var root = document.getElementById('page-tech-notice');
     if (!root) return;
-    var cols = [
-      { t: '序号', w: 50, cls: 'sticky col-seq' }, { t: '公告编号', w: 130, cls: 'sticky col-code' }, { t: '公告标题', w: 200, cls: 'sticky col-title' },
-      { t: '公告类型', w: 80 }, { t: '公告子类', w: 90 },
-      { t: '公告说明' }, { t: '车系', w: 90 }, { t: '车型', w: 80 }, { t: '故障部位', w: 90 }, { t: '发布人', w: 90 },
-      { t: '发布时间', w: 150 }
-    ];
-    if (isManage()) { cols.push({ t: '状态', w: 120 }); }
-    else { cols.push({ t: '是否已读', w: 70 }, { t: '是否已下载', w: 80 }); }
-    cols.push({ t: '操作', w: 150, cls: 'col-actions' });
-    root.innerHTML = '<div class="lt-wrap">' + listFilterHtml() +
-      '<div class="lt-list-area"><div class="lt-toolbar"><div class="lt-toolbar-left">' + listToolbarHtml() + '</div></div>' +
-      '<div class="lt-table-wrap"><table class="lt-table"><thead><tr>' + npTH(cols) + '</tr></thead><tbody id="tn-tbody"></tbody></table></div>' +
-      '<div class="lt-pager" id="tn-pager"><div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>' +
-      '<div class="lt-pager-right"><button class="pg-prev">上一页</button><span class="pg-pages"></span><button class="pg-next">下一页</button>' +
-      '<div class="pager-goto">前往 <input type="text"> 页</div><select class="pager-size"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div></div>' +
-      '</div></div>';
+    root.innerHTML = npShell(K, { l2: '系统设置', l3: '技术公告' }, listFilterHtml(), listToolbarHtml(), npTH(tnCols()), 'tn-tbody', 'tn-pager');
   }
 
   function tnQuery() {
@@ -200,53 +225,7 @@
 
   function renderList() {
     var st = NP[K];
-    var tb = document.getElementById('tn-tbody');
-    if (!tb) return;
-    var pages = Math.max(1, Math.ceil(st.filtered.length / st.pageSize));
-    if (st.page > pages) st.page = pages;
-    if (st.page < 1) st.page = 1;
-    var start = (st.page - 1) * st.pageSize;
-    var rows = st.filtered.slice(start, start + st.pageSize);
-    var html = '';
-    rows.forEach(function (a, i) {
-      var ops = [];
-      if (!isManage()) { // 查看态：仅查看
-        ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnOpenDetail(\'' + a.id + '\')">查看</a>');
-      } else if (a.status === '未发布') {
-        // 仅「未发布」可删除（含 曾发布过/草稿 两种）
-        ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnOpenForm(\'' + a.id + '\')">编辑</a>');
-        ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnPublish(\'' + a.id + '\')">发布</a>');
-        ops.push('<a href="javascript:void(0)" class="lt-link np-red" onclick="tnDelete(\'' + a.id + '\')">删除</a>');
-      } else if (a.status === '已发布') {
-        // 已发布不可直接编辑（须先取消发布）；阅读情况仅「已发布」可看
-        ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnOpenDetail(\'' + a.id + '\')">查看</a>');
-        ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnCancelPublish(\'' + a.id + '\')">取消发布</a>');
-        ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="tnOpenRead(\'' + a.id + '\')">阅读情况</a>');
-      }
-      html += '<tr><td class="sticky col-seq">' + (start + i + 1) + '</td>' +
-        '<td class="sticky col-code">' + npEscape(a.code) + '</td>' +
-        '<td class="sticky col-title">' + npEscape(a.title) + '</td>' +
-        '<td>' + npEscape(a.type) + '</td><td>' + npEscape(a.subtype) + '</td><td>' + npEscape(a.noticeDesc || '—') + '</td>' +
-        '<td>' + npEscape(a.series) + '</td><td>' + npEscape(a.model || '—') + '</td><td>' + npEscape(a.faultLocation) + '</td>' +
-        '<td>' + npEscape(a.publisher) + '</td><td>' + (a.publishTime || '—') + '</td>';
-      if (isManage()) {
-        html += '<td>' + tnStatusHtml(a) + '</td>';
-      } else {
-        html += '<td>' + (a.readByMe ? '<span class="lt-badge ok">已读</span>' : '<span class="lt-badge off">未读</span>') + '</td>' +
-          '<td>' + (a.downloadedByMe ? '<span class="lt-badge ok">已下载</span>' : '<span class="lt-badge off">未下载</span>') + '</td>';
-      }
-      html += '<td class="col-actions">' + npRenderActions(ops) + '</td></tr>';
-    });
-    if (!rows.length) html = '<tr><td colspan="' + (isManage() ? 13 : 14) + '" style="text-align:center;color:#999;padding:30px;">暂无数据</td></tr>';
-    tb.innerHTML = html;
-    var pager = document.getElementById('tn-pager');
-    if (pager) {
-      npRenderPager(pager, {
-        page: st.page, pageSize: st.pageSize, total: st.filtered.length,
-        go: function (p) { st.page = p; renderList(); },
-        size: function (v) { st.pageSize = v; st.page = 1; renderList(); }
-      });
-    }
+    npRenderTable(K, 'tn-tbody', 'tn-pager', tnCols(), st.filtered, st);
   }
 
   function tnStatusHtml(a) {
@@ -432,14 +411,14 @@
   var tnRoleNone = false;  // 仅影响展示：主动取消「全部角色」后角色行全部不选（发布对象仍是该范围内全员）
 
   function targetPanelHtml() {
-    return '<div class="ts-form-item-inline plain tn-objrow"><span class="ts-form-label-inline">发布对象<i class="tn-req">*</i></span>' +
+    return '<div class="lt-input-wrap plain tn-objrow"><span class="lt-filter-prefix">发布对象<i class="tn-req">*</i></span>' +
       '<div class="ann-target tn-target-new">' +
       '<div class="tn-tt-sec">' +
       '<div class="tn-tt-head"><b>门店</b>：「全部门店」＝所有门店（含以后新增）；「指定门店」＝所选门店清单。「指定角色」＝所选角色（不选＝全员）</div>' +
       '<div class="tn-tt-storemode"><label class="tn-radio"><input type="radio" name="tn-store-mode" value="all" onchange="tnStoreModeSet(\'all\')"><span>全部门店（含以后新增）</span></label>' +
       '<label class="tn-radio"><input type="radio" name="tn-store-mode" value="part" onchange="tnStoreModeSet(\'part\')"><span>指定门店</span></label></div>' +
       '<div class="tn-tt-part" id="tn-store-part">' +
-      '<div class="ts-form-item-inline plain tn-tt-storeline"><span class="ts-form-label-inline">选择门店</span>' +
+      '<div class="lt-input-wrap plain tn-tt-storeline"><span class="lt-filter-prefix">选择门店</span>' +
       '<input id="tn-fm-stores" type="text" readonly placeholder="点击选择门店（可多选）" onclick="tnPickStores()">' +
       '<span class="tn-tt-storequick"><a href="javascript:void(0)" onclick="tnPartClear()">清除</a></span></div>' +
       '<div class="tn-tt-part-hint" id="tn-store-part-hint"></div>' +
@@ -511,7 +490,8 @@
   };
   // —— 门店侧角色 = 门店范围 → 角色（粒度止于角色；2026-09-18 用户拍板：无需精确到个人）——
   // 2026-09-18 三次拍板：角色行上方恢复「全部角色」行（全选更方便）——
-  //   选上 = 该范围内全部角色；取消 = 角色行全部不选（按说明「指定角色」＝所选角色（不选＝全员），发布对象仍是该范围内全员）
+  //   选上 = 该范围内全部角色；取消 = 角色行全部不选（按两侧统一口径：未指定角色即该范围内全员，发布对象仍是该范围内全员）
+  //   注：此处不重复界面原文，避免与界面文案计数类断言（D7 两侧文案同一句式）相互干扰
   function tnStoreRoles() { return org().roles.filter(function (r) { return r.scope === '门店'; }); }
   // "未指定角色" = 该范围内全员（界面按"全部选上"展示，与预览、区块说明一致）
   function tnRoleAllOn() { return !Object.keys(tnSelRoles).length && !tnRoleNone; }
@@ -603,7 +583,7 @@
   // 发布对象区域 HTML（详情只读）：按发布对象实时解析分组展示（门店/角色+X人、门店+X人…）
   function targetPanelRoHtml(a) {
     var txt = tnTargetInfoOf(a).text;
-    return '<div class="ts-form-item-inline plain" style="grid-column:1/-1"><span class="ts-form-label-inline">发布对象</span>' +
+    return '<div class="lt-input-wrap plain" style="grid-column:1/-1"><span class="lt-filter-prefix">发布对象</span>' +
       '<span style="flex:1;min-width:0;padding:0 10px;font-size:13px;color:#333">' + npEscape(txt) + '</span></div>';
   }
 
@@ -699,8 +679,8 @@
   }
 
   // ============ 侧滑面板（复刻 配件主数据/技术支持 面板：新建/编辑/详情三态同壳） ============
-  // 字段一律 ts 式「行内同框」：<div class="ts-form-item-inline"><span class="ts-form-label-inline">标签</span>控件</div>，
-  // 标签文字嵌在带边框的输入框内左侧、值与控件在框内右侧；下拉全部用公共模糊下拉（.ts-combobox + gtCombobox*）。
+  // 字段一律 ts 式「行内同框」：<div class="lt-input-wrap"><span class="lt-filter-prefix">标签</span>控件</div>，
+  // 标签文字嵌在带边框的输入框内左侧、值与控件在框内右侧；下拉全部用公共模糊下拉（.combobox + gtCombobox*）。
   var panelRo = false; // 详情态 = 只读
 
   function tnFmValue(id) { return ((document.getElementById(id) || {}).value || ''); }
@@ -712,13 +692,13 @@
       (opt.ph && !panelRo ? ' placeholder="' + npEscape(opt.ph) + '"' : '') +
       (opt.maxlen ? ' maxlength="' + opt.maxlen + '"' : '') +
       (panelRo ? ' readonly' : '') + '>';
-    return '<div class="ts-form-item-inline plain' + (opt.required ? ' required' : '') + '"><span class="ts-form-label-inline">' + npEscape(label) + '</span>' + inp + '</div>';
+    return '<div class="lt-input-wrap plain' + (opt.required ? ' required' : '') + '"><span class="lt-filter-prefix">' + npEscape(label) + '</span>' + inp + '</div>';
   }
-  // 行内同框文本域（全行，标签上、文本域在框外下——与技术面板 ts-form-item.full 一致）
+  // 行内同框文本域（全行，标签上、文本域在框外下——与全站 .lt-form-item.full 一致）
   // opt: { ph: 空值灰字提示语, maxlen: 输入上限，超限不再接受输入 }
   function tnTextarea(label, id, val, opt) {
     opt = opt || {};
-    return '<div class="ts-form-item full"><label class="ts-form-label">' + npEscape(label) + '</label>' +
+    return '<div class="lt-form-item full"><label class="lt-form-label">' + npEscape(label) + '</label>' +
       '<textarea id="' + id + '"' +
       (opt.ph && !panelRo ? ' placeholder="' + npEscape(opt.ph) + '"' : '') +
       (opt.maxlen ? ' maxlength="' + opt.maxlen + '"' : '') +
@@ -727,7 +707,7 @@
   // 单行同框字段（文字嵌框内；公告摘要用：默认占整行，传 span 参数可改为占指定列数，如 'span 3' 与「公告说明」同排）
   function tnSummaryField(label, id, val, span, opt) {
     opt = opt || {};
-    return '<div class="ts-form-item-inline plain" style="grid-column:' + (span || '1/-1') + '"><span class="ts-form-label-inline">' + npEscape(label) + '</span>' +
+    return '<div class="lt-input-wrap plain" style="grid-column:' + (span || '1/-1') + '"><span class="lt-filter-prefix">' + npEscape(label) + '</span>' +
       '<input id="' + id + '" type="text" value="' + (val !== undefined && val !== null ? npEscape(val) : '') + '"' +
       (opt.ph && !panelRo ? ' placeholder="' + npEscape(opt.ph) + '"' : '') +
       (opt.maxlen ? ' maxlength="' + opt.maxlen + '"' : '') +
@@ -740,10 +720,10 @@
       (opts || []).map(function (o) { return '<li data-val="' + npEscape(o) + '" onclick="tnFmCbSel(this)">' + npEscape(o) + '</li>'; }).join('');
     var inner = (panelRo
       ? '<input id="' + id + '" value="' + (val ? npEscape(val) : '') + '" readonly>'
-      : '<input id="' + id + '" value="' + (val ? npEscape(val) : '') + '" placeholder="请选择或输入" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)">' +
+      : '<input id="' + id + '" value="' + (val ? npEscape(val) : '') + '" placeholder="请选择" onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this)">' +
         '<span class="cb-arrow" onclick="gtComboboxToggle(this)">▼</span>' +
         '<ul class="lt-datalist">' + lis + '</ul>');
-    return '<div class="ts-form-item-inline ts-combobox' + (opt.required ? ' required' : '') + '" data-cb="' + id + '"><span class="ts-form-label-inline">' + npEscape(label) + '</span>' + inner + '</div>';
+    return '<div class="lt-input-wrap combobox' + (opt.required ? ' required' : '') + '" data-cb="' + id + '"><span class="lt-filter-prefix">' + npEscape(label) + '</span>' + inner + '</div>';
   }
 
   // 车系/车型联动字典：按 csSeed(common-stock) 口径；选车型自动带出车系
@@ -829,9 +809,9 @@
     return '<div class="tn-form">' +
       // —— 基本信息字段组（无标题头；标题占 2 列在编号前；工厂在公告类型前；主故障件两项接在生产日期后补满剩余列）——
       '<div class="ts-form-grid col4">' +
-      '<div class="ts-form-item-inline plain required" style="grid-column:span 2"><span class="ts-form-label-inline">公告标题</span>' +
+      '<div class="lt-input-wrap plain required" style="grid-column:span 2"><span class="lt-filter-prefix">公告标题</span>' +
       '<input id="tn-fm-title" value="' + (a ? npEscape(a.title) : '') + '"' + (panelRo ? ' readonly' : '') + '></div>' +
-      '<div class="ts-form-item-inline plain"><span class="ts-form-label-inline">公告编号</span>' +
+      '<div class="lt-input-wrap plain"><span class="lt-filter-prefix">公告编号</span>' +
       '<input id="tn-fm-code" value="' + (a ? npEscape(a.code) : '') + '" readonly placeholder="保存后自动生成"></div>' +
       tnField('工厂', 'tn-fm-factory', a ? a.factory : '') +
       tnCombo('公告类型', 'tn-fm-type', typeOpts, a ? a.type : '', { required: true }) +
@@ -848,7 +828,7 @@
       tnField('生产日期开始', 'tn-fm-prod-start', a ? a.prodStart : '', { type: 'date' }) +
       tnField('生产日期结束', 'tn-fm-prod-end', a ? a.prodEnd : '', { type: 'date' }) +
       tnMainPartCodeField(a) +
-      '<div class="ts-form-item-inline plain"><span class="ts-form-label-inline">主故障件名称</span>' +
+      '<div class="lt-input-wrap plain"><span class="lt-filter-prefix">主故障件名称</span>' +
       '<input id="tn-fm-mname" value="' + (a ? npEscape(a.mainPartName) : '') + '" readonly placeholder="选择编码后自动带出"></div>' +
       '</div>' +
       // —— 长文本组：公告说明(下拉，非必填，放前面) 与 公告摘要(单行占3列) 同排；故障条件/维修方案 仍为多行文本域 ——
@@ -861,7 +841,7 @@
       // —— 发布对象组织树（定时发布已移除；正文与附件在最后）——
       (panelRo ? targetPanelRoHtml(a) : targetPanelHtml()) +
       // —— 正文（必填）与附件 ——
-      '<div class="ts-form-item full' + (panelRo ? '' : ' required') + ' tn-body-block"><label class="ts-form-label">正文</label>' +
+      '<div class="lt-form-item full' + (panelRo ? '' : ' required') + ' tn-body-block"><label class="lt-form-label">正文</label>' +
       '<div class="tn-editor">' + (panelRo ? '' : editorToolbarHtml()) +
       '<div class="tn-editor-body' + (panelRo ? '' : (a && a.bodyHtml ? '' : ' is-empty')) + '" id="tn-editor"' +
       (panelRo ? '' : ' contenteditable="true" data-ph="≤10000字符（约500字）"') + '>' + (a ? a.bodyHtml : '') + '</div></div></div>' +
@@ -874,13 +854,13 @@
   function tnMainPartCodeField(a) {
     var val = a ? a.mainPartCode : '';
     if (panelRo) {
-      return '<div class="ts-form-item-inline plain"><span class="ts-form-label-inline">主故障件编码</span>' +
+      return '<div class="lt-input-wrap plain"><span class="lt-filter-prefix">主故障件编码</span>' +
         '<input id="tn-fm-mcode" value="' + (val ? npEscape(val) : '') + '" readonly></div>';
     }
-    return '<div class="ts-form-item-inline plain ts-form-search" style="cursor:pointer" onclick="tnPickPartCode()">' +
-      '<span class="ts-form-label-inline">主故障件编码</span>' +
+    return '<div class="lt-input-wrap plain search" style="cursor:pointer" onclick="tnPickPartCode()">' +
+      '<span class="lt-filter-prefix">主故障件编码</span>' +
       '<input id="tn-fm-mcode" readonly placeholder="点击选择配件" style="cursor:pointer">' +
-      '<svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none" onclick="event.stopPropagation();tnPickPartCode()"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>';
+      '<svg class="search-icon" viewBox="0 0 16 16" fill="none" onclick="event.stopPropagation();tnPickPartCode()"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>';
   }
   // 主故障件 选择列表（参照 技术支持 的 mock 配件；选中带出 编码+名称）
   var TN_PART_POOL = [
@@ -912,13 +892,13 @@
   function tnFlField(a) {
     var val = a ? (a.faultLocation || '') : '';
     if (panelRo) {
-      return '<div class="ts-form-item-inline plain required"><span class="ts-form-label-inline">故障部位</span>' +
+      return '<div class="lt-input-wrap plain required"><span class="lt-filter-prefix">故障部位</span>' +
         '<input id="tn-fm-fl" value="' + npEscape(val) + '" readonly></div>';
     }
-    return '<div class="ts-form-item-inline plain required ts-form-search" style="cursor:pointer" onclick="tnPickFaultLocation()">' +
-      '<span class="ts-form-label-inline">故障部位</span>' +
+    return '<div class="lt-input-wrap plain required search" style="cursor:pointer" onclick="tnPickFaultLocation()">' +
+      '<span class="lt-filter-prefix">故障部位</span>' +
       '<input id="tn-fm-fl" value="' + npEscape(val) + '" readonly placeholder="点击选择故障部位" style="cursor:pointer">' +
-      '<svg class="ts-form-search-icon" viewBox="0 0 16 16" fill="none" onclick="event.stopPropagation();tnPickFaultLocation()"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>';
+      '<svg class="search-icon" viewBox="0 0 16 16" fill="none" onclick="event.stopPropagation();tnPickFaultLocation()"><circle cx="7" cy="7" r="5" stroke="#999" stroke-width="1.2"/><path d="M11 11L14.5 14.5" stroke="#999" stroke-width="1.2" stroke-linecap="round"/></svg></div>';
   }
   // 故障部位选择弹窗（单选；样式同全站既有单选弹框——.lt-table + 首列「选」radio + 规范查询行 + 取消/确定）
   // 打开时预选当前已存值；点「确定」才回填字段（名称口径不变）；选项实时取字典启用项。
@@ -1100,7 +1080,7 @@
       // 查询项行：人员 / 是否已下载；查询/重置 放该行最后一列（右对齐）
       '<div class="lt-filter" style="margin-bottom:6px"><div class="lt-filter-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));align-items:center">' +
       npFItem('人员', '<input type="text" id="tn-read-qname" placeholder="姓名/人员ID关键字" oninput="tnReadQuery()">') +
-      npFItem('是否已下载', '<select id="tn-read-qdown" onchange="tnReadQuery()"><option value="">请选择</option><option>已下载</option><option>未下载</option></select>') +
+      npSelect('是否已下载', '<select id="tn-read-qdown" onchange="tnReadQuery()"><option value="">请选择</option><option>已下载</option><option>未下载</option></select>') +
       '<div class="tn-read-querybtns">' +
       '<button class="lt-btn lt-btn-primary" onclick="tnReadQuery()">查询</button>' +
       '<button class="lt-btn lt-btn-default" onclick="tnReadReset()">重置</button>' +
@@ -1182,12 +1162,14 @@
   }
 
   window.initTechNotice = function () {
-    buildShell();
+    buildShell();                       // 统一外壳：查询区/工具栏/表格/分页/展开 由 npShell 生成
     NP[K]._fShow = 7;
     NP[K]._fExp = false;
-    NP[K].query = tnQuery;   // npComboboxSelect 选值后按 data-k 触发 NP[K].query
+    NP[K].query = tnQuery;              // 外壳的「查询」按钮 & npComboboxSelect 选值后都走这里
+    NP[K].reset = tnReset;              // 外壳的「重置」按钮
+    NP[K].render = renderList;
     initFilterGrid('tech-notice-filterGrid', 7);
-    npInitComboboxes();      // combobox 由 buildShell 新建（晚于 showContent 的全局注入），需补一次 × 注入
+    npInitComboboxes();                 // combobox 由 buildShell 新建（晚于 showContent 的全局注入），需补一次 × 注入
     tnQuery();
   };
 

@@ -2,6 +2,7 @@
 // 参考系-故障部位（售后管理 → 参考系 → 故障部位）
 // 故障部位字典：技术公告「故障部位」下拉从这里取（window.FAULT_LOCATIONS）。
 // 权限：总部 + 超级管理员 维护。
+// 2026-10-25 迁到统一外壳（npShell + npRenderTable）：查询区/工具栏/表格/分页/展开全部由外壳生成，本文件不再自建。
 // =====================================================================
 window.FAULT_LOCATIONS = [
   { code: 'FA001', name: '前保险杠', status: '启用' },
@@ -20,56 +21,38 @@ window.FAULT_LOCATIONS = [
 
 (function () {
   var K = 'fault-location';
-  NP[K] = { page: 1, pageSize: 10, filtered: [] };
-  var st = { page: 1, pageSize: 10, filtered: [] };
+  NP[K] = { page: 1, pageSize: 10, allData: [], filtered: [], query: null, reset: null, render: null };
+  var st = NP[K];
   var editingId = null;
 
   function list() { return window.FAULT_LOCATIONS || []; }
+  function val(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+  function v(id, s) { var e = document.getElementById(id); if (e) e.value = s; }
 
-  function buildShell() {
-    var root = document.getElementById('page-fault-location');
-    if (!root) return;
-    var cols = [
-      { t: '序号', w: 50 }, { t: '编码', w: 100 }, { t: '名称' }, { t: '状态', w: 80 }, { t: '操作', w: 130, cls: 'col-actions' }
+  function cols() {
+    return [
+      { t: '序号', w: 50, f: function (r, i) { return i + 1; } },
+      { t: '编码', w: 100, f: function (r) { return npEscape(r.code); } },
+      { t: '名称', f: function (r) { return npEscape(r.name); } },
+      { t: '状态', w: 80, f: function (r) { return r.status === '启用' ? '<span class="lt-badge ok">启用</span>' : '<span class="lt-badge off">停用</span>'; } },
+      {
+        t: '操作', w: 130, cls: 'col-actions', f: function (r) {
+          return npRenderActions([
+            '<a href="javascript:void(0)" class="lt-btn-link" onclick="flEdit(\'' + r.code + '\')">编辑</a>',
+            '<a href="javascript:void(0)" class="lt-link np-red" onclick="flDel(\'' + r.code + '\')">删除</a>'
+          ]);
+        }
+      }
     ];
-    root.innerHTML = '<div class="lt-wrap">' +
-      '<div class="lt-list-area"><div class="lt-toolbar"><div class="lt-toolbar-left">' +
-      '<button class="lt-btn lt-btn-primary" onclick="flAdd()">新增故障部位</button></div></div>' +
-      '<div class="lt-table-wrap"><table class="lt-table"><thead><tr>' + npTH(cols) + '</tr></thead><tbody id="fl-tbody"></tbody></table></div>' +
-      '<div class="lt-pager" id="fl-pager"><div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>' +
-      '<div class="lt-pager-right"><button class="pg-prev">上一页</button><span class="pg-pages"></span><button class="pg-next">下一页</button>' +
-      '<div class="pager-goto">前往 <input type="text"> 页</div><select class="pager-size"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div></div>' +
-      '</div></div>';
   }
 
-  function renderTable() {
-    st.filtered = list().slice();
-    var tb = document.getElementById('fl-tbody');
-    if (!tb) return;
-    var pages = Math.max(1, Math.ceil(st.filtered.length / st.pageSize));
-    if (st.page > pages) st.page = pages;
-    if (st.page < 1) st.page = 1;
-    var start = (st.page - 1) * st.pageSize;
-    var rows = st.filtered.slice(start, start + st.pageSize);
-    var html = '';
-    rows.forEach(function (r, i) {
-      html += '<tr><td>' + (start + i + 1) + '</td><td>' + npEscape(r.code) + '</td><td>' + npEscape(r.name) + '</td>' +
-        '<td>' + (r.status === '启用' ? '<span class="lt-badge ok">启用</span>' : '<span class="lt-badge off">停用</span>') + '</td>' +
-        '<td class="col-actions">' + npRenderActions([
-          '<a href="javascript:void(0)" class="lt-btn-link" onclick="flEdit(\'' + r.code + '\')">编辑</a>',
-          '<a href="javascript:void(0)" class="lt-link np-red" onclick="flDel(\'' + r.code + '\')">删除</a>'
-        ]) + '</td></tr>';
-    });
-    if (!rows.length) html = '<tr><td colspan="5" style="text-align:center;color:#999;padding:30px;">暂无数据</td></tr>';
-    tb.innerHTML = html;
-    var pager = document.getElementById('fl-pager');
-    if (pager) {
-      npRenderPager(pager, {
-        page: st.page, pageSize: st.pageSize, total: st.filtered.length,
-        go: function (p) { st.page = p; renderTable(); },
-        size: function (v) { st.pageSize = v; st.page = 1; renderTable(); }
-      });
-    }
+  function filterHtml() {
+    return npFItem('编码', '<input type="text" id="fl-f-code" placeholder="请输入">') +
+      npFItem('名称', '<input type="text" id="fl-f-name" placeholder="请输入">') +
+      npSelect('状态', '<select id="fl-f-status"><option value="">请选择</option><option value="启用">启用</option><option value="停用">停用</option></select>');
+  }
+  function toolbarHtml() {
+    return '<button class="lt-btn lt-btn-primary" onclick="flAdd()">新增故障部位</button>';
   }
 
   function nextCode() {
@@ -85,7 +68,7 @@ window.FAULT_LOCATIONS = [
       '<div class="pm-form-grid">' +
       npFItem('编码', '<input type="text" id="fl-f-code" value="' + nextCode() + '">') +
       npFItem('名称', '<input type="text" id="fl-f-name" placeholder="请输入故障部位名称">') +
-      npFItem('状态', '<select id="fl-f-status"><option value="启用">启用</option><option value="停用">停用</option></select>') +
+      npSelect('状态', '<select id="fl-f-status"><option value="启用">启用</option><option value="停用">停用</option></select>') +
       '</div>',
       '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="flSave()">保存</button>');
   };
@@ -97,36 +80,59 @@ window.FAULT_LOCATIONS = [
       '<div class="pm-form-grid">' +
       npFItem('编码', '<input type="text" id="fl-f-code" value="' + npEscape(r.code) + '" readonly>') +
       npFItem('名称', '<input type="text" id="fl-f-name" value="' + npEscape(r.name) + '">') +
-      npFItem('状态', '<select id="fl-f-status"><option value="启用"' + (r.status === '启用' ? ' selected' : '') + '>启用</option><option value="停用"' + (r.status === '停用' ? ' selected' : '') + '>停用</option></select>') +
+      npSelect('状态', '<select id="fl-f-status"><option value="启用"' + (r.status === '启用' ? ' selected' : '') + '>启用</option><option value="停用"' + (r.status === '停用' ? ' selected' : '') + '>停用</option></select>') +
       '</div>',
       '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="flSave()">保存</button>');
   };
   window.flSave = function () {
-    var code = (document.getElementById('fl-f-code') || {}).value || '';
-    var name = (document.getElementById('fl-f-name') || {}).value || '';
-    var status = (document.getElementById('fl-f-status') || {}).value || '启用';
-    if (!code || !name) { alert('编码和名称必填'); return; }
+    var code = val('fl-f-code');
+    var name = val('fl-f-name');
+    var status = val('fl-f-status') || '启用';
+    if (!code || !name) { npToast('编码和名称必填'); return; }
     if (editingId) {
       list().forEach(function (r) { if (r.code === editingId) { r.name = name; r.status = status; } });
     } else {
-      if (list().some(function (r) { return r.code === code; })) { alert('编码已存在'); return; }
+      if (list().some(function (r) { return r.code === code; })) { npToast('编码已存在'); return; }
       list().push({ code: code, name: name, status: status });
     }
     npCloseModal();
-    renderTable();
+    st.query();
     npToast('已保存');
   };
   window.flDel = function (code) {
     if (!confirm('确定删除该故障部位？')) return;
     var arr = window.FAULT_LOCATIONS;
     for (var i = 0; i < arr.length; i++) if (arr[i].code === code) { arr.splice(i, 1); break; }
-    renderTable();
+    st.query();
     npToast('已删除');
   };
 
   window.initFaultLocation = function () {
-    buildShell();
-    renderTable();
+    var root = document.getElementById('page-fault-location');
+    if (!root) return;
+    st.allData = list().slice();
+    root.innerHTML = npShell(K, { l2: '参考系', l3: '故障部位' }, filterHtml(), toolbarHtml(), npTH(cols()), 'fl-tbody', 'fl-pager');
+    initFilterGrid(K + '-filterGrid', 7); st._fShow = 7; st._fExp = false;
+
+    st.query = function () {
+      var c = val('fl-f-code').trim();
+      var n = val('fl-f-name').trim();
+      var s = val('fl-f-status');
+      st.allData = list().slice();
+      st.filtered = st.allData.filter(function (r) {
+        return (c === '' || r.code.indexOf(c) >= 0) && (n === '' || r.name.indexOf(n) >= 0) && (s === '' || r.status === s);
+      });
+      st.page = 1;
+      st.render();
+    };
+    st.reset = function () {
+      v('fl-f-code', ''); v('fl-f-name', ''); v('fl-f-status', '');
+      st.query();
+    };
+    st.render = function () {
+      npRenderTable(K, 'fl-tbody', 'fl-pager', cols(), st.filtered, st);
+    };
+    st.query();
   };
 
   npRegisterModuleInit('fault-location', function () { initFaultLocation(); });

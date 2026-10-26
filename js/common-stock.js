@@ -36,7 +36,7 @@ function csComboMarkup(K, fieldId, prefix, opts) {
   // .lt-filter-item > .lt-input-wrap.combobox(含 lt-filter-prefix + input + cb-arrow + lt-datalist)，不套 npFItem（避免双层 .lt-input-wrap 边框）
   return '<div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative" data-k="' + K + '">' +
     '<span class="lt-filter-prefix">' + prefix + '</span>' +
-    '<input type="text" id="' + fieldId + '" placeholder="请选择或输入" onfocus="csComboboxShow(this)" oninput="csComboboxFilter(this)">' +
+    '<input type="text" id="' + fieldId + '" placeholder="请选择" onfocus="csComboboxShow(this)" oninput="csComboboxFilter(this)">' +
     '<span class="cb-arrow" onclick="csComboboxToggle(this)">▼</span>' +
     '<ul class="lt-datalist">' + lis + '</ul></div></div>';
 }
@@ -124,7 +124,7 @@ function csInitPanel(K, tb, pg, isPending) {
     npFItem('配件名称', '<input type="text" id="' + K + '-f-name" placeholder="请输入">') +
     csComboMarkup(K, K + '-f-cat', '配件类别', CS_CAT_OPTS) +
     csComboMarkup(K, K + '-f-attr', '配件销售属性', CS_ATTR_OPTS) +
-    '<div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">是否有效</span><select id="' + K + '-f-valid"><option value="">全部</option><option value="有效" selected>有效</option><option value="无效">无效</option></select></div></div>' +
+    '<div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">是否有效</span><select id="' + K + '-f-valid"><option value="">请选择</option><option value="有效" selected>有效</option><option value="无效">无效</option></select></div></div>' +
     csComboMarkup(K, K + '-f-region', '大区', CS_REGION_OPTS) +
     csComboMarkup(K, K + '-f-district', '小区', CS_DISTRICT_OPTS) +
     npFItem('门店', '<input type="text" id="' + K + '-f-store" placeholder="请输入">');
@@ -179,6 +179,10 @@ function initCommonStock() {
   csInitPanel('common-stock-built', 'cs-built-tbody', 'cs-built-pager', false);
   csInitPanel('common-stock-pending', 'cs-pending-tbody', 'cs-pending-pager', true);
   csApplyStoreDefault();
+  // 本页查询区有 4 个 combobox（配件类别/配件销售属性/大区/小区），DOM 是本函数刚拼出来的，
+  // showContent 里那次全局注入跑在 npInitModule 之前、扫不到 → 这里补一次，× 才会出现。
+  // 放在 csApplyStoreDefault 之后：那时默认值已写入，注入时 sync() 就能正确显示 ×。
+  if (typeof npInitComboboxes === 'function') npInitComboboxes();
 }
 
 function csApplyStoreDefault() {

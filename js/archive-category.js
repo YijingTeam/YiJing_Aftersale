@@ -1,6 +1,8 @@
 /* =========== 归档分类配置（总部，依据《关单归档树.xlsx》3层树） =========== */
-/* 依赖 app.js 中的通用 helper：npOpenModal / npCloseModal / npFItem / npTH / npRenderTable / npEscape / npToast */
-var ARC = { tree: [], view: 'tree', expanded: {}, search: '', maxLevel: 3 };
+/* 依赖 app.js 中的通用 helper：npShell / npRenderTable / npOpenModal / npFItem / npSelect / npTH / npEscape / npToast */
+/* 2026-10-25 迁到统一外壳：查询区 / 工具栏 / 表格区 / 分页 / 展开 全部由 npShell 生成，本文件不再自己拼外壳。
+   树形视图把「表格区」的内容替换成树，平铺视图恢复表格并调用 npRenderTable（分页仍由外壳那份负责）。 */
+var ARC = { tree: [], view: 'tree', expanded: {}, maxLevel: 3 };
 /* 种子数据：每行 = [1级, 2级, 3级]（依据《关单归档树.xlsx》3层；原 4/5 列"备注"为一次性维护痕迹，按 Q2 丢弃；Q3 增加 创建/更新时间） */
 var ARC_SEED = [
   ['无效工单', '', ''],
@@ -126,77 +128,105 @@ function arcFlatten(arr, lv1, lv2, lv3) {
   return out;
 }
 
+/* ---------- 页面骨架（统一外壳） ---------- */
+function arcVal(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+function arcSet(id, v) { var e = document.getElementById(id); if (e) e.value = v; }
+
+function arcCols() {
+  return [
+    { t: '序号', w: 60, f: function (r, i) { return i + 1; } },
+    { t: '层级1', f: function (r) { return npEscape(r.lv1); } },
+    { t: '层级2', f: function (r) { return npEscape(r.lv2); } },
+    { t: '层级3', f: function (r) { return npEscape(r.lv3); } },
+    { t: '创建时间', w: 150, f: function (r) { return npEscape(r.createdAt || ''); } },
+    { t: '更新时间', w: 150, f: function (r) { return npEscape(r.updatedAt || ''); } },
+    /* 操作列放最后一列：.col-actions 是 sticky right:0，放中间会盖住后面的列（2026-10-25 修） */
+    {
+      t: '操作', w: 170, cls: 'col-actions', f: function (r) {
+        var childBtn = (r.level < ARC.maxLevel)
+          ? '<a href="javascript:void(0)" class="lt-link" onclick="arcOpenAdd(\'' + r.id + '\')">+子级</a>'
+          : '<a href="javascript:void(0)" class="lt-link arc-disabled" onclick="arcMaxLevelTip()">+子级</a>';
+        return childBtn + ' <a href="javascript:void(0)" class="lt-link" onclick="arcOpenEdit(\'' + r.id + '\')">编辑</a> <a href="javascript:void(0)" class="lt-link np-red" onclick="arcDelete(\'' + r.id + '\')">删除</a>';
+      }
+    }
+  ];
+}
+function arcFilterHtml() {
+  return npFItem('分类名称', '<input type="text" id="arc-f-name" placeholder="请输入">') +
+    npSelect('层级', '<select id="arc-f-level"><option value="">请选择</option><option value="1级">1级</option><option value="2级">2级</option><option value="3级">3级</option></select>');
+}
+function arcToolbarHtml() {
+  return '<button class="lt-btn lt-btn-primary" onclick="arcOpenAdd(-1)">新增根分类</button>' +
+    '<button class="lt-btn lt-btn-default" onclick="arcImport()">导入</button>' +
+    '<button class="lt-btn lt-btn-default" onclick="arcExport()">导出</button>' +
+    '<button class="lt-btn lt-btn-default" onclick="arcExpandAll()">展开全部</button>' +
+    '<button class="lt-btn lt-btn-default" onclick="arcCollapseAll()">收起全部</button>' +
+    '<button class="lt-btn lt-btn-default" id="arc-view-btn" onclick="arcSwitchView()">切换为平铺表</button>';
+}
+function arcWrapEl() {
+  var root = document.getElementById('page-archive-category');
+  return root ? root.querySelector('.lt-table-wrap') : null;
+}
+function arcPagerEl() { return document.getElementById('arc-pager'); }
+
 function initArchiveCategory() {
   ARC.tree = buildArcTreeFromSeed();
   ARC.view = 'tree';
   ARC.expanded = {};
   ARC.tree.forEach(function (n) { ARC.expanded[n.id] = true; });
-  if (!NP['archive-category']) NP['archive-category'] = { page: 1, pageSize: 10, filtered: [], render: null };
-  NP['archive-category'].page = 1;
+  var K = 'archive-category';
+  if (!NP[K]) NP[K] = { page: 1, pageSize: 10, filtered: [], render: null, query: null, reset: null };
+  var st = NP[K];
+  st.page = 1;
 
   var root = document.getElementById('page-archive-category');
-  root.innerHTML =
-    '<div class="lt-wrap">' +
-      '<div class="lt-filter"><div class="lt-filter-grid" id="arc-filterGrid">' +
-        npFItem('分类名称', '<input type="text" id="arc-f-name" class="np-input" placeholder="请输入">') +
-        npFItem('层级', '<select id="arc-f-level" class="np-input"><option value="">全部</option><option>1级</option><option>2级</option><option>3级</option></select>') +
-        '<div class="lt-filter-footer"><button class="lt-btn-filter primary" onclick="arcSearch()">查询</button><button class="lt-btn-filter default" onclick="arcReset()">重置</button><a href="javascript:void(0)" class="lt-filter-toggle" onclick="arcToggleFilter()">收起</a></div>' +
-      '</div></div>' +
-      '<div class="lt-list-area">' +
-        '<div class="lt-toolbar"><div class="lt-toolbar-left">' +
-          '<button class="lt-btn lt-btn-primary" onclick="arcOpenAdd(-1)">+ 新增根分类</button>' +
-          '<button class="lt-btn lt-btn-default" onclick="arcImport()">导入</button>' +
-          '<button class="lt-btn lt-btn-default" onclick="arcExport()">导出</button>' +
-          '<button class="lt-btn lt-btn-default" onclick="arcExpandAll()">展开全部</button>' +
-          '<button class="lt-btn lt-btn-default" onclick="arcCollapseAll()">收起全部</button>' +
-          '<button class="lt-btn lt-btn-default" id="arc-view-btn" onclick="arcSwitchView()">切换为平铺表</button>' +
-        '</div></div>' +
-        '<div class="lt-table-wrap" style="background:#fff;"><div id="arc-view"></div></div>' +
-        '<div class="lt-pager" id="arc-pager"></div>' +
-      '</div></div>';
-  arcSearch();
+  if (!root) return;
+  root.innerHTML = npShell(K, { l2: '参考系', l3: '归档分类配置' }, arcFilterHtml(), arcToolbarHtml(), npTH(arcCols()), 'arc-tbody', 'arc-pager');
+  initFilterGrid(K + '-filterGrid', 7); st._fShow = 7; st._fExp = false;
+
+  st.query = function () {
+    var hasFilter = [arcVal('arc-f-name'), arcVal('arc-f-level')].some(function (v) { return v !== ''; });
+    if (hasFilter) {
+      (function markMatch(arr) {
+        arr.forEach(function (n) {
+          var hit = arcMatch(n);
+          var childHit = markMatch(n.children);
+          if (hit || childHit) ARC.expanded[n.id] = true;
+          return hit || childHit;
+        });
+      })(ARC.tree);
+    }
+    st.page = 1;
+    arcRender();
+  };
+  st.reset = function () {
+    arcSet('arc-f-name', ''); arcSet('arc-f-level', '');
+    ARC.expanded = {};
+    ARC.tree.forEach(function (n) { ARC.expanded[n.id] = true; });
+    st.page = 1;
+    arcRender();
+  };
+  st.render = function () { npRenderTable(K, 'arc-tbody', 'arc-pager', arcCols(), st.filtered, st); };
+
+  arcRender();
 }
 
-function arcToggleFilter() { var g = document.getElementById('arc-filterGrid'); if (!g) return; g.style.display = (g.style.display === 'none') ? '' : 'none'; }
-
 function arcMatch(node) {
-  var name = (document.getElementById('arc-f-name') || {}).value || '';
-  var lv = (document.getElementById('arc-f-level') || {}).value || '';
+  var name = arcVal('arc-f-name');
+  var lv = arcVal('arc-f-level');
   if (name && node.name.indexOf(name) < 0) return false;
   if (lv && lv !== node.level + '级') return false;
   return true;
 }
 
-function arcSearch() {
-  var hasFilter = [document.getElementById('arc-f-name'), document.getElementById('arc-f-level')].some(function (e) { return e && e.value !== ''; });
-  if (hasFilter) {
-    (function markMatch(arr) {
-      arr.forEach(function (n) {
-        var hit = arcMatch(n);
-        var childHit = markMatch(n.children);
-        if (hit || childHit) ARC.expanded[n.id] = true;
-        return hit || childHit;
-      });
-    })(ARC.tree);
-  }
-  arcRender();
-}
-
-function arcReset() {
-  ['arc-f-name', 'arc-f-level'].forEach(function (id) { var e = document.getElementById(id); if (e) e.value = ''; });
-  ARC.expanded = {};
-  ARC.tree.forEach(function (n) { ARC.expanded[n.id] = true; });
-  arcRender();
-}
-
 function arcRender() {
-  var box = document.getElementById('arc-view');
-  if (!box) return;
   if (ARC.view === 'tree') arcRenderTree(); else arcRenderFlat();
 }
 
 function arcRenderTree() {
-  var box = document.getElementById('arc-view');
+  var wrap = arcWrapEl();
+  if (!wrap) return;
+  var pg = arcPagerEl(); if (pg) pg.style.display = 'none';
   function rowHtml(node) {
     var hasChild = node.children && node.children.length > 0;
     var expanded = !!ARC.expanded[node.id];
@@ -223,18 +253,18 @@ function arcRenderTree() {
     return html;
   }
   var html = '<div class="arc-tree">';
-  if (ARC.tree.length === 0) html += '<div class="arc-empty">暂无数据，点击「+ 新增根分类」添加</div>';
+  if (ARC.tree.length === 0) html += '<div class="arc-empty">暂无数据，点击「新增根分类」添加</div>';
   ARC.tree.forEach(function (n) { html += rowHtml(n); });
   html += '</div>';
-  var pg = document.getElementById('arc-pager'); if (pg) pg.style.display = 'none';
-  box.innerHTML = html;
+  wrap.innerHTML = html;
 }
 
 function arcRenderFlat() {
   var K = 'archive-category';
+  var st = NP[K];
   var data = arcFlatten(ARC.tree, '', '', '');
-  var name = (document.getElementById('arc-f-name') || {}).value || '';
-  var lv = (document.getElementById('arc-f-level') || {}).value || '';
+  var name = arcVal('arc-f-name');
+  var lv = arcVal('arc-f-level');
   data = data.filter(function (r) {
     if (name && (r.lv1 + r.lv2 + r.lv3).indexOf(name) < 0) return false;
     if (lv) {
@@ -243,27 +273,13 @@ function arcRenderFlat() {
     }
     return true;
   });
-  var cols = [
-    { t: '序号', w: 60, f: function (r, i) { return i + 1; } },
-    { t: '操作', w: 170, f: function (r) {
-      var childBtn = (r.level < ARC.maxLevel)
-        ? '<a href="javascript:void(0)" class="lt-link" onclick="arcOpenAdd(\'' + r.id + '\')">+子级</a>'
-        : '<a href="javascript:void(0)" class="lt-link arc-disabled" onclick="arcMaxLevelTip()">+子级</a>';
-      return childBtn + ' <a href="javascript:void(0)" class="lt-link" onclick="arcOpenEdit(\'' + r.id + '\')">编辑</a> <a href="javascript:void(0)" class="lt-link np-red" onclick="arcDelete(\'' + r.id + '\')">删除</a>';
-    } },
-    { t: '层级1', f: function (r) { return npEscape(r.lv1); } },
-    { t: '层级2', f: function (r) { return npEscape(r.lv2); } },
-    { t: '层级3', f: function (r) { return npEscape(r.lv3); } },
-    { t: '创建时间', w: 130, f: function (r) { return npEscape(r.createdAt || ''); } },
-    { t: '更新时间', w: 130, f: function (r) { return npEscape(r.updatedAt || ''); } }
-  ];
-  NP[K].filtered = data;
-  NP[K].page = 1;
-  NP[K].render = function () { npRenderTable(K, 'arc-tbody', 'arc-pager', cols, NP[K].filtered, NP[K]); };
-  var box = document.getElementById('arc-view');
-  var pg = document.getElementById('arc-pager'); if (pg) pg.style.display = '';
-  box.innerHTML = '<table class="lt-table"><thead><tr>' + npTH(cols) + '</tr></thead><tbody id="arc-tbody"></tbody></table>';
-  NP[K].render();
+  st.filtered = data;
+  st.page = 1;
+  var wrap = arcWrapEl();
+  if (!wrap) return;
+  var pg = arcPagerEl(); if (pg) pg.style.display = '';
+  wrap.innerHTML = '<table class="lt-table"><thead><tr>' + npTH(arcCols()) + '</tr></thead><tbody id="arc-tbody"></tbody></table>';
+  st.render();
 }
 
 function arcToggle(id) { ARC.expanded[id] = !ARC.expanded[id]; arcRenderTree(); }
@@ -278,12 +294,11 @@ function arcSwitchView() {
 function arcMaxLevelTip() { npToast('已达最大层级（' + ARC.maxLevel + '级），不能再新增子级'); }
 
 function arcOpenAdd(parentId) {
-  var parent = (parentId && parentId !== -1) ? arcFindById(ARC.tree, parentId) : null;
+  var parent = (parentId && parentId !== -1 && parentId !== '-1') ? arcFindById(ARC.tree, parentId) : null;
   var pathTxt = parent ? arcPathName(ARC.tree, parent.id) : '（无，作为一级分类）';
-  var html =
-    '<div class="np-form">' +
-      '<div class="np-field"><label class="np-req">分类名称</label><input id="arc-m-name" class="np-input" placeholder="请输入分类名称"></div>' +
-      '<div class="np-field"><label>上级分类</label><span class="arc-parent-path">' + npEscape(pathTxt) + '</span></div>' +
+  var html = '<div class="pm-form-grid">' +
+    npFItem('分类名称', '<input type="text" id="arc-m-name" placeholder="请输入分类名称">') +
+    npFItem('上级分类', '<input type="text" class="arc-parent-path" value="' + npEscape(pathTxt) + '" readonly>') +
     '</div>';
   var pid = parent ? ('\'' + parent.id + '\'') : 'null';
   npOpenModal(parent ? '新增子分类' : '新增根分类', html,
@@ -295,12 +310,11 @@ function arcOpenEdit(id) {
   var node = arcFindById(ARC.tree, id);
   if (!node) { npToast('未找到节点'); return; }
   var pathTxt = node.parentId ? arcPathName(ARC.tree, node.parentId) : '（无，作为一级分类）';
-  var html =
-    '<div class="np-form">' +
-      '<div class="np-field"><label class="np-req">分类名称</label><input id="arc-m-name" class="np-input" value="' + npEscape(node.name) + '"></div>' +
-      '<div class="np-field"><label>上级分类</label><span class="arc-parent-path">' + npEscape(pathTxt) + '</span></div>' +
-      '<div class="np-field"><label>创建时间</label><span class="arc-parent-path">' + npEscape(node.createdAt || '') + '</span></div>' +
-      '<div class="np-field"><label>更新时间</label><span class="arc-parent-path">' + npEscape(node.updatedAt || '') + '</span></div>' +
+  var html = '<div class="pm-form-grid">' +
+    npFItem('分类名称', '<input type="text" id="arc-m-name" value="' + npEscape(node.name) + '">') +
+    npFItem('上级分类', '<input type="text" class="arc-parent-path" value="' + npEscape(pathTxt) + '" readonly>') +
+    npFItem('创建时间', '<input type="text" class="arc-parent-path" value="' + npEscape(node.createdAt || '') + '" readonly>') +
+    npFItem('更新时间', '<input type="text" class="arc-parent-path" value="' + npEscape(node.updatedAt || '') + '" readonly>') +
     '</div>';
   npOpenModal('编辑分类', html,
     '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button><button class="lt-btn lt-btn-primary" onclick="arcSave(\'' + id + '\', null)">确定</button>');
@@ -308,7 +322,7 @@ function arcOpenEdit(id) {
 
 /* id === -1 表示新增：parentId 有值=子级，null=根；否则为编辑已有节点（id 为字符串） */
 function arcSave(id, parentId) {
-  var name = (document.getElementById('arc-m-name') || {}).value || '';
+  var name = arcVal('arc-m-name');
   if (!name || !name.trim()) { npToast('请填写分类名称'); return; }
   name = name.trim();
   var now = arcNowStr();
@@ -348,34 +362,15 @@ function arcDelete(id) {
   npToast('已删除');
 }
 
+/* E9：导出走全站公共组件（不再自造 Blob 下载） */
 function arcExport() {
   var rows = arcFlatten(ARC.tree, '', '', '');
-  var header = ['1级', '2级', '3级', '创建时间', '更新时间'];
-  var lines = [header.join(',')];
-  rows.forEach(function (r) {
-    lines.push([r.lv1, r.lv2, r.lv3, r.createdAt, r.updatedAt].map(function (v) {
-      v = (v === null || v === undefined) ? '' : String(v);
-      if (/[",\n]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
-      return v;
-    }).join(','));
-  });
-  var csv = '﻿' + lines.join('\r\n');
-  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = '归档分类配置_' + new Date().toISOString().slice(0, 10) + '.csv';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-  npToast('已导出 CSV');
+  if (!rows.length) { npToast('当前没有可导出的数据'); return; }
+  npExportExcelRowsRaw('归档分类配置', ['1级', '2级', '3级', '创建时间', '更新时间'],
+    rows.map(function (r) { return [r.lv1, r.lv2, r.lv3, r.createdAt, r.updatedAt]; }));
 }
-
 function arcDownloadTemplate() {
-  var header = ['1级', '2级', '3级', '创建时间', '更新时间'];
-  var lines = [header.join(',')];
-  var blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '归档分类_导入模板.csv';
-  a.click();
+  npExportExcelRowsRaw('归档分类_导入模板', ['1级', '2级', '3级', '创建时间', '更新时间'], []);
 }
 
 function arcDoImport(file) {
@@ -385,7 +380,7 @@ function arcDoImport(file) {
     try {
       var text = e.target.result;
       var lines = text.replace(/^﻿/, '').split(/\r?\n/).filter(function (l) { return l.trim() !== ''; });
-        if (lines.length < 2) { npToast('文件无数据'); return; }
+      if (lines.length < 2) { npToast('文件无数据'); return; }
       lines.slice(1).forEach(function (line) {
         var cells = line.split(',');
         var lv1 = (cells[0] || '').trim(), lv2 = (cells[1] || '').trim(), lv3 = (cells[2] || '').trim(), createdAt = (cells[3] || '').trim(), updatedAt = (cells[4] || '').trim();
@@ -437,3 +432,5 @@ function arcImport() {
     });
   }, 50);
 }
+
+npRegisterModuleInit('archive-category', function () { initArchiveCategory(); });

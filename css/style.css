@@ -550,7 +550,7 @@
     .lt-filter-item { display: flex; }
     .lt-filter-prefix { flex-shrink: 0; color: #333; font-size: 12px; padding: 0 8px 0 10px; white-space: nowrap; display: flex; align-items: center; }
     .lt-input-wrap { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; background: #fff; position: relative; width: 100%; }
-    .lt-input-wrap input,
+    .lt-input-wrap input:not([type=checkbox]):not([type=radio]),
     .lt-input-wrap select {
       height: 32px;
       flex: 1;
@@ -566,7 +566,10 @@
     }
     .lt-input-wrap input[readonly] { background:#f5f7fa; color:#999; cursor:not-allowed; }
     .lt-input-wrap:focus-within { border-color: #861B2F; }
-    .lt-input-wrap::after {
+    /* 下拉箭头：只属于真下拉 —— 容器内含 <select> 才有箭头（2026-10-24 组件唯一化后唯一判定口径）。
+       历史缺陷：原为「容器默认有箭头 + 给 .plain/.search/.combobox 逐个 display:none」的黑名单机制，
+       新增变体时漏关一条就会造成「箭头 + 放大镜」并存（预收款车主框 / 配件销售单客户框即此因）。 */
+    .lt-input-wrap:has(select)::after {
       content: '';
       position: absolute;
       right: 10px;
@@ -578,8 +581,32 @@
       transform: translateY(-50%) rotate(45deg);
       pointer-events: none;
     }
-    .lt-input-wrap.plain::after { display: none; }
-    .lt-input-wrap.plain input { padding-right: 10px; cursor: text; }
+    /* ---------- 单行内嵌标签控件：变体清单（唯一组件；规范 §3.1 已登记） ----------
+       plain    文本框/只读展示：无箭头、无图标
+       search   关键词搜索：右侧放大镜（SVG，不可点）
+       pick     选择器：右侧放大镜（可点，弹选择弹窗）
+       combobox 模糊下拉：右下箭头 + 下拉列表 + 清除 ×
+       required 必填：标签前红星
+       full     跨满整行（表单栅格用）
+       箭头：见上一条，只有真 <select> 才有 ---------------------------------------------------- */
+    .lt-input-wrap input:not([type=checkbox]):not([type=radio]):not([readonly]) { cursor: text; }
+    /* required：必填 —— 标签前红星（表单与查询区共用同一条） */
+    .lt-input-wrap.required .lt-filter-prefix::before { content:'*'; color:#861B2F; margin-right:2px; }
+    .lt-input-wrap input[type=checkbox],
+    .lt-input-wrap input[type=radio] { width:14px; height:14px; flex:none; margin:0; border:1px solid #999; border-radius:2px; background:#fff; accent-color:#861B2F; appearance:auto; -webkit-appearance:auto; }
+    .lt-input-wrap input.js-lock,
+    .lt-input-wrap input.pm-readonly { background:#f5f7fa; color:#999; cursor:not-allowed; }
+    .lt-input-wrap.full { grid-column:1/-1; }
+    .lt-input-wrap.pick { cursor:pointer; }
+    .lt-input-wrap.pick input { padding-right:30px; }
+    /* 选择类控件白底可点，不套 readonly 灰底（与 .store-pick 同一口径：它不是禁输字段） */
+    .lt-input-wrap.pick input[readonly] { background:#fff; color:#333; cursor:pointer; }
+    .lt-input-wrap.pick .search-icon { pointer-events:auto; cursor:pointer; }
+    /* search 与 pick 共用同一个图标类 */
+    .search-icon { position:absolute; right:8px; top:50%; transform:translateY(-50%); width:14px; height:14px; pointer-events:none; }
+    /* 只读框不吃 plain 的可编辑态（光标保持全站只读的 not-allowed），仍交回 .lt-input-wrap input[readonly] 统一灰显 */
+    .lt-input-wrap.plain input { padding-right: 10px; }
+    .lt-input-wrap.plain input:not([readonly]) { cursor: text; }
     /* 勾选类筛选项（仅追加项等）——无边框，checkbox + 文字，与主筛选项对齐 */
     .lt-filter-item .lt-check,
     .rs-checks .lt-check {
@@ -598,6 +625,32 @@
       margin: 0;
       cursor: pointer;
       accent-color: #861B2F;
+    }
+    /* 单选类筛选项 —— 与 .lt-check 同构：圆形 radio + 文字，裸放在 .lt-filter-item 内（无边框无标签，独立占 1 格） */
+    .lt-filter-item .lt-radio-group,
+    .rs-radios .lt-radio-group { display: flex; align-items: center; gap: 18px; height: 32px; }
+    .lt-filter-item .lt-radio,
+    .rs-radios .lt-radio {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: #333;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .lt-filter-item .lt-radio input,
+    .rs-radios .lt-radio input {
+      width: 14px;
+      height: 14px;
+      margin: 0;
+      padding: 0;
+      flex: none;
+      cursor: pointer;
+      accent-color: #861B2F;
+      appearance: auto;
+      -webkit-appearance: radio;
     }
     .lt-date-range { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; background: #fff; position: relative; width: 100%; box-sizing: border-box; height: 32px; }
     .lt-date-range .lt-date-range-text {
@@ -857,7 +910,6 @@
     .lt-datalist li.selected { background: #f0e8ea; color: #861B2F; font-weight: 600; }
     .lt-datalist li.hidden { display: none; }
     .lt-input-wrap.combobox input { padding-right: 26px; cursor: text; }
-    .lt-input-wrap.combobox::after { display: none; }
     .lt-input-wrap.combobox .cb-arrow {
       position: absolute;
       right: 0; top: 0; bottom: 0;
@@ -888,10 +940,26 @@
     }
     .lt-input-wrap.combobox .cb-clear:hover { background: #861B2F; }
     .lt-input-wrap.combobox input.has-clear { padding-right: 42px; }
+    /* 查询区一键清除（2026-10-24）：文本框 / 门店选择器 / 日期区间通用小圆 ×，
+       有值才显示、点击清空本项并按该页筛选重查；视觉与 .cb-clear 完全一致，不新增一套观感 */
+    .lt-input-wrap .flt-clear,
+    .lt-date-range .flt-clear {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      width: 14px; height: 14px; line-height: 13px; text-align: center;
+      border-radius: 50%; background: #ccc; color: #fff; font-size: 11px;
+      cursor: pointer; z-index: 3; display: none; align-items: center; justify-content: center;
+      user-select: none;
+    }
+    .lt-input-wrap .flt-clear:hover,
+    .lt-date-range .flt-clear:hover { background: #861B2F; }
+    /* 给 × 让位（勿用 !important；一条后代选择器已可压过 .lt-input-wrap .np-input 的 padding） */
+    .lt-input-wrap.has-flt-clear input { padding-right: 26px; }
+    /* search 型框（门店选择器 / 车系车型）右侧已有放大镜（right:8px）：× 左移避让，文本再让位 */
+    .lt-input-wrap.search .flt-clear { right: 26px; }
+    .lt-input-wrap.search.has-flt-clear input { padding-right: 44px; }
 
     /* 搜索类型输入框*/
     .lt-input-wrap.search input { padding-right: 32px; }
-    .lt-input-wrap.search::after { display: none; }
     .lt-input-wrap.search .search-icon {
       position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
       width: 14px; height: 14px; color: #999; pointer-events: none;
@@ -1231,15 +1299,17 @@
     .ts-form-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px 20px; }
     .ts-form-grid.col2 { grid-template-columns:repeat(2, 1fr); }
     .ts-form-grid.col4 { grid-template-columns:repeat(4, minmax(0, 1fr)); }
-    .ts-form-item { display:flex; flex-direction:column; gap:4px; }
-    .ts-form-item.full { grid-column:1/-1; }
-    .ts-form-item.span2, .ts-form-item-inline.span2 { grid-column:span 2; }
-    .ts-form-label { font-size:12px; color:#666; }
-    .ts-form-item input, .ts-form-item select, .ts-form-item textarea { width:100%; height:32px; border:1px solid #d9d9d9; border-radius:4px; padding:0 8px; font-size:12px; color:#333; background:#fff; font-family:inherit; }
-    .ts-form-item textarea { height:80px; resize:vertical; padding:6px 8px; }
-    .ts-form-item input:focus, .ts-form-item select:focus, .ts-form-item textarea:focus { border-color:#861B2F; outline:none; }
-    .ts-form-item input:disabled, .ts-form-item select:disabled, .ts-form-item textarea:disabled { background:#f5f5f5; color:#999; cursor:not-allowed; }
-    .ts-form-item input[readonly] { background:#f9f9f9; }
+    /* 块级字段（标签在上、输入在下）：全站唯一一套 .lt-form-item / .lt-form-label
+       2026-10-25 合并：原技术侧 .ts-form-item 与质量报告侧 .qr-form-item 两套重复规则收敛到这里 */
+    .lt-form-item { display:flex; flex-direction:column; gap:4px; }
+    .lt-form-item.full { grid-column:1/-1; }
+    .lt-form-item.span2, .lt-input-wrap.span2 { grid-column:span 2; }
+    .lt-form-label { font-size:12px; color:#666; }
+    .lt-form-item input, .lt-form-item select, .lt-form-item textarea { width:100%; height:32px; border:1px solid #d9d9d9; border-radius:4px; padding:0 8px; font-size:12px; color:#333; background:#fff; font-family:inherit; }
+    .lt-form-item textarea { height:80px; resize:vertical; padding:6px 8px; }
+    .lt-form-item input:focus, .lt-form-item select:focus, .lt-form-item textarea:focus { border-color:#861B2F; outline:none; }
+    .lt-form-item input:disabled, .lt-form-item select:disabled, .lt-form-item textarea:disabled { background:#f5f5f5; color:#999; cursor:not-allowed; }
+    .lt-form-item input[readonly] { background:#f9f9f9; }
     .ts-upload-area { border:1px dashed #d9d9d9; border-radius:4px; padding:16px; text-align:center; cursor:pointer; color:#999; font-size:12px; }
     .ts-upload-area:hover { border-color:#861B2F; color:#861B2F; }
     .ts-upload-area { border:1px dashed #d9d9d9; border-radius:4px; padding:16px; text-align:center; cursor:pointer; color:#999; font-size:12px; }
@@ -1259,44 +1329,8 @@
     .ts-upload-file-list .file-item .file-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:8px; }
     .ts-upload-file-list .file-item .remove-btn { flex-shrink:0; width:18px; height:18px; background:#bbb; color:#fff; border:none; border-radius:50%; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
     .ts-upload-file-list .file-item .remove-btn:hover { background:#f5222d; }
-    /* 表单内联样式：文字嵌在输入框内（与查询区筛选框一致） */
-    .ts-form-item-inline { display:flex; align-items:center; border:1px solid #d9d9d9; border-radius:4px; background:#fff; position:relative; }
-    .ts-form-item-inline:focus-within { border-color:#861B2F; }
-    .ts-form-item-inline .ts-form-label-inline { flex-shrink:0; color:#333; font-size:12px; padding:0 4px 0 10px; white-space:nowrap; display:flex; align-items:center; }
-    /* 全局统一必填*样式：required class + ::before 替代 span.req */
-    .ts-form-item-inline.required .ts-form-label-inline::before,
-    .qr-form-item-inline.required .qr-form-label-inline::before { content:'*'; color:#861B2F; margin-right:2px; }
-    .ts-form-item.required .ts-form-label::before,
-    .qr-form-item.required .qr-form-label::before { content:'*'; color:#861B2F; margin-right:2px; }
-    .ts-form-item-inline input:not([type=checkbox]):not([type=radio]),
-    .ts-form-item-inline select { height:32px; flex:1; min-width:0; border:none; outline:none; padding:0 10px; font-size:12px; color:#333; background:transparent; font-family:inherit; }
-    /* checkbox/radio 不受"行内同框输入放大"影响：全局统一基础小方框（避免每个新容器单独打补丁而漏） */
-    .ts-form-item-inline input[type=checkbox],
-    .ts-form-item-inline input[type=radio] { width:14px; height:14px; flex:none; margin:0; border:1px solid #999; border-radius:2px; background:#fff; accent-color:#861B2F; appearance:auto; -webkit-appearance:auto; }
-    .ts-form-item-inline select { cursor:pointer; appearance:none; -webkit-appearance:none; padding-right:24px; }
-    .ts-form-item-inline input[readonly] { background:#f9f9f9; }
-    .ts-form-item-inline input:disabled,
-    .ts-form-item-inline select:disabled { background:#f9f9f9; color:#999; cursor:not-allowed; }
-    .ts-form-item-inline.full { grid-column:1/-1; }
-    /* 纯文本框隐藏下拉箭头 */
-    .ts-form-item-inline.plain::after { display:none; }
-    /* 表单内联搜索图标（维修工单/客诉单/VIN）*/
-    .ts-form-item-inline.ts-form-search input { padding-right:30px; }
-    .ts-form-search-icon { position:absolute; right:8px; top:50%; transform:translateY(-50%); width:14px; height:14px; pointer-events:none; }
-    /* select 下拉箭头 */
-    .ts-form-item-inline::after { content:''; position:absolute; right:10px; top:50%; width:6px; height:6px; border-right:1px solid #999; border-bottom:1px solid #999; transform:translateY(-50%) rotate(45deg); pointer-events:none; }
+    .lt-form-item.required .lt-form-label::before { content:'*'; color:#861B2F; margin-right:2px; }
 
-    /* 故障信息 - combobox 模式（故障描述/故障系统）*/
-    .ts-form-item-inline.ts-combobox::after { display:none; }
-    .ts-form-item-inline.ts-combobox input { padding-right:26px; cursor:text; }
-    .ts-form-item-inline.ts-combobox .cb-arrow { position:absolute; right:0; top:0; bottom:0; width:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#999; font-size:0; flex-shrink:0; }
-    .ts-form-item-inline.ts-combobox .cb-arrow::before { content:''; width:6px; height:6px; border-right:1px solid currentColor; border-bottom:1px solid currentColor; transform:rotate(45deg); }
-    .ts-form-item-inline.ts-combobox .cb-arrow:hover { color:#861B2F; }
-    .ts-form-item-inline.ts-combobox .lt-datalist { display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #d9d9d9; border-radius:4px; margin-top:4px; max-height:200px; overflow-y:auto; z-index:100; box-shadow:0 4px 12px rgba(0,0,0,0.12); list-style:none; padding:0; margin:0; }
-    .ts-form-item-inline.ts-combobox .lt-datalist.show { display:block; }
-    .ts-form-item-inline.ts-combobox .lt-datalist li { padding:7px 12px; font-size:12px; color:#333; cursor:pointer; white-space:nowrap; }
-    .ts-form-item-inline.ts-combobox .lt-datalist li:hover { background:#f5f0f1; color:#861B2F; }
-    .ts-form-item-inline.ts-combobox .lt-datalist li.hidden { display:none; }
 
     .ts-template-select { display:flex; gap:12px; align-items:center; padding:10px 14px; background:#fafafa; border-radius:4px; margin-top:16px; }
     .ts-template-select span { font-size:12px; color:#666; }
@@ -1335,26 +1369,6 @@
     .qr-section.collapsed .qr-section-toggle { transform:rotate(0deg); }
     .qr-section.collapsed .qr-section-body { display:none; }
     .qr-form-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px 20px; }
-    .qr-form-item { display:flex; flex-direction:column; gap:4px; }
-    .qr-form-item.full { grid-column:1/-1; }
-    .qr-form-label { font-size:12px; color:#666; }
-    .qr-form-item input, .qr-form-item select, .qr-form-item textarea { width:100%; height:32px; border:1px solid #d9d9d9; border-radius:4px; padding:0 8px; font-size:12px; color:#333; background:#fff; font-family:inherit; }
-    .qr-form-item textarea { height:80px; resize:vertical; padding:6px 8px; }
-    .qr-form-item input:focus, .qr-form-item select:focus, .qr-form-item textarea:focus { border-color:#861B2F; outline:none; }
-    .qr-form-item input:disabled, .qr-form-item select:disabled, .qr-form-item textarea:disabled { background:#f5f5f5; color:#999; cursor:not-allowed; }
-    .qr-form-item input[readonly] { background:#f9f9f9; }
-    .qr-form-item-inline { display:flex; align-items:center; border:1px solid #d9d9d9; border-radius:4px; background:#fff; position:relative; }
-    .qr-form-item-inline:focus-within { border-color:#861B2F; }
-    .qr-form-item-inline .qr-form-label-inline { flex-shrink:0; color:#333; font-size:12px; padding:0 4px 0 10px; white-space:nowrap; display:flex; align-items:center; }
-    .qr-form-item-inline input,
-    .qr-form-item-inline select { height:32px; flex:1; min-width:0; border:none; outline:none; padding:0 10px; font-size:12px; color:#333; background:transparent; font-family:inherit; }
-    .qr-form-item-inline select { cursor:pointer; appearance:none; -webkit-appearance:none; padding-right:24px; }
-    .qr-form-item-inline input[readonly] { background:#f9f9f9; }
-    .qr-form-item-inline input:disabled,
-    .qr-form-item-inline select:disabled { background:#f9f9f9; color:#999; cursor:not-allowed; }
-    .qr-form-item-inline.full { grid-column:1/-1; }
-    .qr-form-item-inline.plain::after { display:none; }
-    .qr-form-item-inline::after { content:''; position:absolute; right:10px; top:50%; width:6px; height:6px; border-right:1px solid #999; border-bottom:1px solid #999; transform:translateY(-50%) rotate(45deg); pointer-events:none; }
     .qr-upload-area { border:1px dashed #d9d9d9; border-radius:4px; padding:16px; text-align:center; cursor:pointer; color:#999; font-size:12px; }
     .qr-upload-area:hover { border-color:#861B2F; color:#861B2F; }
     .qr-panel-footer { padding:12px 20px; border-top:1px solid #e8e8e8; background:#fafafa; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
@@ -1592,26 +1606,6 @@
 
     .qr-form-grid.col4 { grid-template-columns:repeat(4, minmax(0, 1fr)); }
 
-    .qr-form-item { display:flex; flex-direction:column; gap:4px; }
-
-    .qr-form-item.full { grid-column:1/-1; }
-
-    .qr-form-item.span2, .qr-form-item-inline.span2 { grid-column:span 2; }
-
-    .qr-form-label { font-size:12px; color:#666; }
-
-
-
-    .qr-form-item input, .qr-form-item select, .qr-form-item textarea { width:100%; height:32px; border:1px solid #d9d9d9; border-radius:4px; padding:0 8px; font-size:12px; color:#333; background:#fff; font-family:inherit; }
-
-    .qr-form-item textarea { height:80px; resize:vertical; padding:6px 8px; }
-
-    .qr-form-item input:focus, .qr-form-item select:focus, .qr-form-item textarea:focus { border-color:#861B2F; outline:none; }
-
-    .qr-form-item input:disabled, .qr-form-item select:disabled, .qr-form-item textarea:disabled { background:#f5f5f5; color:#999; cursor:not-allowed; }
-
-    .qr-form-item input[readonly] { background:#f9f9f9; }
-
     .qr-upload-area { border:1px dashed #d9d9d9; border-radius:4px; padding:16px; text-align:center; cursor:pointer; color:#999; font-size:12px; }
 
     .qr-upload-area:hover { border-color:#861B2F; color:#861B2F; }
@@ -1644,59 +1638,30 @@
 
     .qr-upload-file-list .file-item .remove-btn:hover { background:#f5222d; }
 
-    /* 表单内联样式：文字嵌在输入框内（与查询区筛选框一致） */
-    .qr-form-item-inline { display:flex; align-items:center; border:1px solid #d9d9d9; border-radius:4px; background:#fff; position:relative; }
-
-    .qr-form-item-inline:focus-within { border-color:#861B2F; }
-
-    .qr-form-item-inline .qr-form-label-inline { flex-shrink:0; color:#333; font-size:12px; padding:0 4px 0 10px; white-space:nowrap; display:flex; align-items:center; }
 
 
-    .qr-form-item-inline input,
-    .qr-form-item-inline select { height:32px; flex:1; min-width:0; border:none; outline:none; padding:0 10px; font-size:12px; color:#333; background:transparent; font-family:inherit; }
 
-    .qr-form-item-inline select { cursor:pointer; appearance:none; -webkit-appearance:none; padding-right:24px; }
 
-    .qr-form-item-inline input[readonly] { background:#f9f9f9; }
 
-    .qr-form-item-inline input:disabled,
-    .qr-form-item-inline select:disabled { background:#f9f9f9; color:#999; cursor:not-allowed; }
 
-    .qr-form-item-inline.full { grid-column:1/-1; }
 
-    /* 纯文本框隐藏下拉箭头 */
-    .qr-form-item-inline.plain::after { display:none; }
 
-    /* 表单内联搜索图标（维修工单/客诉单/VIN）*/
-    .qr-form-item-inline.qr-form-search input { padding-right:30px; }
 
-    .qr-form-search-icon { position:absolute; right:8px; top:50%; transform:translateY(-50%); width:14px; height:14px; pointer-events:none; }
+
+
     /* 质量报告「故障维修情况-维修工单」放大镜可点（打开维修工单选择），与技术支持同款交互 */
-    #qr-panel .qr-form-item-inline.qr-form-search .qr-form-search-icon { pointer-events:auto; cursor:pointer; }
-
-    /* select 下拉箭头 */
-    .qr-form-item-inline::after { content:''; position:absolute; right:10px; top:50%; width:6px; height:6px; border-right:1px solid #999; border-bottom:1px solid #999; transform:translateY(-50%) rotate(45deg); pointer-events:none; }
+    #qr-panel .lt-input-wrap.search .search-icon { pointer-events:auto; cursor:pointer; }
 
 
-    /* 故障信息 - combobox 模式（故障描述/故障系统）*/
-    .qr-form-item-inline.qr-combobox::after { display:none; }
 
-    .qr-form-item-inline.qr-combobox input { padding-right:26px; cursor:text; }
 
-    .qr-form-item-inline.qr-combobox .cb-arrow { position:absolute; right:0; top:0; bottom:0; width:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#999; font-size:0; flex-shrink:0; }
-    .qr-form-item-inline.qr-combobox .cb-arrow::before { content:''; width:6px; height:6px; border-right:1px solid currentColor; border-bottom:1px solid currentColor; transform:rotate(45deg); }
 
-    .qr-form-item-inline.qr-combobox .cb-arrow:hover { color:#861B2F; }
 
-    .qr-form-item-inline.qr-combobox .lt-datalist { display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #d9d9d9; border-radius:4px; margin-top:4px; max-height:200px; overflow-y:auto; z-index:100; box-shadow:0 4px 12px rgba(0,0,0,0.12); list-style:none; padding:0; margin:0; }
 
-    .qr-form-item-inline.qr-combobox .lt-datalist.show { display:block; }
 
-    .qr-form-item-inline.qr-combobox .lt-datalist li { padding:7px 12px; font-size:12px; color:#333; cursor:pointer; white-space:nowrap; }
 
-    .qr-form-item-inline.qr-combobox .lt-datalist li:hover { background:#f5f0f1; color:#861B2F; }
 
-    .qr-form-item-inline.qr-combobox .lt-datalist li.hidden { display:none; }
+
 
 
     .qr-template-select { display:flex; gap:12px; align-items:center; padding:10px 14px; background:#fafafa; border-radius:4px; margin-top:16px; }
@@ -1755,19 +1720,99 @@
     .pm-section-title { font-size:14px; font-weight:600; color:#185FA5; margin:18px 0 10px 0; padding-left:10px; border-left:3px solid #185FA5; }
     .pm-section-title:first-child { margin-top:0; }
     .pm-form-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px 20px; margin-bottom:10px; }
+    /* 财务管理·配件销售收款：支付平台收款码占位 + 提示行（2026-10-25 新增） */
+    .psf-qr { display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 0 4px; }
+    .psf-qr-box { width:150px; height:150px; border:1px solid #e8e8e8; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:13px; letter-spacing:2px; background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f3f3f3 6px,#f3f3f3 12px); }
+    .psf-qr-tip { font-size:12px; color:#999; }
+    .psf-hint { font-size:12px; color:#861B2F; padding:6px 0 2px; }
+    /* 配件库存管理·仓库仓位管理：弹窗内仓位明细子表 + 提示行（2026-10-25 新增） */
+    /* 冻结列 1~3（序号/仓库编码/仓库名称）：left 偏移 = 前面各列宽累加，宽三重锁（规范 S3b） */
+    #page-warehouse-position .lt-table th.col-seq,      #page-warehouse-position .lt-table td.col-seq      { left:0;     width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
+    #page-warehouse-position .lt-table th.col-warehouse-code,  #page-warehouse-position .lt-table td.col-warehouse-code  { left:40px;  width:110px; min-width:110px; max-width:110px; overflow:hidden; }
+    #page-warehouse-position .lt-table th.col-warehouse-name,  #page-warehouse-position .lt-table td.col-warehouse-name  { left:150px; width:120px; min-width:120px; max-width:120px; overflow:hidden; }
+    .wpm-pos-head { display:flex; align-items:center; gap:12px; margin:16px 0 8px; font-size:13px; font-weight:600; color:#333; }
+    .wpm-pos-head .lt-btn { font-weight:400; }
+    .wpm-pos-table { width:100%; }
+    .wpm-pos-table th, .wpm-pos-table td { padding:6px 8px; font-size:13px; }
+    .wpm-pos-table td input { width:100%; }
+    .wpm-hint { font-size:12px; color:#861B2F; padding:2px 0 10px; }
+
+    /* ===== 配件库存管理：配件内部领用单 / 配件报废单（2026-10-25）
+       冻结列 1~2（序号 40 + 单据号 140）：left 偏移 = 前面列宽累加，宽三重锁（规范 S3b）。
+       两页列结构相同，选择器合并，避免各写一份。 ===== */
+    #page-parts-internal-usage .lt-table th.col-seq,     #page-parts-internal-usage .lt-table td.col-seq,
+    #page-parts-scrap .lt-table th.col-seq,              #page-parts-scrap .lt-table td.col-seq
+      { left:0;    width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
+    #page-parts-internal-usage .lt-table th.col-doc-no,  #page-parts-internal-usage .lt-table td.col-doc-no,
+    #page-parts-scrap .lt-table th.col-doc-no,           #page-parts-scrap .lt-table td.col-doc-no
+      { left:40px; width:140px; min-width:140px; max-width:140px; overflow:hidden; }
+    /* 详情弹窗：单据信息与新增/编辑同一套行内同框（.np-form-grid + .lt-input-wrap），此处无自造标签样式 */
+    /* ===== 单据面板公共形态（规范 §3.1.3）=====
+       np-steps 节点条 / np-audit-* 审核区 / np-items-* 明细工具行与明细表 / np-print* 打印预览 /
+       np-split-footer 底栏左右分置 —— 配件内部领用单、配件报废单等单据页一律复用，
+       禁止各页各写一套 piu-* / psc-* 同名样式（AGENTS §2 组件唯一化）。 */
+    .np-steps { display:flex; align-items:flex-start; gap:8px; padding:12px 0 14px; }
+    .np-step { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; position:relative; }
+    .np-step::before { content:''; position:absolute; top:6px; left:-50%; width:100%; height:2px; background:#e5e5e5; }
+    .np-step:first-child::before { display:none; }
+    .np-step.done::before, .np-step.doing::before { background:#27ae60; }
+    .np-step-dot { width:12px; height:12px; border-radius:50%; background:#e5e5e5; position:relative; z-index:1; }
+    .np-step.done .np-step-dot { background:#27ae60; }
+    .np-step.doing .np-step-dot { background:#fff; border:2px solid #861B2F; }
+    .np-step-name { font-size:13px; color:#333; }
+    .np-step-state { font-size:12px; color:#999; }
+    .np-step.done .np-step-state { color:#27ae60; }
+    .np-step.doing .np-step-state { color:#861B2F; }
+    /* 侧滑面板内：明细表里的行内同框控件（申请数量等）撑满单元格 */
+    .pp-parts-table .lt-input-wrap { width:100%; min-height:32px; }
+    .pp-parts-table .lt-input-wrap select,
+    .pp-parts-table .lt-input-wrap input { width:100%; height:30px; border:none; background:transparent; font-size:13px; }
+    /* 整行字段（申请原因等）：栅格内跨满一行 */
+    .np-form-grid .np-grid-full { grid-column:1/-1; }
+    .np-form-grid .np-grid-full .lt-filter-item { width:100%; display:flex; }
+    /* 明细工具行：右对齐的「配件选择」按钮，不单起小节标题 */
+    .np-items-toolbar { display:flex; justify-content:flex-end; padding:10px 0 6px; }
+    /* 明细表宽度不撑满：列宽按内容收紧，避免名称列吃光空间把「计量单位」推远 */
+    .np-items-table { width:auto; }
+    .np-items-table th, .np-items-table td { white-space:nowrap; }
+    .np-items-table td { padding:6px 8px; }
+    .np-items-table .pl-s { width:88px; }
+    /* 表单内红字提示 */
+    .np-form-hint { font-size:12px; color:#861B2F; padding:2px 0 8px; }
+    /* 底栏：左打印 / 右操作 */
+    .np-split-footer { display:flex; align-items:center; justify-content:space-between; }
+    .np-footer-left, .np-footer-right { display:flex; align-items:center; gap:8px; }
+    /* 审核区：通过/驳回单选 + 审批意见 */
+    .np-audit-box { border:1px solid #ebebeb; border-radius:4px; padding:12px 14px; background:#fff; }
+    .np-audit-radio { display:flex; align-items:center; gap:16px; font-size:13px; color:#333; }
+    .np-audit-radio .lt-radio { display:inline-flex; align-items:center; gap:4px; cursor:pointer; }
+    .np-audit-radio .lt-radio input { width:14px; height:14px; accent-color:#861B2F; }
+    .np-audit-step { margin-left:auto; font-size:12px; color:#666; }
+    .np-audit-memo { margin-top:10px; }
+    .np-audit-memo textarea { width:100%; height:64px; border:1px solid #d9d9d9; border-radius:4px; padding:6px 8px; font-size:13px; font-family:inherit; resize:vertical; box-sizing:border-box; }
+    .np-audit-memo textarea:focus { border-color:#861B2F; outline:none; }
+    .np-audit-line { font-size:13px; color:#333; padding:4px 0; }
+    /* 打印预览：只做版式核对，不调 window.print */
+    .np-print-title { text-align:center; font-size:18px; font-weight:600; padding:6px 0 12px; }
+    .np-print-meta { font-size:13px; color:#333; line-height:1.9; padding-bottom:10px; }
+    .np-print-sign { font-size:13px; color:#333; padding:26px 0 4px; }
+    .lt-link.wpm-disabled { color:#bbb; cursor:not-allowed; }
     .pm-form-item { display:flex; flex-direction:column; gap:4px; }
     .pm-form-item label { font-size:12px; color:#666; white-space:nowrap; }
     .pm-form-item input, .pm-form-item select { height:32px; padding:0 10px; border:1px solid #dcdfe6; border-radius:4px; font-size:13px; box-sizing:border-box; }
     .pm-form-item input:focus, .pm-form-item select:focus { outline:none; border-color:#185FA5; }
     .pm-form-item.required > label::before { content:'*'; color:#861B2F; margin-right:2px; }
-    .lt-input-wrap.required .lt-filter-prefix::before { content:'*'; color:#861B2F; margin-right:2px; }
     .pm-readonly { background:#f5f7fa !important; color:#999 !important; cursor:not-allowed; }
     /* 配件采购：永远只读字段（采购方/收货三字段，加 js-lock）与所有只读 input 统一灰显 */
     .pm-form-item input[readonly],
     .pm-form-item textarea[readonly],
     .pm-form-item select[readonly],
     .pm-form-item input.js-lock,
-    .pm-form-item textarea.js-lock {
+    .pm-form-item textarea.js-lock,
+    .pp-parts-table input.js-lock,
+    .pp-parts-table textarea.js-lock,
+    .pp-parts-table input[readonly],
+    .pp-parts-table select[readonly] {
       background:#f5f7fa; color:#999; cursor:not-allowed;
     }
     /* 配件明细工具栏：display:flex 由 class 提供，避免被 ppSetPanelReadonly 的 style.display='' 抹掉，使 gap 真正生效；间距对齐列表工具栏 8px */
@@ -1884,6 +1929,10 @@
     .pp-parts-table td { padding:4px; border-bottom:1px solid #f0f0f0; }
     .pp-parts-table td input, .pp-parts-table td select { width:100%; padding:4px; border:1px solid #d9d9d9; border-radius:3px; font-size:12px; box-sizing:border-box; }
     .pp-parts-table td input:focus { border-color:#185FA5; outline:none; }
+    /* 表格内勾选框：与全站 .lt-check 同款（14px 方框 + 酒红 accent）；
+       表头「全选」框与行内多选框同宽同色，且不被上面的 td input 宽度规则拉成扁长框 */
+    .pp-parts-table th input[type=checkbox],
+    .pp-parts-table td input[type=checkbox] { width:14px; height:14px; margin:0; padding:0; border:0; background:#fff; accent-color:#861B2F; }
     .pp-panel-totals { text-align:right; padding:10px 0 0 0; font-size:13px; color:#333; }
     .pp-panel-totals b { color:#185FA5; }
     .pp-audit-area { margin-top:8px; }
@@ -1999,7 +2048,6 @@ textarea.np-input { height:auto; padding:8px 10px; line-height:1.6; resize:verti
 .np-form-item > label.np-req::before { content:'*'; color:#e74c3c; margin-right:2px; }
 .np-form-item.full { grid-column:1/-1; }
 /* 筛选区内 .lt-input-wrap 已带边框，去掉 .np-input 多余边框（防双线）*/
-.lt-input-wrap .np-input { border:none; background:transparent; padding:0 6px; }
 
 /* 金额 / 红绿强调 */
 .np-money { color:#c0392b; font-weight:600; }
@@ -2169,7 +2217,9 @@ textarea.np-input { height:auto; padding:8px 10px; line-height:1.6; resize:verti
 .cs-tab.active { color:#861B2F; font-weight:600; border-bottom-color:#861B2F; }
 .cs-panel { padding:0; }
 /* 高度链：让 npShell 的 .lt-wrap 填满 Tab 条以下的剩余空间，翻页器钉在视口底部（与其它配件页一致） */
-#page-common-stock { display:flex; flex-direction:column; height:calc(100vh - 58px); }
+/* 修正（原缺 .active 限定）：本页曾对任意状态都 display:flex，导致未激活时仍占满屏、
+   把后续页面顶出视口（实测 page-top=950）。改为只在 .active 时生效，与其余 npShell 页一致。 */
+#page-common-stock.page-content.active { display:flex; flex-direction:column; height:calc(100vh - 58px); }
 #page-common-stock .cs-tabs { flex-shrink:0; }
 #page-common-stock .cs-panel { flex:1; min-height:0; display:flex; flex-direction:column; }
 #page-common-stock .cs-panel.hidden { display:none !important; }
@@ -2227,6 +2277,8 @@ input[readonly][placeholder="点击选择门店"] { cursor: pointer; }
 .user-tab { padding: 11px 20px; font-size: 13px; color: #333; cursor: pointer; border-bottom: 2px solid transparent; }
 .user-tab.active { color: #861B2F; border-bottom-color: #861B2F; font-weight: 600; }
 .user-body { flex: 1; min-height: 0; overflow: auto; padding: 16px; }
+/* 角色/人员页签内容走 npShell（自带 .lt-wrap 满高）：高度交给 .user-body 滚动，避免双重滚动条 */
+.user-body > .lt-wrap { height: auto; padding: 0; }
 .user-org-tree { font-size: 13px; color: #333; }
 .user-org-node { margin: 2px 0; }
 .user-org-root > .user-org-name { font-weight: 600; }
@@ -2339,11 +2391,11 @@ input[readonly][placeholder="点击选择门店"] { cursor: pointer; }
 
 /* ===== 技术公告 发布对象 组织树：整块为一条带边框的行（标签嵌框内），树复用 公告(备用) .ann-* 结构 ===== */
 #tn-panel .tn-objrow { align-items: flex-start !important; grid-column: 1 / -1; }
-#tn-panel .tn-objrow .ts-form-label-inline { padding: 9px 6px 0 10px; align-self: flex-start; }
+#tn-panel .tn-objrow .lt-filter-prefix { padding: 9px 6px 0 10px; align-self: flex-start; }
 #tn-panel .tn-req { color: #861B2F; margin-left: 2px; font-style: normal; }
 #tn-panel .tn-objrow .ann-target { flex: 1; min-width: 0; padding: 8px 10px; }
 #tn-panel .tn-objrow .ann-tree-box { max-height: 320px; }
-/* checkbox/radio 基础尺寸已由 .ts-form-item-inline input[type=checkbox]/[type=radio] 全局统一，此处不再需要逐容器覆盖 */
+/* checkbox/radio 基础尺寸已由 .lt-input-wrap input[type=checkbox]/[type=radio] 全局统一，此处不再需要逐容器覆盖 */
 /* 树折叠箭头 */
 #tn-panel .tn-tree-caret { display: inline-block; width: 14px; height: 14px; margin-right: 4px; cursor: pointer; flex-shrink: 0; vertical-align: -2px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23861B2F' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 1 L11 7 L5 13'/></svg>") center/contain no-repeat; transition: transform .15s; }
 #tn-panel .tn-tree-caret.open { transform: rotate(90deg); }
@@ -2354,16 +2406,15 @@ input[readonly][placeholder="点击选择门店"] { cursor: pointer; }
 .tn-panel { width: 1050px; right: -1110px; }
 #tn-panel .pm-panel-body { padding: 20px 24px; }
 #tn-panel .pm-section-title:first-child { margin-top: 0; }
-/* 面板内字段布局（复用 ts-form-item-inline 行内同框）+ 隐藏级联时多余占位 */
-#tn-panel .ts-form-item-inline { width: 100%; min-width: 0; }
-#tn-panel .ts-form-item-inline input[type=date],
-#tn-panel .ts-form-item-inline input[type=datetime-local] { appearance: auto; -webkit-appearance: auto; cursor: text; }
-#tn-panel .ts-form-item textarea[readonly],
-#tn-panel .ts-form-item-inline input[readonly] { background: #f9f9f9; color: #555; }
+/* 面板内字段布局（复用 lt-input-wrap 行内同框）+ 隐藏级联时多余占位 */
+#tn-panel .lt-input-wrap { width: 100%; min-width: 0; }
+#tn-panel .lt-input-wrap input[type=date],
+#tn-panel .lt-input-wrap input[type=datetime-local] { appearance: auto; -webkit-appearance: auto; cursor: text; }
+#tn-panel .lt-form-item textarea[readonly] { background: #f9f9f9; color: #555; }
 /* 正文必填块（富文本编辑器 + label）全宽 */
 #tn-panel .tn-body-block { display: block; width: 100%; }
-#tn-panel .tn-body-block .ts-form-label { display: block; margin-bottom: 6px; font-size: 13px; color: #333; }
-#tn-panel .tn-body-block.required .ts-form-label::before { content: '*'; color: #861B2F; margin-right: 2px; }
+#tn-panel .tn-body-block .lt-form-label { display: block; margin-bottom: 6px; font-size: 13px; color: #333; }
+#tn-panel .tn-body-block.required .lt-form-label::before { content: '*'; color: #861B2F; margin-right: 2px; }
 #tn-panel .tn-body-block .tn-editor { margin-top: 0; }
 #tn-panel .tn-body-block .tn-editor-body { min-height: 160px; }
 #tn-panel .tn-attach { margin-top: 12px; margin-bottom: 4px; }
@@ -2426,3 +2477,183 @@ input[readonly][placeholder="点击选择门店"] { cursor: pointer; }
 .tn-caret-none { visibility: hidden; }
 .tn-role-person .ann-tlabel-txt { color: #444; }
 
+
+/* ==================== 配件销售管理（2026-10-20 新增）====================
+   页面：配件销售单 / 配件销售取消 / 配件销售退货（js/parts-sales.js）
+         车主管理（js/car-owner.js）
+   说明：列表冻结列遵循项目既有「left 偏移链」写法：width/min-width/max-width 三重锁，
+        否则横向滚动时冻结列会串位。 */
+
+/* ---- 页面级：npShell 页需要 flex + 满高，钉住翻页器 ---- */
+#page-parts-sales-order.page-content.active,
+#page-parts-sales-cancel.page-content.active,
+#page-parts-sales-return.page-content.active,
+#page-car-owner.page-content.active { display:flex; flex-direction:column; height:calc(100vh - 58px); }
+#page-parts-sales-order .lt-wrap,
+#page-parts-sales-cancel .lt-wrap,
+#page-parts-sales-return .lt-wrap,
+#page-car-owner .lt-wrap { height:100%; }
+
+/* ---- 表格：按声明列宽排版（width:max-content）----
+   .lt-table 基础样式是 width:100% + table-layout:auto，当各列声明宽度之和小于容器宽时，
+   浏览器会把余量摊给各列 → 实际列宽 > min-width，冻结列 left 偏移链随之错位
+   （实测 配件销售取消 col-seq 实际 46px 但 col-cno left 仍写死 40px → 两列重叠）。
+   width:max-content 让表格按声明宽度排版、容器不足时横向滚动，与 common-stock 等页一致。 */
+#page-parts-sales-order .lt-table,
+#page-parts-sales-cancel .lt-table,
+#page-parts-sales-return .lt-table,
+#page-car-owner .lt-table { width:max-content; }
+
+/* ---- 冻结列：配件销售单 ---- */
+#page-parts-sales-order .lt-table th.col-seq, #page-parts-sales-order .lt-table td.col-seq { left:0;   width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
+#page-parts-sales-order .lt-table th.col-no,  #page-parts-sales-order .lt-table td.col-no  { left:40px; width:130px; min-width:130px; max-width:130px; overflow:hidden; }
+#page-parts-sales-order .lt-table th.col-actions, #page-parts-sales-order .lt-table td.col-actions { width:130px; min-width:130px; }
+
+/* ---- 冻结列：配件销售取消 ---- */
+#page-parts-sales-cancel .lt-table th.col-seq, #page-parts-sales-cancel .lt-table td.col-seq { left:0;   width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
+#page-parts-sales-cancel .lt-table th.col-cno, #page-parts-sales-cancel .lt-table td.col-cno { left:40px; width:135px; min-width:135px; max-width:135px; overflow:hidden; }
+
+/* ---- 冻结列：配件销售退货 ---- */
+#page-parts-sales-return .lt-table th.col-seq, #page-parts-sales-return .lt-table td.col-seq { left:0;   width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
+#page-parts-sales-return .lt-table th.col-rno, #page-parts-sales-return .lt-table td.col-rno { left:40px; width:135px; min-width:135px; max-width:135px; overflow:hidden; }
+
+/* ---- 冻结列：车主管理 ---- */
+#page-car-owner .lt-table th.col-seq,  #page-car-owner .lt-table td.col-seq  { left:0;   width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
+#page-car-owner .lt-table th.col-code, #page-car-owner .lt-table td.col-code { left:40px; width:100px; min-width:100px; max-width:100px; overflow:hidden; }
+
+/* ---- 页面级：维修结算收款（npShell 动态页需要 flex + 满高，钉住翻页器） ---- */
+#page-repair-settlement.page-content.active { display:flex; flex-direction:column; height:calc(100vh - 58px); }
+#page-repair-settlement .lt-wrap { height:100%; }
+/* 按声明列宽排版，避免余量摊开导致冻结列 left 偏移链串位 */
+#page-repair-settlement .lt-table { width:max-content; }
+
+/* ---- 冻结列：维修结算收款（序号 + 维修工单号） ---- */
+#page-repair-settlement .lt-table th.col-seq,   #page-repair-settlement .lt-table td.col-seq   { left:0;   width:60px;  min-width:60px;  max-width:60px;  overflow:hidden; }
+#page-repair-settlement .lt-table th.col-order, #page-repair-settlement .lt-table td.col-order { left:60px; width:150px; min-width:150px; max-width:150px; overflow:hidden; }
+#page-repair-settlement .lt-table th.col-actions, #page-repair-settlement .lt-table td.col-actions { width:150px; min-width:150px; }
+
+/* ==================== 预收款（2026-10-23 新增）====================
+   页面：售后管理 / 维保服务 / 预收款（js/prepayment.js）
+         Tab1 预收款记录、Tab2 预收款余额（页内 Tab 复用全站 .cs-tabs/.cs-tab/.cs-panel）
+   说明：冻结列沿用项目既有「left 偏移链」写法（width/min-width/max-width 三重锁），
+        否则横向滚动时冻结列会串位。 */
+
+/* ---- 页面级：npShell 动态页需要 flex + 满高，钉住翻页器 ---- */
+#page-prepayment.page-content.active { display:flex; flex-direction:column; height:calc(100vh - 58px); }
+#page-prepayment .cs-tabs { flex-shrink:0; }
+#page-prepayment .cs-panel { flex:1; min-height:0; display:flex; flex-direction:column; }
+#page-prepayment .cs-panel.hidden { display:none !important; }
+#page-prepayment .cs-panel .lt-wrap { height:100%; }
+/* 按声明列宽排版，避免余量摊开导致冻结列 left 偏移链串位 */
+#page-prepayment .lt-table { width:max-content; }
+
+/* ---- 冻结列：预收款记录（序号 + 车主姓名）与预收款余额（同左链） ---- */
+#page-prepayment .lt-table th.col-seq,   #page-prepayment .lt-table td.col-seq   { left:0;   width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
+#page-prepayment .lt-table th.col-owner, #page-prepayment .lt-table td.col-owner { left:40px; width:100px; min-width:100px; max-width:100px; overflow:hidden; }
+#page-prepayment .lt-table th.col-actions, #page-prepayment .lt-table td.col-actions { width:110px; min-width:110px; }
+
+/* ---- 明细面板：查询区与表格之间补 14px（与列表页「查询区→列表」间距一致，不套卡片）---- */
+#ysk-detail-filterGrid { margin-bottom:14px; }
+
+/* ---- 侧滑面板内只读推荐项目文本域 ---- */
+#rsc-panel .lt-form-item textarea { height:auto; padding:6px 10px; border:1px solid #dcdfe6; border-radius:4px; font-size:13px; box-sizing:border-box; resize:vertical; }
+
+/* ---- 只读信息项：标签+值同一个框内（规范 §4.2「文字在框里」）---- */
+.pso-info-grid { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px 16px; margin-bottom:14px; }
+.pso-info-item { border:1px solid #d9d9d9; border-radius:3px; background:#fff; padding:6px 10px; font-size:13px; display:flex; align-items:center; min-height:32px; box-sizing:border-box; }
+.pso-info-label { color:#666; flex-shrink:0; margin-right:6px; }
+.pso-info-value { color:#333; font-weight:400; word-break:break-all; }
+
+/* ---- 明细区块小标题 ---- */
+.pso-detail-title { font-size:13px; font-weight:600; color:#333; margin:14px 0 8px 0; padding-left:8px; border-left:3px solid #861B2F; line-height:1.4; }
+
+/* ---- 弹框内合计行 ---- */
+/* 弹框内查询区一律走全站 .lt-filter-grid（4 列网格）+ .lt-filter-footer（查询按钮固定第 4 列），
+   旧的灰底容器类已整段删除 */
+/* 退货第二步已由侧滑改为通用弹框（与取消一致），自造的侧滑层样式整段删除 */
+.pso-modal-total { text-align:right; padding:10px 0 0 0; font-size:13px; color:#333; }
+.pso-modal-total b { color:#185FA5; }
+
+/* ---- 发票卡片 ---- */
+.pso-invoice-tip { font-size:12px; color:#c97a0a; background:#fdf6ec; border:1px solid #f5e0c0; border-radius:3px; padding:8px 12px; margin-bottom:12px; }
+.pso-inv-list { display:flex; flex-direction:column; gap:10px; }
+.pso-inv-card { border:1px solid #e8e8e8; border-radius:4px; padding:12px 14px; }
+.pso-inv-card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.pso-inv-btns { display:flex; align-items:center; gap:8px; }
+.pso-inv-badge { display:inline-block; font-size:12px; padding:2px 10px; border-radius:10px; background:#e6f0ff; color:#185FA5; }
+.pso-inv-badge.done { background:#e6f7e6; color:#1D9E75; }
+.pso-inv-badge.ing { background:#fdf6ec; color:#c97a0a; }
+.pso-inv-badge.red { background:#fde6e6; color:#861B2F; }
+.pso-inv-card-body { font-size:13px; color:#333; }
+.pso-inv-line { line-height:1.8; }
+.pso-inv-reason { margin-top:8px; font-size:13px; color:#861B2F; background:#fdf5f6; border-radius:3px; padding:6px 10px; }
+.pso-inv-empty { text-align:center; color:#999; font-size:13px; padding:30px 0; }
+.pso-inv-foot { margin-top:14px; text-align:right; }
+.pso-invoice-note { font-size:12px; color:#666; background:#fafafa; border:1px solid #eee; border-radius:3px; padding:8px 10px; margin:12px 0; line-height:1.7; }
+.pso-invoice-actions { margin-top:12px; }
+
+/* ---- 销售单制作面板：导出行 / 选择客户按钮 ---- */
+.pso-export-row { margin-bottom:10px; }
+.pso-pick-btn { flex-shrink:0; }
+.pso-dash { color:#999; }
+
+/* ==========================================================================
+   配件销售 · 发票页 / 申请开票页（2026-10-20 重做，对齐 PRD 6.9.1）
+   ========================================================================== */
+#page-parts-sales-invoice.page-content.active { display:flex; flex-direction:column; height:calc(100vh - 58px); }
+
+.psi-page { display:flex; flex-direction:column; height:100%; background:#fff; padding:0 24px 16px; box-sizing:border-box; overflow-y:auto; }
+
+/* 整页标题栏：左上角返回箭头 + 标题（无角标） */
+.psi-page-head { display:flex; align-items:center; gap:8px; padding:14px 0 12px; border-bottom:1px solid #e8e8e8; margin-bottom:14px; }
+.psi-back { width:26px; height:26px; border:1px solid #d9d9d9; background:#fff; border-radius:4px; color:#555; cursor:pointer; font-size:13px; line-height:1; padding:0; }
+.psi-back:hover { color:#861B2F; border-color:#861B2F; }
+.psi-page-title { font-size:15px; font-weight:600; color:#333; }
+
+/* 顶部信息区：纯文字「标签：值」，无边框、无输入框；3 列网格，金额类值标红 */
+.psi-info { padding:4px 0 12px; }
+.psi-info-row { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:14px 32px; align-items:baseline; margin-bottom:12px; }
+.psi-info-cell { font-size:13px; display:flex; }
+.psi-info-k { color:#999; white-space:nowrap; }
+.psi-info-v { color:#333; }
+/* 金额类值：主题红（与全站金额红 #185FA5 不同 —— 此处按实际截图取红） */
+.psi-info-v.money { color:#c0392b; }
+
+/* 发票卡片：左侧信息文字块 + 右侧一列（状态标签顶对齐、按钮底对齐）
+   卡片总高度由左侧文字行数决定，按钮不额外占一行 */
+.psi-inv-list { display:flex; flex-direction:column; gap:10px; }
+.psi-inv-card { background:#fafafa; border:1px solid #eee; border-radius:4px; padding:14px 16px; }
+.psi-inv-body { display:flex; align-items:stretch; justify-content:space-between; gap:16px; }
+.psi-inv-info { min-width:0; }
+/* 右侧一列：状态标签顶对齐、按钮整体垂直居中于左侧文字块
+   （不用 space-between / margin-top:auto —— 两者都会把按钮推到卡片底，2 行卡片就错位） */
+.psi-inv-side { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; justify-content:flex-start; gap:8px; }
+.psi-inv-ops { display:flex; align-items:center; gap:10px; margin-top:auto; padding-bottom:0; }
+.psi-inv-badge { flex-shrink:0; }
+.psi-inv-line { font-size:13px; color:#333; line-height:1.9; display:block; }
+.psi-inv-k { color:#999; }
+.psi-inv-reason { margin-top:8px; font-size:13px; color:#861B2F; }
+.psi-inv-empty { text-align:center; color:#999; font-size:13px; padding:30px 0; }
+
+/* 底部通栏按钮（主题色 #861B2F，同全站 .lt-btn-primary） */
+.psi-page-foot { margin-top:auto; padding-top:16px; }
+.psi-full-btn { display:block; width:100%; padding:9px 0; background:#861B2F; color:#fff; border:none; border-radius:4px; font-size:14px; cursor:pointer; }
+.psi-full-btn:hover { background:#6d1526; }
+
+/* 申请开票表单：一行一个字段，字段用既有 npFItem / npSelect（label 是框内前缀标签，值在框内）
+   —— 输入框本身一律走全站 .lt-input-wrap 既有样式（12px / 高 32 / 灰显只读），
+      本段不另写任何输入框字号、颜色、内边距，避免与全站其它页面不一致 */
+.psi-form { padding-top:4px; }
+.psi-field { margin-bottom:16px; }
+.psi-field .lt-filter-item { margin-bottom:0; }
+/* 字段框宽度（表单布局用，非组件样式）；min-height 与全站框实际高度一致（input 32 + 上下边框 2），
+   使「明细要求」这类单选行（radio 自身仅 14px）不会塌成 18px */
+.psi-field .lt-input-wrap { width:520px; max-width:100%; min-height:34px; }
+/* 单选按钮：不吃文本框的 flex:1 / 固定行高，单独复位 */
+.psi-field .lt-input-wrap input[type="radio"] { flex:none; width:14px; height:14px; padding:0; margin:0 4px 0 0; appearance:auto; -webkit-appearance:radio; accent-color:#861B2F; cursor:pointer; }
+.psi-radio { display:inline-flex; align-items:center; line-height:1; font-size:12px; color:#333; margin-right:18px; cursor:pointer; }
+/* 带右侧提示语的字段：框与提示语同行（提示语在框的右侧，不是框下方） */
+.psi-field-side { display:flex; align-items:center; gap:12px; }
+/* 提示语行内的输入框不因提示语变长而被压缩，宽度与其它字段一致 */
+.psi-field-side .lt-input-wrap { flex:none; }
+.psi-rule { font-size:12px; color:#c0392b; line-height:1.7; max-width:520px; }

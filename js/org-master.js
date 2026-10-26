@@ -5,6 +5,14 @@
 // 门店字典不在此重复定义——直接引用门店主数据（避免 B1 双源不一致）。
 // =====================================================================
 (function () {
+  // 时间戳工具（确定性：以 2026-09-01 00:00 起按分钟递增，刷新不跳变；秒级 YYYY-MM-DD HH:mm:ss）
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function tsAt(seq) {
+    var d = new Date(2026, 8, 1, 8, 0, 0);          // 2026-09-01 08:00:00
+    d = new Date(d.getTime() + seq * 61 * 1000);      // 每条差 61 秒
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' +
+      pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }
   // 角色（2026-08-31 用户指定清单：总部 4 + 门店 8，共 12）
   var ROLES = [
     { id: 'R01', name: '总部管理员', scope: '总部', desc: '总部整体运营与系统管理', status: '启用' },
@@ -20,6 +28,8 @@
     { id: 'R11', name: '门店总经理', scope: '门店', desc: '门店全面经营管理', status: '启用' },
     { id: 'R12', name: '门店财务经理', scope: '门店', desc: '门店财务与结算管理', status: '启用' }
   ];
+  // 新建时间/更新时间（2026-10-25 用户要求：列表必须有这两列，且按新建时间倒序）
+  ROLES.forEach(function (r, i) { r.createdAt = tsAt(i + 1); r.updatedAt = tsAt(i + 1); });
 
   var HQ_ROLES = ['R01', 'R02', 'R03', 'R04'];
   var STORE_ROLES = ['R05', 'R06', 'R07', 'R08', 'R09', 'R10', 'R11', 'R12'];
@@ -36,8 +46,6 @@
     return SURNAMES[gi % SURNAMES.length] + GIVEN[Math.floor(gi / SURNAMES.length) % GIVEN.length];
   }
 
-  function pad2(n) { return String(n).padStart(2, '0'); }
-
   // 人员（总部 8 人 + 34 家门店每家 8 人 = 280）
   var PERSONS = [];
   var gi = 0;
@@ -50,7 +58,9 @@
       roleId: HQ_ROLES[Math.floor(h / 2)],
       orgType: '总部',
       storeCode: '',
-      status: '启用'
+      status: '启用',
+      createdAt: tsAt(100 + h),
+      updatedAt: tsAt(100 + h)
     });
   }
 
@@ -65,7 +75,9 @@
         roleId: STORE_ROLES[r],
         orgType: '门店',
         storeCode: st.code,
-        status: '启用'
+        status: '启用',
+        createdAt: tsAt(200 + s * 8 + r),
+        updatedAt: tsAt(200 + s * 8 + r)
       });
     }
   }

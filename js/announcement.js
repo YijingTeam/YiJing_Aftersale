@@ -135,41 +135,38 @@
 
   function findAnn(id) { for (var i = 0; i < NP[K].allData.length; i++) if (NP[K].allData[i].id === id) return NP[K].allData[i]; return null; }
 
-  // ===== 列表页 =====
-  function listFilterHtml() {
-    return '<div class="lt-filter"><div class="lt-filter-grid" id="ann-filterGrid">' +
-      npFItem('关键字', '<input type="text" id="ann-f-key" placeholder="标题/关键字">') +
+  // ===== 列表页（2026-10-25 迁统一外壳：查询区/工具栏/表格/分页/展开由 npShell 生成，本文件不再手写外壳） =====
+  function annCols() {
+    return [
+      { t: '序号', w: 50, f: function (r, i) { return i + 1; } },
+      { t: '标题', f: function (a) { return npEscape(a.title); } },
+      { t: '发布范围', f: function (a) { return npEscape(a.scopeSummary); } },
+      { t: '发布人', w: 100, f: function (a) { return npEscape(a.publisher); } },
+      { t: '发布时间', w: 160, f: function (a) { return a.publishTime; } },
+      {
+        t: '操作', w: 200, cls: 'col-actions', f: function (a) {
+          var ops = ['<a href="javascript:void(0)" class="lt-btn-link" onclick="annOpenDetail(\'' + a.id + '\')">查看</a>'];
+          if (isHq()) {
+            ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="annOpenRead(\'' + a.id + '\')">阅读情况</a>');
+            ops.push('<a href="javascript:void(0)" class="lt-link np-red" onclick="annDelete(\'' + a.id + '\')">删除</a>');
+          }
+          return npRenderActions(ops);
+        }
+      }
+    ];
+  }
+
+  function annFilterHtml() {
+    return npFItem('关键字', '<input type="text" id="ann-f-key" placeholder="标题/关键字">') +
       npSelect('发布范围', '<select id="ann-f-scope"><option value="">请选择</option><option>总部</option><option>门店</option><option>总部+门店</option></select>') +
       npFItem('发布人', '<input type="text" id="ann-f-pub" placeholder="发布人">') +
       '<div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">发布时间</span>' +
       '<input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="annQuery">' +
-      '<div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="ann-f-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="ann-f-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')"></div></div></div>' +
-      '<div class="lt-filter-footer"><button class="lt-btn lt-btn-primary" onclick="annQuery()">查询</button><button class="lt-btn lt-btn-default" onclick="annReset()">重置</button></div>' +
-      '</div></div>';
+      '<div class="lt-date-range-drop"><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="ann-f-date-start" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')"><span>—</span><input type="text" placeholder="yyyy-mm-dd" onfocus="this.type=\'date\';this.classList.add(\'date-shim\')" onblur="if(!this.value){this.type=\'text\';this.classList.remove(\'date-shim\')}" id="ann-f-date-end" value="" onchange="updateDateRangeDisplay(this);this.classList.remove(\'date-shim\')"></div></div></div>';
   }
 
-  function listToolbarHtml() {
+  function annToolbarHtml() {
     return (isHq() ? '<button class="lt-btn lt-btn-primary" onclick="annOpenPublish()">发布公告</button>' : '');
-  }
-
-  function buildShell() {
-    var root = document.getElementById('page-announcement');
-    if (!root) return;
-    var cols = [
-      { t: '序号', w: 50 },
-      { t: '标题' },
-      { t: '发布范围' },
-      { t: '发布人', w: 100 },
-      { t: '发布时间', w: 160 },
-      { t: '操作', w: 200, cls: 'col-actions' }
-    ];
-    root.innerHTML = '<div class="lt-wrap">' + listFilterHtml() +
-      '<div class="lt-list-area"><div class="lt-toolbar"><div class="lt-toolbar-left">' + listToolbarHtml() + '</div></div>' +
-      '<div class="lt-table-wrap"><table class="lt-table"><thead><tr>' + npTH(cols) + '</tr></thead><tbody id="ann-tbody"></tbody></table></div>' +
-      '<div class="lt-pager" id="ann-pager"><div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>' +
-      '<div class="lt-pager-right"><button class="pg-prev">上一页</button><span class="pg-pages"></span><button class="pg-next">下一页</button>' +
-      '<div class="pager-goto">前往 <input type="text"> 页</div><select class="pager-size"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div></div>' +
-      '</div></div>';
   }
 
   function annQuery() {
@@ -202,34 +199,7 @@
 
   function renderAnnList() {
     var st = NP[K];
-    var tb = document.getElementById('ann-tbody');
-    if (!tb) return;
-    var pages = Math.max(1, Math.ceil(st.filtered.length / st.pageSize));
-    if (st.page > pages) st.page = pages;
-    if (st.page < 1) st.page = 1;
-    var start = (st.page - 1) * st.pageSize;
-    var rows = st.filtered.slice(start, start + st.pageSize);
-    var html = '';
-    rows.forEach(function (a, i) {
-      var ops = ['<a href="javascript:void(0)" class="lt-btn-link" onclick="annOpenDetail(\'' + a.id + '\')">查看</a>'];
-      if (isHq()) {
-        ops.push('<a href="javascript:void(0)" class="lt-btn-link" onclick="annOpenRead(\'' + a.id + '\')">阅读情况</a>');
-        ops.push('<a href="javascript:void(0)" class="lt-link np-red" onclick="annDelete(\'' + a.id + '\')">删除</a>');
-      }
-      html += '<tr><td>' + (start + i + 1) + '</td><td>' + npEscape(a.title) + '</td><td>' + npEscape(a.scopeSummary) + '</td>' +
-        '<td>' + npEscape(a.publisher) + '</td><td>' + a.publishTime + '</td>' +
-        '<td class="col-actions">' + npRenderActions(ops) + '</td></tr>';
-    });
-    if (!rows.length) html = '<tr><td colspan="6" style="text-align:center;color:#999;padding:30px;">暂无数据</td></tr>';
-    tb.innerHTML = html;
-    var pager = document.getElementById('ann-pager');
-    if (pager) {
-      npRenderPager(pager, {
-        page: st.page, pageSize: st.pageSize, total: st.filtered.length,
-        go: function (p) { st.page = p; renderAnnList(); },
-        size: function (v) { st.pageSize = v; st.page = 1; renderAnnList(); }
-      });
-    }
+    npRenderTable(K, 'ann-tbody', 'ann-pager', annCols(), st.filtered, st);
   }
 
   window.annQuery = annQuery;
@@ -462,7 +432,7 @@
     var lis = '<li data-val="" onclick="annReadRoleSelect(this)">请选择</li>' +
       o.roles.map(function (r) { return '<li data-val="' + npEscape(r.id) + '" onclick="annReadRoleSelect(this)">' + npEscape(r.name) + '</li>'; }).join('');
     return '<div class="lt-input-wrap combobox" style="position:relative">' +
-      '<input type="text" id="ann-read-role" placeholder="请选择或输入" onfocus="npComboboxShow(this)" oninput="npComboboxFilter(this)">' +
+      '<input type="text" id="ann-read-role" placeholder="请选择" onfocus="npComboboxShow(this)" oninput="npComboboxFilter(this)">' +
       '<span class="cb-arrow" onclick="npComboboxToggle(this)">▼</span>' +
       '<ul class="lt-datalist">' + lis + '</ul></div>';
   }
@@ -491,12 +461,12 @@
       '<div class="lt-table-wrap" style="max-height:320px;"><table class="lt-table"><thead><tr>' +
       npTH([{ t: '角色', w: 130 }, { t: '人员', w: 150 }, { t: '已读/未读', w: 90 }, { t: '查阅时间', w: 160 }]) +
       '</tr></thead><tbody id="ann-read-tbody"></tbody></table></div>' +
-      '<div class="lt-pager" id="ann-read-pager"><div class="lt-pager-left"><span class="pager-total">共 0 条</span></div>' +
-      '<div class="lt-pager-right"><button class="pg-prev">上一页</button><span class="pg-pages"></span><button class="pg-next">下一页</button>' +
-      '<div class="pager-goto">前往 <input type="text"> 页</div><select class="pager-size"><option value="10">10条/页</option><option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select></div></div>' +
+      '<div class="lt-pager" id="ann-read-pager"></div>' +
       '</div>';
     npOpenModal('阅读情况 — ' + a.title, html,
       '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">关闭</button>', { width: 820 });
+    // 弹窗内「角色」是 combobox，内容刚生成 → 补一次注入，× 才会出现
+    if (typeof npInitComboboxes === 'function') npInitComboboxes();
     renderReadTable();
   };
 
@@ -543,9 +513,15 @@
     }
   }
 
-  // ===== 初始化 =====
+  // ===== 初始化（统一外壳） =====
   window.initAnnouncement = function () {
-    buildShell();
+    var root = document.getElementById('page-announcement');
+    if (!root) return;
+    root.innerHTML = npShell(K, { l2: '系统设置', l3: '技术公告' }, annFilterHtml(), annToolbarHtml(), npTH(annCols()), 'ann-tbody', 'ann-pager');
+    initFilterGrid(K + '-filterGrid', 7); NP[K]._fShow = 7; NP[K]._fExp = false;
+    NP[K].query = annQuery;
+    NP[K].reset = annReset;
+    NP[K].render = renderAnnList;
     annQuery();
   };
 

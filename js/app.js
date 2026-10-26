@@ -183,10 +183,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         if (module === 'quality-report-template') {
           initQrt();
         }
-        // 归档分类配置（总部）
-        if (module === 'archive-category') {
-          initArchiveCategory();
-        }
+        // 归档分类配置（总部）→ 已改由 npRegisterModuleInit('archive-category') 统一初始化（2026-10-25 迁统一外壳时改的）
         // 归档分类配置2（总部，仿故障树三列联列）
         if (module === 'archive-category2') {
           initArchiveCategory2();
@@ -845,6 +842,8 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       // 查询项 ≤ 默认显示数，不需要"展开/收起"，隐藏它
       var toggleEl = grid.querySelector('.lt-filter-toggle,.lt-filter-more-toggle');
       if (toggleEl) toggleEl.style.display = items.length > showCount ? '' : 'none';
+      // 2026-10-24：每次栅格初始化顺带注入查询区一键清除 ×（全站查询页都经过本函数，新页面自动生效）
+      if (typeof npInitFilterClears === 'function') npInitFilterClears();
     }
     function toggleFilterGrid(gridId, isExpanded, showCount, toggleSelector) {
       var grid = document.getElementById(gridId);
@@ -890,7 +889,11 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     function updateDateRangeDisplay(dateInput) {
       var drop = dateInput.closest('.lt-date-range-drop');
       var textInput = drop.parentElement.querySelector('.lt-date-range-text');
-      var dates = drop.querySelectorAll('input[type=date]');
+      /* 两个日期输入：排除回显文本框（.lt-date-range-text），兼容 type=date 与「文本框点击切日期」两种写法 */
+      var dates = [];
+      drop.querySelectorAll('input').forEach(function (inp) {
+        if (!inp.classList.contains('lt-date-range-text')) dates.push(inp);
+      });
       if (textInput && dates.length === 2) {
         var s = dates[0].value || '';
         var e = dates[1].value || '';
@@ -2673,9 +2676,10 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       // '已退回' 已废弃，不再使用
       var statuses = ['待提交','待提交','待技术援助答复','待技术援助答复','已关单','已关单','已作废'/*,'已退废弃'*/];
       var stores = ['深圳福田店','广州天河店','上海浦东店','北京朝阳店','成都锦江店','武汉光谷店','杭州西湖店','南京鼓楼店'];
-      var storeCodes = ['SZFT001','GZ001','SH001','BJ001','CD001','WH001','HZ001','NJGL008'];
+      var storeCodes = ['SZFT001','GZ001','SH001','BJ001','SCZ01','WH001','HZ001','NJGL008'];
       var provinces = ['广东','广东','上海','北京','四川','湖北','浙江','江苏'];
       var cities = ['深圳','广州','上海','北京','成都','武汉','杭州','南京'];
+      var regions = ['华南','华南','华东','华北','西南','华中','华东','华东'];
       var carSeries = ['秦PLUS','宋Pro','汉EV','唐DM-i','海豹','元PLUS','驱逐舰05','海豚'];
       var carModels = ['2024款 DM-i','2025款 EV','2024款 四驱','2025款 尊贵型'];
       var faultSystems = ['安全系统','车身系统','电子电气系统','底盘系统','动力集成系统','高压动力系统','内饰系统','外饰系统','智能驾驶系统','其他'];
@@ -2691,7 +2695,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         var ds = d.toISOString().split('T')[0];
         tsAllData.push({
           id:i+1, orderNo:'TS2026' + String(i+1).padStart(4,'0'), status:statuses[i%statuses.length],
-          province:provinces[idx], city:cities[idx], storeName:stores[idx], storeCode:storeCodes[idx],
+          province:provinces[idx], city:cities[idx], region:regions[idx], district:cities[idx], storeName:stores[idx], storeCode:storeCodes[idx],
           submitter: ['张伟','李娜','王强'][i%3],
           submitDate:ds, carSeries:carSeries[idx], subject:stores[idx] + ' ' + carModels[i % 4] + '-' + vins[idx].substring(11) + ' ' + faultDescriptions[idx],
           archiveCategory:archiveCategories[i%5], vin:vins[idx],
@@ -2743,7 +2747,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     // ⚠ 修改注意事项：TS_SHOW_COUNT = 默认显示的筛选器数量（索引0~N-1显示，N及以后隐藏）
     // for (var i = TS_SHOW_COUNT; ...) 表示隐藏第 TS_SHOW_COUNT 个及以后的筛选器
     var TS_SHOW_COUNT = 7;
-    function initTs() { tsFilteredData = tsAllData.slice(); tsCurrentPage = 1; tsRenderTable(); initFilterGrid('ts-filterGrid', TS_SHOW_COUNT); var sel = document.getElementById('ts-flt-status'); if (sel) { sel.innerHTML = '<option value="">全部</option>'; tsStatuses.forEach(function(s) { sel.innerHTML += '<option>' + s + '</option>'; }); } }
+    function initTs() { tsFilteredData = tsAllData.slice(); tsCurrentPage = 1; tsRenderTable(); initFilterGrid('ts-filterGrid', TS_SHOW_COUNT); var sel = document.getElementById('ts-flt-status'); if (sel) { sel.innerHTML = '<option value="">请选择</option>'; tsStatuses.forEach(function(s) { sel.innerHTML += '<option>' + s + '</option>'; }); } }
     function tsGetFiltered() {
       var orderNo = (document.getElementById('ts-flt-order-no')||{}).value || '';
       var carSeriesV = (document.getElementById('ts-flt-car-series')||{}).value || '';
@@ -3546,8 +3550,8 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         function tsSelectCombobox(li, inputId, listId) { gtComboboxSelect(li); }
     // 点击外部关闭combobox
     document.addEventListener('click', function(e){
-      if (!e.target.closest('.ts-combobox')) {
-        document.querySelectorAll('.ts-combobox .lt-datalist.show').forEach(function(l){ l.classList.remove('show'); });
+      if (!e.target.closest('.combobox')) {
+        document.querySelectorAll('.combobox .lt-datalist.show').forEach(function(l){ l.classList.remove('show'); });
       }
     });
 
@@ -3628,7 +3632,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       var ecuValues = ['IVI','OIB','TBOX','ACU','AEC','AKC','ALCM','AMP','AR','BAT','BMS','CASS','CBS','CMCS','COMP','CPM','CRF','CWPD','DKM','DLP','DRMLF','DRMLR','DRMRF','DRMRR','EMS','EPBM','EPBS','EPS','ESA','ETC','FLLR','FLRR','FUS','GCU','HCML','HCMR','HOD','IBC','ICD','ISC','ISD-L','ISD-R','MCUR','MFTS','MLMR','MTCULF','NFCAM','OBC','OPCF','OPCR','PDM-LF','PDM-LR','PDM-RF','PDM-RR','POT','PSM','RADP','RLS','RSBD','SCC','SSM','TPMS','WSMFL','WSMFR','WSMRL','WSMRR','WSM-MRR','ZCU','HAD'];
       var el = document.getElementById('fc-ecu-list');
       if (el) {
-        el.innerHTML = '<li data-val="" onclick="csComboboxSelect(this)">全部</li>' +
+        el.innerHTML = '<li data-val="" onclick="csComboboxSelect(this)">请选择</li>' +
           ecuValues.map(function(v){ return '<li data-val="'+v+'" onclick="csComboboxSelect(this)">'+v+'</li>'; }).join('');
       }
     }
@@ -3766,9 +3770,10 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       // 质量报告状态：待提交 / 审核中 / 已退回 / 已驳回 / 审核通过
       var statuses = ['待提交','待提交','审核中','审核中','审核中','已退回','已驳回','审核通过','审核通过'];
       var stores = ['深圳福田店','广州天河店','上海浦东店','北京朝阳店','成都锦江店','武汉光谷店','杭州西湖店','南京鼓楼店'];
-      var storeCodes = ['SZFT001','GZ001','SH001','BJ001','CD001','WH001','HZ001','NJGL008'];
+      var storeCodes = ['SZFT001','GZ001','SH001','BJ001','SCZ01','WH001','HZ001','NJGL008'];
       var provinces = ['广东','广东','上海','北京','四川','湖北','浙江','江苏'];
       var cities = ['深圳','广州','上海','北京','成都','武汉','杭州','南京'];
+      var regions = ['华南','华南','华东','华北','西南','华中','华东','华东'];
       var carSeries = ['秦PLUS','宋Pro','汉EV','唐DM-i','海豹','元PLUS','驱逐舰05','海豚'];
       var carModels = ['2024款 DM-i','2025款 EV','2024款 四驱','2025款 尊贵型'];
       var faultSystems = ['安全系统','车身系统','电子电气系统','底盘系统','动力集成系统','高压动力系统','内饰系统','外饰系统','智能驾驶系统','其他'];
@@ -3795,7 +3800,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         }
         qrAllData.push({
           id:i+1, orderNo:'QR2026' + String(i+1).padStart(4,'0'), status:statuses[i%statuses.length],
-          province:provinces[idx], city:cities[idx], storeName:stores[idx], storeCode:storeCodes[idx],
+          province:provinces[idx], city:cities[idx], region:regions[idx], district:cities[idx], storeName:stores[idx], storeCode:storeCodes[idx],
           submitDate:ds, carSeries:carSeries[idx], subject:subjects[idx],
           archiveCategory:archiveCategories[i%5], vin:vins[idx],
           faultDate:ds, faultSystem:faultSystems[i%7], faultNature:faultNatures[i%3],
@@ -4797,10 +4802,10 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       npCloseModal();
     }
 
-    // qr-combobox 点击外部关闭
+    // combobox 点击外部关闭
     document.addEventListener('click', function(e){
-      if (!e.target.closest('.qr-combobox')) {
-        document.querySelectorAll('.qr-combobox .lt-datalist.show').forEach(function(l){ l.classList.remove('show'); });
+      if (!e.target.closest('.combobox')) {
+        document.querySelectorAll('.combobox .lt-datalist.show').forEach(function(l){ l.classList.remove('show'); });
       }
     });
 
@@ -4811,7 +4816,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     var thqPageSize = NP_DEFAULT_PAGE_SIZE;
     var thqFilterExpanded = false;
 
-    function initThq() { thqFilteredData = tsAllData.slice(); thqCurrentPage = 1; thqRenderTable(); initFilterGrid('thq-filterGrid', THQ_SHOW_COUNT); var sel = document.getElementById('thq-flt-status'); if (sel) { sel.innerHTML = '<option value="">全部</option>'; tsStatuses.forEach(function(s) { sel.innerHTML += '<option>' + s + '</option>'; }); sel.value = '待技术援助答复'; } }
+    function initThq() { thqFilteredData = tsAllData.slice(); thqCurrentPage = 1; thqRenderTable(); initFilterGrid('thq-filterGrid', THQ_SHOW_COUNT); var sel = document.getElementById('thq-flt-status'); if (sel) { sel.innerHTML = '<option value="">请选择</option>'; tsStatuses.forEach(function(s) { sel.innerHTML += '<option>' + s + '</option>'; }); sel.value = '待技术援助答复'; } }
     function thqGetFiltered() {
       var orderNo = (document.getElementById('thq-flt-order-no')||{}).value || '';
       var carSeriesV = (document.getElementById('thq-flt-car-series')||{}).value || '';
@@ -4828,6 +4833,8 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       var submitStart = (document.getElementById('thq-flt-submit-start')||{}).value || '';
       var submitEnd = (document.getElementById('thq-flt-submit-end')||{}).value || '';
       var store = (document.getElementById('thq-flt-store')||{}).value || '';
+      var region = (document.getElementById('thq-flt-region')||{}).value || '';
+      var district = (document.getElementById('thq-flt-district')||{}).value || '';
       var province = (document.getElementById('thq-flt-province')||{}).value || '';
       var city = (document.getElementById('thq-flt-city')||{}).value || '';
       var archiveCategory = (document.getElementById('thq-flt-archive-category')||{}).value || '';
@@ -4852,6 +4859,8 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         if (submitStart && r.submitDate < submitStart) return false;
         if (submitEnd && r.submitDate > submitEnd) return false;
         if (store && r.storeName.toLowerCase().indexOf(store.toLowerCase()) < 0) return false;
+        if (region && r.region !== region) return false;
+        if (district && r.district !== district) return false;
         if (province && r.province !== province) return false;
         if (city && r.city !== city) return false;
         if (archiveCategory && r.archiveCategory !== archiveCategory) return false;
@@ -4865,7 +4874,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     }
     function thqApplyFilter() { thqFilteredData = thqGetFiltered(); thqCurrentPage = 1; thqRenderTable(); }
     function thqResetFilter() {
-      var ids = ['thq-flt-order-no','thq-flt-car-series','thq-flt-car-model','thq-flt-status','thq-flt-vin','thq-flt-subject','thq-flt-fault-start','thq-flt-fault-end','thq-flt-fault-system','thq-flt-fault-nature','thq-flt-prod-start','thq-flt-prod-end','thq-flt-submit-start','thq-flt-submit-end','thq-flt-store','thq-flt-province','thq-flt-city','thq-flt-archive-category','thq-flt-repair-order','thq-flt-complaint-order','thq-flt-is-pdi','thq-flt-pdi-order','thq-flt-alarm-order'];
+      var ids = ['thq-flt-order-no','thq-flt-car-series','thq-flt-car-model','thq-flt-status','thq-flt-vin','thq-flt-subject','thq-flt-fault-start','thq-flt-fault-end','thq-flt-fault-system','thq-flt-fault-nature','thq-flt-prod-start','thq-flt-prod-end','thq-flt-submit-start','thq-flt-submit-end','thq-flt-store','thq-flt-region','thq-flt-district','thq-flt-province','thq-flt-city','thq-flt-archive-category','thq-flt-repair-order','thq-flt-complaint-order','thq-flt-is-pdi','thq-flt-pdi-order','thq-flt-alarm-order'];
       ids.forEach(function(id) { var el = document.getElementById(id); if (el) { if (el.tagName==='SELECT') el.value=''; else el.value=''; } });
       thqFilteredData = tsAllData.slice(); thqCurrentPage = 1; thqRenderTable();
     }
@@ -4916,7 +4925,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     (function initQrhqMockData() {
       var statuses = ['待提交','审核中','审核中','已退回','已驳回','审核通过'];
       var stores = ['深圳福田店','广州天河店','上海浦东店','北京朝阳店','成都锦江店'];
-      var storeCodes = ['SZFT001','GZ001','SH001','BJ001','CD001'];
+      var storeCodes = ['SZFT001','GZ001','SH001','BJ001','SCZ01'];
       var provinces = ['广东','广东','上海','北京','四川'];
       var cities = ['深圳','广州','上海','北京','成都'];
       var carSeries = ['秦PLUS','宋Pro','汉EV','唐DM-i','海豹'];
@@ -5005,6 +5014,8 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       var submitStart = (document.getElementById('qrhq-flt-submit-start')||{}).value || '';
       var submitEnd = (document.getElementById('qrhq-flt-submit-end')||{}).value || '';
       var store = (document.getElementById('qrhq-flt-store')||{}).value || '';
+      var region = (document.getElementById('qrhq-flt-region')||{}).value || '';
+      var district = (document.getElementById('qrhq-flt-district')||{}).value || '';
       var archiveCategory = (document.getElementById('qrhq-flt-archive-category')||{}).value || '';
       var province = (document.getElementById('qrhq-flt-province')||{}).value || '';
       var city = (document.getElementById('qrhq-flt-city')||{}).value || '';
@@ -5029,6 +5040,8 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
         if (submitStart && r.submitDate < submitStart) return false;
         if (submitEnd && r.submitDate > submitEnd) return false;
         if (store && r.storeName.toLowerCase().indexOf(store.toLowerCase()) < 0) return false;
+        if (region && r.region !== region) return false;
+        if (district && r.district !== district) return false;
         if (province && r.province !== province) return false;
         if (city && r.city !== city) return false;
         if (archiveCategory && r.archiveCategory !== archiveCategory) return false;
@@ -5042,7 +5055,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     }
     function qrhqApplyFilter() { qrhqFilteredData = qrhqGetFiltered(); qrhqCurrentPage = 1; qrhqRenderTable(); }
     function qrhqResetFilter() {
-      var ids = ['qrhq-flt-order-no','qrhq-flt-car-series','qrhq-flt-car-model','qrhq-flt-status','qrhq-flt-vin','qrhq-flt-subject','qrhq-flt-fault-start','qrhq-flt-fault-end','qrhq-flt-fault-system','qrhq-flt-fault-nature','qrhq-flt-prod-start','qrhq-flt-prod-end','qrhq-flt-submit-start','qrhq-flt-submit-end','qrhq-flt-store','qrhq-flt-province','qrhq-flt-city','qrhq-flt-repair-order','qrhq-flt-complaint-order','qrhq-flt-is-pdi','qrhq-flt-pdi-order','qrhq-flt-alarm-order'];
+      var ids = ['qrhq-flt-order-no','qrhq-flt-car-series','qrhq-flt-car-model','qrhq-flt-status','qrhq-flt-vin','qrhq-flt-subject','qrhq-flt-fault-start','qrhq-flt-fault-end','qrhq-flt-fault-system','qrhq-flt-fault-nature','qrhq-flt-prod-start','qrhq-flt-prod-end','qrhq-flt-submit-start','qrhq-flt-submit-end','qrhq-flt-store','qrhq-flt-region','qrhq-flt-district','qrhq-flt-province','qrhq-flt-city','qrhq-flt-repair-order','qrhq-flt-complaint-order','qrhq-flt-is-pdi','qrhq-flt-pdi-order','qrhq-flt-alarm-order'];
       ids.forEach(function(id) { var el = document.getElementById(id); if (el) { if (el.tagName==='SELECT') el.value=''; else el.value=''; } });
       qrhqFilteredData = qrhqAllData.slice(); qrhqCurrentPage = 1; qrhqRenderTable();
     }
@@ -6349,6 +6362,13 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     var soEl = document.getElementById('page-desc-store-operation');
     var rsqEl = document.getElementById('page-desc-repair-stats-query');
     var rlhEl = document.getElementById('page-desc-repair-labor-hours');
+    var tshqEl = document.getElementById('page-desc-tech-support-hq');
+    var qrhqEl = document.getElementById('page-desc-quality-report-hq');
+    var rscEl = document.getElementById('page-desc-repair-settlement');
+    var rsiEl = document.getElementById('page-desc-repair-settlement');
+    var yskEl = document.getElementById('page-desc-prepayment');
+    var psoEl = document.getElementById('page-desc-parts-sales-order');
+    var psiEl = document.getElementById('page-desc-parts-sales-invoice');
     if (!defEl || !pmEl) return;
     // 先全部隐藏
     defEl.style.display = 'none';
@@ -6357,6 +6377,13 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     if (soEl) soEl.style.display = 'none';
     if (rsqEl) rsqEl.style.display = 'none';
     if (rlhEl) rlhEl.style.display = 'none';
+    if (tshqEl) tshqEl.style.display = 'none';
+    if (qrhqEl) qrhqEl.style.display = 'none';
+    if (rscEl) rscEl.style.display = 'none';
+    if (rsiEl) rsiEl.style.display = 'none';
+    if (yskEl) yskEl.style.display = 'none';
+    if (psoEl) psoEl.style.display = 'none';
+    if (psiEl) psiEl.style.display = 'none';
     // 根据模块显示对应内容
     if (module === 'parts-master') {
       pmEl.style.display = 'block';
@@ -6368,6 +6395,21 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
       if (rsqEl) rsqEl.style.display = 'block';
     } else if (module === 'repair-labor-hours') {
       if (rlhEl) rlhEl.style.display = 'block';
+    } else if (module === 'tech-support-hq') {
+      if (tshqEl) tshqEl.style.display = 'block';
+    } else if (module === 'quality-report-hq') {
+      if (qrhqEl) qrhqEl.style.display = 'block';
+    } else if (module === 'repair-settlement') {
+      if (rscEl) rscEl.style.display = 'block';
+    } else if (module === 'repair-settlement-invoice') {
+      /* 发票整页与列表页共用同一份页面说明块 */
+      if (rsiEl) rsiEl.style.display = 'block';
+    } else if (module === 'prepayment') {
+      if (yskEl) yskEl.style.display = 'block';
+    } else if (module === 'parts-sales-order') {
+      if (psoEl) psoEl.style.display = 'block';
+    } else if (module === 'parts-sales-invoice') {
+      if (psiEl) psiEl.style.display = 'block';
     } else {
       defEl.style.display = '';
     }
@@ -6603,7 +6645,7 @@ var ppAllData = [
   {seq:1,po:'PO202605001',type:'常规订单',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:12,amount:'45,200.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',edate:'2026-07-25',submitter:'—',stime:'—',sync:'—',recvName:'张丽',recvPhone:'13800001111',recvAddr:'上海市浦东新区张江路100号',auditLog:[],items:[{code:'PJ001',name:'刹车片（前）',taxNo:'',unit:'个',snp:1,price:380,shortQty:5,rel:'',qty:5,amount:1900,maxOrder:100,replace:'',stock:50,intransit:10}]},
   {seq:2,po:'PO202605002',type:'油品订单',region:'华南',district:'广州',store:'广州天河店',scode:'GZ001',variety:8,amount:'32,800.00',shortage:'—',status:'未提交',source:'门店下单',remark:'—',edate:'2026-07-28',submitter:'—',stime:'—',sync:'—',recvName:'陈刚',recvPhone:'13900002222',recvAddr:'广州市天河区珠江新城88号',auditLog:[],items:[]},
   {seq:3,po:'PO202605003',type:'紧急订单',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:5,amount:'18,500.00',shortage:'DQ202605001',status:'门店审核中',source:'主机厂代下',remark:'—',edate:'2026-07-25',submitter:'王五',stime:'2026-07-20 09:00:00',sync:'—',recvName:'李娜',recvPhone:'13700003333',recvAddr:'北京市朝阳区建国路56号',auditLog:[{step:'门店保存提交',person:'王五',time:'2026-07-20 09:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
-  {seq:4,po:'PO202605004',type:'常规订单',region:'西南',district:'成都',store:'成都锦江店',scode:'CD001',variety:15,amount:'56,700.00',shortage:'—',status:'门店审核中',source:'门店下单',remark:'—',edate:'2026-07-27',submitter:'赵六',stime:'2026-07-20 14:00:00',sync:'—',recvName:'赵静',recvPhone:'13600004444',recvAddr:'成都市武侯区人民南路120号',auditLog:[{step:'门店保存提交',person:'赵六',time:'2026-07-20 14:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
+  {seq:4,po:'PO202605004',type:'常规订单',region:'西南',district:'成都',store:'成都锦江店',scode:'SCZ01',variety:15,amount:'56,700.00',shortage:'—',status:'门店审核中',source:'门店下单',remark:'—',edate:'2026-07-27',submitter:'赵六',stime:'2026-07-20 14:00:00',sync:'—',recvName:'赵静',recvPhone:'13600004444',recvAddr:'成都市武侯区人民南路120号',auditLog:[{step:'门店保存提交',person:'赵六',time:'2026-07-20 14:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
   {seq:5,po:'PO202605005',type:'绿色通道',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:6,amount:'28,300.00',shortage:'—',status:'门店审核中',source:'主机厂代下',remark:'—',edate:'—',submitter:'孙七',stime:'2026-07-21 10:00:00',sync:'—',recvName:'孙伟',recvPhone:'13500005555',recvAddr:'沈阳市和平区南京北街66号',auditLog:[{step:'门店保存提交',person:'孙七',time:'2026-07-21 10:00:00',result:'提交',opinion:'请审核',attach:''}],items:[]},
   {seq:6,po:'PO202606001',type:'常规订单',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:10,amount:'41,200.00',shortage:'—',status:'审核通过',source:'门店下单',remark:'—',edate:'2026-07-26',submitter:'周八',stime:'2026-07-21 14:00:00',sync:'—',recvName:'周琳',recvPhone:'13400006666',recvAddr:'杭州市西湖区文三路88号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-21 15:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-21 17:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
   {seq:7,po:'PO202606002',type:'定制订单',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:3,amount:'62,100.00',shortage:'—',status:'审核通过',source:'门店下单',remark:'—',edate:'2026-07-29',submitter:'吴九',stime:'2026-07-22 09:00:00',sync:'2026-07-22 17:00:00',recvName:'吴敏',recvPhone:'13300007777',recvAddr:'武汉市光谷大道特1号',auditLog:[{step:'门店审核',person:'王芳',time:'2026-07-22 11:00:00',result:'通过',opinion:'同意',attach:''},{step:'总部审核',person:'李明',time:'2026-07-22 15:00:00',result:'通过',opinion:'同意',attach:''}],items:[]},
@@ -6760,7 +6802,7 @@ var ppdAllData = [
   {seq:1,code:'PJ001',name:'刹车片（前）',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',po:'PO202605001',adate:'2026-05-20',oem:'OE202605001',dno:'DH202605001',pqty:50,dqty:50,uprice:'380.00',amount:'19,000.00'},
   {seq:2,code:'PJ002',name:'机油滤清器',region:'华南',district:'广州',store:'广州天河店',scode:'GZ001',po:'PO202605002',adate:'2026-05-21',oem:'OE202605002',dno:'DH202605002',pqty:80,dqty:80,uprice:'85.00',amount:'6,800.00'},
   {seq:3,code:'PJ003',name:'空气滤芯',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',po:'PO202605003',adate:'2026-05-22',oem:'OE202605003',dno:'DH202605003',pqty:60,dqty:0,uprice:'120.00',amount:'7,200.00'},
-  {seq:4,code:'PJ004',name:'火花塞',region:'西南',district:'成都',store:'成都锦江店',scode:'CD001',po:'PO202605004',adate:'2026-05-23',oem:'OE202605004',dno:'DH202605004',pqty:40,dqty:40,uprice:'95.00',amount:'3,800.00'},
+  {seq:4,code:'PJ004',name:'火花塞',region:'西南',district:'成都',store:'成都锦江店',scode:'SCZ01',po:'PO202605004',adate:'2026-05-23',oem:'OE202605004',dno:'DH202605004',pqty:40,dqty:40,uprice:'95.00',amount:'3,800.00'},
   {seq:5,code:'PJ005',name:'刹车油',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',po:'PO202605005',adate:'2026-05-24',oem:'OE202605005',dno:'DH202605005',pqty:30,dqty:30,uprice:'150.00',amount:'4,500.00'},
   {seq:6,code:'PJ006',name:'空调滤芯',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',po:'PO202606001',adate:'2026-06-01',oem:'OE202606001',dno:'DH202606001',pqty:70,dqty:70,uprice:'90.00',amount:'6,300.00'},
   {seq:7,code:'PJ001',name:'刹车片（前）',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',po:'PO202606002',adate:'2026-06-02',oem:'OE202606002',dno:'DH202606002',pqty:35,dqty:35,uprice:'380.00',amount:'13,300.00'},
@@ -7038,7 +7080,7 @@ var fsqAllData = [
   {seq:1,name:'刹车片（前）',code:'PJ001',store:'上海浦东店',scode:'SH001',province:'上海',region:'华东',district:'上海',po:'PO202605003',type:'紧急',oem:'OE202605003',pqty:50,aqty:35,sqty:15,shours:'72',sync:'2026-05-18 15:00:00',oreply:'2026-05-19 14:00:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
   {seq:2,name:'机油滤清器',code:'PJ002',store:'广州天河店',scode:'GZ001',province:'广东',region:'华南',district:'广州',po:'PO202605004',type:'常规',oem:'OE202605004',pqty:80,aqty:60,sqty:20,shours:'48',sync:'2026-05-19 16:30:00',oreply:'2026-05-20 10:00:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
   {seq:3,name:'空气滤芯',code:'PJ003',store:'北京朝阳店',scode:'BJ001',province:'北京',region:'华北',district:'北京',po:'PO202605005',type:'绿色',oem:'OE202605005',pqty:60,aqty:60,sqty:0,shours:'0',sync:'2026-05-20 09:00:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'},
-  {seq:4,name:'火花塞',code:'PJ004',store:'成都锦江店',scode:'CD001',province:'四川',region:'西南',district:'成都',po:'PO202606001',type:'常规',oem:'OE202606001',pqty:40,aqty:25,sqty:15,shours:'96',sync:'2026-05-30 14:00:00',oreply:'2026-05-31 16:00:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
+  {seq:4,name:'火花塞',code:'PJ004',store:'成都锦江店',scode:'SCZ01',province:'四川',region:'西南',district:'成都',po:'PO202606001',type:'常规',oem:'OE202606001',pqty:40,aqty:25,sqty:15,shours:'96',sync:'2026-05-30 14:00:00',oreply:'2026-05-31 16:00:00',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'已发货'},
   {seq:5,name:'刹车油',code:'PJ005',store:'沈阳和平店',scode:'SY001',province:'辽宁',region:'东北',district:'沈阳',po:'PO202606005',type:'绿色',oem:'OE202606005',pqty:30,aqty:10,sqty:20,shours:'120',sync:'2026-06-06 15:30:00',oreply:'2026-06-08 09:00:00',capply:'2026-06-09',caudit:'2026-06-10 10:00:00',cstatus:'已取消',sstatus:'已发货'},
   {seq:6,name:'空调滤芯',code:'PJ006',store:'杭州西湖店',scode:'HZ001',province:'浙江',region:'华东',district:'杭州',po:'PO202606002',type:'定制',oem:'OE202606002',pqty:70,aqty:70,sqty:0,shours:'0',sync:'2026-06-01 16:00:00',oreply:'—',capply:'—',caudit:'—',cstatus:'未取消',sstatus:'待处理'},
   {seq:7,name:'变速箱油',code:'PJ007',store:'深圳南山店',scode:'SZ001',province:'广东',region:'华南',district:'深圳',po:'PO202606007',type:'绿色',oem:'OE202606007',pqty:25,aqty:10,sqty:15,shours:'168',sync:'2026-06-09 10:00:00',oreply:'2026-06-12 11:00:00',capply:'2026-06-13',caudit:'—',cstatus:'审核驳回',sstatus:'已发货'},
@@ -7235,7 +7277,7 @@ var epAllData = [
   {seq:1,orderNo:'WC202605001',supplier:'联友科技武汉',region:'华东',district:'上海',store:'上海浦东店',scode:'SH001',variety:8,amount:'32,500.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-05-20 15:00:00',edate:'2026-06-12',submitter:'张三',stime:'2026-05-18 09:00:00',recvName:'张伟',recvPhone:'13800001234',recvAddr:'上海市浦东新区张江路 88 号',items:[{code:'290F60471R',name:'整车控制器',unit:'EA',snp:10,price:799.70,qty:30,amount:23991.00,maxOrder:999,replace:'无',stock:20,intransit:0},{code:'291A12345X',name:'电机控制模块',unit:'EA',snp:5,price:850.90,qty:10,amount:8509.00,maxOrder:500,replace:'无',stock:8,intransit:3}],auditLog:[{step:'门店审核',person:'李明',time:'2026-05-20 15:00:00',result:'通过',opinion:'同意',attach:''}]},
   {seq:2,orderNo:'WC202605002',supplier:'华锐汽车配件',region:'华南',district:'广州',store:'广州天河店',scode:'GZ001',variety:5,amount:'18,200.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-05-21 10:00:00',edate:'2026-06-15',submitter:'李四',stime:'2026-05-19 14:00:00',recvName:'李娜',recvPhone:'13800005678',recvAddr:'广州市天河区天河路 100 号',items:[{code:'292B22222Y',name:'前大灯总成',unit:'个',snp:1,price:680.00,qty:20,amount:13600.00,maxOrder:200,replace:'无',stock:15,intransit:5},{code:'292B33333Z',name:'后尾灯总成',unit:'个',snp:1,price:460.00,qty:10,amount:4600.00,maxOrder:200,replace:'无',stock:10,intransit:2}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-05-21 10:00:00',result:'通过',opinion:'同意',attach:''}]},
   {seq:3,orderNo:'WC202605003',supplier:'联友科技武汉',region:'华北',district:'北京',store:'北京朝阳店',scode:'BJ001',variety:3,amount:'28,600.00',status:'待审核',remark:'—',auditor:'—',atime:'—',edate:'2026-06-10',submitter:'王五',stime:'2026-05-22 11:00:00',recvName:'王强',recvPhone:'13800009012',recvAddr:'北京市朝阳区建国路 88 号',items:[{code:'293C11111A',name:'制动片套装',unit:'套',snp:4,price:520.00,qty:35,amount:18200.00,maxOrder:300,replace:'无',stock:25,intransit:0},{code:'293C22222B',name:'刹车盘',unit:'个',snp:2,price:520.00,qty:20,amount:10400.00,maxOrder:300,replace:'无',stock:12,intransit:4}],auditLog:[]},
-  {seq:4,orderNo:'WC202606001',supplier:'联恒机电设备',region:'西南',district:'成都',store:'成都锦江店',scode:'CD001',variety:6,amount:'22,400.00',status:'已驳回',remark:'供应商资质过期',auditor:'李明',atime:'2026-06-02 09:30:00',edate:'—',submitter:'赵六',stime:'2026-06-01 08:00:00',recvName:'刘洋',recvPhone:'13800003456',recvAddr:'成都市武侯区人民南路 88 号',items:[{code:'294D11111C',name:'蓄电池',unit:'EA',snp:6,price:880.00,qty:20,amount:17600.00,maxOrder:400,replace:'无',stock:18,intransit:0},{code:'294D22222D',name:'发电机',unit:'EA',snp:3,price:480.00,qty:10,amount:4800.00,maxOrder:400,replace:'无',stock:6,intransit:2}],auditLog:[{step:'门店审核',person:'李明',time:'2026-06-02 09:30:00',result:'驳回',opinion:'供应商资质过期',attach:''}]},
+  {seq:4,orderNo:'WC202606001',supplier:'联恒机电设备',region:'西南',district:'成都',store:'成都锦江店',scode:'SCZ01',variety:6,amount:'22,400.00',status:'已驳回',remark:'供应商资质过期',auditor:'李明',atime:'2026-06-02 09:30:00',edate:'—',submitter:'赵六',stime:'2026-06-01 08:00:00',recvName:'刘洋',recvPhone:'13800003456',recvAddr:'成都市武侯区人民南路 88 号',items:[{code:'294D11111C',name:'蓄电池',unit:'EA',snp:6,price:880.00,qty:20,amount:17600.00,maxOrder:400,replace:'无',stock:18,intransit:0},{code:'294D22222D',name:'发电机',unit:'EA',snp:3,price:480.00,qty:10,amount:4800.00,maxOrder:400,replace:'无',stock:6,intransit:2}],auditLog:[{step:'门店审核',person:'李明',time:'2026-06-02 09:30:00',result:'驳回',opinion:'供应商资质过期',attach:''}]},
   {seq:5,orderNo:'WC202606002',supplier:'联友科技武汉',region:'东北',district:'沈阳',store:'沈阳和平店',scode:'SY001',variety:10,amount:'45,800.00',status:'已通过',remark:'—',auditor:'王芳',atime:'2026-06-05 14:00:00',edate:'2026-06-25',submitter:'孙七',stime:'2026-06-04 10:30:00',recvName:'陈静',recvPhone:'13800007890',recvAddr:'沈阳市和平区青年大街 200 号',items:[{code:'295E11111E',name:'中控显示屏',unit:'EA',snp:2,price:1290.00,qty:25,amount:32250.00,maxOrder:250,replace:'无',stock:9,intransit:1},{code:'295E22222F',name:'仪表盘总成',unit:'EA',snp:2,price:1355.00,qty:10,amount:13550.00,maxOrder:250,replace:'无',stock:5,intransit:0}],auditLog:[{step:'门店审核',person:'王芳',time:'2026-06-05 14:00:00',result:'通过',opinion:'同意',attach:''}]},
   {seq:6,orderNo:'WC202606003',supplier:'中晟零部件',region:'华东',district:'杭州',store:'杭州西湖店',scode:'HZ001',variety:7,amount:'31,200.00',status:'审核中',remark:'—',auditor:'—',atime:'—',edate:'2026-06-28',submitter:'周八',stime:'2026-06-08 15:00:00',recvName:'赵磊',recvPhone:'13800001122',recvAddr:'杭州市西湖区文三路 100 号',items:[{code:'296F11111G',name:'空调压缩机',unit:'EA',snp:4,price:760.00,qty:30,amount:22800.00,maxOrder:350,replace:'无',stock:14,intransit:3},{code:'296F22222H',name:'冷凝器',unit:'EA',snp:3,price:840.00,qty:10,amount:8400.00,maxOrder:350,replace:'无',stock:7,intransit:1}],auditLog:[]},
   {seq:7,orderNo:'WC202606004',supplier:'联友科技武汉',region:'华中',district:'武汉',store:'武汉光谷店',scode:'WH001',variety:12,amount:'52,100.00',status:'已通过',remark:'—',auditor:'李明',atime:'2026-06-10 11:00:00',edate:'2026-07-05',submitter:'吴九',stime:'2026-06-09 09:00:00',recvName:'孙琳',recvPhone:'13800003344',recvAddr:'武汉市洪山区光谷大道 88 号',items:[{code:'297G11111I',name:'动力电池模组',unit:'EA',snp:1,price:1999.00,qty:20,amount:39980.00,maxOrder:100,replace:'无',stock:4,intransit:2},{code:'297G22222J',name:'电池管理单元',unit:'EA',snp:1,price:1212.00,qty:10,amount:12120.00,maxOrder:100,replace:'无',stock:3,intransit:0}],auditLog:[{step:'门店审核',person:'李明',time:'2026-06-10 11:00:00',result:'通过',opinion:'同意',attach:''}]},
@@ -7671,7 +7713,7 @@ function ppSetPanelReadonly(readonly) {
     if (readonly) { el.readOnly = true; el.disabled = true; el.style.background = '#f5f5f5'; }
     else { el.readOnly = false; el.disabled = false; el.style.background = ''; }
   });
-  wrap.querySelectorAll('.pm-form-item input, .pm-form-item select, .pm-form-item textarea').forEach(function(el) {
+  wrap.querySelectorAll('.lt-input-wrap input, .lt-input-wrap select, .lt-input-wrap textarea').forEach(function(el) {
     if (el.classList.contains('js-lock')) return;
     if (readonly) { el.readOnly = true; el.disabled = true; el.style.background = '#f5f5f5'; }
     else { el.readOnly = false; el.disabled = false; el.style.background = ''; }
@@ -7737,7 +7779,7 @@ function ppaRenderPanel() {
     {l:'收货联系电话',v:ppCurrentRec.recvPhone||'—',req:true},
     {l:'收货地址',v:ppCurrentRec.recvAddr||'—',req:true}
   ];
-  info.innerHTML = fs.map(function(f){return '<div class="pm-form-item'+(f.req?' required':'')+'"><label>'+f.l+'</label><input readonly class="pm-readonly" value="'+f.v+'"></div>';}).join('');
+  info.innerHTML = fs.map(function(f){return '<div class="lt-input-wrap plain'+(f.req?' required':'')+'"><span class="lt-filter-prefix">'+f.l+'</span><input readonly class="pm-readonly" value="'+f.v+'"></div>';}).join('');
   var items = (ppCurrentRec.items && ppCurrentRec.items.length) ? ppCurrentRec.items : [
     {code:'290F60471R',name:'整车控制器',taxNo:'',unit:'EA',snp:10,price:799.70,shortQty:6,rel:'无',qty:98,amount:78370.6,maxOrder:999,replace:'替换件编码',stock:0,intransit:0},
     {code:'290F60472R',name:'前灯总成(左)',taxNo:'',unit:'个',snp:1,price:502.86,shortQty:2,rel:'有',qty:99,amount:49783.14,maxOrder:99,replace:'无',stock:0,intransit:0},
@@ -8155,7 +8197,7 @@ var ussPageSize = NP_DEFAULT_PAGE_SIZE;
 (function() {
   var regions = ['华东','华东','华东','华南','华南','华北','华北','西南','西南','东北','华东','华中','华中'];
   var districts = ['上海','上海','杭州','广州','深圳','北京','石家庄','成都','重庆','沈阳','上海','武汉','长沙'];
-  var storeCodes = ['SH001','SH002','HZ001','GZ001','SZ001','BJ001','SJZ01','CD001','CQ001','SY001','DL001','WH001','CS001'];
+  var storeCodes = ['SH001','SH002','HZ001','GZ001','SZ001','BJ001','SJZ01','SCZ01','CQ001','SY001','DL001','WH001','CS001'];
   var storeNames = ['上海浦东店','上海徐汇店','杭州西湖店','广州天河店','深圳南山店','北京朝阳店','石家庄桥西店','成都锦江店','重庆渝中店','沈阳和平店','上海奕境汽车服务','武汉光谷店','长沙岳麓店'];
   var plates = ['沪A88888','沪B12345','浙A66666','粤A99999','粤B55555','京A11111','冀A77777','川A33333','渝A22222','辽A44444','辽B88888','鄂A66666','湘A77777'];
   var custNames = ['张伟','李娜','王强','陈敏','刘洋','赵磊','孙丽','周杰','吴芳','郑宇','钱峰','马杰','朱琳'];
@@ -8837,7 +8879,9 @@ applyMenuByRole(gUserRole);
 // ===== 维修统计查询（原：综合查询维修情况） =====
 var RSQ_FIELDS = ['seq','storeName','storeCode','orderNo','vin','plate','cust','custTel','carSeries','carModel','engineNo','color','mileage','inDate','doneDate','settleDate','repairType','repairItem','faultDesc','repairContent','receiver','advisor','mainTech','qc','groupLeader','dispatcher','pjNormal','gsNormal','fjNormal','pjNormalTotal','pjNormalRate','pjWarranty','gsWarranty','fjWarranty','pjWarrantyTotal','pjWarrantyRate','pjFree','gsFree','fjFree','pjFreeTotal','pjFreeRate','pjIns','gsIns','fjIns','pjInsTotal','pjInsRate','pjAgree','gsAgree','fjAgree','pjAgreeTotal','pjAgreeRate','pjInner','gsInner','fjInner','pjInnerTotal','pjInnerRate','pjPackage','gsPackage','othPackage','pjPackageTotal','pjPackageRate','pjYsTotal','gsYsTotal','fjYsTotal','ysTotal','grossRate','jszTotal','ssTotal','gdRate','orderTotal','isSettle','isPdi','createTime','updateTime'];
 var RSQ_SUM_ORDER = ['pjNormal','gsNormal','fjNormal','pjNormalTotal','pjWarranty','gsWarranty','fjWarranty','pjWarrantyTotal','pjFree','gsFree','fjFree','pjFreeTotal','pjIns','gsIns','fjIns','pjInsTotal','pjAgree','gsAgree','fjAgree','pjAgreeTotal','pjInner','gsInner','fjInner','pjInnerTotal','pjPackage','gsPackage','othPackage','pjPackageTotal','pjYsTotal','gsYsTotal','fjYsTotal','ysTotal','pjYsRate','gsYsRate','fjYsRate','jszTotal','ssTotal','gdRate','orderTotal','grossRate'];
-var RSQ_STORES = [['北京朝阳店','BJ001'],['上海浦东店','SH001'],['广州天河店','GZ001'],['成都锦江店','CD001']];
+var RSQ_STORES = [['北京朝阳店','BJ001'],['上海浦东店','SH001'],['广州天河店','GZ001'],['成都锦江店','SCZ01']];
+// 大区/小区统一向门店主数据取（rsq 本页不再自定义一套），门店名不在主数据时返回空串
+function rsqStoreInfo(name){ return (typeof NP !== 'undefined' && NP['store-manage']) ? npStoreInfo(name) : { region:'', district:'' }; }
 var RSQ_TYPES = ['普通维修','定保','保险','保养','专案','召回','服务活动','免费保养','PDI'];
 var rsqAllData = [];
 var rsqView = []; // 过滤后的展示数据（基准为 rsqAllData）
@@ -8885,6 +8929,7 @@ function rsqGenData(){
     var ysTotal=pjYs+gsYs+fjYs;
     rsqAllData.push({
       seq:i+1, storeName:st[0], storeCode:st[1],
+      region: rsqStoreInfo(st[0]).region, district: rsqStoreInfo(st[0]).district,   // 大区/小区取自门店主数据（唯一来源），不再本页另存一份
       orderNo:'HUB02510'+(150000+i),
       vin:'LV***'+(String.fromCharCode(65+i%26))+'D',
       plate:['鄂A','沪B','京C','粤D'][i%4]+'***'+(10+i%89),
@@ -8976,10 +9021,13 @@ function rsqApplyFilter(){
   var fAdvisor=el?(el.value||'').trim():'';
   function dval(id){ var e=document.getElementById(id); return e?(e.value||'').trim():''; }
   var inS=dval('rsq-d-in-start'), inE=dval('rsq-d-in-end');
+  var fRegion=dval('rsq-region'), fDistrict=dval('rsq-district');
   var setS=dval('rsq-d-settle-start'), setE=dval('rsq-d-settle-end');
   var crS=dval('rsq-d-create-start'), crE=dval('rsq-d-create-end');
   rsqView=rsqAllData.filter(function(d){
     if(fAdvisor && d.advisor.indexOf(fAdvisor)===-1) return false;
+    if(fRegion && d.region!==fRegion) return false;
+    if(fDistrict && d.district!==fDistrict) return false;
     if(inS && (d.inDate||'') < inS) return false;
     if(inE && (d.inDate||'') > inE) return false;
     if(setS && (d.settleDate||'') < setS) return false;
@@ -9027,8 +9075,9 @@ function initRepairStatsQuery(){
     var ds=s.getFullYear()+'-'+pad(s.getMonth()+1)+'-'+pad(s.getDate());
     var de=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
     var se=document.getElementById('rsq-d-in-start'), ee=document.getElementById('rsq-d-in-end');
-    if(se){ se.value=ds; updateDateRangeDisplay(se); }
-    if(ee) ee.value=de;
+    if(se){ se.value=ds; }
+    if(ee){ ee.value=de; }
+    if(se) updateDateRangeDisplay(se);
   }
   rsqRender();
 }
@@ -9211,8 +9260,9 @@ function rlhInit(){
     var ds=s.getFullYear()+'-'+pad(s.getMonth()+1)+'-'+pad(s.getDate());
     var de=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
     var se=document.getElementById('rlh-d-sub-start'), ee=document.getElementById('rlh-d-sub-end');
-    if(se){ se.value=ds; updateDateRangeDisplay(se); }
+    if(se) se.value=ds;
     if(ee) ee.value=de;
+    if(se) updateDateRangeDisplay(se);
   }
   initFilterGrid('rlh-filterGrid', RLH_SHOW_COUNT);
   rlhRenderAll();
@@ -9290,8 +9340,13 @@ function npComboboxInit(c){
     var dl = c.querySelector('.lt-datalist');
     if(dl){ dl.classList.remove('show'); var lis = dl.querySelectorAll('li'); for(var i=0;i<lis.length;i++){ lis[i].classList.remove('hidden'); } }
     sync();
+    // 清空后重查：显式 data-apply 优先；否则回源容器 data-k（全站 combobox 的通用约定，
+    // 与 npComboboxSelect L9760 / csComboboxSelect 同口径）。此前这里只认 data-apply，
+    // 导致"选值能重查、点 × 不重查"两套行为（2026-10-25 修）。
     var apply = c.getAttribute('data-apply');
-    if(apply && typeof window[apply] === 'function'){ try{ window[apply](); }catch(e){} }
+    if(apply && typeof window[apply] === 'function'){ try{ window[apply](); }catch(e){} return; }
+    var dk = c.getAttribute('data-k');
+    if(dk && typeof NP !== 'undefined' && NP[dk] && typeof NP[dk].query === 'function'){ try{ NP[dk].query(); }catch(e){} }
   });
   c.appendChild(x);
   c.addEventListener('click', function(){ sync(); }); // 点 li 选择后（事件冒泡）刷新 X
@@ -9300,10 +9355,154 @@ function npComboboxInit(c){
   sync();
 }
 function npInitComboboxes(){
+  // 字典下拉（大区/小区）必须先灌选项：npComboboxInit 对同一容器只处理一次（data-np-cb 标记），
+  // 而字典填充要每次切页按当前大区重算联动，故放在它之前独立执行。
+  npDictFillComboboxes();
   var cs = document.querySelectorAll('.lt-input-wrap.combobox');
   for(var i=0;i<cs.length;i++) npComboboxInit(cs[i]);
+  // 2026-10-24：查询区一键清除 × 与 combobox 同批注入（凡是走 npInitComboboxes 的切页都一并覆盖）
+  npInitFilterClears();
 }
+
+/* ============ 查询区一键清除（2026-10-24） ============
+   背景：查询区控件共 4 类——文本框(npFItem/.lt-input-wrap.plain)、门店选择器(.store-pick)、
+   日期区间(.lt-date-range)、原生下拉(npSelect)；其中只有 combobox 有 ×（npComboboxInit）。
+   本组函数补齐其余三类的「一键清除」：有值才显示小圆 ×，点击清空本项并触发该页重查。
+   覆盖范围：所有 .lt-filter-grid 内的文本框/门店选择器/日期区间（npShell 页面与静态页通用）。
+   不处理：原生下拉（选回"全部/请选择"即为清空，属常规交互）、combobox（已有 ×，跳过防重）。 */
+function npFilterClearApply(inp){
+  var grid = inp.closest('.lt-filter-grid');
+  var host = inp.closest('.lt-date-range') || inp.closest('.lt-input-wrap');
+  // ① 显式回调优先：容器 data-apply（combobox 口径）或输入框 data-callback
+  var cb = (host && host.getAttribute('data-apply')) || inp.getAttribute('data-callback') || '';
+  if (cb && typeof window[cb] === 'function') { window[cb](); return; }
+  // ② npShell 页面：栅格 id 恒为 "<模块key>-filterGrid"，直接回源该模块的 query
+  var k = (grid && grid.id || '').replace(/-filterGrid$/, '');
+  if (k && NP[k] && typeof NP[k].query === 'function') { NP[k].query(); return; }
+  // ③ 兜底：老式静态页（回调为代码串或挂在 IIFE 内），点一次该页的「查询」按钮
+  if (grid) { var b = grid.querySelector('.lt-filter-footer .lt-btn-primary'); if (b) b.click(); }
+}
+function npFilterClearInject(inp){
+  if (!inp || inp.getAttribute('data-np-x')) return;
+  if (inp.tagName === 'SELECT' || inp.type === 'checkbox' || inp.type === 'radio' || inp.type === 'date') return;
+  if (inp.closest('.lt-date-range-drop')) return;   // 日期区间下拉里的起止输入，× 由区间外层统一提供
+  if (inp.closest('.combobox')) return;             // 已由 npComboboxInit 提供 ×，避免双 ×
+  var host = inp.closest('.lt-date-range') || inp.closest('.lt-input-wrap');
+  if (!host) return;
+  // 只读展示框（如详情里的"已收款金额"）不加 ×；门店选择器、日期回显框虽只读但可清除，放行
+  if (inp.readOnly && !inp.closest('.store-pick') && !inp.closest('.lt-date-range')) return;
+  inp.setAttribute('data-np-x', '1');
+  npFltClearReady = true;
+  host.classList.add('has-flt-clear');
+  var x = document.createElement('span');
+  x.className = 'flt-clear';
+  x.innerHTML = '&times;';
+  x.title = '清空该项';
+  function sync(){ x.style.display = inp.value ? 'inline-flex' : 'none'; }
+  x.addEventListener('click', function(ev){
+    ev.preventDefault(); ev.stopPropagation();
+    inp.value = '';
+    // 日期区间：同时清掉起止日期，语义回到"不限"（不是重置成默认区间）
+    var dr = inp.closest('.lt-date-range');
+    if (dr) {
+      var ds = dr.querySelectorAll('.lt-date-range-drop input');
+      for (var i = 0; i < ds.length; i++) ds[i].value = '';
+    }
+    sync();
+    npFilterClearApply(inp);
+  });
+  host.appendChild(x);
+  inp.addEventListener('input', sync);
+  inp.addEventListener('focus', sync);
+  inp.addEventListener('blur', sync);
+  sync();
+}
+function npInitFilterClears(){
+  var el = document.querySelectorAll('.lt-filter-grid input[type=text], .lt-filter-grid input:not([type])');
+  for (var i = 0; i < el.length; i++) npFilterClearInject(el[i]);
+}
+/* 门店选择器、日期区间由弹窗/下拉回填，不触发 input 事件；× 的显隐靠全局捕获补同步
+   （点击后异步一次：点击目标在弹窗里时，确认动作晚于捕获阶段的同步） */
+var npFltClearReady = false;   /* 全站尚未注入过 × 时，全局监听直接短路，避免每次点击白扫 DOM */
+function npFilterClearSyncAll(){
+  if (!npFltClearReady) return;
+  var xs = document.querySelectorAll('.lt-filter-grid .flt-clear');
+  for (var i = 0; i < xs.length; i++) {
+    var host = xs[i].parentElement;
+    var inp = host ? host.querySelector('input') : null;
+    xs[i].style.display = (inp && inp.value) ? 'inline-flex' : 'none';
+  }
+}
+document.addEventListener('click', function(){ setTimeout(npFilterClearSyncAll, 0); }, true);
+document.addEventListener('change', npFilterClearSyncAll, true);
 document.addEventListener('DOMContentLoaded', npInitComboboxes);
+
+// ===== 字典下拉：大区 / 小区（2026-10-19 新建）=====
+// 依据：原型规范(奕境).md §Combobox 第4款「大区/小区字典以门店主数据为唯一权威来源……只改门店主数据一处，各页下拉/数据自动跟随」。
+// 改造前：32 处下拉选项在 index.html 里各写一份字面量，与门店主数据无引用关系，已漂移出大量「有数据却选不到」。
+// 现在：容器只声明 data-dict="region|district" 与 data-dict-cb="本页选择函数"，选项由本层统一生成，不再逐页手写。
+// 联动：同一 .lt-filter-grid 内选中大区后，小区只列该大区下的城市；大区清空（选"请选择"或点 ×）即恢复全部。
+// 大区展示顺序固定（内容仍从主数据派生，新增大区自动追加到末尾），避免各页顺序跳动。
+// 大区展示顺序（只决定先后、不决定内容；主数据里新增的大区会自动追加到末尾）。
+// 刻意做成函数而非顶层变量：注入器可能在 app.js 尚未执行完时被调用，届时顶层 var 还是 undefined。
+function npDictRegionOrder(){ return ['华东','华南','华北','西南','东北','华中']; }
+function npDictStoreList(){ try { return (typeof NP !== 'undefined' && NP['store-manage'] && NP['store-manage'].allData) || []; } catch(e){ return []; } }
+function npDictList(key, region){
+  var seen = {}, out = [], list = npDictStoreList(), i, s, v;
+  if (!list.length) return out;   // 主数据未就绪（加载期 / 异常顺序）：返回空，由调用方跳过填充，绝不在此抛错
+  for (i = 0; i < list.length; i++) {
+    s = list[i]; if (!s) continue;
+    v = s[key]; if (!v || seen[v]) continue;
+    if (region && s.region !== region) continue;
+    seen[v] = 1; out.push(v);
+  }
+  if (key === 'region' && !region) {
+    var order = npDictRegionOrder(), ordered = [], j;
+    for (j = 0; j < order.length; j++) if (out.indexOf(order[j]) >= 0) ordered.push(order[j]);
+    for (j = 0; j < out.length; j++) if (ordered.indexOf(out[j]) < 0) ordered.push(out[j]);
+    out = ordered;
+  }
+  return out;
+}
+function npDictRegions(){ return npDictList('region'); }
+function npDictDistricts(region){ return npDictList('district', region); }
+function npDictFillList(list, opts, cb){
+  var h = '<li data-val="" onclick="' + npEscape(cb) + '(this)">请选择</li>', i;
+  for (i = 0; i < opts.length; i++) h += '<li data-val="' + npEscape(opts[i]) + '" onclick="' + npEscape(cb) + '(this)">' + npEscape(opts[i]) + '</li>';
+  list.innerHTML = h;
+}
+function npDictFillOne(c){
+  var list = c.querySelector('.lt-datalist'); if (!list) return;
+  var scope = c.closest('.lt-filter-grid') || document;
+  var rs = scope.querySelector('.lt-input-wrap.combobox[data-dict="region"] input');
+  var cur = rs ? (rs.value || '') : '';
+  npDictFillList(list, npDictDistricts(cur), c.getAttribute('data-dict-cb') || 'gtComboboxSelect');
+}
+function npDictSyncScope(scope){
+  if (!scope) return;
+  var ds = scope.querySelectorAll('.lt-input-wrap.combobox[data-dict="district"]'), i;
+  for (i = 0; i < ds.length; i++) npDictFillOne(ds[i]);
+}
+function npDictFillComboboxes(){
+  if (!npDictStoreList().length) return;   // 主数据未就绪：本次不填充，等下次页面切换/DOMContentLoaded 再来
+  var cs = document.querySelectorAll('.lt-input-wrap.combobox[data-dict]'), i, c, list, key;
+  for (i = 0; i < cs.length; i++) {
+    c = cs[i]; list = c.querySelector('.lt-datalist'); if (!list) continue;
+    key = c.getAttribute('data-dict');
+    if (key === 'region') npDictFillList(list, npDictRegions(), c.getAttribute('data-dict-cb') || 'gtComboboxSelect');
+    else npDictFillOne(c);
+    // 联动：点大区（选中 li 或点 × 清空）后，本栅格内所有小区下拉按新的大区重刷选项。
+    // 必须用捕获阶段：× 清除按钮内部 stopPropagation，冒泡阶段收不到它的点击。
+    // setTimeout 是为了等 ×/li 的处理函数先把 input.value 改掉，再读新值。
+    if (key === 'region' && !c.getAttribute('data-np-dict-sync')) {
+      c.setAttribute('data-np-dict-sync', '1');
+      c.addEventListener('click', function(){
+        var s = this.closest('.lt-filter-grid') || document;
+        setTimeout(function(){ npDictSyncScope(s); }, 0);
+      }, true);
+    }
+  }
+}
 
 // 演示数据日期归一化（A5）：把固定日期的演示数据整体平移到"今天"附近，
 // 使"上月今天~今天"的默认日期窗口内始终有数据（贴合 PRD"默认最近一个月"）。
@@ -9373,8 +9572,10 @@ function npDefaultDateRange(startId, endId) {
   var ds = s.getFullYear() + '-' + pad(s.getMonth() + 1) + '-' + pad(s.getDate());
   var de = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
   var se = document.getElementById(startId), ee = document.getElementById(endId);
-  if (se) { se.value = ds; updateDateRangeDisplay(se); }
+  /* 先写两个日期输入再统一回显：否则回显时结束日期还是空，会显示成「26-9-23-」缺结束日期 */
+  if (se) se.value = ds;
   if (ee) ee.value = de;
+  if (se) updateDateRangeDisplay(se);
   return [ds, de];
 }
 function rebaseDates(arr, dateKeys, newestOffsetDays) {
@@ -9451,6 +9652,77 @@ function npOpenModal(title, bodyHtml, footerHtml, opts){
 }
 function npCloseModal(){ var o=document.getElementById('np-modal-root'); if(o){ o.classList.remove('show'); o.innerHTML=''; } }
 
+/* ===== 全站统一车主选择器（2026-10-23 新增）=====
+   入口：预收款「车主」、配件销售单「客户（个销）」等所有需要从车主管理（客档）选人的字段。
+   交互＝与门店选择器一致：单框（框内标签 + 放大镜）→ 点击弹框 → 查询 + 单选表格 → 确定回填「姓名(编号)」。
+   用法：npOpenOwnerPicker(inputId, onConfirm)  —— onConfirm 收到选中的车主对象。 */
+window.npOwnerPickState = null;
+function npOpenOwnerPicker(inputId, onConfirm) {
+  var all = (window.CAR_OWNERS || []).filter(function (o) { return o.valid === '有效'; });
+  if (!all.length) all = (window.CAR_OWNERS || []).slice();
+  if (!all.length) { npToast('车主管理中暂无车主，请先到「系统设置 › 车主管理」维护'); return; }
+  window.npOwnerPickState = { inputId: inputId, onConfirm: onConfirm, all: all, filtered: all.slice() };
+  var body =
+    '<div class="lt-filter-grid" style="grid-template-columns:1fr;margin-bottom:12px">' +
+      '<div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">客户</span>' +
+        '<input type="text" id="np-owner-f-kw" placeholder="输入客户编号/姓名/手机号查询" oninput="npOwnerPickFilter(this)">' +
+      '</div></div>' +
+    '</div>' +
+    '<div class="lt-table-wrap" style="max-height:320px;overflow:auto">' +
+      '<table class="lt-table"><thead><tr>' +
+        '<th style="width:40px;"></th><th style="width:110px;">客户编号</th><th style="width:100px;">客户姓名</th>' +
+        '<th style="width:130px;">手机号</th><th>车型</th><th style="width:90px;">注册状态</th>' +
+      '</tr></thead><tbody id="np-owner-tbody"></tbody></table>' +
+    '</div>';
+  npOpenModal('选择车主（车主管理）', body,
+    '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button>' +
+    '<button class="lt-btn lt-btn-primary" onclick="npOwnerPickConfirm()">确定</button>', { width: 720 });
+  npOwnerPickRender();
+}
+function npOwnerPickRender() {
+  var st = window.npOwnerPickState; if (!st) return;
+  var tb = document.getElementById('np-owner-tbody'); if (!tb) return;
+  if (!st.filtered.length) {
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px">没有符合条件的车主</td></tr>';
+    return;
+  }
+  tb.innerHTML = st.filtered.map(function (o, i) {
+    return '<tr style="cursor:pointer" onclick="npOwnerPickRow(this)">' +
+      '<td><input type="radio" name="np-owner-pick" value="' + npEscape(o.code) + '"' + (i === 0 ? ' checked' : '') + '></td>' +
+      '<td>' + npEscape(o.code) + '</td>' +
+      '<td>' + npEscape(o.name) + '</td>' +
+      '<td>' + npEscape(o.phone || '—') + '</td>' +
+      '<td>' + npEscape(o.model || '—') + '</td>' +
+      '<td>' + npEscape(o.valid) + '</td>' +
+    '</tr>';
+  }).join('');
+}
+function npOwnerPickFilter(input) {
+  var st = window.npOwnerPickState; if (!st) return;
+  var kw = (input.value || '').trim();
+  st.filtered = st.all.filter(function (o) {
+    return kw === '' || (o.code || '').indexOf(kw) >= 0 || (o.name || '').indexOf(kw) >= 0 || (o.phone || '').indexOf(kw) >= 0;
+  });
+  npOwnerPickRender();
+}
+/* 点行＝选中该行（首次渲染已默认选中第一行，避免"忘了点单选"选不上） */
+function npOwnerPickRow(tr) {
+  var r = tr.querySelector('input[type=radio]');
+  if (r) r.checked = true;
+}
+function npOwnerPickConfirm() {
+  var st = window.npOwnerPickState; if (!st) return;
+  var sel = document.querySelector('input[name="np-owner-pick"]:checked');
+  if (!sel) { npToast('请选择车主'); return; }
+  var o = null;
+  for (var i = 0; i < st.all.length; i++) { if (st.all[i].code === sel.value) { o = st.all[i]; break; } }
+  if (!o) { npToast('请选择车主'); return; }
+  var inp = document.getElementById(st.inputId);
+  if (inp) inp.value = o.name + '(' + o.code + ')';
+  npCloseModal();
+  if (typeof st.onConfirm === 'function') st.onConfirm(o);
+}
+
 /* 通用筛选项 */
 function npFItem(label, controlHtml){
   return '<div class="lt-filter-item"><div class="lt-input-wrap plain"><span class="lt-filter-prefix">'+npEscape(label)+'</span>'+controlHtml+'</div></div>';
@@ -9459,13 +9731,50 @@ function npFItem(label, controlHtml){
 function npSelect(label, innerHtml){
   return '<div class="lt-filter-item"><div class="lt-input-wrap"><span class="lt-filter-prefix">'+npEscape(label)+'</span>'+innerHtml+'</div></div>';
 }
+/* ===== 表单字段（弹窗/侧滑面板内）唯一写法：行内同框 =====
+   规范 §3.1.1：单行字段（文本/下拉/选择器）一律 `.lt-input-wrap` + 内嵌前缀标签，
+   框内写标签、框外无独立 label；**禁止**用 `.lt-form-item`+`.lt-form-label` 的上下结构
+   （`.lt-form-item.full` 只留给多行 textarea / 图片 / 附件这类块级字段）。
+   required=true → 框内标签前带红星（CSS `.lt-input-wrap.required .lt-filter-prefix::before`）。 */
+function npFormItem(label, controlHtml, required){
+  return '<div class="lt-filter-item"><div class="lt-input-wrap plain'+(required?' required':'')+'">'+
+    '<span class="lt-filter-prefix">'+npEscape(label)+'</span>'+controlHtml+'</div></div>';
+}
+function npFormSelect(label, innerHtml, required){
+  return '<div class="lt-filter-item"><div class="lt-input-wrap'+(required?' required':'')+'">'+
+    '<span class="lt-filter-prefix">'+npEscape(label)+'</span>'+innerHtml+'</div></div>';
+}
+/* ===== 配件池 / 不良品库存：全站唯一来源 =====
+   规范 §4.8 模拟数据规范：配件编码/名称/单位/单价只允许在这里定义一份，
+   单据页（配件内部领用单、配件报废单…）一律引用，禁止各页各写一套配件池（AGENTS §2 组件唯一化）。
+   NP_BAD_STOCK = 不良品库存（PRD 5.7.3：报废申请数量只能 ≤ 不良品库存，
+   口径来自「库存管理 → 该配件的不良品合计」；该库存页尚未建，此处为原型演示数据）。 */
+window.NP_PARTS = [
+  { code: 'P001', name: '机油滤清器', unit: '个', price: 150.00 },
+  { code: 'P002', name: '刹车片', unit: '副', price: 150.00 },
+  { code: 'P003', name: '空气滤清器', unit: '个', price: 110.00 },
+  { code: 'P004', name: '火花塞', unit: '个', price: 50.00 },
+  { code: 'P005', name: '空调滤清器', unit: '个', price: 200.00 },
+  { code: 'P006', name: '雨刷片', unit: '对', price: 80.00 },
+  { code: 'P007', name: '刹车油', unit: '瓶', price: 120.00 },
+  { code: 'P008', name: '蓄电池', unit: '个', price: 380.00 }
+];
+window.NP_BAD_STOCK = { P001: 6, P002: 3, P003: 8, P004: 12, P005: 4, P006: 2, P007: 5, P008: 1 };
+function npPartOf(code){
+  var all = window.NP_PARTS || [];
+  for (var i = 0; i < all.length; i++) if (all[i].code === code) return all[i];
+  return null;
+}
+function npBadStock(code){
+  return (window.NP_BAD_STOCK || {})[code] || 0;
+}
 /* 通用模糊下拉（combobox） */
 function npComboMarkup(K, fieldId, prefix, opts){
   var lis = '<li data-val="" onclick="npComboboxSelect(this)">请选择</li>' +
     opts.map(function(o){ return '<li data-val="'+npEscape(o)+'" onclick="npComboboxSelect(this)">'+npEscape(o)+'</li>'; }).join('');
   return '<div class="lt-filter-item"><div class="lt-input-wrap combobox" style="position:relative" data-k="'+K+'">' +
     '<span class="lt-filter-prefix">'+npEscape(prefix)+'</span>' +
-    '<input type="text" id="'+fieldId+'" placeholder="请选择或输入" onfocus="npComboboxShow(this)" oninput="npComboboxFilter(this)">' +
+    '<input type="text" id="'+fieldId+'" placeholder="请选择" onfocus="npComboboxShow(this)" oninput="npComboboxFilter(this)">' +
     '<span class="cb-arrow" onclick="npComboboxToggle(this)">▼</span>' +
     '<ul class="lt-datalist">'+lis+'</ul></div></div>';
 }
@@ -10058,40 +10367,41 @@ function moImportExcel(){
 NP['store-manage'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
 (function(){
   var a = [
-    { code:'BJ001', shortName:'北京朝阳店', name:'北京朝阳店', type:'用户中心', region:'华北', district:'北京', province:'北京', city:'北京', address:'北京市朝阳区建国路88号', status:'营业店', disabled:'启用' },
-    { code:'SH001', shortName:'上海浦东店', name:'上海浦东店', type:'用户中心', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市浦东新区张江路100号', status:'营业店', disabled:'启用' },
-    { code:'SH002', shortName:'上海徐汇店', name:'上海徐汇店', type:'商超店', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市徐汇区漕溪北路88号', status:'营业店', disabled:'启用' },
-    { code:'GZ001', shortName:'广州天河店', name:'广州天河店', type:'用户中心', region:'华南', district:'广州', province:'广东', city:'广州', address:'广州市天河区天河路100号', status:'营业店', disabled:'启用' },
-    { code:'SZ001', shortName:'深圳南山店', name:'深圳南山店', type:'商超店', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市南山区深南大道88号', status:'营业店', disabled:'启用' },
-    { code:'SZFT001', shortName:'深圳福田店', name:'深圳福田店', type:'商超店', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市福田区福华三路88号', status:'营业店', disabled:'启用' },
-    { code:'HZ001', shortName:'杭州西湖店', name:'杭州西湖店', type:'用户中心', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市西湖区文三路88号', status:'营业店', disabled:'启用' },
-    { code:'WH001', shortName:'武汉光谷店', name:'武汉光谷店', type:'用户中心', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'武汉市洪山区光谷大道88号', status:'营业店', disabled:'启用' },
-    { code:'CD001', shortName:'成都锦江店', name:'成都锦江店', type:'用户中心', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市锦江区人民南路120号', status:'营业店', disabled:'启用' },
-    { code:'CS001', shortName:'长沙岳麓店', name:'长沙岳麓店', type:'商超店', region:'华中', district:'长沙', province:'湖南', city:'长沙', address:'长沙市岳麓区麓山南路100号', status:'营业店', disabled:'启用' },
-    { code:'DL001', shortName:'上海奕境汽车服务', name:'上海奕境汽车服务', type:'城市展厅', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市闵行区申长路88号', status:'营业店', disabled:'启用' },
-    { code:'DL002', shortName:'广州奕境汽车有限公司', name:'广州奕境汽车有限公司', type:'城市展厅', region:'华南', district:'广州', province:'广东', city:'广州', address:'广州市白云区机场路88号', status:'营业店', disabled:'启用' },
-    { code:'DL003', shortName:'北京奕境汽车销售', name:'北京奕境汽车销售', type:'城市展厅', region:'华北', district:'北京', province:'北京', city:'北京', address:'北京市海淀区中关村大街88号', status:'营业店', disabled:'启用' },
-    { code:'DL004', shortName:'成都奕境汽车服务', name:'成都奕境汽车服务', type:'商超店', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市武侯区人民南路88号', status:'营业店', disabled:'启用' },
-    { code:'DL005', shortName:'沈阳奕境汽车有限公司', name:'沈阳奕境汽车有限公司', type:'城市展厅', region:'东北', district:'沈阳', province:'辽宁', city:'沈阳', address:'沈阳市和平区青年大街88号', status:'营业店', disabled:'启用' },
-    { code:'DL006', shortName:'杭州奕境汽车服务', name:'杭州奕境汽车服务', type:'POP展', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市滨江区江南大道88号', status:'营业店', disabled:'启用' },
-    { code:'DL007', shortName:'深圳奕境汽车销售', name:'深圳奕境汽车销售', type:'城市展厅', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市宝安区宝安大道88号', status:'营业店', disabled:'启用' },
-    { code:'DL008', shortName:'武汉奕境汽车有限公司', name:'武汉奕境汽车有限公司', type:'POP展', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'武汉市江汉区解放大道88号', status:'营业店', disabled:'启用' },
-    { code:'NJ001', shortName:'南京建邺店', name:'南京建邺店', type:'商超店', region:'华东', district:'南京', province:'江苏', city:'南京', address:'南京市建邺区江东中路88号', status:'营业店', disabled:'启用' },
-    { code:'NJGL008', shortName:'南京鼓楼店', name:'南京鼓楼店', type:'城市展厅', region:'华东', district:'南京', province:'江苏', city:'南京', address:'南京市鼓楼区中央路88号', status:'营业店', disabled:'启用' },
-    { code:'S001', shortName:'奕境经开店', name:'奕境经开店', type:'用户中心', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市嘉定区博园路88号', status:'营业店', disabled:'启用' },
-    { code:'S002', shortName:'奕境滨江店', name:'奕境滨江店', type:'POP展', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市滨江区滨盛路88号', status:'营业店', disabled:'启用' },
-    { code:'S003', shortName:'奕境高新店', name:'奕境高新店', type:'POP展', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市高新区天府大道88号', status:'营业店', disabled:'启用' },
-    { code:'S004', shortName:'奕境空港店', name:'奕境空港店', type:'城市展厅', region:'华北', district:'天津', province:'天津', city:'天津', address:'天津市东丽区机场大道88号', status:'营业店', disabled:'启用' },
-    { code:'TJ001', shortName:'天津和平店', name:'天津和平店', type:'商超店', region:'华北', district:'天津', province:'天津', city:'天津', address:'天津市和平区南京路88号', status:'营业店', disabled:'启用' },
-    { code:'CQ001', shortName:'重庆渝中店', name:'重庆渝中店', type:'商超店', region:'西南', district:'重庆', province:'重庆', city:'重庆', address:'重庆市渝中区解放碑88号', status:'营业店', disabled:'启用' },
-    { code:'SY001', shortName:'沈阳和平店', name:'沈阳和平店', type:'POP展', region:'东北', district:'沈阳', province:'辽宁', city:'沈阳', address:'沈阳市和平区太原街88号', status:'营业店', disabled:'启用' },
-    { code:'SJZ01', shortName:'石家庄桥西店', name:'石家庄桥西店', type:'商超店', region:'华北', district:'石家庄', province:'河北', city:'石家庄', address:'石家庄市桥西区中山西路88号', status:'营业店', disabled:'启用' },
-    { code:'SJZ001', shortName:'石家庄长安店', name:'石家庄长安店', type:'POP展', region:'华北', district:'石家庄', province:'河北', city:'石家庄', address:'石家庄市长安区中山东路88号', status:'营业店', disabled:'停用' },
-    { code:'SZJ001', shortName:'苏州园区店', name:'苏州园区店', type:'城市展厅', region:'华东', district:'苏州', province:'江苏', city:'苏州', address:'苏州市工业园区现代大道88号', status:'营业店', disabled:'启用' },
-    { code:'KM001', shortName:'昆明五华店', name:'昆明五华店', type:'POP展', region:'西南', district:'昆明', province:'云南', city:'昆明', address:'昆明市五华区人民中路88号', status:'营业店', disabled:'停用' },
-    { code:'XM001', shortName:'厦门思明店', name:'厦门思明店', type:'商超店', region:'华南', district:'厦门', province:'福建', city:'厦门', address:'厦门市思明区湖滨南路88号', status:'营业店', disabled:'启用' },
-    { code:'NB001', shortName:'宁波鄞州店', name:'宁波鄞州店', type:'商超店', region:'华东', district:'宁波', province:'浙江', city:'宁波', address:'宁波市鄞州区中山东路88号', status:'营业店', disabled:'启用' },
-    { code:'JN001', shortName:'济南历下店', name:'济南历下店', type:'商超店', region:'华北', district:'济南', province:'山东', city:'济南', address:'济南市历下区经十路88号', status:'营业店', disabled:'启用' }
+    { code:'BJ001', shortName:'北京朝阳店', name:'北京朝阳店', type:'用户中心', region:'华北', district:'北京', province:'北京', city:'北京', address:'北京市朝阳区建国路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'SH001', shortName:'上海浦东店', name:'上海浦东店', type:'用户中心', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市浦东新区张江路100号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'SH002', shortName:'上海徐汇店', name:'上海徐汇店', type:'商超店', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市徐汇区漕溪北路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'GZ001', shortName:'广州天河店', name:'广州天河店', type:'用户中心', region:'华南', district:'广州', province:'广东', city:'广州', address:'广州市天河区天河路100号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'SZ001', shortName:'深圳南山店', name:'深圳南山店', type:'商超店', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市南山区深南大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'SZFT001', shortName:'深圳福田店', name:'深圳福田店', type:'商超店', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市福田区福华三路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'HZ001', shortName:'杭州西湖店', name:'杭州西湖店', type:'用户中心', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市西湖区文三路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'WH001', shortName:'武汉光谷店', name:'武汉光谷店', type:'用户中心', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'武汉市洪山区光谷大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'HBZ01', shortName:'武汉龙阳店', name:'武汉龙阳店', type:'用户中心', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'湖北省武汉市汉阳区龙阳大道88号', status:'营业店', disabled:'启用', channelMode:'直营', taxNo:'91420105MAK56G0123' },
+    { code:'SCZ01', shortName:'成都锦江店', name:'成都锦江店', type:'用户中心', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市锦江区人民南路120号', status:'营业店', disabled:'启用', channelMode:'直营', taxNo:'91510100MAKFGRJ5XK' },
+    { code:'CS001', shortName:'长沙岳麓店', name:'长沙岳麓店', type:'商超店', region:'华中', district:'长沙', province:'湖南', city:'长沙', address:'长沙市岳麓区麓山南路100号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'DL001', shortName:'上海奕境汽车服务', name:'上海奕境汽车服务', type:'城市展厅', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市闵行区申长路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'DL002', shortName:'广州奕境汽车有限公司', name:'广州奕境汽车有限公司', type:'城市展厅', region:'华南', district:'广州', province:'广东', city:'广州', address:'广州市白云区机场路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'DL003', shortName:'北京奕境汽车销售', name:'北京奕境汽车销售', type:'城市展厅', region:'华北', district:'北京', province:'北京', city:'北京', address:'北京市海淀区中关村大街88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'DL004', shortName:'成都奕境汽车服务', name:'成都奕境汽车服务', type:'商超店', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市武侯区人民南路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'DL005', shortName:'沈阳奕境汽车有限公司', name:'沈阳奕境汽车有限公司', type:'城市展厅', region:'东北', district:'沈阳', province:'辽宁', city:'沈阳', address:'沈阳市和平区青年大街88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'DL006', shortName:'杭州奕境汽车服务', name:'杭州奕境汽车服务', type:'POP展', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市滨江区江南大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'DL007', shortName:'深圳奕境汽车销售', name:'深圳奕境汽车销售', type:'城市展厅', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市宝安区宝安大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'DL008', shortName:'武汉奕境汽车有限公司', name:'武汉奕境汽车有限公司', type:'POP展', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'武汉市江汉区解放大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'NJ001', shortName:'南京建邺店', name:'南京建邺店', type:'商超店', region:'华东', district:'南京', province:'江苏', city:'南京', address:'南京市建邺区江东中路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'NJGL008', shortName:'南京鼓楼店', name:'南京鼓楼店', type:'城市展厅', region:'华东', district:'南京', province:'江苏', city:'南京', address:'南京市鼓楼区中央路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'S001', shortName:'奕境经开店', name:'奕境经开店', type:'用户中心', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市嘉定区博园路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'S002', shortName:'奕境滨江店', name:'奕境滨江店', type:'POP展', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市滨江区滨盛路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'S003', shortName:'奕境高新店', name:'奕境高新店', type:'POP展', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市高新区天府大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'S004', shortName:'奕境空港店', name:'奕境空港店', type:'城市展厅', region:'华北', district:'天津', province:'天津', city:'天津', address:'天津市东丽区机场大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'TJ001', shortName:'天津和平店', name:'天津和平店', type:'商超店', region:'华北', district:'天津', province:'天津', city:'天津', address:'天津市和平区南京路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'CQ001', shortName:'重庆渝中店', name:'重庆渝中店', type:'商超店', region:'西南', district:'重庆', province:'重庆', city:'重庆', address:'重庆市渝中区解放碑88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'SY001', shortName:'沈阳和平店', name:'沈阳和平店', type:'POP展', region:'东北', district:'沈阳', province:'辽宁', city:'沈阳', address:'沈阳市和平区太原街88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'SJZ01', shortName:'石家庄桥西店', name:'石家庄桥西店', type:'商超店', region:'华北', district:'石家庄', province:'河北', city:'石家庄', address:'石家庄市桥西区中山西路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'SJZ001', shortName:'石家庄长安店', name:'石家庄长安店', type:'POP展', region:'华北', district:'石家庄', province:'河北', city:'石家庄', address:'石家庄市长安区中山东路88号', status:'营业店', disabled:'停用', channelMode:'非直营', taxNo:'' },
+    { code:'SZJ001', shortName:'苏州园区店', name:'苏州园区店', type:'城市展厅', region:'华东', district:'苏州', province:'江苏', city:'苏州', address:'苏州市工业园区现代大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'KM001', shortName:'昆明五华店', name:'昆明五华店', type:'POP展', region:'西南', district:'昆明', province:'云南', city:'昆明', address:'昆明市五华区人民中路88号', status:'营业店', disabled:'停用', channelMode:'非直营', taxNo:'' },
+    { code:'XM001', shortName:'厦门思明店', name:'厦门思明店', type:'商超店', region:'华南', district:'厦门', province:'福建', city:'厦门', address:'厦门市思明区湖滨南路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'NB001', shortName:'宁波鄞州店', name:'宁波鄞州店', type:'商超店', region:'华东', district:'宁波', province:'浙江', city:'宁波', address:'宁波市鄞州区中山东路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'JN001', shortName:'济南历下店', name:'济南历下店', type:'商超店', region:'华北', district:'济南', province:'山东', city:'济南', address:'济南市历下区经十路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' }
   ];
   NP['store-manage'].allData = a;
 })();
@@ -10104,6 +10414,7 @@ function initStoreManage(){
     npComboMarkup('store-manage','sm-f-province','省份',['北京','上海','广东','浙江','湖北','四川','湖南','江苏','天津','重庆','辽宁','河北','云南','福建','山东']) +
     npComboMarkup('store-manage','sm-f-city','城市',['北京','上海','广州','深圳','杭州','武汉','成都','长沙','南京','天津','重庆','沈阳','石家庄','苏州','昆明','厦门','宁波','济南']) +
     npSelect('门店类型','<select id="sm-f-type"><option value="">请选择</option><option>用户中心</option><option>商超店</option><option>POP展</option><option>城市展厅</option></select>') +
+    npSelect('渠道模式','<select id="sm-f-channel"><option value="">请选择</option><option>直营</option><option>非直营</option></select>') +
     npSelect('营业状态','<select id="sm-f-status"><option value="">请选择</option><option>营业店</option><option>停用</option></select>');
   var cols=[
     {t:'序号',w:60,f:function(r,i){return i+1;}},
@@ -10111,6 +10422,8 @@ function initStoreManage(){
     {t:'门店简称',f:function(r){return npEscape(r.shortName);}},
     {t:'门店名称',f:function(r){return npEscape(r.name);}},
     {t:'门店类型',w:90,f:function(r){return r.type;}},
+    {t:'渠道模式',w:90,f:function(r){return r.channelMode;}},
+    {t:'纳税人识别号',w:180,f:function(r){return r.taxNo?npEscape(r.taxNo):'—';}},
     {t:'大区',w:70,f:function(r){return r.region;}},
     {t:'小区',w:70,f:function(r){return r.district;}},
     {t:'省份',w:70,f:function(r){return r.province;}},
@@ -10127,6 +10440,7 @@ function initStoreManage(){
     var code=val('sm-f-code');
     var name=val('sm-f-name');
     var type=val('sm-f-type');
+    var channel=val('sm-f-channel');
     var region=val('sm-f-region');
     var status=val('sm-f-status');
     var province=val('sm-f-province');
@@ -10136,6 +10450,7 @@ function initStoreManage(){
       return (code===''||r.code.indexOf(code)>=0) &&
         (name===''||r.shortName.indexOf(name)>=0) &&
         (type===''||r.type===type) &&
+        (channel===''||r.channelMode===channel) &&
         (region===''||r.region===region) &&
         (status===''||(status==='停用'?r.disabled==='停用':r.disabled==='启用')) &&
         (province===''||r.province===province) &&
@@ -10144,7 +10459,7 @@ function initStoreManage(){
     }); st.page=1; st.render();
   };
   st.reset=function(){
-    ['sm-f-code','sm-f-name','sm-f-type','sm-f-region','sm-f-status','sm-f-province','sm-f-city','sm-f-district'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';});
+    ['sm-f-code','sm-f-name','sm-f-type','sm-f-channel','sm-f-region','sm-f-status','sm-f-province','sm-f-city','sm-f-district'].forEach(function(id){var e=document.getElementById(id); if(e)e.value='';});
     st.filtered=st.allData.slice(); st.page=1; st.render();
   };
   st.render=function(){ npRenderTable(K,'sm-tbody','sm-pager',cols,st.filtered,st); };
@@ -10153,13 +10468,17 @@ function initStoreManage(){
 
 /* ============ 门店多选弹框 ============ */
 window.msStoreState = null;
-function msOpenStorePicker(inputId, onConfirm){
+function msOpenStorePicker(inputId, onConfirm, opts){
+  opts = opts || {};
   var input = document.getElementById(inputId);
   var pre = input ? (input.value||'') : '';
-  var preNames = pre.split(/[,，、]/).map(function(s){ return s.trim(); }).filter(Boolean);
+  // 兼容「门店选择框」回显写法：名称（编码）/ 名称(编码) —— 去掉尾部括号里的编码再按名称匹配
+  var preNames = pre.split(/[,，、]/).map(function(s){ return s.trim().replace(/[（(][^）)]*[）)]\s*$/,'').trim(); }).filter(Boolean);
   var all = NP['store-manage'].allData;
   var selected = all.filter(function(s){ return preNames.indexOf(s.shortName)>=0 || preNames.indexOf(s.name)>=0; }).map(function(s){ return {code:s.code, shortName:s.shortName, name:s.name}; });
-  window.msStoreState = { inputId:inputId, onConfirm:onConfirm, page:1, pageSize:10, filtered: all.slice(), selected: selected, render: msStoreRender, query: msStoreFilter, reset: msStoreReset };
+  // single=true：单选模式（表单里的「门店」字段），最多选 1 家；默认多选（查询区筛选）
+  if (opts.single && selected.length > 1) selected = selected.slice(0, 1);
+  window.msStoreState = { inputId:inputId, onConfirm:onConfirm, single:!!opts.single, page:1, pageSize:10, filtered: all.slice(), selected: selected, render: msStoreRender, query: msStoreFilter, reset: msStoreReset };
   NP['msStore'] = window.msStoreState;
   var html = '<div class="ms-store-body">' +
     '<div class="ms-store-left">' +
@@ -10219,6 +10538,13 @@ function msStoreRenderSelected(){
 }
 function msStoreToggle(code){
   var st=window.msStoreState; if(!st) return;
+  if(st.single){
+    // 单选模式：点谁选谁（再点一次取消），永远最多 1 家
+    var had = st.selected.length===1 && st.selected[0].code===code;
+    var r = st.filtered.find(function(x){ return x.code===code; });
+    st.selected = (had || !r) ? [] : [{code:r.code, shortName:r.shortName, name:r.name}];
+    msStoreRender(); msStoreRenderSelected(); return;
+  }
   var idx=st.selected.findIndex(function(s){return s.code===code;});
   if(idx>=0){ st.selected.splice(idx,1); } else { var r=st.filtered.find(function(x){return x.code===code;}); if(r) st.selected.push({code:r.code,shortName:r.shortName,name:r.name}); }
   msStoreRender(); msStoreRenderSelected();
@@ -10882,14 +11208,10 @@ function npToast(msg){ var t=document.getElementById('np-toast'); if(!t){ t=docu
 
 /* =========== 通用模糊下拉（combobox）助手：静态页面复用 =========== */
 /* 按最近 .lt-input-wrap.combobox 定位；模糊用 includes（大小写不敏感）；选中后调 wrap 上 data-apply 指定的全局过滤函数 */
-/* ===== 公共模糊下拉（E4 2026-08-20 全站唯一实现；容器自动识别 .lt-input-wrap.combobox 与 .ts-combobox） ===== */
+/* ===== 公共模糊下拉（E4 2026-08-20 全站唯一实现；容器即 .lt-input-wrap.combobox） ===== */
 function gtCmbWrap(el) {
-  // 容器自动识别：标准筛选容器 / ts 表单容器 / qr 表单容器（E4 全站统一）
-  var w = el.closest ? el.closest('.lt-input-wrap.combobox') : null;
-  if (w) return w;
-  w = el.closest ? el.closest('.ts-combobox') : null;
-  if (w) return w;
-  return el.closest ? el.closest('.qr-combobox') : null;
+  // 2026-10-24 组件唯一化后只剩一个容器类；旧的 .combobox 两个副本（ts/qr 表单那两套）已并入
+  return el.closest ? el.closest('.lt-input-wrap.combobox') : null;
 }
 function gtComboboxFilter(input) {
   var w = gtCmbWrap(input); if (!w) return;
