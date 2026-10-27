@@ -38,6 +38,20 @@ function psfinPhone(name) {
   for (var i = 0; i < list.length; i++) { if (list[i].name === name) return list[i].phone || '—'; }
   return '—';
 }
+/* 联系电话脱敏：138****8888（PRD 列表「脱敏」口径） */
+function psfinMaskPhone(p) {
+  if (!p || p === '—') return p || '—';
+  p = String(p);
+  if (p.length < 7) return p;
+  return p.slice(0, 3) + '****' + p.slice(-4);
+}
+/* 客户姓名脱敏：张**（保留首字 + 两颗星） */
+function psfinMaskName(n) {
+  if (!n || n === '—') return n || '—';
+  n = String(n);
+  if (n.length <= 1) return n;
+  return n.charAt(0) + '**';
+}
 
 /* 门店主数据取数（门店管理是门店信息唯一来源） */
 function psfinStore(code) {
@@ -67,15 +81,17 @@ function psfinPayMap() {
   var map = {};
   (typeof psoOrderAll === 'function' ? psoOrderAll() : []).forEach(function (o, i) {
     var arr = [];
-    if (o.payStatus === '已结清') {
+    if (o.payStatus === '已结清' || o.payStatus === '部分收款') {
+      var direct = psfinIsDirect(o.storeCode);
+      /* 直营店只能走支付平台收款（支付二维码）；非直营演示时也体现支付二维码渠道，与门店自行收款并存 */
+      var usePlatform = direct || (i % 2 === 0);
+      var ch, method;
+      if (usePlatform) { ch = PS_FIN.CH_PLATFORM; method = '微信扫码'; }
+      else { ch = PS_FIN.CH_OWN; method = (o.payStatus === '已结清') ? '微信' : '支付宝'; }
+      var amt = (o.payStatus === '已结清') ? o.amount : psoMoney(parseFloat(o.amount) * 0.6);
       arr.push({
-        ch: PS_FIN.CH_OWN, method: '微信', amount: o.amount, time: psfinAddMin(o.submitTime, 12 + i),
-        billType: '普通发票', billNo: '', billAmount: 0
-      });
-    } else if (o.payStatus === '部分收款') {
-      arr.push({
-        ch: PS_FIN.CH_OWN, method: '支付宝', amount: psoMoney(parseFloat(o.amount) * 0.6),
-        time: psfinAddMin(o.submitTime, 25 + i), billType: '收据', billNo: '', billAmount: 0
+        ch: ch, method: method, amount: amt, time: psfinAddMin(o.submitTime, 12 + i),
+        billType: (o.payStatus === '已结清') ? '普通发票' : '收据', billNo: '', billAmount: 0
       });
     }
     map[o.orderNo] = arr;
@@ -148,6 +164,8 @@ function psfinRefundRows() {
       customer: r.customer, amount: r.amount, submitter: r.submitter, submitTime: r.returnTime
     });
   });
+  /* 仅已收款（对应销售单已收款>0）的销售取消/退货才进入退款菜单 */
+  rows = rows.filter(function (x) { return psfinReceived(x.orderNo) > 0; });
   rows.forEach(function (x) {
     x.phone = psfinPhone(x.customer);
     x.refunded = psoMoney(psfinRefunded(x.docNo));
@@ -175,12 +193,12 @@ function psfinRefundRows() {
       },
       { t: '门店名称', w: 110, f: function (r) { return npEscape(r.store); } },
       { t: '门店编码', w: 100, f: function (r) { return npEscape(r.storeCode); } },
-      { t: '客户', w: 120, f: function (r) { return npEscape(r.customer); } },
-      { t: '联系电话', w: 130, f: function (r) { return npEscape(r.phone); } },
+      { t: '客户', w: 120, f: function (r) { return npEscape(psfinMaskName(r.customer)); } },
+      { t: '联系电话', w: 130, f: function (r) { return npEscape(psfinMaskPhone(r.phone)); } },
       { t: '销售单金额', w: 110, f: function (r) { return npEscape(r.amount); } },
       { t: '已收金额', w: 110, f: function (r) { return npEscape(r.received); } },
       {
-        t: '收款登记情况', w: 110, f: function (r) {
+        t: '收款情况', w: 110, f: function (r) {
           var cls = r.payStatus === '已结清' ? 'ok' : (r.payStatus === '部分收款' ? 'warn' : 'off');
           return '<span class="lt-badge ' + cls + '">' + npEscape(r.payStatus) + '</span>';
         }
@@ -207,7 +225,7 @@ function psfinRefundRows() {
   function filterHtml() {
     return npFItem('销售单号', '<input type="text" id="' + P + '-f-no" placeholder="请输入">') +
       npFItem('客户', '<input type="text" id="' + P + '-f-cust" placeholder="请输入">') +
-      npSelect('收款登记情况', '<select id="' + P + '-f-status"><option value="">请选择</option>' +
+      npSelect('收款情况', '<select id="' + P + '-f-status"><option value="">请选择</option>' +
         PS_FIN.PAY_STATUS.map(function (o) { return '<option>' + npEscape(o) + '</option>'; }).join('') + '</select>') +
       '<div class="lt-filter-item"><div class="lt-date-range"><span class="lt-filter-prefix">提交日期</span>' +
       '<input type="text" readonly class="lt-date-range-text" value="" placeholder="开始日期-结束日期" onclick="toggleDateRangePicker(this)" data-callback="NP[\'' + K + '\'].query()">' +
@@ -226,7 +244,8 @@ function psfinRefundRows() {
   window.initPartsSalesReceipt = function () {
     var root = document.getElementById('page-' + K);
     if (!root) return;
-    root.innerHTML = npShell(K, { l2: '财务管理', l3: '配件销售收款' }, filterHtml(), '', npTH(cols()), K + '-tbody', K + '-pager');
+    var toolbar = '<button class="lt-btn lt-btn-default" onclick="psfinExportPay()">导出</button>';
+    root.innerHTML = npShell(K, { l2: '财务管理', l3: '配件销售收款' }, filterHtml(), toolbar, npTH(cols()), K + '-tbody', K + '-pager');
     NP[K] = { page: 1, pageSize: 20, allData: [], filtered: [], query: null, reset: null, render: null };
     st = NP[K];
     initFilterGrid(K + '-filterGrid', 7); st._fShow = 7; st._fExp = false;
@@ -259,6 +278,18 @@ function psfinRefundRows() {
   };
 
   npRegisterModuleInit(K, function () { window.initPartsSalesReceipt(); });
+
+  /* 导出：当前筛选结果（全站 npExportExcelRowsRaw） */
+  window.psfinExportPay = function () {
+    var st = NP[K];
+    var data = st && st.filtered ? st.filtered : [];
+    if (!data.length) { npToast('当前没有可导出的数据'); return; }
+    var headers = ['序号', '销售单号', '门店名称', '门店编码', '客户', '联系电话', '销售单金额', '已收金额', '收款情况', '提交人', '提交时间'];
+    var rows = data.map(function (r, i) {
+      return [i + 1, r.orderNo, r.store, r.storeCode, psfinMaskName(r.customer), psfinMaskPhone(r.phone), r.amount, r.received, r.payStatus, r.submitter, r.submitTime];
+    });
+    npExportExcelRowsRaw('配件销售收款导出', headers, rows);
+  };
 })();
 
 /* ============================================================
@@ -280,11 +311,11 @@ function psfinRefundRows() {
       { t: '门店名称', w: 110, f: function (r) { return npEscape(r.store); } },
       { t: '门店编码', w: 100, f: function (r) { return npEscape(r.storeCode); } },
       { t: '退款类型', w: 100, f: function (r) { return npEscape(r.type); } },
-      { t: '客户', w: 120, f: function (r) { return npEscape(r.customer); } },
-      { t: '联系电话', w: 130, f: function (r) { return npEscape(r.phone); } },
+      { t: '客户', w: 120, f: function (r) { return npEscape(psfinMaskName(r.customer)); } },
+      { t: '联系电话', w: 130, f: function (r) { return npEscape(psfinMaskPhone(r.phone)); } },
       { t: '退款金额', w: 110, f: function (r) { return npEscape(r.amount); } },
       {
-        t: '退款登记情况', w: 110, f: function (r) {
+        t: '退款情况', w: 110, f: function (r) {
           return '<span class="lt-badge ' + (r.refundStatus === '已退款' ? 'ok' : 'off') + '">' + npEscape(r.refundStatus) + '</span>';
         }
       },
@@ -307,7 +338,7 @@ function psfinRefundRows() {
   function filterHtml() {
     return npFItem('单据编号', '<input type="text" id="' + P + '-f-no" placeholder="请输入">') +
       npFItem('客户', '<input type="text" id="' + P + '-f-cust" placeholder="请输入">') +
-      npSelect('退款登记情况', '<select id="' + P + '-f-status"><option value="">请选择</option>' +
+      npSelect('退款情况', '<select id="' + P + '-f-status"><option value="">请选择</option>' +
         PS_FIN.REFUND_STATUS.map(function (o) {
           return '<option' + (o === '未退款' ? ' selected' : '') + '>' + npEscape(o) + '</option>';
         }).join('') + '</select>') +
@@ -330,7 +361,8 @@ function psfinRefundRows() {
   window.initPartsSalesRefund = function () {
     var root = document.getElementById('page-' + K);
     if (!root) return;
-    root.innerHTML = npShell(K, { l2: '财务管理', l3: '配件销售退款' }, filterHtml(), '', npTH(cols()), K + '-tbody', K + '-pager');
+    var toolbar = '<button class="lt-btn lt-btn-default" onclick="psfinExportRefund()">导出</button>';
+    root.innerHTML = npShell(K, { l2: '财务管理', l3: '配件销售退款' }, filterHtml(), toolbar, npTH(cols()), K + '-tbody', K + '-pager');
     NP[K] = { page: 1, pageSize: 20, allData: [], filtered: [], query: null, reset: null, render: null };
     st = NP[K];
     initFilterGrid(K + '-filterGrid', 7); st._fShow = 7; st._fExp = false;
@@ -365,6 +397,18 @@ function psfinRefundRows() {
   };
 
   npRegisterModuleInit(K, function () { window.initPartsSalesRefund(); });
+
+  /* 导出：当前筛选结果（全站 npExportExcelRowsRaw） */
+  window.psfinExportRefund = function () {
+    var st = NP[K];
+    var data = st && st.filtered ? st.filtered : [];
+    if (!data.length) { npToast('当前没有可导出的数据'); return; }
+    var headers = ['序号', '单据编号', '门店名称', '门店编码', '退款类型', '客户', '联系电话', '退款金额', '退款情况', '提交人', '提交时间'];
+    var rows = data.map(function (r, i) {
+      return [i + 1, r.docNo, r.store, r.storeCode, r.type, psfinMaskName(r.customer), psfinMaskPhone(r.phone), r.amount, r.refundStatus, r.submitter, r.submitTime];
+    });
+    npExportExcelRowsRaw('配件销售退款导出', headers, rows);
+  };
 })();
 
 /* ============================================================
@@ -377,29 +421,39 @@ window.psfinOpenPay = function (orderNo) {
   if (canGet <= 0) { npToast('该销售单已结清，无需收款'); return; }
   var direct = psfinIsDirect(row.storeCode);
   var chans = direct ? [PS_FIN.CH_PLATFORM] : [PS_FIN.CH_OWN, PS_FIN.CH_PLATFORM];
+  var billDisplay = direct ? 'none' : 'contents';
 
-  var html = '<div class="pm-form-grid">' +
+  var html = '<div class="pm-form-grid col4">' +
     npFItem('单据编号', '<input type="text" id="psf-pay-no" value="' + npEscape(row.orderNo) + '" readonly>') +
-    npSelect('收款渠道', '<select id="psf-pay-ch" onchange="psfinSyncPayMethod()">' +
-      chans.map(function (c) { return '<option>' + npEscape(c) + '</option>'; }).join('') + '</select>') +
-    npSelect('收款方式', '<select id="psf-pay-method"></select>') +
-    npFItem('收款金额', '<input type="text" id="psf-pay-amount" value="' + canGet.toFixed(2) + '" placeholder="可收 ' + canGet.toFixed(2) + '">') +
+    npFormSelect('收款渠道', '<select id="psf-pay-ch" onchange="psfinSyncPayMethod()">' +
+      chans.map(function (c) { return '<option>' + npEscape(c) + '</option>'; }).join('') + '</select>', true) +
+    npFormSelect('收款方式', '<select id="psf-pay-method"></select>', true) +
+    npFormItem('收款金额', '<input type="text" id="psf-pay-amount" value="' + canGet.toFixed(2) + '" placeholder="可收 ' + canGet.toFixed(2) + '">', true) +
+    '<div class="lt-filter-item form-actions" data-col="4" id="psf-pay-qrbtn" style="display:' + (direct ? '' : 'none') + '">' +
+    '<button class="lt-btn lt-btn-primary" onclick="psfinGetQr()">获取支付码</button>' +
+    '</div>' +
+    '<div id="psf-bill-block" style="display:' + billDisplay + '">' +
     npSelect('票据类型', '<select id="psf-pay-billtype"><option value="">请选择</option>' +
       PS_FIN.BILL_TYPES.map(function (b) { return '<option>' + npEscape(b) + '</option>'; }).join('') + '</select>') +
     npFItem('票据号', '<input type="text" id="psf-pay-billno" placeholder="请输入">') +
     npFItem('票据金额', '<input type="text" id="psf-pay-billamount" placeholder="请输入">') +
     '</div>' +
-    '<div class="psf-qr" id="psf-qr" style="display:none">' +
-    '<div class="psf-qr-box">收款码</div>' +
-    '<div class="psf-qr-tip">收款码有效期 15-30 分钟，如失效可重新发起获取新的支付二维码</div>' +
     '</div>' +
-    '<div class="psf-hint">可收金额 ' + canGet.toFixed(2) + ' 元' + (direct ? '（直营店仅支持支付平台收款）' : '') + '</div>';
+    '<div class="psf-qr" id="psf-qr" style="display:' + (direct ? '' : 'none') + '">' +
+    '<div class="psf-qr-row">' +
+    '<div class="psf-qr-box">收款码</div>' +
+    '<div class="psf-qr-side">' +
+    '<div class="psf-qr-tip">二维码有效期：15-30分钟，如失效，请重新发起获取新的支付二维码</div>' +
+    '<a href="javascript:void(0)" class="lt-link" onclick="npToast(\'下载图片（演示）\')">下载图片</a>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
 
   npOpenModal('收款',
     html,
     '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button>' +
-    '<button class="lt-btn lt-btn-primary" onclick="psfinSubmitPay()">确认收款</button>',
-    { width: 720 });
+    '<button class="lt-btn lt-btn-primary" onclick="psfinSubmitPay()">确认</button>',
+    { width: 1000 });
   window.__psfPayCtx = { orderNo: orderNo, canGet: canGet };
   psfinSyncPayMethod();
 };
@@ -408,15 +462,30 @@ window.psfinOpenPay = function (orderNo) {
 window.psfinSyncPayMethod = function () {
   var ch = (document.getElementById('psf-pay-ch') || {}).value || '';
   var sel = document.getElementById('psf-pay-method');
+  var methodCell = sel ? sel.closest('.lt-filter-item') : null;
   var qr = document.getElementById('psf-qr');
+  var qrbtn = document.getElementById('psf-pay-qrbtn');
+  var bill = document.getElementById('psf-bill-block');
   var isPlatform = ch === PS_FIN.CH_PLATFORM;
-  var list = isPlatform ? PS_FIN.METHOD_PLATFORM : PS_FIN.METHOD_OWN;
+  /* 支付平台（二码合一）→ 隐藏「收款方式」且无需选择；门店自行收款 → 显示并必填 */
+  if (methodCell) methodCell.style.display = isPlatform ? 'none' : '';
   if (sel) {
-    sel.innerHTML = '<option value="">请选择</option>' +
-      list.map(function (m) { return '<option>' + m + '</option>'; }).join('');
-    if (isPlatform) sel.value = list[0];
+    if (isPlatform) { sel.innerHTML = ''; }
+    else {
+      sel.innerHTML = '<option value="">请选择</option>' +
+        PS_FIN.METHOD_OWN.map(function (m) { return '<option>' + m + '</option>'; }).join('');
+    }
   }
   if (qr) qr.style.display = isPlatform ? '' : 'none';
+  if (qrbtn) qrbtn.style.display = isPlatform ? '' : 'none';
+  if (bill) bill.style.display = isPlatform ? 'none' : 'contents';
+};
+
+/* 获取支付码：点击即生成/刷新二码合一收款码（微信、支付宝均可扫码） */
+window.psfinGetQr = function () {
+  var qr = document.getElementById('psf-qr');
+  if (qr) qr.style.display = '';
+  npToast('已生成支付二维码（二码合一，微信/支付宝均可扫码）');
 };
 
 window.psfinSubmitPay = function () {
@@ -424,14 +493,15 @@ window.psfinSubmitPay = function () {
   var g = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
   var ch = g('psf-pay-ch'), method = g('psf-pay-method'), amount = g('psf-pay-amount');
   var billType = g('psf-pay-billtype'), billNo = g('psf-pay-billno'), billAmount = g('psf-pay-billamount');
+  var isPlatform = ch === PS_FIN.CH_PLATFORM;
   if (!ch) { npToast('请选择收款渠道'); return; }
-  if (!method) { npToast('请选择收款方式'); return; }
+  if (!isPlatform && !method) { npToast('请选择收款方式'); return; }
   var n = parseFloat(amount);
   if (isNaN(n) || n <= 0) { npToast('收款金额需大于 0'); return; }
   if (n - ctx.canGet > 0.005) { npToast('收款金额不能超过可收金额 ' + ctx.canGet.toFixed(2)); return; }
   var list = psfinPayMap()[ctx.orderNo] || (psfinPayMap()[ctx.orderNo] = []);
   list.push({
-    ch: ch, method: method, amount: psoMoney(n), time: npNowLocal(),
+    ch: ch, method: isPlatform ? '二码合一' : method, amount: psoMoney(n), time: npNowLocal(),
     billType: billType || '—', billNo: billNo, billAmount: billAmount ? psoMoney(billAmount) : 0
   });
   npCloseModal();
@@ -450,25 +520,24 @@ window.psfinOpenRefund = function (docNo) {
   var refunded = psfinRefunded(docNo);
   var need = Math.round((parseFloat(row.amount) - refunded) * 100) / 100;
 
-  var body = '<div class="pm-form-grid">' +
+  var body = '<div class="pm-form-grid col4">' +
     npFItem('单据编号', '<input type="text" id="psf-rfd-no" value="' + npEscape(row.docNo) + '" readonly>') +
-    npFItem('退款类型', '<input type="text" value="' + npEscape(row.type) + '" readonly>') +
     npFItem('退款日期', '<input type="text" value="' + npEscape(npNowLocal().slice(0, 10)) + '" readonly>') +
-    npFItem('操作人', '<input type="text" value="当前门店用户" readonly>') +
+    npFItem('操作人', '<input type="text" value="张三" readonly>') +
     npFItem('退款金额', '<input type="text" value="' + need.toFixed(2) + '" readonly>') +
     '</div>' +
+    '<div class="psf-hint">退款后请注意作废票据</div>' +
     '<div class="lt-table-wrap" style="max-height:300px;margin-top:8px"><table class="lt-table"><thead><tr>' +
     npTH([
       { t: '序号', w: 50 }, { t: '收款渠道', w: 130 }, { t: '收款方式', w: 100 },
       { t: '收款金额', w: 100 }, { t: '收款时间', w: 160 }, { t: '已退金额', w: 100 },
       { t: '可退金额', w: 100 }, { t: '退款金额', w: 120 }
-    ]) + '</tr></thead><tbody id="psf-rfd-tbody">' + psfinRefundTableHtml(pays, refunded) + '</tbody></table></div>' +
-    '<div class="psf-hint">本次退款合计 <b id="psf-rfd-sum">0.00</b> 元，应为 ' + need.toFixed(2) + ' 元</div>';
+    ]) + '</tr></thead><tbody id="psf-rfd-tbody">' + psfinRefundTableHtml(pays, refunded) + '</tbody></table></div>';
 
-  npOpenModal('退款 ' + row.docNo, body,
+  npOpenModal('退款', body,
     '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button>' +
-    '<button class="lt-btn lt-btn-primary" onclick="psfinSubmitRefund()">确认退款</button>',
-    { width: 900 });
+    '<button class="lt-btn lt-btn-primary" onclick="psfinSubmitRefund()">确认</button>',
+    { width: 1060 });
   window.__psfRfdCtx = { docNo: docNo, need: need, orderNo: row.orderNo, refunded: refunded };
   psfinSyncRefundSum();
 };
@@ -488,7 +557,7 @@ function psfinRefundTableHtml(pays, refunded) {
       '<td>' + npEscape(p.time) + '</td>' +
       '<td>' + psoMoney(used) + '</td>' +
       '<td>' + canBack.toFixed(2) + '</td>' +
-      '<td><input type="text" id="psf-rfd-amt-' + i + '" data-can="' + canBack.toFixed(2) + '" value="" placeholder="≤' + canBack.toFixed(2) + '" oninput="psfinSyncRefundSum()"></td>' +
+      '<td><input type="text" id="psf-rfd-amt-' + i + '" data-can="' + canBack.toFixed(2) + '"' + (canBack <= 0.005 ? ' value="0" readonly' : ' value="" placeholder="≤' + canBack.toFixed(2) + '"') + ' oninput="psfinSyncRefundSum()"></td>' +
       '</tr>';
   });
   if (!html) html = '<tr><td colspan="8" style="text-align:center;color:#999;padding:24px">暂无收款记录</td></tr>';
@@ -559,11 +628,11 @@ window.psfinOpenFlow = function (docNo) {
 
   var flows = [];
   (psfinPayMap()[orderNo] || []).forEach(function (p) {
-    flows.push({ kind: '收款', ch: p.ch, method: p.method, amount: p.amount, time: p.time, billType: p.billType || '—', billNo: p.billNo || '—', billAmount: p.billAmount ? psoMoney(p.billAmount) : '—' });
+    flows.push({ kind: '收款', ch: p.ch, method: p.method, amount: p.amount, time: p.time, billType: p.billType || '', billNo: p.billNo || '', billAmount: p.billAmount ? psoMoney(p.billAmount) : '' });
   });
   refundDocNos.forEach(function (dn) {
     (psfinRefundMap()[dn] || []).forEach(function (r) {
-      flows.push({ kind: '退款', ch: r.ch, method: r.method, amount: r.amount, time: r.time, billType: '—', billNo: '—', billAmount: '—' });
+      flows.push({ kind: '退款', ch: r.ch, method: r.method, amount: r.amount, time: r.time, billType: '', billNo: '', billAmount: '' });
     });
   });
   flows.sort(function (a, b) { return a.time < b.time ? -1 : 1; });
@@ -575,7 +644,6 @@ window.psfinOpenFlow = function (docNo) {
 
   var html = '<div class="pm-form-grid">' +
     npFItem('单据编号', '<input type="text" value="' + npEscape(docNo) + '" readonly>') +
-    npFItem('销售单号', '<input type="text" value="' + npEscape(orderNo) + '" readonly>') +
     npFItem('已收款金额', '<input type="text" value="' + got + '" readonly>') +
     npFItem('已退款金额', '<input type="text" value="' + back + '" readonly>') +
     '</div>' +

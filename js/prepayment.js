@@ -73,7 +73,11 @@ var YSK_RECORD_SEED = [
   { owner: '张建国', storeCode: 'BJ001',  method: '现金',   amount: '1500.00', registrar: '王芳',         time: '2026-10-09 14:06:12' },
   { owner: '李思远', storeCode: 'HZ001',  method: '银行卡', amount: '3000.00', registrar: '赵磊',         time: '2026-10-07 15:55:14' },
   { owner: '王雅静', storeCode: 'SZ001',  method: '支付宝', amount: '2500.00', registrar: '周勇',         time: '2026-09-29 10:36:28' },
-  { owner: '赵文博', storeCode: 'SH001',  method: '现金',   amount: '600.00',  registrar: '当前门店用户', time: '2026-09-26 11:20:05' }
+  /* ★ 2026-10-27：这一条原为 2026-09-26，落在「近一月」默认区间（上个月同日 ~ 今天）之外，
+     日期一滚到 10-27 就被默认区间挡掉 → 「重置回到全量」用例变 12/13。
+     种子的日期是写死的、默认区间却随时间滚动，这类"隔一段时间就红一次"的用例必须靠数据落在区间内来避免，
+     故把最老这条挪到 2026-09-28（仍是全表最早，倒序位置不变）。 */
+  { owner: '赵文博', storeCode: 'SH001',  method: '现金',   amount: '600.00',  registrar: '当前门店用户', time: '2026-09-28 11:20:05' }
 ];
 (function () {
   var st = NP['prepayment-record'];
@@ -301,7 +305,7 @@ function yskInitBalancePanel() {
     { t: '余额', w: 130, cls: 'col-balance', f: function (r) { return yskMoneyHtml(r.balance); } },
     { t: '门店名称', w: 150, cls: 'col-store-name', f: function (r) { return npEscape(yskStoreShort(r.storeCode)); } },
     { t: '门店编码', w: 90, cls: 'col-store-code', f: function (r) { return npEscape(r.storeCode); } },
-    { t: '预收款合计金额', w: 150, cls: 'col-total', f: function (r) { return yskMoneyHtml(r.recharge); } },
+    { t: '合计充值金额', w: 150, cls: 'col-total', f: function (r) { return yskMoneyHtml(r.recharge); } },
     {
       t: '操作', w: 110, cls: 'col-actions', f: function (r) {
         return npRenderActions(['<a href="javascript:void(0)" class="lt-btn-link" onclick="yskOpenDetail(\'' + npEscape(r.owner) + '\',\'' + npEscape(r.storeCode) + '\')">查看明细</a>']);

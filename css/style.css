@@ -905,7 +905,10 @@
       padding: 0;
     }
     .lt-datalist.show { display: block; }
-    .lt-datalist li { padding: 7px 12px; font-size: 12px; cursor: pointer; color: #333; }
+    /* 选项一律单行：窄容器（如明细表单元格）里长选项不得折成两行
+       —— 2026-10-26 实测：折让项目列 120px 时「集油卡抵机油」折行成 46px 高，用户当场反馈「挤到换行」。
+       折行的根治办法是容器给足宽度（见 js/repair-settlement.js 折让表列宽），这里再兜一层，保证任何页面都不会折行。 */
+    .lt-datalist li { padding: 7px 12px; font-size: 12px; cursor: pointer; color: #333; white-space: nowrap; }
     .lt-datalist li:hover { background: #fdf5f6; color: #861B2F; }
     .lt-datalist li.selected { background: #f0e8ea; color: #861B2F; font-weight: 600; }
     .lt-datalist li.hidden { display: none; }
@@ -1720,11 +1723,27 @@
     .pm-section-title { font-size:14px; font-weight:600; color:#185FA5; margin:18px 0 10px 0; padding-left:10px; border-left:3px solid #185FA5; }
     .pm-section-title:first-child { margin-top:0; }
     .pm-form-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px 20px; margin-bottom:10px; }
-    /* 财务管理·配件销售收款：支付平台收款码占位 + 提示行（2026-10-25 新增） */
-    .psf-qr { display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 0 4px; }
-    .psf-qr-box { width:150px; height:150px; border:1px solid #e8e8e8; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:13px; letter-spacing:2px; background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f3f3f3 6px,#f3f3f3 12px); }
-    .psf-qr-tip { font-size:12px; color:#999; }
+    /* 4 列变体：与全站 .np-form-grid.col4 同写法（PRD 5.4.1/5.4.2「一行 4 列」） */
+    .pm-form-grid.col4 { grid-template-columns:repeat(4, minmax(0, 1fr)); }
+    /* 财务管理·配件销售收款：支付平台收款码区（2026-10-26 修正：码居中、文字换行、按钮置行尾第4列） */
+    .psf-qr { display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 0 4px; }
+    .psf-qr-row { display:flex; gap:18px; align-items:center; justify-content:center; width:100%; }
+    .psf-qr-box { width:160px; height:160px; border:1px solid #e8e8e8; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:13px; letter-spacing:2px; background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f3f3f3 6px,#f3f3f3 12px); flex:0 0 auto; }
+    .psf-qr-side { display:flex; flex-direction:column; gap:8px; max-width:300px; }
+    .psf-qr-tip { font-size:12px; color:#999; line-height:1.6; }
+    /* 「获取支付码」按钮格：复用全站 .lt-filter-item.form-actions 规范（右对齐、与同行输入框底对齐） */
+    .pm-form-grid .lt-filter-item.form-actions { display:flex; align-items:flex-end; justify-content:flex-end; gap:8px; }
+    .pm-form-grid.col4 .lt-filter-item.form-actions[data-col="4"] { grid-column:4; }
     .psf-hint { font-size:12px; color:#861B2F; padding:6px 0 2px; }
+    /* 收款(新)·演示切换区域：独立于表单网格的边框区块（2026-10-26 新增） */
+    .psf-demo { border:1px dashed #e0c4cc; border-radius:6px; background:#fcf6f8; padding:10px 14px; margin-top:12px; }
+    .psf-demo-title { font-size:13px; font-weight:600; color:#861B2F; margin-bottom:8px; }
+    .psf-demo-row { display:flex; flex-wrap:wrap; align-items:center; gap:18px; }
+    .psf-demo-label { font-size:13px; color:#333; font-weight:600; }
+    .psf-demo-row label { display:inline-flex; align-items:center; gap:4px; font-size:13px; color:#333; cursor:pointer; }
+    .psf-demo-hint { font-size:12px; color:#861B2F; margin-top:8px; }
+    /* 退款明细：可退金额=0 的行，退款金额输入框灰显只读 */
+    #psf-rfd-tbody input[readonly] { background:#f5f7fa; color:#999; cursor:not-allowed; }
     /* 配件库存管理·仓库仓位管理：弹窗内仓位明细子表 + 提示行（2026-10-25 新增） */
     /* 冻结列 1~3（序号/仓库编码/仓库名称）：left 偏移 = 前面各列宽累加，宽三重锁（规范 S3b） */
     #page-warehouse-position .lt-table th.col-seq,      #page-warehouse-position .lt-table td.col-seq      { left:0;     width:40px;  min-width:40px;  max-width:40px;  overflow:hidden; }
@@ -2042,6 +2061,12 @@ textarea.np-input { height:auto; padding:8px 10px; line-height:1.6; resize:verti
 .np-form-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px 20px; margin-bottom:12px; }
 .np-form-grid.col2 { grid-template-columns:repeat(2, 1fr); }
 .np-form-grid.col4 { grid-template-columns:repeat(4, minmax(0, 1fr)); }
+/* 表单栅格「操作按钮格」（规范 §3.1.1 变体，配 npFormActions()）：
+   把业务操作按钮放进表单行里（如在线支付行2 第4列），固定占最后一列、右对齐、与同行输入框底对齐。
+   唯一来源＝本段；页面禁止自造按钮格或写内联栅格。 */
+.np-form-grid .lt-filter-item.form-actions { display:flex; align-items:flex-end; justify-content:flex-end; gap:8px; }
+.np-form-grid.col4 .lt-filter-item.form-actions[data-col="4"] { grid-column:4; }
+.np-form-grid.col2 .lt-filter-item.form-actions[data-col="2"] { grid-column:2; }
 .np-form-item { display:flex; flex-direction:column; gap:4px; }
 .np-form-item > label { font-size:13px; color:#555; }
 .np-form-item > label.np-req { color:#333; font-weight:600; }
@@ -2657,3 +2682,36 @@ input[readonly][placeholder="点击选择门店"] { cursor: pointer; }
 /* 提示语行内的输入框不因提示语变长而被压缩，宽度与其它字段一致 */
 .psi-field-side .lt-input-wrap { flex:none; }
 .psi-rule { font-size:12px; color:#c0392b; line-height:1.7; max-width:520px; }
+
+/* ==========================================================================
+   原型专用：场景演示切换区（2026-10-26 新增，规范 §3.1.5 已登记）
+   用途：PRD 里「只能靠点不同数据行才能看到」的状态，做成弹框底部一排按钮一键切换。
+   唯一来源＝本段；禁止页面自造同类私有类名（同类需求请复用 .np-demo-switch*）。
+   范本调用处：js/repair-settlement.js rscDemoSwitchHtml / rscDemoScene / rscDemoReset
+   ========================================================================== */
+.np-demo-switch { margin-top:14px; border:1px dashed #d9d9d9; border-radius:4px; background:#fafbfc; padding:10px 14px 12px; }
+.np-demo-switch-hd { font-size:12px; font-weight:600; color:#555; margin-bottom:9px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+.np-demo-switch-hint { font-weight:400; color:#999; }
+.np-demo-switch-group { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+.np-demo-switch-group-label { font-size:12px; color:#666; min-width:132px; flex-shrink:0; }
+.np-demo-switch-btn { font-size:12px; line-height:1.5; padding:4px 10px; border:1px solid #d9d9d9; background:#fff; border-radius:3px; color:#333; cursor:pointer; }
+.np-demo-switch-btn:hover { border-color:#861B2F; color:#861B2F; }
+.np-demo-switch-btn.active { background:#861B2F; border-color:#861B2F; color:#fff; }
+.np-demo-switch-ops { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px; padding-top:9px; border-top:1px dashed #e2e6ea; }
+.np-demo-switch-tip { margin-top:9px; font-size:12px; color:#c97a0a; background:#fff7e6; border:1px solid #ffd591; border-radius:3px; padding:6px 10px; line-height:1.7; }
+
+/* ==========================================================================
+   弹窗「底部按钮条之下」的附加区（2026-10-26 新增，配 npOpenModal 的 opts.belowFooterHtml）
+   用户口径①：「演示专用模块应该在按钮的下面，不能把底部按钮压在演示模块下方、与上面隔那么开」。
+   用户口径②：「按钮应该和行1、行2 放在一起用一个底色，不该在演示区那个灰色区块里」。
+   于是本段做了两件事：位置＝按钮条之后；底色＝按钮条与正文同为白底（业务那一块），
+   演示内容自带灰底虚线框（.np-demo-switch 的 #fafbfc + 虚线边），两者不共用灰底。
+   唯一来源＝本段；页面不得自己往 .modal-footer 里塞演示元素、也不得改这里的底色。
+   ========================================================================== */
+.modal-below-footer { flex-shrink:0; padding:0 18px 16px; background:#fff; border-radius:0 0 8px 8px; }
+/* 有下方附加区时：按钮条回到「表单那一块」——白底、无分隔线，不再和演示区拼成一条灰带 */
+.modal-box:has(.modal-below-footer) .modal-footer {
+  background:#fff; border-top:0; padding-bottom:4px; border-radius:0;
+}
+/* 演示框保留自己的灰底虚线（不要在附加区里被刷白） */
+.modal-below-footer .np-demo-switch { margin-top:0; }

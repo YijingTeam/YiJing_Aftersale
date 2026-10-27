@@ -6366,6 +6366,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     var qrhqEl = document.getElementById('page-desc-quality-report-hq');
     var rscEl = document.getElementById('page-desc-repair-settlement');
     var rsiEl = document.getElementById('page-desc-repair-settlement');
+    var rscnEl = document.getElementById('page-desc-repair-settlement-new');
     var yskEl = document.getElementById('page-desc-prepayment');
     var psoEl = document.getElementById('page-desc-parts-sales-order');
     var psiEl = document.getElementById('page-desc-parts-sales-invoice');
@@ -6381,6 +6382,7 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     if (qrhqEl) qrhqEl.style.display = 'none';
     if (rscEl) rscEl.style.display = 'none';
     if (rsiEl) rsiEl.style.display = 'none';
+    if (rscnEl) rscnEl.style.display = 'none';
     if (yskEl) yskEl.style.display = 'none';
     if (psoEl) psoEl.style.display = 'none';
     if (psiEl) psiEl.style.display = 'none';
@@ -6404,6 +6406,12 @@ var NP_DEFAULT_PAGE_SIZE = 20; // 公共分页默认每页条数（唯一权威�
     } else if (module === 'repair-settlement-invoice') {
       /* 发票整页与列表页共用同一份页面说明块 */
       if (rsiEl) rsiEl.style.display = 'block';
+    } else if (module === 'repair-settlement-new') {
+      /* 维修结算收款(新)：老页的变体，页面说明只写三处差异（见说明块） */
+      if (rscnEl) rscnEl.style.display = 'block';
+    } else if (module === 'repair-settlement-new-invoice') {
+      /* 新版发票整页与新版列表页共用同一份页面说明块 */
+      if (rscnEl) rscnEl.style.display = 'block';
     } else if (module === 'prepayment') {
       if (yskEl) yskEl.style.display = 'block';
     } else if (module === 'parts-sales-order') {
@@ -9631,7 +9639,11 @@ function npDateTime(key, idx){ return npDate(key, idx) + ' ' + String(npRandStr(
 function npDateTimeWithin(key, idx, maxDays){ var base = new Date(2026,6,20); var d = new Date(base.getTime() - npRandStr(key, idx, 0, maxDays)*86400000); var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); var ds=y+'-'+m+'-'+day; return ds + ' ' + String(npRandStr(key+'-h', idx, 8, 17)).padStart(2,'0') + ':' + String(npRandStr(key+'-m2', idx, 0, 59)).padStart(2,'0') + ':' + String(npRandStr(key+'-s2', idx, 0, 59)).padStart(2,'0'); }
 function npMoney(key, idx, min, max){ return (npRandStr(key, idx, min, max)).toFixed(2); }
 
-/* 通用弹窗：复用已有 .modal-overlay / .modal-box / .modal-header / .modal-body / .modal-close */
+/* 通用弹窗：复用已有 .modal-overlay / .modal-box / .modal-header / .modal-body / .modal-close
+   opts.width          弹框宽度
+   opts.belowFooterHtml 追加在「底部按钮条之下」的一块内容（2026-10-26 新增，用户口径：
+                        演示类模块必须在按钮下面，不能把按钮压到演示模块下方、与正文隔太远）。
+                        典型用法＝场景演示切换区（规范 §3.1.5），业务正文/按钮顺序保持不变。 */
 function npOpenModal(title, bodyHtml, footerHtml, opts){
   opts = opts || {};
   var w = opts.width || 780;
@@ -9645,6 +9657,7 @@ function npOpenModal(title, bodyHtml, footerHtml, opts){
       '<div class="modal-header"><h3>'+npEscape(title)+'</h3><button class="modal-close" onclick="npCloseModal()">&times;</button></div>' +
       '<div class="modal-body" id="np-modal-body">'+bodyHtml+'</div>' +
       (footerHtml ? '<div class="modal-footer" id="np-modal-footer">'+footerHtml+'</div>' : '') +
+      (opts.belowFooterHtml ? '<div class="modal-below-footer" id="np-modal-below">'+opts.belowFooterHtml+'</div>' : '') +
     '</div>';
   overlay.classList.add('show');
   overlay.onclick = function(e){ if(e.target === overlay) npCloseModal(); };
@@ -9743,6 +9756,14 @@ function npFormItem(label, controlHtml, required){
 function npFormSelect(label, innerHtml, required){
   return '<div class="lt-filter-item"><div class="lt-input-wrap'+(required?' required':'')+'">'+
     '<span class="lt-filter-prefix">'+npEscape(label)+'</span>'+innerHtml+'</div></div>';
+}
+/* ===== 表单栅格里的「操作按钮格」（2026-10-26 新增）=====
+   用途：把弹窗里的业务操作按钮放进表单行里（如「在线支付」行2 第 4 列），
+        而不是塞到弹框 footer —— 用户口径「按钮，放在行2 的第 4 列，和演示切换区域不要焊死」。
+   唯一类名：`.lt-filter-item.form-actions`（规范 §3.1.1 变体表已登记），
+   固定占同行第 col 列、右对齐、与同行输入框底对齐；**禁止**页面自造同类类名或写内联栅格。 */
+function npFormActions(buttonsHtml, col){
+  return '<div class="lt-filter-item form-actions" data-col="'+(col || 4)+'">'+(buttonsHtml || '')+'</div>';
 }
 /* ===== 配件池 / 不良品库存：全站唯一来源 =====
    规范 §4.8 模拟数据规范：配件编码/名称/单位/单价只允许在这里定义一份，
@@ -10367,14 +10388,14 @@ function moImportExcel(){
 NP['store-manage'] = { page:1, pageSize:10, allData:[], filtered:[], render:null, query:null, reset:null };
 (function(){
   var a = [
-    { code:'BJ001', shortName:'北京朝阳店', name:'北京朝阳店', type:'用户中心', region:'华北', district:'北京', province:'北京', city:'北京', address:'北京市朝阳区建国路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
-    { code:'SH001', shortName:'上海浦东店', name:'上海浦东店', type:'用户中心', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市浦东新区张江路100号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'BJ001', shortName:'北京朝阳店', name:'北京朝阳店', type:'用户中心', region:'华北', district:'北京', province:'北京', city:'北京', address:'北京市朝阳区建国路88号', status:'营业店', disabled:'启用', channelMode:'非直营', payEnabled:true, taxNo:'' },
+    { code:'SH001', shortName:'上海浦东店', name:'上海浦东店', type:'用户中心', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市浦东新区张江路100号', status:'营业店', disabled:'启用', channelMode:'非直营', payEnabled:true, taxNo:'' },
     { code:'SH002', shortName:'上海徐汇店', name:'上海徐汇店', type:'商超店', region:'华东', district:'上海', province:'上海', city:'上海', address:'上海市徐汇区漕溪北路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
-    { code:'GZ001', shortName:'广州天河店', name:'广州天河店', type:'用户中心', region:'华南', district:'广州', province:'广东', city:'广州', address:'广州市天河区天河路100号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
-    { code:'SZ001', shortName:'深圳南山店', name:'深圳南山店', type:'商超店', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市南山区深南大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'GZ001', shortName:'广州天河店', name:'广州天河店', type:'用户中心', region:'华南', district:'广州', province:'广东', city:'广州', address:'广州市天河区天河路100号', status:'营业店', disabled:'启用', channelMode:'非直营', payEnabled:true, taxNo:'' },
+    { code:'SZ001', shortName:'深圳南山店', name:'深圳南山店', type:'商超店', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市南山区深南大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', payEnabled:true, taxNo:'' },
     { code:'SZFT001', shortName:'深圳福田店', name:'深圳福田店', type:'商超店', region:'华南', district:'深圳', province:'广东', city:'深圳', address:'深圳市福田区福华三路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
-    { code:'HZ001', shortName:'杭州西湖店', name:'杭州西湖店', type:'用户中心', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市西湖区文三路88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
-    { code:'WH001', shortName:'武汉光谷店', name:'武汉光谷店', type:'用户中心', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'武汉市洪山区光谷大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
+    { code:'HZ001', shortName:'杭州西湖店', name:'杭州西湖店', type:'用户中心', region:'华东', district:'杭州', province:'浙江', city:'杭州', address:'杭州市西湖区文三路88号', status:'营业店', disabled:'启用', channelMode:'非直营', payEnabled:true, taxNo:'' },
+    { code:'WH001', shortName:'武汉光谷店', name:'武汉光谷店', type:'用户中心', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'武汉市洪山区光谷大道88号', status:'营业店', disabled:'启用', channelMode:'非直营', payEnabled:true, taxNo:'' },
     { code:'HBZ01', shortName:'武汉龙阳店', name:'武汉龙阳店', type:'用户中心', region:'华中', district:'武汉', province:'湖北', city:'武汉', address:'湖北省武汉市汉阳区龙阳大道88号', status:'营业店', disabled:'启用', channelMode:'直营', taxNo:'91420105MAK56G0123' },
     { code:'SCZ01', shortName:'成都锦江店', name:'成都锦江店', type:'用户中心', region:'西南', district:'成都', province:'四川', city:'成都', address:'成都市锦江区人民南路120号', status:'营业店', disabled:'启用', channelMode:'直营', taxNo:'91510100MAKFGRJ5XK' },
     { code:'CS001', shortName:'长沙岳麓店', name:'长沙岳麓店', type:'商超店', region:'华中', district:'长沙', province:'湖南', city:'长沙', address:'长沙市岳麓区麓山南路100号', status:'营业店', disabled:'启用', channelMode:'非直营', taxNo:'' },
@@ -10405,6 +10426,15 @@ NP['store-manage'] = { page:1, pageSize:10, allData:[], filtered:[], render:null
   ];
   NP['store-manage'].allData = a;
 })();
+/* 该门店是否接入支付（决定能否用「支付二维码 / 用户App」两个在线收退款渠道）
+   口径（2026-10-26 用户拍板，PRD 6.1.1【收款】渠道矩阵）：
+     直营店 → 一律接入；非直营店 → 看门店主数据 payEnabled 字段（在门店管理维护）。
+   公共函数：门店管理列表与「维修结算收款」共用，禁止各页各写一套。 */
+function storePayEnabled(s){
+  if (!s) return false;
+  if (s.channelMode === '直营') return true;
+  return s.payEnabled === true;
+}
 function initStoreManage(){
   var K='store-manage'; var st=NP[K];
   var filter = npFItem('门店编码','<input type="text" id="sm-f-code" placeholder="请输入">') +
@@ -10423,6 +10453,7 @@ function initStoreManage(){
     {t:'门店名称',f:function(r){return npEscape(r.name);}},
     {t:'门店类型',w:90,f:function(r){return r.type;}},
     {t:'渠道模式',w:90,f:function(r){return r.channelMode;}},
+    {t:'是否接入支付',w:110,f:function(r){return storePayEnabled(r)?'<span class="lt-badge ok">已接入</span>':'<span class="lt-badge off">未接入</span>';}},
     {t:'纳税人识别号',w:180,f:function(r){return r.taxNo?npEscape(r.taxNo):'—';}},
     {t:'大区',w:70,f:function(r){return r.region;}},
     {t:'小区',w:70,f:function(r){return r.district;}},

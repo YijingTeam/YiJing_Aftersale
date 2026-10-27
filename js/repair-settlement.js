@@ -31,6 +31,9 @@ var RSC_BADGE = {
   CREDITING:'warn', CREDITED:'off', CREDIT_FAIL:'off'
 };
 var RSC_REFUND_REASONS = ['重复收款','收款金额错误','维修项目取消或未实施','客户协商终止服务'];
+/* ---------- 折让项目字典（2026-10-26 用户口径，规范 §4.9.2 登记） ----------
+   顺序即下拉顺序，「其它」为兜底值。页面内禁止再写折让类型字面量（规范 §4.9 末条）。 */
+var RSC_DISCOUNT_TYPES = ['按商务政策','折扣券','会员折扣','活动折扣','内部考核','总经理签免','二手车整备','集油卡抵机油','其它'];
 
 /* ---------- 示例数据（9 行，字段与 920 结算单一一对应）
    门店按已拍板口径分布：直营（SCZ01/HBZ01）与非直营（上海浦东店/北京朝阳店/武汉光谷店）都有，
@@ -44,17 +47,18 @@ var RSC_REFUND_REASONS = ['重复收款','收款金额错误','维修项目取�
       date:'2026-10-19 15:20', reporter:'张伟', reporterPhone:'13800138001', reportDate:'2026-10-17',
       labor:'325.63', part:'351.62', total:'677.25',
       status:'UNPAID', settlement:'WAITING_PAYMENT', invoice:'NOT_READY',
-      discounts:[{type:'按商务政策', amount:'0.00', labor:'0.00', part:'0.00', remark:''}],
+      discounts:[{type:'按商务政策', labor:'20.00', part:'0.00', remark:''}],
       /* 收退款流水（渠道→方式按联动规则：门店自行全量；支付二维码/用户App 只有微信、支付宝） */
       payRecords:[
         { type:'收款', channel:'门店自行', method:'现金', amount:'300.00', time:'2026-10-19 15:22', payState:'OK' },
-        { type:'收款', channel:'门店自行', method:'挂账', amount:'377.25', time:'2026-10-19 15:26', payState:'OK' }
+        { type:'收款', channel:'门店自行', method:'现金', amount:'377.25', time:'2026-10-19 15:26', payState:'OK' }
       ] },
     { id:'WXJSDYJ-SCZ01261015011', order:'Z05RO261015011', storeCode:'SCZ01', plate:'川A·Q9026', vin:'LDP41B960TD920011',
       date:'2026-10-15 13:06', reporter:'李静', reporterPhone:'13900139002', reportDate:'2026-10-13',
       labor:'180.00', part:'0.00', total:'180.00',
       status:'PAYING', settlement:'WAITING_PAYMENT', invoice:'NOT_READY',
-      discounts:[{type:'优惠券', amount:'0.00', labor:'0.00', part:'0.00', remark:''}], payOrderNo:'YJ_WXSK_Z05RO26101501101',
+      discounts:[{type:'折扣券', labor:'0.00', part:'0.00', remark:''}], payOrderNo:'YJ_WXSK_Z05RO26101501101',
+      payChannel:'支付二维码', payState:'PAYING',
       payRecords:[
         { type:'收款', channel:'支付二维码', method:'微信', amount:'180.00', time:'2026-10-15 13:08', payState:'WAIT' }
       ] },
@@ -62,10 +66,11 @@ var RSC_REFUND_REASONS = ['重复收款','收款金额错误','维修项目取�
       date:'2026-10-12 10:18', reporter:'王芳', reporterPhone:'13700137003', reportDate:'2026-10-10',
       labor:'720.00', part:'0.00', total:'720.00',
       status:'PAID_PENDING_COLLECTION', settlement:'WAITING_PAYMENT', invoice:'NOT_READY',
-      discounts:[{type:'按商务政策', amount:'100.00', labor:'100.00', part:'0.00', remark:''},
-                 {type:'优惠券', amount:'100.00', labor:'100.00', part:'0.00', remark:''}],
-      recommend:'客户为老客户，按商务政策折让 100 元，另发 100 元优惠券。',
+      discounts:[{type:'按商务政策', labor:'100.00', part:'0.00', remark:''},
+                 {type:'折扣券', labor:'100.00', part:'0.00', remark:''}],
+      recommend:'客户为老客户，按商务政策折让 100 元，另发 100 元折扣券。',
       payOrderNo:'YJ_WXSK_Z05RO26101200701',
+      payChannel:'用户App', payState:'SUCCESS',
       payRecords:[
         { type:'收款', channel:'用户App', method:'支付宝', amount:'520.00', time:'2026-10-12 10:20', payState:'OK' },
         { type:'收款', channel:'用户App', method:'微信', amount:'200.00', time:'2026-10-12 10:24', payState:'PAY_FAIL' }
@@ -143,15 +148,16 @@ var RSC_REFUND_REASONS = ['重复收款','收款金额错误','维修项目取�
       discounts:[], refundRoute:'AFTER_COLLECTION', refundReason:'收款金额错误', refundRequestNo:'RF-920-0023-1',
       payOrderNo:'YJ_WXSK_WX202609280000000101',
       payRecords:[
-        { type:'收款', channel:'门店自行', method:'挂账', amount:'400.00', time:'2026-09-28 10:24', payState:'OK' },
+        { type:'收款', channel:'门店自行', method:'银行卡', amount:'400.00', time:'2026-09-28 10:24', payState:'OK' },
         /*退款流水支付状态＝失败（本单状态＝退款失败待核对） */
-        { type:'退款', channel:'门店自行', method:'挂账', amount:'400.00', time:'2026-09-28 10:31', payState:'FAIL' }
+        { type:'退款', channel:'门店自行', method:'银行卡', amount:'400.00', time:'2026-09-28 10:31', payState:'FAIL' }
       ] },
     { id:'SK2026092500000001', order:'WX2026092500000001', storeCode:'BJ001', plate:'京A·R9204', vin:'LAB00R12635092024',
       date:'2026-09-25 09:15', reporter:'吴涛', reporterPhone:'13100131009', reportDate:'2026-09-24',
       labor:'120.00', part:'80.00', total:'200.00',
       status:'EXCEPTION', settlement:'WAITING_PAYMENT', invoice:'NOT_READY',
       discounts:[], payOrderNo:'YJ_WXSK_WX202609250000000101',
+      payChannel:'用户App', payState:'TIMEOUT',
       /* 支付异常单：流水支付状态＝支付超时（配合列表「支付异常」） */
       payRecords:[
         { type:'收款', channel:'用户App', method:'微信', amount:'200.00', time:'2026-09-25 09:17', payState:'TIMEOUT' }
@@ -215,7 +221,34 @@ var RSC_REFUND_REASONS = ['重复收款','收款金额错误','维修项目取�
       discounts:[], payOrderNo:'YJ_WXSK_Z05RO26102101401',
       payRecords:[
         { type:'收款', channel:'用户App', method:'微信', amount:'700.00', time:'2026-10-21 15:12', payState:'OK' }
-      ] }
+      ] },
+    /* ↓ 2026-10-26 依 PRD 6.1.1【收款】在线支付场景表补充的 2 行示例（让弹框的
+       「用户App·未发起（可撤回）」「用户App·支付已取消」两种场景都能在原型里点到）
+       ★ 折让金额必须非 0：rscDiscountCheck 规定「折让金额为 0」不许进【收款】/【在线支付】，
+         写成 0.00 会让这两个场景（以及第 1 行「渠道空」）压根打不开弹框，等于演示不出 PRD 场景。 ---------- */
+    /* 非直营(接了支付) + 未支付 + 渠道已选「用户App」但 App 端还没调支付平台 → 支付状态＝未发起，可【撤回】 */
+    { id:'WXJSDYJ-SH001261023015', order:'Z05RO261023015', storeCode:'SH001', plate:'沪A·M2315', vin:'LAP31CZ60SG920015',
+      date:'2026-10-23 09:40', reporter:'周婕', reporterPhone:'13700137015', reportDate:'2026-10-21',
+      labor:'300.00', part:'160.00', total:'460.00',
+      status:'UNPAID', settlement:'WAITING_PAYMENT', invoice:'NOT_READY',
+      discounts:[{type:'按商务政策', labor:'10.00', part:'0.00', remark:''}],
+      payChannel:'用户App', payState:'',
+      payRecords:[] },
+    /* 非直营(接了支付) + 未支付 + 用户App 支付已取消 → 无操作项（系统自动置空渠道、解锁折让） */
+    { id:'WXJSDYJ-WH001261024016', order:'Z05RO261024016', storeCode:'WH001', plate:'鄂A·R9216', vin:'LAB00R12635092026',
+      date:'2026-10-24 10:12', reporter:'马涛', reporterPhone:'13600136016', reportDate:'2026-10-22',
+      labor:'360.00', part:'160.00', total:'520.00',
+      status:'UNPAID', settlement:'WAITING_PAYMENT', invoice:'NOT_READY',
+      discounts:[], payChannel:'用户App', payState:'CANCELED',
+      payRecords:[] },
+    /* 非直营(没接支付) + 未支付：验证「未接支付的门店不出在线渠道」——
+       底部不出【在线支付】，弹框内也没有 用户App / 支付二维码 可选（PRD 6.1.1 渠道矩阵） */
+    { id:'WXJSDYJ-CS001261025017', order:'Z05RO261025017', storeCode:'CS001', plate:'湘A·R9217', vin:'LAB00R12635092027',
+      date:'2026-10-25 15:20', reporter:'谭磊', reporterPhone:'13500135017', reportDate:'2026-10-23',
+      labor:'150.00', part:'88.00', total:'238.00',
+      status:'UNPAID', settlement:'WAITING_PAYMENT', invoice:'NOT_READY',
+      discounts:[],
+      payRecords:[] }
   ];
   a.forEach(function(r, i){ r.idx = i; });
   NP['repair-settlement'].allData = a;
@@ -237,6 +270,17 @@ function rscStoreType(r){
   var s = rscStore(r.storeCode);
   if (!s) return '—';
   return s.channelMode === '直营' ? '直营店' : '非直营店';
+}
+/* 该结算单所属门店是否接入支付（在线渠道开关）
+   直营店一律接入；非直营店看门店主数据 payEnabled（门店管理维护）——公共函数 storePayEnabled 唯一来源 */
+function rscStorePayEnabled(r){
+  var s = rscStore(r.storeCode);
+  if (typeof storePayEnabled === 'function') return storePayEnabled(s);
+  return s ? s.channelMode === '直营' : false;
+}
+/* 该门店可用的在线收退款渠道（PRD 6.1.1 渠道矩阵：非直营(没接支付) → 两个在线渠道都没有） */
+function rscOnlineChannelsOf(r){
+  return rscStorePayEnabled(r) ? RSC_ONLINE_CHANNELS.slice() : [];
 }
 /* ---------- 人员主数据：门店服务顾问（R06） ----------
    「服务顾问」查询项与列表列的唯一来源；示例数据的 advisor 也按门店回填，
@@ -268,8 +312,12 @@ function rscApplyAdvisors(){
 /* ---------- 金额/状态派生 ---------- */
 function rscNum(v){ var n = parseFloat(String(v || '0').replace(/,/g,'')); return isNaN(n) ? 0 : n; }
 function rscMoney(v){ return rscNum(v).toFixed(2); }
+/* 折让金额＝工时折让＋配件折让（2026-10-26 用户口径）。
+   ★ 唯一出口：数据里不再存 amount 字段，行金额一律由本函数派生——
+     两处各存一份（amount 与 labor/part）必然漂移，改完一处漏另一处就是对不上账。 */
+function rscDiscountAmt(d){ return rscNum(d && d.labor) + rscNum(d && d.part); }
 function rscDiscountTotal(r){
-  return (r.discounts || []).reduce(function(s, d){ return s + rscNum(d.amount); }, 0);
+  return (r.discounts || []).reduce(function(s, d){ return s + rscDiscountAmt(d); }, 0);
 }
 /* 实际收款金额 = 应收总额 - 折让合计 */
 function rscNet(r){ return Math.max(0, Math.round((rscNum(r.total) - rscDiscountTotal(r)) * 100) / 100); }
@@ -533,15 +581,21 @@ function rscEnsurePanel(){
         '<div class="pm-section-title">结算单信息</div>' +
         '<div class="pso-info-grid" id="rsc-order-info"></div>' +
         '<div class="pm-section-title">折让项目 <span id="rsc-discount-toolbar" class="pp-parts-toolbar"></span></div>' +
-        '<div style="overflow-x:auto;margin-bottom:8px">' +
+        /* 2026-10-26：这里不能再包 overflow-x:auto —— 表格内「折让项目」是模糊下拉，
+           overflow-x:auto 会把 overflow-y 一并变成 auto，最后一行下拉列表被裁掉。
+           列宽（2026-10-26 用户反馈「折让项目里的项目挤到换行、备注太宽」后按实测调）：
+           折让项目 120→180（模糊下拉要放得下最长字典值「集油卡抵机油」，实测 120 时该选项折成两行 46px），
+           备注由自动列（实测 353px）改为声明 140px 收窄；表格仍 width:100% 撑满面板，
+           余量按列宽比例摊回，实测折让项目 218px / 备注 169px。 */
+        '<div style="margin-bottom:8px">' +
           '<table class="pp-parts-table" id="rsc-discount-table">' +
             '<thead><tr>' +
               '<th style="width:40px">序号</th>' +
-              '<th style="width:120px">折让项目</th>' +
+              '<th style="width:180px">折让项目</th>' +
               '<th style="width:100px">折让金额</th>' +
               '<th style="width:100px">工时折让</th>' +
               '<th style="width:100px">配件折让</th>' +
-              '<th>备注</th>' +
+              '<th style="width:140px">备注</th>' +
               '<th style="width:70px">操作</th>' +
             '</tr></thead>' +
             '<tbody id="rsc-discount-tbody"></tbody>' +
@@ -615,33 +669,46 @@ function rscOpenPanel(idx){
     rscInfoItem('结算状态', rscSettleLabel(r)) +
     rscInfoItem('提交结算日期', r.date);
 
-  /* 折让项目：仅「未支付」可增删，其余状态只读 */
-  var canEditDiscount = (r.status === 'UNPAID');
+  /* 折让项目：仅「未支付」可增删，其余状态只读
+     2026-10-26 PRD 6.1.1【收款】第1条：每次在「维修结算收款」界面点操作列【收款】，都要调支付接口，
+     查订单是否有支付中的、并查 DMS 的支付收款记录判断订单是否已支付；
+     有支付中（待支付）或已支付的 → 折让区域不可编辑（撤回 / 取消支付 / 支付超时后解锁）。 */
+  rscPayInterfaceCheck(r);
+  /* 可编辑条件只允许一处判定：rscDiscountEditable()（本处与 rscRenderDiscounts 共用，禁止各写一遍） */
+  var canEditDiscount = rscDiscountEditable(r);
   document.getElementById('rsc-discount-toolbar').innerHTML = canEditDiscount
-    ? '<button class="lt-btn lt-btn-default" onclick="rscAddDiscount()">新增折让</button>' : '';
+    ? '<button class="lt-btn lt-btn-default" onclick="rscAddDiscount()">新增折让</button>'
+    : (rscPayLocked(r) ? '<span style="font-size:12px;color:#861B2F">' + npEscape(rscPayLockReason(r)) + '</span>' : '');
   rscRenderDiscounts(r);
 
   var rec = document.getElementById('rsc-recommend');
   rec.value = r.recommend || '';
 
-  /* 金额账类：应收 / 实收 / 差额 */
-  var total = rscNum(r.total), net = rscNet(r), diff = total - net;
-  var zero = '<span style="color:#999">¥ 0.00</span>';
-  var moneyTd = function(v){ return '<span style="color:#185FA5">¥ ' + v.toFixed(2) + '</span>'; };
-  document.getElementById('rsc-net-tip').textContent = '实际收款金额 ¥' + rscMoney(net);
-  document.getElementById('rsc-account-tbody').innerHTML =
-    '<tr><td><b>应收金额</b></td><td>' + moneyTd(total) + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + moneyTd(total) + '</td></tr>' +
-    '<tr><td><b>实收金额</b></td><td>' + moneyTd(net) + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + moneyTd(net) + '</td></tr>' +
-    '<tr><td><b>差额</b></td><td>' + moneyTd(diff) + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + moneyTd(diff) + '</td></tr>';
-
-  /* 底部条（照搬 920 payment-bar） */
-  document.getElementById('rsc-panel-footer').innerHTML =
-    '<div class="pp-panel-totals" style="margin-right:auto;text-align:left">'
-    + '总金额 <b>¥' + rscMoney(total) + '</b> · 总折让额 <b>¥' + rscMoney(rscDiscountTotal(r)) + '</b> · 待在线支付 <b>¥' + rscMoney(net) + '</b>'
-    + '</div>' + rscFooterButtons(r);
+  /* 金额账类 + 底栏合计：抽成 rscRenderAccount()，折让改动后只刷这一块（不整表重绘） */
+  rscRenderAccount(r);
 
   document.getElementById('rsc-panel-overlay').classList.add('show');
   document.getElementById('rsc-panel').classList.add('show');
+}
+/* 金额账类（应收/实收/差额）＋ 底栏合计（总金额/总折让额/待支付）＋ 底部按钮
+   折让金额改动时由 rscDiscountRecalc() 复用，保证"改折让 → 金额账类与待支付同步"只有一份实现 */
+function rscRenderAccount(r){
+  var total = rscNum(r.total), net = rscNet(r), diff = total - net;
+  var zero = '<span style="color:#999">¥ 0.00</span>';
+  var moneyTd = function(v){ return '<span style="color:#185FA5">¥ ' + v.toFixed(2) + '</span>'; };
+  var tip = document.getElementById('rsc-net-tip');
+  if (tip) tip.textContent = '实际收款金额 ¥' + rscMoney(net);
+  var tb = document.getElementById('rsc-account-tbody');
+  if (tb) tb.innerHTML =
+    '<tr><td><b>应收金额</b></td><td>' + moneyTd(total) + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + moneyTd(total) + '</td></tr>' +
+    '<tr><td><b>实收金额</b></td><td>' + moneyTd(net) + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + moneyTd(net) + '</td></tr>' +
+    '<tr><td><b>差额</b></td><td>' + moneyTd(diff) + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + zero + '</td><td>' + moneyTd(diff) + '</td></tr>';
+  /* 底部条（照搬 920 payment-bar） */
+  var ft = document.getElementById('rsc-panel-footer');
+  if (ft) ft.innerHTML =
+    '<div class="pp-panel-totals" style="margin-right:auto;text-align:left">'
+    + '总金额 <b>¥' + rscMoney(total) + '</b> · 总折让额 <b>¥' + rscMoney(rscDiscountTotal(r)) + '</b> · 待支付 <b>¥' + rscMoney(net) + '</b>'
+    + '</div>' + rscFooterButtons(r);
 }
 function rscMerchantNo(r){
   var s = rscStore(r.storeCode);
@@ -655,6 +722,11 @@ function rscLockTitle(r){
   if (r.status === 'PAYING') return '当前页面已封存';
   if (r.status === 'PAID_PENDING_COLLECTION') return '已收到支付成功回调';
   if (r.status === 'PAID') return '服务中心已写入结算单';
+  /* 2026-10-26 用户口径：支付已取消 / 支付已超时 → 收款渠道置空、折让解锁可编辑，
+     封存条不能再写「折让不可修改」（原样会与可编辑自相矛盾）。 */
+  var st = rscOrderPayState(r);
+  if (st === 'CANCELED') return '支付已取消';
+  if (st === 'TIMEOUT') return '支付已超时';
   return '当前页面已封存';
 }
 function rscLockText(r){
@@ -665,10 +737,13 @@ function rscLockText(r){
   }
   if (r.status === 'REFUNDING' || r.status === 'REFUND_FAIL') return '请核对本次退款结果，当前不可收款或再次支付。';
   if (r.status === 'EXCEPTION') return '请联系财务核对原支付单，当前不可修改金额、再次支付或确认收款。';
-  if (r.status === 'PAYING') return '支付二维码已绑定本轮金额快照，折让、优惠券和应收金额不可修改。';
+  if (r.status === 'PAYING') return '支付二维码已绑定本轮金额快照，折让项目和应收金额不可修改。';
   if (r.status === 'PAID_PENDING_COLLECTION') return '金额快照继续封存，可选择【收款】完成结算，或选择【退款】原路退回。';
-  if (r.status === 'PAID') return '收款、折让、优惠券和支付信息已归档，页面保持只读，可在详情或列表发起开票。';
-  return '支付二维码已绑定当前金额版本，折让、优惠券和应收金额暂不可修改。';
+  if (r.status === 'PAID') return '收款、折让项目和支付信息已归档，页面保持只读，可在详情或列表发起开票。';
+  var st = rscOrderPayState(r);
+  if (st === 'CANCELED') return '用户已在App端取消支付：收款渠道已置空，可重新选择；折让项目已解锁，可编辑。';
+  if (st === 'TIMEOUT') return '支付已超时：收款渠道已置空，可重新选择；折让项目已解锁，可编辑。';
+  return '支付二维码已绑定当前金额版本，折让项目和应收金额暂不可修改。';
 }
 function rscFooterButtons(r){
   var btns = [];
@@ -680,11 +755,11 @@ function rscFooterButtons(r){
     btns.push('<button class="lt-btn lt-btn-default" onclick="npToast(\'本轮已支付\')">本轮已支付</button>');
     btns.push('<button class="lt-btn lt-btn-default" onclick="rscOpenRefund(' + r.idx + ')">' + (r.status === 'REFUND_FAIL' ? '退款待核对' : '退款中') + '</button>');
   } else {
-    /* 在线支付：与门店渠道模式无关，直营/非直营都显示（用户已拍板）
+    /* 在线支付：直营/非直营(接了支付) 都出；非直营(没接支付) 不出（PRD 6.1.1 渠道矩阵：该门店两个在线渠道都没有）
        ★ 支付异常行不出「在线支付」：该状态下 rscOpenOnlinePay 的守卫必拦（当前状态不可在线支付），
          且与同一面板封存条「当前不可修改金额、再次支付或确认收款」自相矛盾，
          按用户「不能操作的按钮不显示」口径处理（2026-10-23） */
-    if (r.status !== 'EXCEPTION') {
+    if (r.status !== 'EXCEPTION' && rscStorePayEnabled(r)) {
       var payText = '在线支付', payDisabled = '';
       if (r.status === 'PAYING') payText = '查看支付二维码';
       else if (r.status === 'PAID_PENDING_COLLECTION' || r.status === 'PAID') { payText = '已支付'; payDisabled = ' disabled'; }
@@ -702,28 +777,164 @@ function rscFooterButtons(r){
   btns.push('<button class="lt-btn lt-btn-default" onclick="npToast(\'打印出门证功能演示\')">打印出门证</button>');
   return btns.join('');
 }
+/* ---------- 折让项目区（2026-10-26 依用户口径改造） ----------
+   用户原文：「『折让项目』需要可编辑，下拉值（下拉带搜索）：按商务政策 / 折扣券 / 会员折扣 / 活动折扣 /
+            内部考核 / 总经理签免 / 二手车整备 / 集油卡抵机油 / 其它」；
+            「折让金额＝工时折让＋配件折让，工时折让、配件折让、备注应该是可编辑的框」。
+   控件选型（规范 §3.1）：9 个值 > 5 → 模糊下拉 `.lt-input-wrap.combobox`（唯一组件，与查询区/表单同一套）；
+   表格内可编辑单元格范式＝ `parts-internal-usage.js` 的 `<div class="lt-input-wrap pl-s"><input></div>`。
+   编辑条件：status==='UNPAID' 且未被支付锁定；其余状态整区只读（纯文本，不出现输入框）。 */
+function rscDiscountEditable(r){
+  return r.status === 'UNPAID' && !rscPayLocked(r);
+}
+function rscDiscountText(v){
+  return (v === undefined || v === null || v === '') ? '—' : npEscape(v);
+}
+/* 折让项目：模糊下拉（首项"请选择" data-val=""，选中值取 cmbSelVal） */
+function rscDiscountComboHtml(d, i){
+  var lis = '<li data-val="" onclick="rscDiscountTypeSelect(this)">请选择</li>';
+  for (var k = 0; k < RSC_DISCOUNT_TYPES.length; k++){
+    var t = RSC_DISCOUNT_TYPES[k];
+    lis += '<li data-val="' + npEscape(t) + '" onclick="rscDiscountTypeSelect(this)">' + npEscape(t) + '</li>';
+  }
+  return '<div class="lt-input-wrap combobox" data-di="' + i + '" data-apply="rscDiscountTypeSync">'
+    + '<input type="text" id="rsc-di-type-' + i + '" value="' + npEscape(d.type || '') + '" placeholder="请选择"'
+    + ' onfocus="gtComboboxShow(this)" oninput="gtComboboxFilter(this);rscDiscountTypeInput(this)">'
+    + '<span class="cb-arrow" onclick="gtComboboxToggle(this)">&#9660;</span>'
+    + '<ul class="lt-datalist">' + lis + '</ul></div>';
+}
 function rscRenderDiscounts(r){
   var list = r.discounts || [];
-  var lock = (r.status !== 'UNPAID');
+  var lock = !rscDiscountEditable(r);
   var html = list.map(function(d, i){
+    if (lock){
+      return '<tr>' +
+        '<td>' + (i+1) + '</td>' +
+        '<td>' + rscDiscountText(d.type) + '</td>' +
+        '<td>' + rscMoney(rscDiscountAmt(d)) + '</td>' +
+        '<td>' + rscMoney(d.labor) + '</td>' +
+        '<td>' + rscMoney(d.part) + '</td>' +
+        '<td>' + rscDiscountText(d.remark) + '</td>' +
+        '<td>—</td>' +
+      '</tr>';
+    }
     return '<tr>' +
       '<td>' + (i+1) + '</td>' +
-      '<td>' + npEscape(d.type) + '</td>' +
-      '<td><input type="text" value="' + npEscape(rscMoney(d.amount)) + '" readonly></td>' +
-      '<td><input type="text" value="' + npEscape(rscMoney(d.labor)) + '" readonly></td>' +
-      '<td><input type="text" value="' + npEscape(rscMoney(d.part)) + '" readonly></td>' +
-      '<td>' + (d.remark ? npEscape(d.remark) : '—') + '</td>' +
-      '<td>' + (lock ? '—' : '<a href="javascript:void(0)" class="lt-link np-red" onclick="rscDeleteDiscount(' + r.idx + ',' + i + ')">删除</a>') + '</td>' +
+      '<td>' + rscDiscountComboHtml(d, i) + '</td>' +
+      /* 折让金额＝工时折让＋配件折让：只读派生值，不给输入框（改工时/配件即刷新本单元格） */
+      '<td id="rsc-di-amt-' + i + '">' + rscMoney(rscDiscountAmt(d)) + '</td>' +
+      '<td><div class="lt-input-wrap" data-di="' + i + '"><input type="text" id="rsc-di-labor-' + i + '" value="' + rscMoney(d.labor) +
+        '" placeholder="0.00" oninput="rscDiscountNumInput(this,\'labor\')"></div></td>' +
+      '<td><div class="lt-input-wrap" data-di="' + i + '"><input type="text" id="rsc-di-part-' + i + '" value="' + rscMoney(d.part) +
+        '" placeholder="0.00" oninput="rscDiscountNumInput(this,\'part\')"></div></td>' +
+      '<td><div class="lt-input-wrap" data-di="' + i + '"><input type="text" id="rsc-di-remark-' + i + '" value="' + npEscape(d.remark || '') +
+        '" placeholder="请输入" oninput="rscDiscountRemark(this)"></div></td>' +
+      '<td><a href="javascript:void(0)" class="lt-link np-red" onclick="rscDeleteDiscount(' + r.idx + ',' + i + ')">删除</a></td>' +
     '</tr>';
   }).join('');
   if (!list.length) html = '<tr><td colspan="7" style="text-align:center;color:#999;padding:14px;">暂无折让项目</td></tr>';
   document.getElementById('rsc-discount-tbody').innerHTML = html;
+  /* 动态生成的 combobox 必须自己补一次注入（规范 §Combobox 第 9 款）：
+     showContent 里那次注入跑在 npInitModule 之前，本表在面板打开时才生成 → 不补就没有清除 × */
+  if (!lock && typeof npInitComboboxes === 'function') npInitComboboxes();
+}
+/* 折让项目：点下拉项 → 写值 + 收列表 + 同步模型（值取 data-val，空值＝未选） */
+function rscDiscountTypeSelect(li){
+  var w = (li && li.closest) ? li.closest('.lt-input-wrap.combobox') : null;
+  if (!w) return;
+  var inp = w.querySelector('input'), l = w.querySelector('.lt-datalist');
+  if (inp) inp.value = cmbSelVal(li);
+  if (l){
+    l.classList.remove('show');
+    var xs = l.querySelectorAll('li');
+    for (var i = 0; i < xs.length; i++) xs[i].classList.remove('hidden');
+  }
+  rscDiscountTypeSet(w, inp ? inp.value : '');
+}
+function rscDiscountTypeSet(w, val){
+  var r = window.__rscCur;
+  if (!r || !r.discounts) return;
+  var i = parseInt(w.getAttribute('data-di'), 10);
+  if (isNaN(i) || !r.discounts[i]) return;
+  r.discounts[i].type = val ? String(val).trim() : '';
+}
+/* 手输过滤 / 清除 ×（× 由 npComboboxInit 注入，清空时不触发 input 事件，故容器另挂 data-apply 走下面的全量同步） */
+function rscDiscountTypeInput(inp){
+  var w = (inp && inp.closest) ? inp.closest('.lt-input-wrap.combobox') : null;
+  if (w) rscDiscountTypeSet(w, inp.value);
+}
+function rscDiscountTypeSync(){
+  var r = window.__rscCur;
+  if (!r || !r.discounts) return;
+  var tb = document.getElementById('rsc-discount-tbody');
+  if (!tb || !tb.querySelectorAll) return;
+  var ws = tb.querySelectorAll('.lt-input-wrap.combobox[data-di]');
+  for (var k = 0; k < ws.length; k++){
+    var i = parseInt(ws[k].getAttribute('data-di'), 10);
+    var inp = ws[k].querySelector('input');
+    if (!isNaN(i) && r.discounts[i] && inp) r.discounts[i].type = inp.value ? String(inp.value).trim() : '';
+  }
+}
+/* 金额输入净化：只留数字与一个小数点，最多两位小数（负号、字母一律丢弃） */
+function rscMoneyInput(raw){
+  var v = String(raw === undefined || raw === null ? '' : raw).replace(/[^\d.]/g, '');
+  var k = v.indexOf('.');
+  if (k >= 0) v = v.slice(0, k + 1) + v.slice(k + 1).replace(/\./g, '');
+  var seg = v.split('.');
+  if (seg.length > 1) v = seg[0] + '.' + seg[1].slice(0, 2);
+  return v;
+}
+/* 工时折让 / 配件折让：输入即写模型；折让金额＝两者之和 → 原地刷新本行金额与合计（不整表重绘，打字不丢焦点） */
+function rscDiscountNumInput(inp, field){
+  var w = (inp && inp.closest) ? inp.closest('.lt-input-wrap') : null;
+  if (!w) return;
+  var clean = rscMoneyInput(inp.value);
+  if (clean !== inp.value) inp.value = clean;
+  var r = window.__rscCur;
+  if (!r || !r.discounts) return;
+  var i = parseInt(w.getAttribute('data-di'), 10);
+  if (isNaN(i) || !r.discounts[i]) return;
+  r.discounts[i][field] = (clean === '' ? '0' : clean);
+  rscDiscountRecalc(r, i);
+}
+function rscDiscountRemark(inp){
+  var w = (inp && inp.closest) ? inp.closest('.lt-input-wrap') : null;
+  if (!w) return;
+  var r = window.__rscCur;
+  if (!r || !r.discounts) return;
+  var i = parseInt(w.getAttribute('data-di'), 10);
+  if (isNaN(i) || !r.discounts[i]) return;
+  r.discounts[i].remark = inp.value || '';
+}
+/* 折让改动后的联动刷新：本行折让金额 → 金额账类 → 底栏总折让额/待支付 → 实际收款金额 */
+function rscDiscountRecalc(r, rowIndex){
+  var d = (r.discounts || [])[rowIndex];
+  var amtEl = document.getElementById('rsc-di-amt-' + rowIndex);
+  if (amtEl && d) amtEl.textContent = rscMoney(rscDiscountAmt(d));
+  rscRenderAccount(r);
+}
+/* 折让校验（2026-10-26 用户口径）：点【收款】/【在线支付】前拦两道
+   ① 折让项目必须从下拉里选（值 ∈ RSC_DISCOUNT_TYPES）
+   ② 折让金额（工时折让＋配件折让）不能为 0
+   ★ 只在折让区可编辑时校验：支付中/已支付＝金额快照已封存、用户也改不了，
+     若此时仍校验，历史遗留的 0 元折让会把「查看支付二维码」这类只读入口卡死。 */
+function rscDiscountCheck(r){
+  if (!rscDiscountEditable(r)) return '';
+  var list = r.discounts || [];
+  for (var i = 0; i < list.length; i++){
+    var t = String((list[i] && list[i].type) || '').trim();
+    if (!t || RSC_DISCOUNT_TYPES.indexOf(t) < 0) return '第 ' + (i + 1) + ' 行折让项目未选择，请先在下拉中选择折让项目';
+    if (rscDiscountAmt(list[i]) <= 0) return '第 ' + (i + 1) + ' 行折让金额为 0，请填写工时折让或配件折让';
+  }
+  return '';
 }
 function rscAddDiscount(){
   var r = window.__rscCur; if (!r) return;
   if (!r.discounts) r.discounts = [];
-  r.discounts.push({ type:'按商务政策', amount:'0.00', labor:'0.00', part:'0.00', remark:'' });
+  /* 默认不预填折让项目：9 个值是让用户选的，预填「按商务政策」会让下拉形同虚设 */
+  r.discounts.push({ type:'', labor:'0.00', part:'0.00', remark:'' });
   rscRenderDiscounts(r);
+  rscRenderAccount(r);
   npToast('已新增一行折让项目');
 }
 function rscDeleteDiscount(idx, di){
@@ -731,50 +942,362 @@ function rscDeleteDiscount(idx, di){
   if (!r.discounts || !r.discounts[di]) return;
   r.discounts.splice(di, 1);
   rscRenderDiscounts(r);
+  rscRenderAccount(r);
 }
 function rscNewCycle(idx){
   var r = rscGet(idx); if (!r) return;
   npToast('再次收款：新一轮支付需从「未支付」重新发起（原型演示）');
 }
 
-/* ---------- 弹框：在线支付 ---------- */
+/* ---------- 弹框：在线支付（2026-10-26 依 PRD 6.1.1【收款】重做） ----------
+   ★ 旧版（「优惠后实际收款 + 支付单号」+「支付关闭 / 结果待确认 / 支付成功」三键）在 PRD 里不存在，已整体替换。
+   PRD 元素（逐条落地）：
+     · 点【在线支付】不立即出二维码：先取「当前收款渠道」与「该订单的支付状态（订单支付状态，不是流水状态）」
+     · 行1：维修工单号、维修结算单号、收款渠道（下拉：用户App(默认) / 支付二维码）、收款金额
+     · 行2：支付状态（未发起 / 待支付(支付中) / 支付已取消 / 支付已超时 / 支付成功）
+     · 可操作项随「渠道 × 支付状态」两维变化（见 rscOnlineActions）：
+         渠道空                  → 同步给App（下拉＝用户App）/ 获取支付码（下拉＝支付二维码）
+         用户App + 未发起         → 撤回（向App传"不可支付" + 渠道置空 + 折让解锁）
+         用户App + 待支付(支付中)  → 无
+         用户App + 已取消/已超时    → 无（系统自动：渠道置空 + 折让解锁）
+         用户App + 支付成功        → 无
+         支付二维码 + 待支付       → 取消支付（渠道置空 + 折让解锁）
+         支付二维码 + 已超时       → 无（系统自动同上）
+     · 无论点【在线支付】还是【收款】，都要向 App 同步最新结算收款单及「App 是否可支付」
+   原型演示：PRD 在「待支付(支付中)」写「无操作项」（由用户在 App / 扫码端完成），
+   原型无支付后台，保留「模拟支付成功（演示）」一个显式标注的入口，仅用于走到「收款」，可按需删除。 */
+var RSC_ORDER_PAY_STATE = {
+  '':'未发起', PAYING:'待支付(支付中)', CANCELED:'支付已取消', TIMEOUT:'支付已超时', SUCCESS:'支付成功'
+};
+var RSC_ONLINE_CHANNELS = ['用户App', '支付二维码'];
+/* ---------- 演示切换：PRD 6.1.1【收款】场景表 → 一键切换（2026-10-26 用户要求） ----------
+   用户原话：「在弹窗底部，增加一个区域，专门用来演示切换。这样就可以把表格里所需要的
+             演示需要的所有场景通过按钮进行切换」。
+   场景逐条对应 PRD 那张 4 列表（场景 / 显示项 / 可操作项 / 点击操作后）：
+     行1「当前收款渠道：空」                    → 场景 1
+     行2「当前收款渠道：用户App」×支付状态 4 格  → 场景 2~6（PRD 把「支付已取消/支付已超时」
+                                                   写在同一格，原型拆两个按钮，两态都能演示）
+     行3「当前收款渠道：支付二维码」×2 格        → 场景 7~8
+   顺序即 PRD 表格自上而下的顺序，改顺序前先回读 PRD。 */
+/* 场景清单：group＝PRD 表格的分组（场景列所属渠道）；ch/st＝「点击操作后」本行落到的实际状态。
+   ★ 用户 2026-10-26 三次纠正：支付已取消 / 支付已超时 正确结果是 ——
+     ① 收款渠道置为空、可重新选择收款渠道；② 折让项目取消锁定、可编辑。
+     所以这两个（含支付二维码·已超时）场景的 ch 一律为空，st 保留（行2 仍显示该支付状态）。 */
+var RSC_ONLINE_SCENES = [
+  { group: '空',           ch: '',           st: '',         label: '渠道：空' },
+  { group: '用户App',      ch: '用户App',    st: '',         label: '未发起' },
+  { group: '用户App',      ch: '用户App',    st: 'PAYING',   label: '待支付(支付中)' },
+  { group: '用户App',      ch: '',           st: 'CANCELED', label: '支付已取消' },
+  { group: '用户App',      ch: '',           st: 'TIMEOUT',  label: '支付已超时' },
+  { group: '用户App',      ch: '用户App',    st: 'SUCCESS',  label: '支付成功' },
+  { group: '支付二维码',   ch: '支付二维码', st: 'PAYING',   label: '待支付(支付中)' },
+  { group: '支付二维码',   ch: '',           st: 'TIMEOUT',  label: '支付已超时' }
+];
+function rscOnlineChannel(r){ return r.payChannel || ''; }
+/* 订单支付状态（PRD：取「这笔订单」的支付状态，不是支付流水号的状态）
+   未挂 payState 的历史行按结算状态派生，保持与既有示例数据兼容 */
+function rscOrderPayState(r){
+  if (r.payState === '') return '';
+  if (r.payState) return r.payState;
+  if (r.status === 'PAYING') return 'PAYING';
+  if (r.status === 'EXCEPTION') return 'TIMEOUT';
+  if (r.status === 'PAID' || r.status === 'PAID_PENDING_COLLECTION') return 'SUCCESS';
+  return '';
+}
+function rscPayLocked(r){
+  var s = rscOrderPayState(r);
+  return s === 'PAYING' || s === 'SUCCESS';
+}
+function rscPayLockReason(r){
+  return rscOrderPayState(r) === 'SUCCESS'
+    ? '订单已支付，折让项目不可编辑'
+    : '订单在支付中（待支付），折让项目不可编辑';
+}
+/* 模拟「调支付接口 + 查 DMS 支付收款记录」：原型无后台，按订单支付状态派生。
+   调用点＝点【收款】打开面板时（rscOpenPanel）与点【在线支付】时，与 PRD 第1、2条一致。 */
+function rscPayInterfaceCheck(r){
+  var s = rscOrderPayState(r);
+  return { paying: s === 'PAYING', paid: s === 'SUCCESS', state: s };
+}
+/* 向 App 同步「App 是否可支付」（PRD 第4条：点【在线支付】与点【收款】都要同步最新结算收款单） */
+function rscSyncAppPayable(r, payable){
+  r.appPayable = !!payable;
+  r.appSyncTime = (typeof npNowLocal === 'function') ? npNowLocal() : '';
+}
 function rscOpenOnlinePay(idx){
   var r = rscGet(idx); if (!r) return;
-  if (r.status !== 'UNPAID' && r.status !== 'PAYING') { npToast('当前状态不可在线支付'); return; }
-  var net = rscNet(r);
-  if (net <= 0) { npToast('线上实付现金须大于0；当前没有待在线支付金额'); return; }
-  var payNo = r.payOrderNo || ('YJ_WXSK_' + r.order + '01');
+  if (r.status !== 'UNPAID' && r.status !== 'PAYING' && r.status !== 'PAID_PENDING_COLLECTION') { npToast('当前状态不可在线支付'); return; }
+  if (rscNet(r) <= 0) { npToast('线上实付现金须大于0；当前没有待支付金额'); return; }
+  /* 折让校验：折让项目必须选、折让金额不能为 0（2026-10-26 用户口径），不合格不许发起支付 */
+  var dErr = rscDiscountCheck(r);
+  if (dErr) { npToast(dErr); return; }
+  window.__rscPayCur = r;
+  /* 演示切换用：记下「打开弹框那一刻」的支付态，供【还原本行进入时状态】回退 */
+  window.__rscDemoBackup = {
+    idx: r.idx, payChannel: r.payChannel, payState: r.payState, payOrderNo: r.payOrderNo,
+    payQrTime: r.payQrTime, appPayable: r.appPayable, appSyncTime: r.appSyncTime
+  };
+  rscSyncAppPayable(r, rscOrderPayState(r) !== 'PAYING');
+  /* PRD 第2条：每次点【在线支付】都调接口查支付中/已支付；有则提示，但不影响打开弹框 */
+  var chk = rscPayInterfaceCheck(r);
+  rscRenderOnlinePay(r);
+  if (chk.paying) npToast('已在支付中，勿重复支付');
+  else if (chk.paid) npToast('已支付、勿重复支付');
+}
+function rscOnlineTip(r){
+  var ch = rscOnlineChannel(r), st = rscOrderPayState(r);
+  if (!rscStorePayEnabled(r)) return '本门店未接入支付（非直营·未接支付）：不支持「用户App / 支付二维码」，只能走门店自行（线下收款）。';
+  /* 支付已取消 / 已超时：渠道已被系统置空（下面「渠道为空」那句话就不适用了），先说这两态 */
+  if (st === 'CANCELED') return '用户已在App端取消支付：收款渠道已自动置空，可在本弹框内重新选择收款渠道；折让项目已解锁、可编辑。';
+  if (st === 'TIMEOUT') return '支付已超时：收款渠道已自动置空，可在本弹框内重新选择收款渠道；折让项目已解锁、可编辑。';
+  if (st === 'SUCCESS') return '支付已成功：请关闭本弹框并点【收款】完成结算确认。';
+  if (!ch) return '当前收款渠道为空：选「用户App」后点【同步给App】；选「支付二维码」后点【获取支付码】。';
+  if (ch === '用户App' && st === '') return '已选「用户App」：App 端可支付（尚未发起）。点【撤回】可回退并解锁折让项目。';
+  if (ch === '用户App' && st === 'PAYING') return '用户已在App端发起支付（待支付）：此状态无操作项，只能由用户在App端支付或取消支付。';
+  if (ch === '支付二维码' && st === 'PAYING') return '二维码未超时：点【取消支付】可作废本次二维码（收款渠道置空、折让项目解锁）。';
+  return '当前收款渠道：' + ch + '；支付状态：' + (RSC_ORDER_PAY_STATE[st] || '—') + '。';
+}
+/* ---------- 弹框「在线支付」底部：演示切换区（原型专用） ----------
+   为什么存在：PRD 6.1.1【收款】那张表有 7 个场景（渠道空 / 用户App×4~5 / 支付二维码×2），
+   在原型里只能靠点不同的列表行去碰，其中「渠道空」「用户App·未发起」两种状态还会被
+   折让校验拦在弹框外（折让金额为 0 的行），等于演示不出来。故把场景做成按钮。
+   · 只改本行的 payChannel / payState（演示态），**不改列表里的收款状态 r.status**；
+   · 公共类名 .np-demo-switch*，样式在 style.css 唯一一份（规范 §3.1.5 已登记），禁止页面自造同类私有类名。 */
+function rscSceneGroups(){
+  var order = [], groups = {};
+  RSC_ONLINE_SCENES.forEach(function(s){
+    var key = s.group;
+    if (!groups[key]){ groups[key] = []; order.push(key); }
+    groups[key].push(s);
+  });
+  return order.map(function(k){ return { ch: k, items: groups[k] }; });
+}
+/* 当前高亮哪个场景按钮：优先用「刚点过的演示场景」（支付已取消/已超时会把渠道置空，
+   两个渠道组会落到同一状态，只靠状态反查会同时点亮两个），否则按状态反查（取 PRD 顺序第一个）。 */
+function rscDemoActiveIndex(r){
+  var ch = rscOnlineChannel(r), st = rscOrderPayState(r);
+  var ix = r.__demoIx;
+  if (typeof ix === 'number' && RSC_ONLINE_SCENES[ix] &&
+      RSC_ONLINE_SCENES[ix].ch === ch && RSC_ONLINE_SCENES[ix].st === st) return ix;
+  for (var i = 0; i < RSC_ONLINE_SCENES.length; i++){
+    if (RSC_ONLINE_SCENES[i].ch === ch && RSC_ONLINE_SCENES[i].st === st) return i;
+  }
+  return -1;
+}
+function rscDemoSwitchHtml(r){
+  var actIx = rscDemoActiveIndex(r);
+  var chans = rscOnlineChannelsOf(r);
+  var html = '<div class="np-demo-switch" id="rsc-demo-switch">' +
+    '<div class="np-demo-switch-hd">演示切换（原型专用）' +
+      '<span class="np-demo-switch-hint">按 PRD 6.1.1【收款】场景表切换；只改本弹框的演示状态，不改列表里的收款状态</span>' +
+    '</div>';
+  rscSceneGroups().forEach(function(g){
+    html += '<div class="np-demo-switch-group">' +
+      '<span class="np-demo-switch-group-label">收款渠道：' + npEscape(g.ch) + '</span>';
+    g.items.forEach(function(s){
+      var i = RSC_ONLINE_SCENES.indexOf(s);
+      html += '<button type="button" class="np-demo-switch-btn' + (i === actIx ? ' active' : '') + '"' +
+        ' onclick="rscDemoScene(' + r.idx + ',' + i + ')">' + npEscape(s.label) + '</button>';
+    });
+    html += '</div>';
+  });
+  html += '<div class="np-demo-switch-ops">';
+  /* PRD 在「待支付(支付中)」写「可操作项：无」——模拟支付成功不属于可操作项，
+     所以它不进业务按钮、放这里，并显式标注（演示）。 */
+  if (chans.length && rscOrderPayState(r) === 'PAYING'){
+    html += '<button type="button" class="np-demo-switch-btn" onclick="rscOnlineDemoPaid(' + r.idx + ')">模拟支付成功（演示）</button>';
+  }
+  html += '<button type="button" class="np-demo-switch-btn" onclick="rscDemoReset(' + r.idx + ')">还原本行进入时状态</button>';
+  html += '</div>';
+  /* 状态说明（与场景切换同处一区，避免正文混入 PRD 之外的元素） */
+  html += '<div class="np-demo-switch-tip">当前场景说明：' + npEscape(rscOnlineTip(r)) + '</div>';
+  html += '</div>';
+  return html;
+}
+/* 切到某个 PRD 场景：渠道 + 订单支付状态两维一起设，然后原地重绘弹框并同步背后的侧滑面板。
+   「支付已取消 / 支付已超时」按 PRD 落成：收款渠道置空（可重新选择）+ 折让解锁（可编辑）。 */
+function rscDemoScene(idx, i){
+  var r = rscGet(idx); if (!r) return;
+  var s = RSC_ONLINE_SCENES[i]; if (!s) return;
+  r.__demoIx = i;
+  r.payChannel = s.ch;
+  r.payState = s.st;
+  if (!r.payOrderNo) r.payOrderNo = 'YJ_WXSK_' + r.order + '01';
+  r.payQrTime = (s.ch === '支付二维码' && s.st === 'PAYING')
+    ? ((typeof npNowLocal === 'function') ? npNowLocal() : '') : '';
+  /* PRD「点击操作后」：同步给App＝传「可支付」；其余（获取二维码 / 撤回 / 取消 / 超时）＝传「不可支付」 */
+  rscSyncAppPayable(r, s.ch === '用户App' && s.st !== 'PAYING');
+  rscRenderOnlinePay(r); rscRefreshPanelBehind(r);
+  var extra = (s.st === 'CANCELED' || s.st === 'TIMEOUT') ? '；收款渠道已置空可重选、折让项目已解锁' : '';
+  npToast('演示场景：收款渠道＝' + (s.ch || '空') + '；支付状态＝' + (RSC_ORDER_PAY_STATE[s.st] || '—') + extra);
+}
+/* 还原为「打开弹框那一刻」的支付态（连续演示不同场景后回到原样） */
+function rscDemoReset(idx){
+  var r = rscGet(idx); if (!r) return;
+  var b = window.__rscDemoBackup;
+  if (!b || b.idx !== r.idx){ npToast('没有可还原的初始状态'); return; }
+  r.__demoIx = null;
+  r.payChannel = b.payChannel || ''; r.payState = b.payState || ''; r.payOrderNo = b.payOrderNo || '';
+  r.payQrTime = b.payQrTime; r.appPayable = b.appPayable; r.appSyncTime = b.appSyncTime;
+  rscRenderOnlinePay(r); rscRefreshPanelBehind(r);
+  npToast('已还原为打开弹框时的状态');
+}
+function rscRenderOnlinePay(r, pickOverride){
+  var ch = rscOnlineChannel(r), st = rscOrderPayState(r);
+  var chans = rscOnlineChannelsOf(r);          /* 按门店支付能力给在线渠道（PRD 6.1.1 矩阵） */
+  /* shown＝下拉该显示什么：用户刚选的预览值优先，其次已落定的渠道，都没有就显示「请选择」
+     （渠道为空＝PRD 的「收款渠道置空」，必须看起来就是空的，不能默认显示成用户App）；
+     pick＝按钮按哪个渠道给动作：没有选中值时按第一个可用渠道给默认动作（与 PRD 渠道空那格一致）。 */
+  var shown = pickOverride || ch;
+  var pick = shown || chans[0] || '';
+  var chOpts = chans.length
+    ? '<option value=""' + (shown ? '' : ' selected') + '>请选择</option>' +
+      chans.map(function(c){
+        return '<option' + (c === shown ? ' selected' : '') + '>' + npEscape(c) + '</option>';
+      }).join('')
+    : '';
+  /* 收款渠道：未接入支付的门店（非直营·未接支付）没有在线渠道可选，显示只读「不支持在线支付」
+     必填红星按用户口径保留（收款渠道是发起支付前必须落定的字段）
+     · 渠道已落定 → 禁改；渠道为空（含支付已取消/已超时被系统置空）→ 可重新选择 */
+  var channelField = chans.length
+    ? npFormSelect('收款渠道', '<select id="rsc-pay-channel"' + (ch ? ' disabled' : '') + ' onchange="rscOnlineChannelPreview(' + r.idx + ')">' + chOpts + '</select>', true)
+    : npFormItem('收款渠道', '<input type="text" readonly value="不支持在线支付">');
+  /* ★ 行1＝4 个字段一行 4 列（PRD 6.1.1【收款】显示项原文：维修工单号、维修结算单号、收款渠道、收款金额）
+     表单栅格只能用 .np-form-grid.col4（规范 §3.1.1「布局与控件分离」/ §3.1.2「禁止自造表单栅格」）。
+     弹框宽度 1260 是实测值：22 位结算单号需要 195px 输入宽，4 等列下 1260px 才不裁字。 */
   var body =
-    '<div class="pso-info-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">' +
-      rscInfoItem('优惠后实际收款', '¥' + rscMoney(net)) +
-      rscInfoItem('支付单号', payNo) +
-    '</div>' +
-    '<div class="pm-tip-warn" style="margin-top:0">请使用微信扫码支付。默认 5 分钟（可配置，最长 120 分钟），剩余 <b>005:00</b>。关闭弹窗不会解除页面封存。</div>';
-  npOpenModal('在线支付', body,
-    '<button class="lt-btn lt-btn-default" onclick="rscPayExpire(' + idx + ')">支付关闭</button>' +
-    '<button class="lt-btn lt-btn-default" onclick="rscPayUnknown()">结果待确认</button>' +
-    '<button class="lt-btn lt-btn-primary" onclick="rscPaySuccess(' + idx + ')">支付成功</button>',
-    {width:720});
+    '<div class="np-form-grid col4">' +
+      npFormItem('维修工单号', '<input type="text" readonly value="' + npEscape(r.order) + '">') +
+      npFormItem('维修结算单号', '<input type="text" readonly value="' + npEscape(r.id) + '">') +
+      channelField +
+      npFormItem('收款金额', '<input type="text" readonly value="' + rscMoney(rscNet(r)) + '">') +
+    '</div>';
+  /* ★ 行2＝支付状态（第1列）+ 业务操作按钮（第4列）
+     用户口径（2026-10-26 三次纠正）：「按钮，放在行2 的第 4 列，和演示切换区域不要焊死」。
+     · 支付状态出现条件＝渠道已落定 或 有支付状态（支付已取消/已超时会把渠道置空，但状态要留着，
+       此时不显示就会丢掉 PRD 行2 的显示项）；
+     · 按钮固定落第 4 列（npFormActions），与行1/行2 同一张表单、同一底色，不再挂到弹框 footer、
+       也不再和演示区挤在一起 —— 二维码内容再长也不会把按钮挤到二维码下面。 */
+  var showState = !!(ch || st);
+  body += '<div class="np-form-grid col4">' +
+    (showState ? npFormItem('支付状态', '<input type="text" readonly value="' + npEscape(RSC_ORDER_PAY_STATE[st] || '') + '">') : '') +
+    npFormActions(rscOnlineActions(r, pick)) +
+    '</div>';
+  /* 二维码：只有「支付二维码 + 待支付(支付中)」这一个场景出码；高度收到 160px 以便整框在小屏也放得下 */
+  if (ch === '支付二维码' && st === 'PAYING'){
+    body += '<div style="text-align:center;margin:0 0 4px">' +
+      '<div style="width:160px;height:160px;margin:0 auto;border:1px solid #ddd;border-radius:6px;background:#fafafa;'
+      + 'display:flex;flex-direction:column;align-items:center;justify-content:center;color:#666;font-size:12px;line-height:1.8">'
+      + '<span>支付二维码</span><span>（微信 / 支付宝 二码合一）</span></div>' +
+      '<div style="font-size:12px;color:#666;margin-top:6px">请用户使用微信或支付宝扫码支付；未支付时不要关闭本弹框</div>' +
+      '</div>';
+  }
+  /* 演示切换区：排在弹框内容之后（正文含按钮）、不挂 footer、与按钮不共底色 */
+  npOpenModal('在线支付', body, '', {width:1260, belowFooterHtml: rscDemoSwitchHtml(r)});
 }
-function rscPayExpire(idx){
+/* 收款渠道下拉只是「预选」，点了按钮才落定；切换时整框重绘（按钮已在表单行里，不能再只刷 footer） */
+function rscOnlineChannelPreview(idx){
   var r = rscGet(idx); if (!r) return;
-  r.status = 'UNPAID';
-  npCloseModal(); rscRenderAfterChange(r);
-  npToast('二维码已失效，支付中心确认未支付后已解除封存');
+  var sel = document.getElementById('rsc-pay-channel');
+  rscRenderOnlinePay(r, (sel && sel.value) || '');
 }
-function rscPayUnknown(){ npToast('支付结果未知，保持封存；核对原支付单，不能重付或解除封存。'); }
-function rscPaySuccess(idx){
+/* 可操作项（行2 第4列的按钮）＝ PRD 6.1.1 表格「可操作项」列 ＋ 关闭，逐场景严格对应。
+   pick 必须由调用方传入：不要在生成时回读正文里尚未插入的 DOM（会读到上一个弹框残留的
+   disabled 下拉值，实测：还原后正文渠道空、按钮却显示「获取支付码」）。 */
+function rscOnlineActions(r, pick){
+  var ch = rscOnlineChannel(r), st = rscOrderPayState(r);
+  var chans = rscOnlineChannelsOf(r);
+  var btns = [];
+  if (!chans.length){
+    /* 未接入支付的门店：无任何在线操作项 */
+  } else if (!ch){
+    pick = pick || chans[0];
+    btns.push(pick === '用户App'
+      ? '<button class="lt-btn lt-btn-primary" onclick="rscOnlineSyncApp(' + r.idx + ')">同步给App</button>'
+      : '<button class="lt-btn lt-btn-primary" onclick="rscOnlineGetQr(' + r.idx + ')">获取支付码</button>');
+  } else if (ch === '用户App' && st === ''){
+    btns.push('<button class="lt-btn lt-btn-default" onclick="rscOnlineWithdraw(' + r.idx + ')">撤回</button>');
+  } else if (ch === '支付二维码' && st === 'PAYING'){
+    btns.push('<button class="lt-btn lt-btn-default" onclick="rscOnlineCancelPay(' + r.idx + ')">取消支付</button>');
+  }
+  /* footer ＝ PRD「可操作项」+ 关闭，逐场景严格对应上表；
+     「模拟支付成功（演示）」不是 PRD 的可操作项（PRD 该场景写「无」），已移入底部演示切换区。 */
+  btns.push('<button class="lt-btn lt-btn-default" onclick="rscCloseOnlinePay(' + r.idx + ')">关闭</button>');
+  return btns.join('');
+}
+/* 面板在弹框后面开着时，改动后原地重开，保证折让锁定/解锁与金额快照同步 */
+function rscRefreshPanelBehind(r){
+  var p = document.getElementById('rsc-panel');
+  if (p && p.classList && p.classList.contains && p.classList.contains('show')) rscOpenPanel(r.idx);
+}
+function rscOnlineSyncApp(idx){
   var r = rscGet(idx); if (!r) return;
-  if (r.status !== 'PAYING' && r.status !== 'UNPAID') { npToast('当前状态不可支付'); return; }
-  r.status = 'PAID_PENDING_COLLECTION';
+  r.__demoIx = null;                       /* 真实操作后不再按「点过的演示场景」高亮，改按真实状态反查 */
+  r.payChannel = '用户App'; r.payState = '';
+  if (!r.payOrderNo) r.payOrderNo = 'YJ_WXSK_' + r.order + '01';
+  rscSyncAppPayable(r, true);
+  rscRenderOnlinePay(r); rscRefreshPanelBehind(r);
+  npToast('已把最新结算收款单同步给App（App 可支付）');
+}
+function rscOnlineGetQr(idx){
+  var r = rscGet(idx); if (!r) return;
+  r.__demoIx = null;
+  r.payChannel = '支付二维码'; r.payState = 'PAYING';
+  if (!r.payOrderNo) r.payOrderNo = 'YJ_WXSK_' + r.order + '01';
+  r.payQrTime = (typeof npNowLocal === 'function') ? npNowLocal() : '';
+  rscSyncAppPayable(r, false);
+  rscRenderOnlinePay(r); rscRefreshPanelBehind(r);
+  npToast('已展示支付二维码（微信/支付宝二码合一），已向App传"不可支付"');
+}
+function rscOnlineWithdraw(idx){
+  var r = rscGet(idx); if (!r) return;
+  r.__demoIx = null;
+  r.payChannel = ''; r.payState = '';
+  rscSyncAppPayable(r, false);
+  rscRenderOnlinePay(r); rscRefreshPanelBehind(r);
+  npToast('已撤回：向App传"不可支付"；收款渠道已置空，折让项目已解锁');
+}
+function rscOnlineCancelPay(idx){
+  var r = rscGet(idx); if (!r) return;
+  r.__demoIx = null;
+  r.payChannel = ''; r.payState = '';
+  rscSyncAppPayable(r, false);
+  rscRenderOnlinePay(r); rscRefreshPanelBehind(r);
+  npToast('已取消支付：收款渠道已置空可重新选择，折让项目已解锁');
+}
+/* 演示专用：模拟支付平台回调成功（PRD 该场景无操作项） */
+function rscOnlineDemoPaid(idx){
+  var r = rscGet(idx); if (!r) return;
+  r.__demoIx = null;
+  r.payState = 'SUCCESS'; r.status = 'PAID_PENDING_COLLECTION';
+  rscSyncAppPayable(r, false);
   npCloseModal(); rscOpenPanel(idx);
-  npToast('支付已到账，请点击【收款】完成结算确认');
+  npToast('（演示）支付已到账，请点【收款】完成结算确认');
+}
+/* 关闭：处于「支付已取消 / 支付已超时」的，关闭时执行系统自动动作（渠道置空 + 折让解锁） */
+function rscCloseOnlinePay(idx){
+  var r = rscGet(idx);
+  if (r){
+    var st = rscOrderPayState(r);
+    if (st === 'CANCELED' || st === 'TIMEOUT'){
+      r.__demoIx = null;
+      r.payChannel = ''; r.payState = '';
+      rscSyncAppPayable(r, false);
+      npCloseModal(); rscRenderAfterChange(r);
+      npToast('收款渠道已自动置空，可重新选择；折让项目已解锁');
+      return;
+    }
+  }
+  npCloseModal();
 }
 
 /* ---------- 弹框：确认收款 ---------- */
 function rscOpenCollection(idx){
   var r = rscGet(idx); if (!r) return;
   if (r.status !== 'PAID_PENDING_COLLECTION') { npToast('当前状态不可收款'); return; }
+  /* 折让校验同【在线支付】：折让项目必须选、折让金额不能为 0（2026-10-26 用户口径） */
+  var dErr = rscDiscountCheck(r);
+  if (dErr) { npToast(dErr); return; }
   var body =
     '<div class="pso-info-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">' +
       rscInfoItem('支付已到账', '¥' + rscMoney(rscNet(r))) +
@@ -797,24 +1320,25 @@ function rscConfirmCollection(idx){
 }
 
 /* ---------- 弹框：收退款详情 ----------
-   用户口径（2026-10-21）：
+   用户口径（2026-10-21 / 2026-10-26 两次拍板，均已并入 PRD 6.1.1【收款】渠道矩阵）：
    1 顶部信息区 4 格顺序＝维修工单号、结算单号、已收款金额、已退款金额
    2 表格去掉「票据号」列
    3 收退款渠道＝门店自行 / 支付二维码 / 用户App
-     收退款方式＝微信 / 支付宝 / 银行卡 / 现金 / 挂账
-     渠道与方式联动：门店自行 → 微信、支付宝、银行卡、现金、挂账（全量）
+     收退款方式（门店自行）＝微信 / 支付宝 / 银行卡 / 现金（**已去掉「挂账」**，2026-10-26 用户拍板）
+     渠道与方式联动：门店自行 → 按门店类型：直营＝银行卡、现金；非直营＝微信、支付宝、银行卡、现金
                      支付二维码 → 只有微信、支付宝
                      用户App   → 只有微信、支付宝 */
 var RSC_PAY_CHANNELS = ['门店自行', '支付二维码', '用户App'];
-var RSC_PAY_METHODS_ALL = ['微信', '支付宝', '银行卡', '现金', '挂账'];
-var RSC_PAY_METHODS_BY_CHANNEL = {
-  '门店自行': ['微信', '支付宝', '银行卡', '现金', '挂账'],
-  '支付二维码': ['微信', '支付宝'],
-  '用户App': ['微信', '支付宝']
-};
-/* 按渠道取可用收退款方式（渠道→方式联动口径的唯一来源） */
-function rscPayMethodsOf(channel){
-  return RSC_PAY_METHODS_BY_CHANNEL[channel] || [];
+/* 门店自行（线下收款）的方式：非直营全量、直营只收银行卡/现金（PRD 表格：微信/支付宝 直营为空） */
+var RSC_PAY_METHODS_OWN_DIRECT = ['银行卡', '现金'];
+var RSC_PAY_METHODS_OWN = ['微信', '支付宝', '银行卡', '现金'];
+var RSC_PAY_METHODS_ONLINE = ['微信', '支付宝'];
+/* 按渠道取可用收退款方式（渠道→方式联动口径的唯一来源）
+   第二参数：门店是否直营（不传＝按非直营全量，兼容旧调用点） */
+function rscPayMethodsOf(channel, direct){
+  if (channel === '门店自行') return direct ? RSC_PAY_METHODS_OWN_DIRECT.slice() : RSC_PAY_METHODS_OWN.slice();
+  if (channel === '支付二维码' || channel === '用户App') return RSC_PAY_METHODS_ONLINE.slice();
+  return [];
 }
 /* 渠道切换 → 方式下拉重画（仅保留该渠道允许的方式） */
 function rscPayChannelChange(channel, selId){
