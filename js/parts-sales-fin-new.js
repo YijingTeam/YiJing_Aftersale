@@ -8,8 +8,12 @@
      ④ 余额充足 = 预付款余额 ≥ 应收金额（可更大）：可全额抵扣，隐藏“收款渠道/收款方式/获取支付码/票据”；
         在“收款渠道”前增加可编辑“预付款抵扣”字段：默认值=min(应收金额,预付款余额)，可改，硬上限=min(应收金额,预付款余额)
    退款(新)：
-     复制原退款（原函数改名 New 后缀，逻辑一字未改）；「收退款详情」如实渲染 psfinPayMap/psfinRefundMap
-     中真实存在的「预收款账户」收/退款记录（由收款(新)抵扣/退款动作写入，数据驱动，不重复造行）
+     复制原退款（原函数改名 New 后缀，逻辑一字未改）
+     ① (新) 模块专属「预收款账户」收款种子 `psfinNewPrepaySeed()`：约一半销售单有「预付款抵扣」记录
+        （PSFIN_NEW_PREPAY_ORDERS，当前 8 条退款单据中 4 条 = 50%）；金额从该单实收额中划出，实收总额不变。
+        退款弹窗与「收退款详情」同源渲染（psfinNewAllPays），不重复造行；原「配件销售退款」不受影响。
+     ② 预付款「退款」行由真实退款记录拆分而来（只改渠道归属、不改金额合计），保证详情表格行合计 == 「已退款金额」字段。
+     ③ 退款弹窗「已退金额」按渠道核销（退款渠道名先映射回收款渠道：门店自行退款↔门店自行收款、支付平台退款↔支付平台收款）。
    复用：psfinPayRows / psfinRefundRows / psfinPayMap / psfinRefundMap / psoMoney / PS_FIN / 全局 np* 组件
    不改原文件任何逻辑。
    ============================================================ */
@@ -268,12 +272,14 @@ var PS_FIN_NEW = {
     if (billBlock) billBlock.style.display = (showCollect && !direct) ? 'contents' : 'none';
     var hint = document.getElementById('psf-pay-n-demo-hint');
     if (hint) {
+      var dEl = document.getElementById('psf-pay-n-deduct');
+      var dVal = dEl ? (parseFloat(dEl.value) || 0) : 0;
       if (showCollect) {
-        var dEl = document.getElementById('psf-pay-n-deduct');
-        var dVal = dEl ? (parseFloat(dEl.value) || 0) : 0;
         hint.textContent = '预付款抵扣 ￥' + dVal.toFixed(2) + '（可修改），仍需收款 ￥' + remaining.toFixed(2);
       } else {
-        hint.textContent = '已全额抵扣，无需收款';
+        var pEl = document.getElementById('psf-pay-n-prepay');
+        var balVal = pEl && pEl.value !== '—' ? (parseFloat(pEl.value) || 0) : 0;
+        hint.textContent = '预付款余额 ￥' + balVal.toFixed(2) + '，可抵扣 ￥' + dVal.toFixed(2) + ' 已全额抵扣，无需收款';
       }
     }
     if (showCollect) psfinNewSyncPayMethod();
@@ -490,7 +496,7 @@ var PS_FIN_NEW = {
         { t: '序号', w: 50 }, { t: '收款渠道', w: 130 }, { t: '收款方式', w: 100 },
         { t: '收款金额', w: 100 }, { t: '收款时间', w: 160 }, { t: '已退金额', w: 100 },
         { t: '可退金额', w: 100 }, { t: '退款金额', w: 120 }
-      ]) + '</tr></thead><tbody id="psf-rfd-n-tbody">' + psfinRefundTableHtmlN(pays, refunded) + '</tbody></table></div>';
+      ]) + '</tr></thead><tbody id="psf-rfd-n-tbody">' + psfinRefundTableHtmlN(pays, refunded, psfinNewRefundedByCh(docNo, row.orderNo)) + '</tbody></table></div>';
 
     npOpenModal('退款', body,
       '<button class="lt-btn lt-btn-default" onclick="npCloseModal()">取消</button>' +
@@ -500,11 +506,36 @@ var PS_FIN_NEW = {
     psfinNewSyncRefundSum();
   };
 
-  function psfinRefundTableHtmlN(pays, refunded) {
+  /* 该单据【各收款渠道】的已退金额：按真实退款记录统计，并把「退款渠道」映射回「收款渠道」再归集
+     （退款渠道名与收款渠道名不同：门店自行退款↔门店自行收款、支付平台退款↔支付平台收款；
+      不映射会导致已退金额核销不到任何行，可退金额虚高）
+     —— 用于退款弹窗「已退金额」逐渠道核销 */
+  function psfinNewRefundedByCh(docNo, orderNo) {
+    var toPayCh = function (ch) {
+      if (ch === PS_FIN.CH_RFD_PLATFORM) return PS_FIN.CH_PLATFORM;
+      if (ch === PS_FIN.CH_RFD_OWN) return PS_FIN.CH_OWN;
+      return ch;                                  /* 预收款账户 等同名渠道 */
+    };
+    var byCh = {};
+    psfinNewRefundFlows(docNo, orderNo).forEach(function (r) {
+      var k = toPayCh(r.ch);
+      byCh[k] = Math.round(((byCh[k] || 0) + (parseFloat(r.amount) || 0)) * 100) / 100;
+    });
+    return byCh;
+  }
+
+  function psfinRefundTableHtmlN(pays, refunded, refundedByCh) {
     var left = refunded;
     var html = '';
     pays.forEach(function (p, i) {
-      var used = Math.min(left, parseFloat(p.amount) || 0);
+      /* 已退金额优先按【该渠道的真实已退额】核销；无渠道级数据时退回按行序核销（原逻辑） */
+      var used;
+      if (refundedByCh) {
+        used = Math.min(refundedByCh[p.ch] || 0, parseFloat(p.amount) || 0);
+        refundedByCh[p.ch] = Math.round(((refundedByCh[p.ch] || 0) - used) * 100) / 100;
+      } else {
+        used = Math.min(left, parseFloat(p.amount) || 0);
+      }
       left = Math.round((left - used) * 100) / 100;
       var canBack = Math.round(((parseFloat(p.amount) || 0) - used) * 100) / 100;
       html += '<tr>' +
@@ -515,7 +546,7 @@ var PS_FIN_NEW = {
         '<td>' + npEscape(p.time) + '</td>' +
         '<td>' + psoMoney(used) + '</td>' +
         '<td>' + canBack.toFixed(2) + '</td>' +
-        '<td><input type="text" id="psf-rfd-n-amt-' + i + '" data-can="' + canBack.toFixed(2) + '"' + (canBack <= 0.005 ? ' value="0" readonly' : ' value="" placeholder="≤' + canBack.toFixed(2) + '"') + ' oninput="psfinNewSyncRefundSum()"></td>' +
+        '<td><input type="text" id="psf-rfd-n-amt-' + i + '" data-can="' + canBack.toFixed(2) + '" data-ch="' + npEscape(p.ch) + '" data-method="' + npEscape(p.method) + '"' + (canBack <= 0.005 ? ' value="0" readonly' : ' value="" placeholder="≤' + canBack.toFixed(2) + '"') + ' oninput="psfinNewSyncRefundSum()"></td>' +
         '</tr>';
     });
     if (!html) html = '<tr><td colspan="8" style="text-align:center;color:#999;padding:24px">暂无收款记录</td></tr>';
@@ -548,18 +579,17 @@ var PS_FIN_NEW = {
       if (isNaN(v) || v <= 0) continue;
       var can = parseFloat(inputs[i].getAttribute('data-can')) || 0;
       if (v - can > 0.005) { npToast('可退金额≤' + can.toFixed(2)); return; }
-      picks.push({ i: i, amount: v });
+      picks.push({ i: i, amount: v, ch: inputs[i].getAttribute('data-ch') || '', method: inputs[i].getAttribute('data-method') || '' });
     }
     if (!picks.length) { npToast('请输入退款金额'); return; }
     var sum = Math.round(picks.reduce(function (s, p) { return s + p.amount; }, 0) * 100) / 100;
     if (Math.abs(sum - ctx.need) > 0.005) { npToast('退款金额应为' + ctx.need.toFixed(2)); return; }
 
-    var pays = psfinNewAllPays(ctx.orderNo, ctx.docNo);
     var list = psfinRefundMap()[ctx.docNo] || (psfinRefundMap()[ctx.docNo] = []);
     picks.forEach(function (p) {
-      var pay = pays[p.i] || {};
-      var rch = pay.ch === '预收款账户' ? '预收款账户' : (pay.ch === PS_FIN.CH_PLATFORM ? PS_FIN.CH_RFD_PLATFORM : PS_FIN.CH_RFD_OWN);
-      var rmethod = pay.ch === '预收款账户' ? '预收款退款' : (pay.method || '—');
+      /* 渠道/方式取该行输入框上标记的值（渲染时写入），不按下标反查，避免数据变化后错配 */
+      var rch = p.ch === '预收款账户' ? '预收款账户' : (p.ch === PS_FIN.CH_PLATFORM ? PS_FIN.CH_RFD_PLATFORM : PS_FIN.CH_RFD_OWN);
+      var rmethod = p.ch === '预收款账户' ? '预收款退款' : (p.method || '—');
       list.push({ ch: rch, method: rmethod, amount: psoMoney(p.amount), time: npNowLocal() });
     });
     npCloseModal();
@@ -567,21 +597,50 @@ var PS_FIN_NEW = {
     npToast('退款成功');
   };
 
-  /* 示例「预收款账户」收/退款记录：按单据真实金额派生（仅退款(新)详情展示，原退款不动） */
-  function psfinNewPrepayFlows(orderNo, refundDocNos) {
-    var out = [];
-    var ord = (typeof psfinPayRows === 'function') ? psfinPayRows().filter(function (r) { return r.orderNo === orderNo; })[0] : null;
-    if (ord) {
-      var amt = psoMoney(Math.round(parseFloat(ord.amount || 0) * 0.3 * 100) / 100);
-      out.push({ kind: '收款', ch: '预收款账户', method: '预收款抵扣', amount: amt, time: psfinAddMin(ord.submitTime || '2026-10-10 09:00:00', 6), billType: '', billNo: '', billAmount: '' });
-    }
-    refundDocNos.forEach(function (dn) {
-      var row = psfinRefundRows().filter(function (r) { return r.docNo === dn; })[0];
-      if (row) {
-        var ramt = psoMoney(Math.round(parseFloat(row.amount || 0) * 0.5 * 100) / 100);
-        out.push({ kind: '退款', ch: '预收款账户', method: '预收款退款', amount: ramt, time: psfinAddMin(row.submitTime || '2026-10-15 09:00:00', 6), billType: '', billNo: '', billAmount: '' });
-      }
+  /* ===== 「预收款账户」收款记录种子（仅退款(新) 使用；原「配件销售退款」不改动） =====
+     需求：退款列表约一半的单据有「预付款抵扣」记录，点「退款」时可看到并可退。
+     实现：这不是渲染时临时派生，而是 (新) 模块专属的真实收款记录种子——
+           金额从该销售单的【实收额】中划出（实收总额不变），与主渠道收款并存。 */
+  /* 约一半的退款单据有「预付款抵扣」记录：当前 8 行中选 4 行
+     （HUB02510150009 / HUB02510150010 各对应 2 条退款单据，共 4 行 = 50%） */
+  var PSFIN_NEW_PREPAY_ORDERS = ['HUB02510150009', 'HUB02510150010'];
+  function psfinNewPrepaySeed() {
+    if (window.__PSF_NEW_PREPAY) return window.__PSF_NEW_PREPAY;
+    var map = {};
+    PSFIN_NEW_PREPAY_ORDERS.forEach(function (orderNo) {
+      var got = parseFloat(psfinReceived(orderNo) || 0);
+      if (got <= 0.005) return;
+      /* 预付款额 = 实收额的 30%（从实收中划出，不新增实收），四舍五入到分 */
+      var amt = psoMoney(Math.round(got * 0.3 * 100) / 100);
+      if (amt <= 0.005) return;
+      var ord = (typeof psfinPayRows === 'function') ? psfinPayRows().filter(function (r) { return r.orderNo === orderNo; })[0] : null;
+      map[orderNo] = [{
+        ch: '预收款账户', method: '预收款抵扣', amount: amt,
+        time: psfinAddMin((ord && ord.submitTime) || '2026-10-10 09:00:00', 6),
+        billType: '—', billNo: '', billAmount: 0
+      }];
     });
+    window.__PSF_NEW_PREPAY = map;
+    return map;
+  }
+
+  /* (新) 专属的「退款记录」视图：把该单据【真实退款记录】中的一笔拆出「预收款账户」退款行
+     —— 拆分只改渠道归属、不改金额合计，保证详情表格行合计 == 「已退款金额」字段（口径自洽） */
+  function psfinNewRefundFlows(docNo, orderNo) {
+    var out = (psfinRefundMap()[docNo] || []).map(function (r) {
+      return { kind: '退款', ch: r.ch, method: r.method, amount: r.amount, time: r.time, billType: '', billNo: '', billAmount: '' };
+    });
+    var seed = psfinNewPrepaySeed()[orderNo];
+    if (!seed || !out.length) return out;
+    var seedAmt = parseFloat(seed[0].amount) || 0;
+    var split = psoMoney(Math.round(Math.min(parseFloat(out[0].amount) || 0, seedAmt) * 100) / 100);
+    if (split <= 0.005) return out;
+    var first = out[0];
+    var rest = psoMoney(Math.round(((parseFloat(first.amount) || 0) - split) * 100) / 100);
+    out[0] = { kind: '退款', ch: '预收款账户', method: '预收款退款', amount: split, time: first.time, billType: '', billNo: '', billAmount: '' };
+    if (rest > 0.005) {
+      out.splice(1, 0, { kind: '退款', ch: first.ch, method: first.method, amount: rest, time: first.time, billType: '', billNo: '', billAmount: '' });
+    }
     return out;
   }
 
@@ -590,15 +649,33 @@ var PS_FIN_NEW = {
     var base = (psfinPayMap()[orderNo] || []).map(function (p) {
       return { ch: p.ch, method: p.method, amount: p.amount, time: p.time, billType: p.billType || '', billNo: p.billNo || '', billAmount: p.billAmount ? psoMoney(p.billAmount) : '' };
     });
-    var prepay = psfinNewPrepayFlows(orderNo, docNo ? [docNo] : []).filter(function (f) { return f.kind === '收款'; }).map(function (f) {
-      return { ch: f.ch, method: f.method, amount: f.amount, time: f.time, billType: f.billType || '', billNo: f.billNo || '', billAmount: f.billAmount ? psoMoney(f.billAmount) : '' };
+    /* 预付款记录来自 (新) 模块专属种子（只有约一半销售单有），不是每单都派生 */
+    var prepay = (psfinNewPrepaySeed()[orderNo] || []).map(function (p) {
+      return { ch: p.ch, method: p.method, amount: p.amount, time: p.time, billType: p.billType || '', billNo: p.billNo || '', billAmount: p.billAmount ? psoMoney(p.billAmount) : '' };
     });
-    /* 让 预付款 + 主渠道 之和 = 实收，避免渠道金额叠加超过应退 */
+    /* 预付款行是「实收」的一部分，不是叠加在实收之上：
+       ① 预付款额不得超过实收额：超出则按比例缩放预付款行金额；
+       ② 再从主渠道行金额中扣除等额预付款（合计扣掉 prepaySum），
+          保证「预付款 + 主渠道」合计恒等于实收额，
+          否则弹窗各行金额之和会超过应退金额，导致退款提交时被「退款金额应为X」拦死。 */
     var total = psfinReceived(orderNo);
     var prepaySum = prepay.reduce(function (s, p) { return s + (parseFloat(p.amount) || 0); }, 0);
-    var remain = Math.round((total - prepaySum) * 100) / 100;
-    if (base.length && remain >= 0) base[0].amount = remain;
-    return base.concat(prepay);
+    if (prepaySum > total + 0.005 && prepaySum > 0) {
+      var k = total / prepaySum;                     /* 等比缩放预付款行 */
+      prepay.forEach(function (p) { p.amount = psoMoney(Math.round((parseFloat(p.amount) || 0) * k * 100) / 100); });
+      prepaySum = prepay.reduce(function (s, p) { return s + (parseFloat(p.amount) || 0); }, 0);
+    }
+    var cutLeft = Math.round(prepaySum * 100) / 100;  /* 主渠道侧需扣掉的金额 */
+    base.forEach(function (p) {
+      if (cutLeft <= 0.005) return;
+      var a = parseFloat(p.amount) || 0;
+      var cut = Math.min(a, cutLeft);
+      p.amount = psoMoney(a - cut);
+      cutLeft = Math.round((cutLeft - cut) * 100) / 100;
+    });
+    /* 按收款时间排序（预付款在前）：退款弹窗「已退金额」按行序依次核销，
+       与详情页「预收款账户优先核销」的拆分口径保持一致 */
+    return prepay.concat(base).sort(function (a, b) { return a.time < b.time ? -1 : 1; });
   }
 
   /* 收退款详情（新）：复制原逻辑，并追加 预收款账户 收款/退款 行（收退款渠道=预收款账户） */
@@ -615,18 +692,17 @@ var PS_FIN_NEW = {
     }
 
     var flows = [];
-    (psfinPayMap()[orderNo] || []).forEach(function (p) {
+    /* 收款行与「退款」弹窗同源（psfinNewAllPays），保证两处口径一致、不重复造行 */
+    psfinNewAllPays(orderNo, docNo).forEach(function (p) {
       flows.push({ kind: '收款', ch: p.ch, method: p.method, amount: p.amount, time: p.time, billType: p.billType || '', billNo: p.billNo || '', billAmount: p.billAmount ? psoMoney(p.billAmount) : '' });
     });
+    /* 退款行：由真实退款记录拆分而来（有预付款的单据拆出「预收款账户」退款行），金额合计不变 */
     refundDocNos.forEach(function (dn) {
-      (psfinRefundMap()[dn] || []).forEach(function (r) {
-        flows.push({ kind: '退款', ch: r.ch, method: r.method, amount: r.amount, time: r.time, billType: '', billNo: '', billAmount: '' });
-      });
+      psfinNewRefundFlows(dn, orderNo).forEach(function (r) { flows.push(r); });
     });
-    psfinNewPrepayFlows(orderNo, refundDocNos).forEach(function (f) { flows.push(f); });
     flows.sort(function (a, b) { return a.time < b.time ? -1 : 1; });
 
-    var got = psoMoney(psfinSum(psfinPayMap()[orderNo], 'amount'));
+    var got = psoMoney(psfinSum(psfinNewAllPays(orderNo, docNo), 'amount'));
     var back = 0;
     refundDocNos.forEach(function (dn) { back += psfinRefunded(dn); });
     back = psoMoney(back);

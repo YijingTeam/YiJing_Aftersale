@@ -9,6 +9,12 @@
    新增一笔预收款后，余额页与明细立即跟随，不存第二份余额数据。
    渲染层全部使用当前原型既有类与公共 helper（npShell / npTH / npSelect / npFItem /
    npOpenModal / npRenderTable / npRenderActions / msOpenStorePicker / npExportExcelRowsRaw）。
+
+   2026-10-27（用户两条）：
+     ① 预收款余额列表加「导出」（yskExportBalance，导出当前筛选结果，不含操作列）；
+     ② 查看明细列表加「业务单据号」列（位置：业务 ~ 金额之间）与「导出」（yskExportDetail）。
+        业务单据号取值规则见规范 §4.9.5（唯一出口 YSK_BIZ_DOC_PREFIX）；充值行显示「—」。
+        明细表同时从"手写逐行拼 td"收口到 cols() + npRenderTable（th 与 td 同源，杜绝再加列错位）。
    ============================================================ */
 
 /* ---------- 枚举（存成常量，杜绝多处硬编码字符串漂移） ---------- */
@@ -16,14 +22,27 @@ var YSK_CHANNEL = '门店自行(线下收款)';        /* 收款渠道：本模�
 var YSK_METHODS = ['微信', '支付宝', '银行卡', '现金'];
 var YSK_BIZ = ['交付横向费用', '维修结算', '配件销售', '保险', '服务包'];
 var YSK_TYPES = ['充值', '使用'];
+/* 业务单据号前缀（规范 §4.9.5 唯一出口）：单号＝前缀-门店编码+YYMMDD+3位流水；
+   维修结算沿用「维修结算收款」的结算单号格式（WXJSDYJ-…），不另造一套。 */
+var YSK_BIZ_DOC_PREFIX = {
+  '维修结算': 'WXJSDYJ',
+  '配件销售': 'PSXD',
+  '保险': 'BXD',
+  '服务包': 'FWB',
+  '交付横向费用': 'JFHX'
+};
 /* 演示口径：当前登录门店 ＝ 上海浦东店（与「常用件建储情况」等门店侧页面的默认门店一致） */
 var YSK_CUR_STORE_CODE = 'SH001';
-/* 提交人（＝收款登记人）按角色映射，新增提交时实时取，不写死成某一笔 */
-var YSK_ROLE_USER = { '门店': '当前门店用户', '总部': '当前总部用户', '超级管理员': '当前管理员' };
+/* 收款登记人的取法（2026-10-27 用户口径：登记收款的都是门店的人，不可能是登录用户自己）：
+   取「该门店的门店财务经理（R12）」真实姓名，该店没有这个人时退到「门店管理员（R05）」。
+   人名一律从人员主数据（用户管理 › 人员）现取，页面里不写死任何人名，也不再写「当前门店用户」这类角色占位。规范 §4.9.6 */
+var YSK_REGISTRAR_ROLES = ['R12', 'R05'];
 
 /* ---------- 状态容器（两个 Table 页各一份，走全站 NP 状态表） ---------- */
 NP['prepayment-record'] = { page: 1, pageSize: 20, allData: [], filtered: [], render: null, query: null, reset: null };
 NP['prepayment-balance'] = { page: 1, pageSize: 20, allData: [], filtered: [], render: null, query: null, reset: null };
+/* 明细面板：一次给满（该车主在该门店的流水条数有限，不做分页），但仍走公共渲染 npRenderTable */
+NP['prepayment-detail'] = { page: 1, pageSize: 1000, filtered: [], render: null };
 
 /* ---------- 小工具 ---------- */
 function yskNum(v) { var n = parseFloat(String(v === null || v === undefined ? '' : v).replace(/,/g, '')); return isNaN(n) ? 0 : n; }
@@ -42,10 +61,9 @@ function yskStore(code) {
 /* 门店名称统一显示门店简称（取门店管理主数据，与维修结算收款一致） */
 function yskStoreShort(code) { var s = yskStore(code); return s ? (s.shortName || s.name) : '—'; }
 function yskStoreLabel(code) { var s = yskStore(code); return s ? ((s.shortName || s.name) + '(' + s.code + ')') : '—'; }
-/* 提交人：提交那一刻的角色对应用户 */
-function yskCurrentUser() {
-  var role = (typeof gUserRole !== 'undefined' && gUserRole) ? gUserRole : '门店';
-  return YSK_ROLE_USER[role] || YSK_ROLE_USER['门店'];
+/* 收款登记人：该门店的财务经理（缺员退门店管理员），真实姓名现取 —— 与登录身份档位无关 */
+function yskRegistrar(storeCode) {
+  return npStorePersonName(storeCode || YSK_CUR_STORE_CODE, YSK_REGISTRAR_ROLES);
 }
 /* 表单/查询取值：combobox 残留的「请选择」按空处理 */
 function yskVal(id) {
@@ -60,24 +78,26 @@ function yskStoreNames(raw) {
 /* ============================================================
    一、预收款记录（充值）种子数据
    日期落在 2026-09-23 ~ 2026-10-23（规范默认区间＝上月今天~今天），否则进页面 0 条
+   收款登记人不写死人名：按各自门店从人员主数据取（见下方 st.allData 的 registrar 派生），
+   否则会重犯 2026-10-27 用户抓到的问题——「王芳」是上海浦东店的人却挂在河北店的记录上。
    ============================================================ */
 var YSK_RECORD_SEED = [
-  { owner: '沐云汐', storeCode: 'SH001',  method: '微信',   amount: '3000.00', registrar: '当前门店用户', time: '2026-10-23 10:12:33' },
-  { owner: '张建国', storeCode: 'BJ001',  method: '银行卡', amount: '5000.00', registrar: '王芳',         time: '2026-10-20 09:25:41' },
-  { owner: '刘婉如', storeCode: 'HBZ01',  method: '现金',   amount: '4000.00', registrar: '陈静',         time: '2026-10-19 13:17:09' },
-  { owner: '李思远', storeCode: 'GZ001',  method: '微信',   amount: '2000.00', registrar: '张伟',         time: '2026-10-18 11:33:55' },
-  { owner: '沐云汐', storeCode: 'SH001',  method: '支付宝', amount: '2000.00', registrar: '当前门店用户', time: '2026-10-16 15:40:08' },
-  { owner: '陈志明', storeCode: 'WH001',  method: '微信',   amount: '1000.00', registrar: '刘洋',         time: '2026-10-15 10:02:47' },
-  { owner: '王雅静', storeCode: 'SCZ01',  method: '支付宝', amount: '8000.00', registrar: '李娜',         time: '2026-10-12 16:48:20' },
-  { owner: '沐云汐', storeCode: 'BJ001',  method: '微信',   amount: '1200.00', registrar: '王芳',         time: '2026-10-11 09:48:36' },
-  { owner: '张建国', storeCode: 'BJ001',  method: '现金',   amount: '1500.00', registrar: '王芳',         time: '2026-10-09 14:06:12' },
-  { owner: '李思远', storeCode: 'HZ001',  method: '银行卡', amount: '3000.00', registrar: '赵磊',         time: '2026-10-07 15:55:14' },
-  { owner: '王雅静', storeCode: 'SZ001',  method: '支付宝', amount: '2500.00', registrar: '周勇',         time: '2026-09-29 10:36:28' },
+  { owner: '沐云汐', storeCode: 'SH001',  method: '微信',   amount: '3000.00', time: '2026-10-23 10:12:33' },
+  { owner: '张建国', storeCode: 'BJ001',  method: '银行卡', amount: '5000.00', time: '2026-10-20 09:25:41' },
+  { owner: '刘婉如', storeCode: 'HBZ01',  method: '现金',   amount: '4000.00', time: '2026-10-19 13:17:09' },
+  { owner: '李思远', storeCode: 'GZ001',  method: '微信',   amount: '2000.00', time: '2026-10-18 11:33:55' },
+  { owner: '沐云汐', storeCode: 'SH001',  method: '支付宝', amount: '2000.00', time: '2026-10-16 15:40:08' },
+  { owner: '陈志明', storeCode: 'WH001',  method: '微信',   amount: '1000.00', time: '2026-10-15 10:02:47' },
+  { owner: '王雅静', storeCode: 'SCZ01',  method: '支付宝', amount: '8000.00', time: '2026-10-12 16:48:20' },
+  { owner: '沐云汐', storeCode: 'BJ001',  method: '微信',   amount: '1200.00', time: '2026-10-11 09:48:36' },
+  { owner: '张建国', storeCode: 'BJ001',  method: '现金',   amount: '1500.00', time: '2026-10-09 14:06:12' },
+  { owner: '李思远', storeCode: 'HZ001',  method: '银行卡', amount: '3000.00', time: '2026-10-07 15:55:14' },
+  { owner: '王雅静', storeCode: 'SZ001',  method: '支付宝', amount: '2500.00', time: '2026-09-29 10:36:28' },
   /* ★ 2026-10-27：这一条原为 2026-09-26，落在「近一月」默认区间（上个月同日 ~ 今天）之外，
      日期一滚到 10-27 就被默认区间挡掉 → 「重置回到全量」用例变 12/13。
      种子的日期是写死的、默认区间却随时间滚动，这类"隔一段时间就红一次"的用例必须靠数据落在区间内来避免，
      故把最老这条挪到 2026-09-28（仍是全表最早，倒序位置不变）。 */
-  { owner: '赵文博', storeCode: 'SH001',  method: '现金',   amount: '600.00',  registrar: '当前门店用户', time: '2026-09-28 11:20:05' }
+  { owner: '赵文博', storeCode: 'SH001',  method: '现金',   amount: '600.00',  time: '2026-09-28 11:20:05' }
 ];
 (function () {
   var st = NP['prepayment-record'];
@@ -90,7 +110,8 @@ var YSK_RECORD_SEED = [
       channel: YSK_CHANNEL,
       method: r.method,
       amount: r.amount,
-      registrar: r.registrar,
+      /* 收款登记人：按该行门店从人员主数据派生（不写死人名，见 YSK_REGISTRAR_ROLES 注释） */
+      registrar: yskRegistrar(r.storeCode),
       time: r.time
     };
   });
@@ -100,20 +121,23 @@ var YSK_RECORD_SEED = [
    二、使用记录（预收款被消耗的流水）
    口径：预收款在「交付横向费用 / 维修结算 / 配件销售 / 保险 / 服务包」五个业务场景被扣减；
         充值不属于任何业务场景，故充值行「业务」显示「—」。
+   2026-10-27：每条使用流水带「业务单据号」docNo（＝发生这笔业务的单据号），
+        明细页把它显示在「业务」与「金额」之间；规则见规范 §4.9.5：
+        前缀-门店编码+YYMMDD+3位流水，YYMMDD 取该笔流水发生时间。
    数据为原型演示数据，不与维修结算收款、配件销售等页面实时联动。
    ============================================================ */
 var YSK_USAGE = [
-  { owner: '刘婉如', storeCode: 'HBZ01', biz: '保险',           amount: '2600.00', time: '2026-10-22 09:33:18' },
-  { owner: '沐云汐', storeCode: 'SH001', biz: '维修结算',       amount: '680.00',  time: '2026-10-21 14:22:10' },
-  { owner: '张建国', storeCode: 'BJ001', biz: '维修结算',       amount: '1250.00', time: '2026-10-21 16:30:12' },
-  { owner: '王雅静', storeCode: 'SCZ01', biz: '服务包',         amount: '1200.00', time: '2026-10-20 14:08:55' },
-  { owner: '李思远', storeCode: 'GZ001', biz: '配件销售',       amount: '460.00',  time: '2026-10-20 15:47:03' },
-  { owner: '沐云汐', storeCode: 'SH001', biz: '配件销售',       amount: '320.00',  time: '2026-10-19 11:05:36' },
-  { owner: '王雅静', storeCode: 'SCZ01', biz: '维修结算',       amount: '2380.00', time: '2026-10-17 10:36:29' },
-  { owner: '张建国', storeCode: 'BJ001', biz: '保险',           amount: '2000.00', time: '2026-10-14 09:12:51' },
-  { owner: '沐云汐', storeCode: 'BJ001', biz: '服务包',         amount: '800.00',  time: '2026-10-13 10:18:44' },
-  { owner: '李思远', storeCode: 'HZ001', biz: '交付横向费用',   amount: '900.00',  time: '2026-10-09 13:24:16' },
-  { owner: '王雅静', storeCode: 'SZ001', biz: '配件销售',       amount: '730.00',  time: '2026-10-05 11:52:37' }
+  { owner: '刘婉如', storeCode: 'HBZ01', biz: '保险',           docNo: 'BXD-HBZ01261022001',    amount: '2600.00', time: '2026-10-22 09:33:18' },
+  { owner: '沐云汐', storeCode: 'SH001', biz: '维修结算',       docNo: 'WXJSDYJ-SH001261021001', amount: '680.00',  time: '2026-10-21 14:22:10' },
+  { owner: '张建国', storeCode: 'BJ001', biz: '维修结算',       docNo: 'WXJSDYJ-BJ001261021001', amount: '1250.00', time: '2026-10-21 16:30:12' },
+  { owner: '王雅静', storeCode: 'SCZ01', biz: '服务包',         docNo: 'FWB-SCZ01261020001',    amount: '1200.00', time: '2026-10-20 14:08:55' },
+  { owner: '李思远', storeCode: 'GZ001', biz: '配件销售',       docNo: 'PSXD-GZ001261020001',   amount: '460.00',  time: '2026-10-20 15:47:03' },
+  { owner: '沐云汐', storeCode: 'SH001', biz: '配件销售',       docNo: 'PSXD-SH001261019001',   amount: '320.00',  time: '2026-10-19 11:05:36' },
+  { owner: '王雅静', storeCode: 'SCZ01', biz: '维修结算',       docNo: 'WXJSDYJ-SCZ01261017001', amount: '2380.00', time: '2026-10-17 10:36:29' },
+  { owner: '张建国', storeCode: 'BJ001', biz: '保险',           docNo: 'BXD-BJ001261014001',    amount: '2000.00', time: '2026-10-14 09:12:51' },
+  { owner: '沐云汐', storeCode: 'BJ001', biz: '服务包',         docNo: 'FWB-BJ001261013001',    amount: '800.00',  time: '2026-10-13 10:18:44' },
+  { owner: '李思远', storeCode: 'HZ001', biz: '交付横向费用',   docNo: 'JFHX-HZ001261009001',   amount: '900.00',  time: '2026-10-09 13:24:16' },
+  { owner: '王雅静', storeCode: 'SZ001', biz: '配件销售',       docNo: 'PSXD-SZ001261005001',   amount: '730.00',  time: '2026-10-05 11:52:37' }
 ];
 
 /* ============================================================
@@ -133,13 +157,13 @@ function yskLedger() {
   (NP['prepayment-record'].allData || []).forEach(function (r) {
     var it = ensure(r.owner, r.storeCode);
     it.recharge += yskNum(r.amount);
-    /* 充值行的「业务」不属于五个业务场景，显示「—」 */
-    it.rows.push({ type: '充值', biz: '—', amount: yskNum(r.amount), time: r.time, method: r.method });
+    /* 充值行的「业务」不属于五个业务场景，显示「—」；充值不挂业务单据，单据号同样是「—」 */
+    it.rows.push({ type: '充值', biz: '—', docNo: '—', amount: yskNum(r.amount), time: r.time, method: r.method });
   });
   YSK_USAGE.forEach(function (u) {
     var it = ensure(u.owner, u.storeCode);
     it.used += yskNum(u.amount);
-    it.rows.push({ type: '使用', biz: u.biz, amount: yskNum(u.amount), time: u.time, method: '' });
+    it.rows.push({ type: '使用', biz: u.biz, docNo: u.docNo || '—', amount: yskNum(u.amount), time: u.time, method: '' });
   });
   list.forEach(function (it) {
     it.balance = it.recharge - it.used;
@@ -155,10 +179,19 @@ function yskLedgerOf(owner, storeCode) {
   }
   return null;
 }
-/* 明细筛选：充值/使用、业务；空值＝全部（默认全部） */
-function yskFilterRows(rows, type, biz) {
+/* 明细筛选：充值/使用、业务、业务单据号；空值＝全部（默认全部）
+   业务单据号按「模糊包含」匹配、忽略大小写（2026-10-27 用户口径：文本搜索框即可）；
+   充值行的单据号是「—」，按文本参与匹配（输入「—」能筛出充值行，输真实单号则筛不到它）。 */
+function yskFilterRows(rows, type, biz, docNo) {
+  var kw = String(docNo === null || docNo === undefined ? '' : docNo).trim().toLowerCase();
   return (rows || []).filter(function (x) {
-    return (type === '' || x.type === type) && (biz === '' || x.biz === biz);
+    if (type !== '' && x.type !== type) return false;
+    if (biz !== '' && x.biz !== biz) return false;
+    if (kw !== '') {
+      var dn = String(x.docNo || '—').toLowerCase();
+      if (dn.indexOf(kw) < 0) return false;
+    }
+    return true;
   });
 }
 
@@ -317,8 +350,11 @@ function yskInitBalancePanel() {
     npFItem('车主姓名', '<input type="text" id="ysk-bal-f-owner" placeholder="请输入">') +
     yskStoreFilterItem('ysk-bal-flt-store');
 
+  /* 工具栏：导出当前筛选结果（2026-10-27 用户口径：预收款余额列表加导出） */
+  var toolbar = '<button class="lt-btn lt-btn-default" onclick="yskExportBalance()">导出</button>';
+
   var root = document.getElementById('ysk-panel-balance');
-  root.innerHTML = npShell(K, { l2: '售后管理', l3: '预收款' }, filter, '', npTH(cols), 'ysk-bal-tbody', 'ysk-bal-pager');
+  root.innerHTML = npShell(K, { l2: '售后管理', l3: '预收款' }, filter, toolbar, npTH(cols), 'ysk-bal-tbody', 'ysk-bal-pager');
 
   var st = NP[K];
   st.query = function () {
@@ -352,6 +388,19 @@ function yskInitBalancePanel() {
 function yskBalApplyFilter() { var st = NP['prepayment-balance']; if (st && st.query) st.query(); }
 /* 余额页门店选择器的 id 后缀是 -flt-store，msStoreConfirm 反推出的 mod 是「ysk-bal」*/
 window['ysk-balApplyFilter'] = yskBalApplyFilter;
+
+/* 余额页导出：导出当前筛选结果（列头与列表一致，不含操作列），走全站公共导出组件 */
+function yskExportBalance() {
+  var st = NP['prepayment-balance'];
+  var data = (st && st.filtered) ? st.filtered : [];
+  if (!data.length) { npToast('当前没有可导出的数据'); return; }
+  var headers = ['序号', '车主姓名', '余额', '门店名称', '门店编码', '合计充值金额'];
+  var rows = data.map(function (r, i) {
+    return [i + 1, r.owner, yskMoney(r.balance), yskStoreShort(r.storeCode), r.storeCode, yskMoney(r.recharge)];
+  });
+  npExportExcelRowsRaw('预收款余额_' + npNowLocal().slice(0, 10).replace(/-/g, ''), headers, rows);
+  npToast('导出成功');
+}
 
 /* ============================================================
    五、新增预收款（侧滑面板 pm-panel）
@@ -452,8 +501,8 @@ function yskSubmitAdd() {
     channel: YSK_CHANNEL,
     method: method,
     amount: yskMoney(amount),
-    /* 收款登记人默认＝提交人（提交这一刻的登录用户） */
-    registrar: yskCurrentUser(),
+    /* 收款登记人＝本门店的门店财务经理（真实姓名，从人员主数据现取；不是登录身份档位） */
+    registrar: yskRegistrar(YSK_CUR_STORE_CODE),
     /* 收款时间默认＝提交时间 */
     time: npNowLocal()
   };
@@ -470,15 +519,35 @@ function yskSubmitAdd() {
 
 /* ============================================================
    六、查看明细（侧滑面板：该车主在该门店的全部充值/使用流水，按时间倒序）
+   列表 8 列固定顺序：序号 / 车主姓名 / 门店 / 充值(使用) / 业务 / 业务单据号 / 金额 / 时间
+   ——「业务单据号」夹在「业务」与「金额」之间（2026-10-27 用户口径，规范 §4.9.5）。
    ============================================================ */
 var YSK_DETAIL_KEY = { owner: '', storeCode: '' };
 
-function yskEnsureDetailPanel() {
-  if (document.getElementById('ysk-detail-overlay')) return;
-  var d = document.createElement('div');
-  d.innerHTML =
-    '<div class="pm-panel-overlay" id="ysk-detail-overlay" onclick="yskCloseDetail()"></div>' +
-    '<div class="pm-panel" id="ysk-detail-panel" style="width:900px">' +
+/* 明细列定义（唯一真源：表头交 npTH、行交 npRenderTable，加列不会再错位） */
+function yskDetailCols() {
+  return [
+    { t: '序号', w: 60, f: function (r, i) { return i + 1; } },
+    { t: '车主姓名', w: 100, f: function () { return npEscape(YSK_DETAIL_KEY.owner); } },
+    { t: '门店', w: 140, f: function () { return npEscape(yskStoreShort(YSK_DETAIL_KEY.storeCode)); } },
+    { t: '充值/使用', w: 100, f: function (r) { return npEscape(r.type); } },
+    { t: '业务', w: 130, f: function (r) { return npEscape(r.biz); } },
+    { t: '业务单据号', w: 170, cls: 'col-bill-no', f: function (r) { return npEscape(r.docNo || '—'); } },
+    {
+      t: '金额', w: 120, f: function (r) {
+        return '<span class="np-money">' + (r.type === '使用' ? '-' : '') + '¥' + yskMoney(r.amount) + '</span>';
+      }
+    },
+    { t: '时间', w: 170, f: function (r) { return npEscape(r.time); } }
+  ];
+}
+
+/* 明细面板骨架（HTML 独立成函数：面板结构与查询区/工具栏只此一份，自检也能断言真实产物） */
+function yskDetailPanelHtml() {
+  return '<div class="pm-panel-overlay" id="ysk-detail-overlay" onclick="yskCloseDetail()"></div>' +
+    /* 面板宽度 1060：8 列声明宽度合计 990 + 面板左右内边距 48 = 1038，留 22 余量，
+       否则新增「业务单据号」这一列后 22 位单号会被横向滚动切掉（2026-10-27） */
+    '<div class="pm-panel" id="ysk-detail-panel" style="width:1060px">' +
       '<div class="pm-panel-header">' +
         '<div style="display:flex;align-items:center">' +
           '<span class="pm-panel-title" id="ysk-detail-title">预收款明细</span>' +
@@ -486,21 +555,33 @@ function yskEnsureDetailPanel() {
         '</div>' +
         '<button class="pm-panel-close" onclick="yskCloseDetail()">&#10005;</button>' +
       '</div>' +
-      '<div class="pm-panel-body">' +
-        /* 查询项：充值/使用（默认全部）、业务；查询区走全站 .lt-filter-grid（4 列）+ 按钮固定第 4 列 */
+      '<div class="pm-panel-body" id="ysk-detail-body">' +
+        /* 查询项：充值/使用（默认全部）、业务、业务单据号（文本模糊）；查询区走全站 .lt-filter-grid（4 列）
+           + 按钮固定第 4 列 → 3 项正好与按钮共占一行，未超一屏 7 项，不出「﹀展开」 */
         '<div class="lt-filter-grid" id="ysk-detail-filterGrid">' +
           npSelect('充值/使用', '<select id="ysk-det-f-type" onchange="yskRenderDetail()"><option value="">请选择</option>' +
             YSK_TYPES.map(function (t) { return '<option>' + npEscape(t) + '</option>'; }).join('') + '</select>') +
           npSelect('业务', '<select id="ysk-det-f-biz" onchange="yskRenderDetail()"><option value="">请选择</option>' +
             YSK_BIZ.map(function (b) { return '<option>' + npEscape(b) + '</option>'; }).join('') + '</select>') +
+          npFItem('业务单据号', '<input type="text" id="ysk-det-f-docno" placeholder="请输入">') +
           '<div class="lt-filter-footer">' +
             '<button class="lt-btn lt-btn-primary" onclick="yskRenderDetail()">查询</button>' +
             '<button class="lt-btn lt-btn-default" onclick="yskResetDetail()">重置</button>' +
           '</div>' +
         '</div>' +
+        /* 工具栏：导出当前明细筛选结果（2026-10-27 用户口径：明细列表加导出） */
+        '<div class="lt-toolbar"><div class="lt-toolbar-left">' +
+          '<button class="lt-btn lt-btn-default" onclick="yskExportDetail()">导出</button>' +
+        '</div></div>' +
         '<div class="lt-table-wrap" id="ysk-detail-tableWrap"></div>' +
       '</div>' +
     '</div>';
+}
+
+function yskEnsureDetailPanel() {
+  if (document.getElementById('ysk-detail-overlay')) return;
+  var d = document.createElement('div');
+  d.innerHTML = yskDetailPanelHtml();
   while (d.firstChild) document.body.appendChild(d.firstChild);
 }
 
@@ -510,6 +591,7 @@ function yskOpenDetail(owner, storeCode) {
   document.getElementById('ysk-detail-title').textContent = '预收款明细 · ' + owner + '（' + yskStoreShort(storeCode) + '）';
   var ty = document.getElementById('ysk-det-f-type'); if (ty) ty.value = '';
   var bz = document.getElementById('ysk-det-f-biz'); if (bz) bz.value = '';
+  var dn = document.getElementById('ysk-det-f-docno'); if (dn) dn.value = '';
   yskRenderDetail();
   document.getElementById('ysk-detail-overlay').classList.add('show');
   document.getElementById('ysk-detail-panel').classList.add('show');
@@ -525,6 +607,7 @@ function yskCloseDetail() {
 function yskResetDetail() {
   var ty = document.getElementById('ysk-det-f-type'); if (ty) ty.value = '';
   var bz = document.getElementById('ysk-det-f-biz'); if (bz) bz.value = '';
+  var dn = document.getElementById('ysk-det-f-docno'); if (dn) dn.value = '';
   yskRenderDetail();
 }
 
@@ -535,32 +618,43 @@ function yskRenderDetail() {
   var rows = it ? it.rows.slice() : [];
   var type = yskVal('ysk-det-f-type');
   var biz = yskVal('ysk-det-f-biz');
-  rows = yskFilterRows(rows, type, biz);
+  var docNo = yskVal('ysk-det-f-docno');
+  rows = yskFilterRows(rows, type, biz, docNo);
 
-  /* 列：序号、车主姓名、门店、充值/使用、业务、金额、时间 */
-  var cols = [
-    { t: '序号', w: 60 },
-    { t: '车主姓名', w: 100 },
-    { t: '门店', w: 140 },
-    { t: '充值/使用', w: 100 },
-    { t: '业务', w: 130 },
-    { t: '金额', w: 120 },
-    { t: '时间', w: 170 }
-  ];
-  var body = rows.length ? rows.map(function (x, i) {
-    var isUse = x.type === '使用';
-    return '<tr>' +
-      '<td>' + (i + 1) + '</td>' +
-      '<td>' + npEscape(YSK_DETAIL_KEY.owner) + '</td>' +
-      '<td>' + npEscape(yskStoreShort(YSK_DETAIL_KEY.storeCode)) + '</td>' +
-      '<td>' + npEscape(x.type) + '</td>' +
-      '<td>' + npEscape(x.biz) + '</td>' +
-      '<td><span class="np-money">' + (isUse ? '-' : '') + '¥' + yskMoney(x.amount) + '</span></td>' +
-      '<td>' + npEscape(x.time) + '</td>' +
-      '</tr>';
-  }).join('') : '<tr><td colspan="' + cols.length + '" style="text-align:center;color:#999;padding:20px">暂无记录</td></tr>';
+  /* 列定义只有一份（yskDetailCols）：表头与单元格同源，加列不会再出现 th/td 错位。
+     表格骨架自己搭（抽屉里没有 npShell），行与空态交给公共 npRenderTable。 */
+  var cols = yskDetailCols();
+  wrap.innerHTML = '<table class="lt-table"><thead><tr>' + npTH(cols) + '</tr></thead>' +
+    '<tbody id="ysk-det-tbody"></tbody></table>';
+  var st = NP['prepayment-detail'];
+  st.filtered = rows;
+  st.render = function () { npRenderTable('prepayment-detail', 'ysk-det-tbody', '', cols, st.filtered, st); };
+  st.render();
+}
 
-  wrap.innerHTML = '<table class="lt-table"><thead><tr>' + npTH(cols) + '</tr></thead><tbody>' + body + '</tbody></table>';
+/* 明细导出：导出当前明细筛选结果（列头与列表 8 列一致），走全站公共导出组件。
+   筛选条件与页面共用同一份 yskFilterRows（含业务单据号），保证「看到的」＝「导出的」。 */
+function yskExportDetail() {
+  var it = yskLedgerOf(YSK_DETAIL_KEY.owner, YSK_DETAIL_KEY.storeCode);
+  var rows = yskFilterRows(it ? it.rows.slice() : [],
+    yskVal('ysk-det-f-type'), yskVal('ysk-det-f-biz'), yskVal('ysk-det-f-docno'));
+  if (!rows.length) { npToast('当前没有可导出的数据'); return; }
+  var headers = ['序号', '车主姓名', '门店', '充值/使用', '业务', '业务单据号', '金额', '时间'];
+  var data = rows.map(function (x, i) {
+    return [
+      i + 1,
+      YSK_DETAIL_KEY.owner,
+      yskStoreShort(YSK_DETAIL_KEY.storeCode),
+      x.type,
+      x.biz,
+      x.docNo || '—',
+      (x.type === '使用' ? '-' : '') + yskMoney(x.amount),
+      x.time
+    ];
+  });
+  var fname = '预收款明细_' + YSK_DETAIL_KEY.owner + '_' + npNowLocal().slice(0, 10).replace(/-/g, '');
+  npExportExcelRowsRaw(fname, headers, data);
+  npToast('导出成功');
 }
 
 /* ---------- 注册切页初始化 ---------- */

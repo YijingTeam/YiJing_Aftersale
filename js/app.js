@@ -9840,6 +9840,21 @@ function npTopbarDemo(name){
   if (name === '下载记录') npToast('下载记录：展示本账号的历史导出/下载文件（演示）');
   else if (name === '学习平台') npToast('学习平台：培训课程与资料入口（演示）');
 }
+/* 操作人姓名（公共组件，唯一实现）：从人员主数据「用户管理 › 人员」（window.ORG_MASTER.persons）
+   按「门店编码 + 角色优先级」取首个未停用人员的真实姓名。
+   用途：「提交人 / 收款登记人 / 审核人」这类操作人字段——必须是真实在岗人员的姓名，
+   禁止写「当前门店用户」「当前管理员」这类角色占位（2026-10-27 用户口径：登记收款的都是门店的人）。
+   取不到返回 '—'。roleIds 传角色ID数组，按顺序优先命中。规范 §4.9.6 */
+function npStorePersonName(storeCode, roleIds){
+  var ps = (window.ORG_MASTER && window.ORG_MASTER.persons) || [];
+  var ids = roleIds || [];
+  for (var k = 0; k < ids.length; k++){
+    for (var i = 0; i < ps.length; i++){
+      if (ps[i].storeCode === storeCode && ps[i].roleId === ids[k] && ps[i].status !== '停用') return ps[i].name;
+    }
+  }
+  return '—';
+}
 /* 公共 Excel 导出组件（C1 2026-08-20 全站补真导出）：基于本地 xlsx 库。
    输入：filename = 下载文件名（不含扩展名）；sheets = [{name, headers:[], fields:[], data:[]}]。
    headers 为列名数组，fields 为数据字段名数组（与 headers 对齐），data 为行对象数组。 */

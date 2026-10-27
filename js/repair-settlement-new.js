@@ -380,7 +380,9 @@ function rsnShownBalance(r){
   var d = r.__demoBal;
   return (typeof d === 'number') ? Math.max(0, d) : rsnPrepaidBalance(r);
 }
-/* 预收款抵扣落库：写「预收款」使用流水（唯一权威：余额＝充值−使用） */
+/* 预收款抵扣落库：写「预收款」使用流水（唯一权威：余额＝充值−使用）。
+   2026-10-27：流水带「业务单据号」docNo＝本结算单号 —— 预收款「查看明细」页新增了该列（规范 §4.9.5），
+   不写这一格，页面上新产生的使用行就没有单据号（充值行按口径显示「—」）。 */
 function rsnWritePrepaidUsage(r, amount, time){
   if (!r.owner || rsnNum(amount) <= 0) return false;
   if (!Array.isArray(window.YSK_USAGE)) return false;
@@ -388,6 +390,7 @@ function rsnWritePrepaidUsage(r, amount, time){
     owner: r.owner,
     storeCode: r.storeCode,
     biz: '维修结算',
+    docNo: r.id,
     amount: rsnMoney(amount),
     time: time || ((typeof npNowLocal === 'function') ? npNowLocal() : '')
   });
